@@ -1,0 +1,7 @@
+/.gradle/
+/.idea/
+/androidApp/build/
+/buildSrc/build/pluginUnderTestMetadata/
+/buildSrc/.gradle/
+/buildSrc/build/
+/jvm/build/
