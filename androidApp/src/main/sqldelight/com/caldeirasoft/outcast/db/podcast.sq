@@ -1,0 +1,77 @@
+import kotlinx.datetime.Instant;
+import com.caldeirasoft.outcast.domain.models.Artwork;
+import com.caldeirasoft.outcast.domain.models.NewEpisodesAction;
+
+CREATE TABLE podcast (
+    podcastId INTEGER NOT NULL UNIQUE PRIMARY KEY ASC,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    artistName TEXT NOT NULL,
+    artistId INTEGER,
+    artistUrl TEXT,
+    description TEXT,
+    feedUrl TEXT NOT NULL,
+    releaseDateTime TEXT as Instant NOT NULL,
+    artwork TEXT AS Artwork,
+    trackCount INTEGER NOT NULL,
+    podcastWebsiteURL TEXT,
+    copyright TEXT,
+    contentAdvisoryRating TEXT,
+    userRating REAL,
+    genreId INTEGER AS Int,
+    isSubscribed INTEGER AS Boolean NOT NULL DEFAULT 0,
+    newEpisodeAction TEXT AS NewEpisodesAction NOT NULL,
+
+    updatedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE INDEX podcast_id ON podcast(podcastId);
+CREATE INDEX podcast_url ON podcast(url);
+
+CREATE VIEW podcastSummary AS
+    SELECT podcastId,
+        name,
+        artwork
+    FROM podcast
+    WHERE isSubscribed = 1;
+
+insertPodcast:
+INSERT INTO podcast (podcastId, name, url, artistName, artistId, artistUrl, description, feedUrl, releaseDateTime, artwork, trackCount, podcastWebsiteURL, copyright, contentAdvisoryRating, userRating, genreId, isSubscribed, newEpisodeAction, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'CLEAR', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+
+selectAll:
+SELECT p.*
+FROM podcastSummary p;
+
+selectPodcastById:
+SELECT *
+FROM podcast
+WHERE podcastId = ?;
+
+updatePodcastMetadata:
+UPDATE podcast
+SET releaseDateTime = ?,
+ trackCount = ?,
+ updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+WHERE podcastId = ?;
+
+
+subscribe:
+UPDATE podcast
+SET isSubscribed = 1,
+    newEpisodeAction = ?,
+    updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+WHERE podcastId = ?;
+
+unsubscribe:
+UPDATE podcast
+SET isSubscribed = 0,
+    updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+WHERE podcastId = ?;
+
+deletePodcastById:
+DELETE FROM podcast
+WHERE podcastId = ?;
+
+deleteAllPodcasts:
+DELETE FROM podcast;

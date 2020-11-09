@@ -1,0 +1,85 @@
+import kotlinx.datetime.Instant;
+import kotlin.collections.List;
+import com.caldeirasoft.outcast.domain.models.Artwork;
+import com.caldeirasoft.outcast.domain.models.Genre;
+import com.caldeirasoft.outcast.domain.models.EpisodeLocation;
+
+PRAGMA foreign_keys = 1;
+CREATE TABLE queue (
+    episodeId INTEGER NOT NULL UNIQUE PRIMARY KEY,
+    queueIndex INTEGER NOT NULL DEFAULT 0,
+
+    FOREIGN KEY (`episodeId`) REFERENCES `episode` (`episodeId`) ON DELETE CASCADE
+);
+
+CREATE TRIGGER insert_episode_queue_next
+AFTER INSERT ON episode
+BEGIN
+    INSERT OR REPLACE INTO queue (episodeId, queueIndex)
+    SELECT episodeId, 0 AS queueIndex
+    FROM episode e
+    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
+        WHERE e.episodeId = new.episodeId
+          AND p.isSubscribed == 1 AND p.newEpisodeAction == 'QUEUE_NEXT';
+END;
+
+CREATE TRIGGER insert_episode_queue_last
+AFTER INSERT ON episode
+BEGIN
+    INSERT OR REPLACE INTO queue (episodeId, queueIndex)
+    SELECT episodeId, -1 AS queueIndex
+    FROM episode e
+    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
+        WHERE e.episodeId = new.episodeId
+          AND p.isSubscribed == 1 AND p.newEpisodeAction == 'QUEUE_LAST';
+END;
+
+CREATE TRIGGER insert_queue_update_index
+BEFORE INSERT ON queue
+BEGIN
+    UPDATE queue SET queueIndex = queueIndex + 1
+    WHERE queueIndex >= new.queueIndex;
+END;
+
+CREATE TRIGGER add_to_queue_remove_from_inbox
+AFTER INSERT ON queue
+BEGIN
+    DELETE FROM inbox WHERE episodeId = new.episodeId;
+END;
+
+CREATE TRIGGER insert_queue_last
+AFTER INSERT ON queue
+FOR EACH ROW WHEN (new.queueIndex == -1)
+BEGIN
+    REPLACE INTO queue (episodeId, queueIndex)
+    SELECT new.episodeId, COUNT(*)
+    FROM queue;
+END;
+
+CREATE TRIGGER delete_queue_update_index
+AFTER DELETE ON queue
+BEGIN
+    UPDATE queue SET queueIndex = queueIndex - 1
+    WHERE queueIndex > old.queueIndex;
+END;
+
+selectAll:
+SELECT e.* FROM episode AS e
+INNER JOIN queue q USING (episodeId)
+ORDER BY q.queueIndex;
+
+addToQueueNext:
+INSERT INTO queue (episodeId, queueIndex)
+VALUES (?, 0);
+
+addToQueueLast:
+INSERT INTO queue (episodeId, queueIndex)
+VALUES (?, -1);
+
+addToQueue:
+INSERT OR REPLACE INTO queue (episodeId, queueIndex)
+VALUES (?, ?);
+
+removeFromQueue:
+DELETE FROM queue
+WHERE episodeId = :episodeId;
