@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.di
 
-import com.caldeirasoft.outcast.data.repository.ItunesRepositoryImpl
-import com.caldeirasoft.outcast.domain.repository.ItunesRepository
+import com.caldeirasoft.outcast.data.repository.StoreRepositoryImpl
+import com.caldeirasoft.outcast.domain.repository.StoreRepository
 import com.caldeirasoft.outcast.domain.usecase.*
 import org.koin.core.KoinApplication
 import org.koin.core.module.Module
@@ -15,7 +15,7 @@ fun KoinApplication.initKoinModules(appModule: Module) {
 internal val mainDispatcherQualifier = named("MainDispatcher")
 
 internal val commomModule = module {
-    single<ItunesRepository> { ItunesRepositoryImpl(httpClient = get()) }
+    single<StoreRepository> { StoreRepositoryImpl(httpClient = get()) }
 
     factory { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
     factory { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
@@ -30,12 +30,10 @@ internal val commomModule = module {
     factory { UnsubscribeFromPodcastUseCase(podcastRepository = get()) }
     factory { GetPodcastUseCase(podcastRepository = get()) }
     factory { GetEpisodeUseCase(episodeRepository = get()) }
-    factory { FetchItunesPodcastDirectoryUseCase(itunesRepository = get()) }
-    factory { FetchItunesPodcastDataUseCase(itunesRepository = get()) }
-    factory { FetchItunesListStoreItemsUseCase(itunesRepository = get()) }
-    factory { FetchItunesArtistDataUseCase(itunesRepository = get()) }
-    factory { FetchItunesRoomDataUseCase(itunesRepository = get()) }
-    factory { FetchItunesGroupingDataUseCase(itunesRepository = get()) }
+    factory { FetchStoreDirectoryUseCase(storeRepository = get()) }
+    factory { FetchStorePodcastDataUseCase(storeRepository = get()) }
+    factory { FetchStoreItemsUseCase(storeRepository = get()) }
+    factory { FetchStoreDataUseCase(storeRepository = get()) }
 }
 
 internal expect val platformModule: Module

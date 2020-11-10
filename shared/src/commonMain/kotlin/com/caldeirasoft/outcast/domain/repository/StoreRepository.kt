@@ -16,32 +16,12 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 
-interface ItunesRepository {
-
-    fun getSearchResultsData(): Flow<Resource<StoreData>> {
-        TODO("Not yet implemented")
-    }
-
-    fun getLookupData(lookupIds: List<Long>): Flow<Resource<StoreData>> {
-        TODO("Not yet implemented")
-    }
-
-    fun getSearchHints(): Flow<Resource<StoreData>> {
-        TODO("Not yet implemented")
-    }
-
-    fun getCategories(): Flow<Resource<StoreData>> {
-        TODO("Not yet implemented")
-    }
-
-    suspend fun getCategoriesAsync(storeFront: String): StoreData {
-        TODO("Not yet implemented")
-    }
+interface StoreRepository {
 
     /**
-     * getPodcastDirectoryDataAsync
+     * getDirectoryDataAsync
      */
-    suspend fun getPodcastDirectoryDataAsync(storeFront: String): NetworkResponse<StoreDataGrouping>
+    suspend fun getDirectoryDataAsync(storeFront: String): NetworkResponse<StoreDataGrouping>
 
     /**
      * getStoreDataAsync

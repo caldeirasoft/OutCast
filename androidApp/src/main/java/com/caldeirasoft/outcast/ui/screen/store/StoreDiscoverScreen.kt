@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.inbox
+package com.caldeirasoft.outcast.ui.screen.store
 
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
@@ -9,52 +9,45 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HourglassFull
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
-import kotlinx.coroutines.CoroutineScope
+import org.koin.java.KoinJavaComponent
 import org.koin.java.KoinJavaComponent.inject
 
 @Composable
-fun InboxScreen(
-    model2: InboxViewModel,
-    navController: NavController,
-    scope: CoroutineScope
-) {
-    val model: InboxViewModel by inject(InboxViewModel::class.java)
+fun StoreDiscoverScreen(navController: NavController) {
+    val model: StoreDirectoryViewModel by inject(StoreDirectoryViewModel::class.java)
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Inbox")
+                    Text(text = "Discover")
                 },
                 actions = {
                     IconButton(onClick = {
-                        navController.navigate("discover")
+                        navController.navigate("inbox")
                     }) {
-                        Icon(asset = Icons.Filled.Favorite)
+                        Icon(asset = Icons.Filled.HourglassFull)
                     }
                 })
         }
     )
     { innerPadding ->
-        InboxContent(
-            model = model,
-            modifier = Modifier.padding(innerPadding))
+        InboxContent(modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
 fun InboxContent(
-    model: InboxViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.padding(16.dp)) {
         Text("Hi there!")
         Text("Thanks for going through the Layouts codelab")
-        Text(model.textData)
     }
 }

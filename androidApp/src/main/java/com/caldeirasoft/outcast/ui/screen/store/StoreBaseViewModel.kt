@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.presentation.viewmodel
+package com.caldeirasoft.outcast.ui.screen.store
 
 import androidx.lifecycle.ViewModel
 import com.caldeirasoft.outcast.domain.models.*
@@ -6,8 +6,8 @@ import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
-abstract class ItunesBaseViewModel(
-    private val fetchItunesListStoreItemsUseCase: FetchItunesListStoreItemsUseCase,
+abstract class StoreBaseViewModel(
+    private val fetchStoreItemsUseCase: FetchStoreItemsUseCase,
 ) : ViewModel() {
     val storeFront: String = ""
 
@@ -15,8 +15,8 @@ abstract class ItunesBaseViewModel(
         lookupIds: List<Long>,
         storeDataWithLookup: StoreDataWithLookup
     ): Flow<Resource<List<StoreItem>>> =
-        fetchItunesListStoreItemsUseCase.invoke(
-            FetchItunesListStoreItemsUseCase.Params(
+        fetchStoreItemsUseCase.invoke(
+            FetchStoreItemsUseCase.Params(
                 lookupIds = lookupIds,
                 storeFront = storeFront,
                 storeDataWithLookup = storeDataWithLookup

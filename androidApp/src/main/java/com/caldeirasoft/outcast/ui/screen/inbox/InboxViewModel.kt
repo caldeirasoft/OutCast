@@ -34,4 +34,6 @@ class InboxViewModel(
                 .onEach { episodesData.emit(it) }
         }
     }
+
+    val textData = "Inbox Text"
 }

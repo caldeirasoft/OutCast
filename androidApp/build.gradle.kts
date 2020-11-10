@@ -19,6 +19,8 @@ repositories {
 }
 dependencies {
     implementation(project(":shared"))
+    // Android
+    implementation("com.google.android.material:material:1.2.1")
     // AndroidX
     implementation(Libs.AndroidX.coreKtx)
     implementation(Libs.AndroidX.appcompat)
@@ -46,7 +48,7 @@ dependencies {
     implementation(Libs.Koin.core)
     implementation(Libs.Koin.coreExt)
     implementation(Libs.Koin.androidScope)
-    implementation(Libs.Koin.androidCompose)
+    //implementation(Libs.Koin.androidCompose)
     implementation(Libs.Koin.androidViewModel)
     // SQLDelight
     implementation(Libs.SqlDelight.runtime)

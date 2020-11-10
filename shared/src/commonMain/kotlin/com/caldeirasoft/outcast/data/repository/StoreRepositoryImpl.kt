@@ -4,26 +4,19 @@ import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import com.caldeirasoft.outcast.domain.models.*
-import com.caldeirasoft.outcast.domain.repository.ItunesRepository
+import com.caldeirasoft.outcast.domain.repository.StoreRepository
 import com.caldeirasoft.outcast.domain.util.NetworkResponse
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.domain.util.networkBoundResource
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
-import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.json.Json
 
-class ItunesRepositoryImpl(val httpClient:HttpClient) : ItunesRepository {
+class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
 
     /**
      * getPodcastDirectoryDataAsync
      */
-    override suspend fun getPodcastDirectoryDataAsync(storeFront: String): NetworkResponse<StoreDataGrouping> =
+    override suspend fun getDirectoryDataAsync(storeFront: String): NetworkResponse<StoreDataGrouping> =
         // get grouping data
         when (val networkResponse = getStoreDataApi("https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewPodcastDirectory", storeFront)) {
             is NetworkResponse.Success -> {
@@ -175,14 +168,14 @@ class ItunesRepositoryImpl(val httpClient:HttpClient) : ItunesRepository {
                 val storePageDto: StorePageDto = networkResponse.body
                 // retrieve data
                 when (storePageDto.pageData?.componentName) {
+                    "grouping_page" -> {
+                        getGroupingDataAsync(storePageDto)
+                    }
                     "room_page" -> {
                         getRoomPodcastDataAsync(storePageDto)
                     }
                     "multi_room_page" -> {
                         getMultiRoomDataAsync(storePageDto)
-                    }
-                    "grouping_page" -> {
-                        getGroupingDataAsync(storePageDto)
                     }
                     "artist_page" -> {
                         when (storePageDto.pageData.metricsBase?.pageType) {
