@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 abstract class StoreBaseViewModel(
     private val fetchStoreItemsUseCase: FetchStoreItemsUseCase,
 ) : ViewModel() {
-    val storeFront: String = ""
+    val storeFront: String = "143442-3,29"
 
     fun fetchStoreItems(
         lookupIds: List<Long>,

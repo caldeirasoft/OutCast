@@ -10,6 +10,7 @@ buildscript {
         classpath(Libs.androidGradlePlugin)
         classpath(Libs.SqlDelight.gradlePlugin)
         classpath(Libs.Koin.gradlePlugin)
+        classpath("com.android.tools.build:gradle:4.2.0-alpha16")
     }
 }
 group = "com.caldeirasoft.outcast"

@@ -4,8 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.domain.util.Resource
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class StoreDirectoryViewModel(
@@ -14,16 +13,18 @@ class StoreDirectoryViewModel(
 ) : StoreBaseViewModel(fetchStoreItemsUseCase = fetchStoreItemsUseCase) {
 
     private val storeDataGrouping
-            = MutableStateFlow<Resource<StoreDataGrouping>>(Resource.Loading(null))
+            = MutableStateFlow<Resource<StoreDataGrouping>>(Resource.Loading())
 
-    val storeDataGroupingState
+    val storeDataGroupingState: StateFlow<Resource<StoreDataGrouping>>
             = storeDataGrouping
 
     init {
         viewModelScope.launch {
             fetchStoreDirectoryUseCase
                 .invoke(FetchStoreDirectoryUseCase.Params(storeFront = storeFront))
-                .onEach { storeDataGrouping.emit(it) }
+                .collect {
+                    storeDataGrouping.emit(it)
+                }
         }
     }
     val testMessage: String = "Test Message"

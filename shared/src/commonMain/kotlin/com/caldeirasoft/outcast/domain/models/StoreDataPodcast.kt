@@ -26,8 +26,8 @@ class StoreDataPodcast(
     val userRating: Float,
     val genre: Genre? = null,
     val episodes: List<StoreItemPodcastEpisode>,
-    val podcastsByArtist: StoreIdsPodcasts,
-    val podcastsListenersAlsoFollow: StoreIdsPodcasts
+    val podcastsByArtist: StoreCollectionPodcasts,
+    val podcastsListenersAlsoFollow: StoreCollectionPodcasts
 ) : StoreData {
     
 }

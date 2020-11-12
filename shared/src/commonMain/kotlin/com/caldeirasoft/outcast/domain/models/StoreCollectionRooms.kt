@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 class StoreCollectionRooms(
     var label: String,
-    val items: List<StoreItem>) : StoreCollection {
+    override var items: List<StoreItem>) : StoreCollection {
 }

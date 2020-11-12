@@ -36,11 +36,12 @@ object Libs {
         }
 
         object Navigation {
-            const val compose = "androidx.navigation:navigation-compose:1.0.0-alpha01"
+            private const val version = "1.0.0-alpha02"
+            const val compose = "androidx.navigation:navigation-compose:$version"
         }
 
         object Compose {
-            private const val version = "1.0.0-alpha06"
+            const val version = "1.0.0-alpha07"
 
             const val runtime = "androidx.compose.runtime:runtime:$version"
             const val foundation = "androidx.compose.foundation:foundation:$version"
@@ -51,10 +52,15 @@ object Libs {
             const val tooling = "androidx.ui:ui-tooling:$version"
             const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
         }
+
+        object Paging {
+            private const val version = "1.0.0-alpha01"
+            const val compose = "androidx.paging:paging-compose:$version"
+        }
     }
 
     object Kotlin {
-        private const val version = "1.4.10"
+        const val version = "1.4.10"
         const val stdlibJdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
     }
@@ -69,6 +75,16 @@ object Libs {
     object Kotlinx {
         const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0"
         const val datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.1.0"
+    }
+
+    object Accompanist {
+        private const val version = "0.3.3.1"
+        const val coil = "dev.chrisbanes.accompanist:accompanist-coil:$version"
+    }
+
+    object Landscapist {
+        private const val version = "1.0.9"
+        const val coil = "com.github.skydoves:landscapist-coil:$version"
     }
 
     object Koin {

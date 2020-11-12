@@ -89,7 +89,7 @@ class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
                                     when (elementChild.type) {
                                         "popularity" -> { }
                                         "normal" -> {
-                                            yield(StoreIdsPodcasts(
+                                            yield(StoreCollectionPodcasts(
                                                 label = elementChild.name,
                                                 url = elementChild.seeAllUrl,
                                                 itemsIds = ids
@@ -218,7 +218,7 @@ class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
                             val ids =
                                 elementChild.content.map { content -> content.contentId }
                             yield(
-                                StoreIdsPodcasts(
+                                StoreCollectionPodcasts(
                                     label = elementChild.name,
                                     url = elementChild.seeAllUrl,
                                     itemsIds = ids
@@ -261,14 +261,14 @@ class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
      * getArtistProviderDataAsync
      */
     fun getArtistProviderDataAsync(storePageDto: StorePageDto): NetworkResponse<StoreDataMultiRoom> {
-        val collectionSequence: Sequence<StoreIds> = sequence {
+        val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.contentData
             entries?.forEach { contentData ->
                 when (contentData.dkId) {
                     1 -> { // parse episodes
                         val ids = contentData.adamIds.map { id -> id.toLong() }
                         yield(
-                            StoreIdsPodcastEpisodes(
+                            StoreCollectionPodcastEpisodes(
                                 label = contentData.title,
                                 itemsIds = ids
                             )
@@ -277,7 +277,7 @@ class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
                     else -> { // parse podcasts
                         val ids = contentData.adamIds.map { id -> id.toLong() }
                         yield(
-                            StoreIdsPodcasts(
+                            StoreCollectionPodcasts(
                                 label = contentData.title,
                                 itemsIds = ids
                             )
@@ -320,12 +320,12 @@ class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
      * getMultiRoomDataAsync
      */
     fun getMultiRoomDataAsync(storePageDto: StorePageDto): NetworkResponse<StoreDataMultiRoom> {
-        val collectionSequence: Sequence<StoreIdsPodcasts> = sequence {
+        val collectionSequence: Sequence<StoreCollectionPodcasts> = sequence {
             val entries = storePageDto.pageData?.segments
             entries?.forEach { segmentData ->
                 val ids = segmentData.adamIds.map { id -> id.toLong() }
                 yield(
-                    StoreIdsPodcasts(
+                    StoreCollectionPodcasts(
                         label = segmentData.title,
                         url = segmentData.seeAllUrl?.url,
                         itemsIds = ids
@@ -385,8 +385,8 @@ class StoreRepositoryImpl(val httpClient:HttpClient) : StoreRepository {
                             contentAdvisoryRating = podcastEntry.contentRatingsBySystem?.riaa?.name,
                             userRating = podcastEntry.userRating?.value?.toFloat() ?: 0f,
                             genre = podcastEntry.genres.firstOrNull()?.toGenre(),
-                            podcastsByArtist = StoreIdsPodcasts("", itemsIds = moreByArtist.toList()),
-                            podcastsListenersAlsoFollow = StoreIdsPodcasts("", itemsIds = listenersAlsoBought.toList()),
+                            podcastsByArtist = StoreCollectionPodcasts("", itemsIds = moreByArtist.toList()),
+                            podcastsListenersAlsoFollow = StoreCollectionPodcasts("", itemsIds = listenersAlsoBought.toList()),
                             episodes = podcastEntry.children.map { (key, episodeEntry) ->
                                 StoreItemPodcastEpisode(
                                     id = key.toLong(),

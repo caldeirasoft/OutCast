@@ -38,6 +38,8 @@ dependencies {
     implementation(Libs.AndroidX.Compose.tooling)
     // Navigation
     implementation(Libs.AndroidX.Navigation.compose)
+    // Paging
+    implementation(Libs.AndroidX.Paging.compose)
     // Kotlin coroutines
     implementation(Libs.Coroutines.core)
     // Kotlinx serialization
@@ -50,6 +52,8 @@ dependencies {
     implementation(Libs.Koin.androidScope)
     //implementation(Libs.Koin.androidCompose)
     implementation(Libs.Koin.androidViewModel)
+    // Accompanist
+    implementation(Libs.Landscapist.coil)
     // SQLDelight
     implementation(Libs.SqlDelight.runtime)
     implementation(Libs.SqlDelight.coroutines)
@@ -77,8 +81,8 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.0.0-alpha06"
-        kotlinCompilerVersion = "1.4.10"
+        kotlinCompilerExtensionVersion = Libs.AndroidX.Compose.version
+        kotlinCompilerVersion = Libs.Kotlin.version
     }
 }
 

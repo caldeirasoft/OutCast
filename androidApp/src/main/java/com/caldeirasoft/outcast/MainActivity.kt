@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
-import com.caldeirasoft.outcast.ui.screen.store.StoreDiscoverScreen
+import com.caldeirasoft.outcast.ui.screen.store.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                     composable("discover") { navBackStackEntry ->
-                        StoreDiscoverScreen(navController = navController)
+                        StoreDirectoryScreen(navController = navController)
                     }
                 }
             }

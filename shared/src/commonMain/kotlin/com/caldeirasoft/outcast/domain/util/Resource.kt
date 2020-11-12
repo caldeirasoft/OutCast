@@ -1,27 +1,23 @@
 package com.caldeirasoft.outcast.domain.util
 
-sealed class Resource<out T>(val status: Status, val message: String?) {
+sealed class Resource<out T>() {
     /**
      * A request that resulted in a response with a 2xx status code that has a body
      */
-    data class Success<T : Any>(val data: T)
-        : Resource<T>(Status.SUCCESS, message = null)
+    data class Success<T>(val data: T) : Resource<T>()
 
     /**
      * A request that resulted in a response with an error
      */
-    data class Error<T : Any>(val msg: String, val data: T?)
-        : Resource<T>(Status.ERROR, message = msg)
+    data class Error<T>(val msg: String) : Resource<T>()
 
     /**
      * A request that resulted in a response with an error
      */
-    data class ErrorThrowable<T : Any>(val throwable: Throwable?, val data: T?)
-        : Resource<T>(Status.ERROR, message = throwable?.message)
+    data class ErrorThrowable<T>(val throwable: Throwable) : Resource<T>()
 
     /**
      * A request that resulted in a response with an error
      */
-    data class Loading<T : Any>(val data: T?)
-        : Resource<T>(Status.LOADING, message = null)
+    data class Loading<T>(val data: T? = null) : Resource<T>()
 }
