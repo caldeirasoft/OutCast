@@ -31,8 +31,8 @@ object Libs {
 
         object LifeCycle {
             private const val lifecycleVersion = "2.3.0-beta01"
-            const val lifecycleKtx = "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
-            const val viewModelKtx = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+            const val lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
+            const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
         }
 
         object Navigation {
@@ -53,9 +53,24 @@ object Libs {
             const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
         }
 
+        object Hilt {
+            private const val version = "2.28-alpha"
+            private const val viewModelVersion = "1.0.0-alpha02"
+            const val gradlePlugin = "com.google.dagger:hilt-android-gradle-plugin:$version"
+            const val hilt = "com.google.dagger:hilt-android:$version"
+            const val compiler = "com.google.dagger:hilt-android-compiler:$version"
+            const val viewModel = "androidx.hilt:hilt-lifecycle-viewmodel:$viewModelVersion"
+            const val viewModelCompiler = "androidx.hilt:hilt-compiler:$viewModelVersion"
+        }
+
         object Paging {
-            private const val version = "1.0.0-alpha01"
+            private const val version = "1.0.0-alpha02"
             const val compose = "androidx.paging:paging-compose:$version"
+        }
+
+        object DataStore {
+            private const val version = "1.0.0-alpha02"
+            const val preferences = "androidx.datastore:datastore-preferences:$version"
         }
     }
 

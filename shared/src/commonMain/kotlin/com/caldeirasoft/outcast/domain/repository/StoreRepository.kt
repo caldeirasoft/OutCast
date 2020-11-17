@@ -2,6 +2,9 @@ package com.caldeirasoft.outcast.domain.repository
 
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
+import com.caldeirasoft.outcast.domain.interfaces.StoreData
+import com.caldeirasoft.outcast.domain.interfaces.StoreDataWithLookup
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.domain.util.NetworkResponse
 
@@ -10,7 +13,7 @@ interface StoreRepository {
     /**
      * getDirectoryDataAsync
      */
-    suspend fun getDirectoryDataAsync(storeFront: String): NetworkResponse<StoreDataGrouping>
+    suspend fun getDirectoryDataAsync(storeFront: String): NetworkResponse<StoreGroupingData>
 
     /**
      * getStoreDataAsync
@@ -20,7 +23,7 @@ interface StoreRepository {
     /**
      * getPodcastDataAsync
      */
-    suspend fun getPodcastDataAsync(url: String, storeFront: String): NetworkResponse<StoreDataPodcast>
+    suspend fun getPodcastDataAsync(url: String, storeFront: String): NetworkResponse<StorePodcast>
 
     /**
      * getListStoreItemDataAsync

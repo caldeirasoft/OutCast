@@ -1,9 +1,13 @@
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 plugins {
     id("com.android.application")
     kotlin("android")
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version Versions.kotlin
     id("com.squareup.sqldelight")
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"
@@ -25,8 +29,8 @@ dependencies {
     implementation(Libs.AndroidX.coreKtx)
     implementation(Libs.AndroidX.appcompat)
     // LifeCycle
-    implementation(Libs.AndroidX.LifeCycle.lifecycleKtx)
-    implementation(Libs.AndroidX.LifeCycle.viewModelKtx)
+    implementation(Libs.AndroidX.LifeCycle.lifecycle)
+    implementation(Libs.AndroidX.LifeCycle.viewModel)
     // Compose
     implementation(Libs.AndroidX.Compose.runtime)
     implementation(Libs.AndroidX.Compose.foundation)
@@ -40,6 +44,11 @@ dependencies {
     implementation(Libs.AndroidX.Navigation.compose)
     // Paging
     implementation(Libs.AndroidX.Paging.compose)
+    // Hilt
+    implementation(Libs.AndroidX.Hilt.hilt)
+    implementation(Libs.AndroidX.Hilt.viewModel)
+    kapt(Libs.AndroidX.Hilt.viewModelCompiler)
+    kapt(Libs.AndroidX.Hilt.compiler)
     // Kotlin coroutines
     implementation(Libs.Coroutines.core)
     // Kotlinx serialization
@@ -52,7 +61,12 @@ dependencies {
     implementation(Libs.Koin.androidScope)
     //implementation(Libs.Koin.androidCompose)
     implementation(Libs.Koin.androidViewModel)
-    // Accompanist
+    // Ktor client
+    implementation(Libs.Ktor.clientCore)
+    implementation(Libs.Ktor.encoding)
+    implementation(Libs.Ktor.serialization)
+    implementation(Libs.Ktor.clientAndroid)
+    // Landscapist
     implementation(Libs.Landscapist.coil)
     // SQLDelight
     implementation(Libs.SqlDelight.runtime)

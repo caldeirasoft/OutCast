@@ -2,8 +2,14 @@ package com.caldeirasoft.outcast.di
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.db.createDatabase
-import com.caldeirasoft.outcast.data.repository.*
-import com.caldeirasoft.outcast.domain.repository.*
+import com.caldeirasoft.outcast.data.repository.EpisodeRepositoryImpl
+import com.caldeirasoft.outcast.data.repository.InboxRepositoryImpl
+import com.caldeirasoft.outcast.data.repository.PodcastRepositoryImpl
+import com.caldeirasoft.outcast.data.repository.QueueRepositoryImpl
+import com.caldeirasoft.outcast.domain.repository.EpisodeRepository
+import com.caldeirasoft.outcast.domain.repository.InboxRepository
+import com.caldeirasoft.outcast.domain.repository.PodcastRepository
+import com.caldeirasoft.outcast.domain.repository.QueueRepository
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import com.caldeirasoft.outcast.presentation.viewmodel.PodcastDetailViewModel
 import com.caldeirasoft.outcast.presentation.viewmodel.PodcastsViewModel
@@ -30,31 +36,4 @@ internal val appModule = module {
     single<InboxRepository> { InboxRepositoryImpl(database = get()) }
     single<QueueRepository> { QueueRepositoryImpl(database = get()) }
 
-    viewModel { InboxViewModel(fetchInboxUseCase = get()) }
-    viewModel { QueueViewModel(fetchQueueUseCase = get()) }
-    viewModel { PodcastsViewModel(fetchPodcastsSubscribedUseCase = get()) }
-    viewModel {
-        PodcastDetailViewModel(
-            fetchEpisodesFromPodcastUseCase = get(),
-            getPodcastUseCase = get()
-        )
-    }
-    viewModel {
-        StoreDirectoryViewModel(
-            fetchStoreDirectoryUseCase = get(),
-            fetchStoreItemsUseCase = get()
-        )
-    }
-    viewModel {
-        StoreDataViewModel(
-            fetchStoreItemsUseCase = get(),
-            fetchStoreDataUseCase = get()
-        )
-    }
-    viewModel {
-        StorePodcastViewModel(
-            fetchStoreItemsUseCase = get(),
-            fetchStorePodcastDataUseCase = get()
-        )
-    }
 }

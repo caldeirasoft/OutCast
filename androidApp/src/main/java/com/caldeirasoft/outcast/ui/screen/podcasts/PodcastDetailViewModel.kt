@@ -16,12 +16,12 @@ class PodcastDetailViewModel(
     private val getPodcastUseCase: GetPodcastUseCase,
     private val fetchEpisodesFromPodcastUseCase: FetchEpisodesFromPodcastUseCase
 ) : ViewModel() {
-    private val filterData: StateFlow<PodcastEpisodesFilterType?> = MutableStateFlow(null)
+    //private val filterData: StateFlow<PodcastEpisodesFilterType?> = MutableStateFlow(null)
     private val podcastData = MutableSharedFlow<Podcast>()
     private val podcastEpisodesData = MutableSharedFlow<List<EpisodeSummary>>()
 
-    val filterDataState
-        get() = filterData
+    //val filterDataState
+    //    get() = filterData
 
     val podcastDataState
         get() = podcastData

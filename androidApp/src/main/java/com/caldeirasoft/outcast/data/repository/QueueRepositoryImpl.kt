@@ -7,8 +7,9 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
+import javax.inject.Inject
 
-class QueueRepositoryImpl(val database: Database) : QueueRepository {
+class QueueRepositoryImpl @Inject constructor (val database: Database) : QueueRepository {
     override fun fetchQueue(): Flow<List<EpisodeSummary>> =
         database.queueQueries
             .selectAll(mapper = { episodeId: Long,

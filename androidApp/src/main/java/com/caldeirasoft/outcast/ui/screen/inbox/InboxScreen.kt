@@ -1,30 +1,24 @@
 package com.caldeirasoft.outcast.ui.screen.inbox
 
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.navigate
+import androidx.compose.ui.viewinterop.viewModel
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import kotlinx.coroutines.CoroutineScope
 import org.koin.java.KoinJavaComponent.inject
 
 @Composable
 fun InboxScreen(
-    model2: InboxViewModel,
-    navController: NavController,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    viewModel: InboxViewModel,
+    navigateToDiscover: () -> Unit
 ) {
-    val model: InboxViewModel by inject(InboxViewModel::class.java)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -32,9 +26,7 @@ fun InboxScreen(
                     Text(text = "Inbox")
                 },
                 actions = {
-                    IconButton(onClick = {
-                        navController.navigate("discover")
-                    }) {
+                    IconButton(onClick = navigateToDiscover) {
                         Icon(asset = Icons.Filled.Favorite)
                     }
                 })
@@ -42,7 +34,7 @@ fun InboxScreen(
     )
     { innerPadding ->
         InboxContent(
-            model = model,
+            model = viewModel,
             modifier = Modifier.padding(innerPadding))
     }
 }

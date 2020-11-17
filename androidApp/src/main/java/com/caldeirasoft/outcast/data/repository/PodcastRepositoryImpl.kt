@@ -9,8 +9,9 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Instant
+import javax.inject.Inject
 
-class PodcastRepositoryImpl(val database: Database) : PodcastRepository
+class PodcastRepositoryImpl @Inject constructor (val database: Database) : PodcastRepository
 {
     override fun fetchSubscribedPodcasts(): Flow<List<PodcastSummary>> =
         database.podcastQueries

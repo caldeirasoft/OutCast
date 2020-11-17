@@ -8,8 +8,9 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Instant
+import javax.inject.Inject
 
-class InboxRepositoryImpl(val database: Database) : InboxRepository {
+class InboxRepositoryImpl @Inject constructor (val database: Database) : InboxRepository {
     override fun fetchEpisodes(): Flow<List<EpisodeSummary>> =
         database.inboxQueries
             .selectAll(mapper = { episodeId: Long,
