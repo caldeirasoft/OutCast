@@ -1,10 +1,11 @@
-package com.caldeirasoft.outcast.ui.screen.store
+package com.caldeirasoft.outcast.ui.screen.storepodcast
 
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.models.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreItemsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStorePodcastDataUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
+import com.caldeirasoft.outcast.ui.screen.storedirectory.StoreBaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch

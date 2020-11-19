@@ -1,15 +1,14 @@
-package com.caldeirasoft.outcast.ui.screen.store
+package com.caldeirasoft.outcast.ui.screen.storedata
 
 import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreDataWithLookup
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreItemsUseCase
 import com.caldeirasoft.outcast.domain.util.NetworkResponse
 import kotlinx.coroutines.flow.first
 import java.lang.Integer.min
 
-class StoreItemsPagingSource(
+class StoreDataItemsPagingSource(
     val ids: List<Long>,
     val storeDataWithLookup: StoreDataWithLookup,
     val storeFront: String,

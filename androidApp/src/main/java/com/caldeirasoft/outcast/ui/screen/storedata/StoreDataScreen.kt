@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store
+package com.caldeirasoft.outcast.ui.screen.storedata
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +23,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.*
+import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
+import com.caldeirasoft.outcast.ui.ambient.StoreDataViewModelAmbient
 import com.caldeirasoft.outcast.ui.components.StoreCollectionPodcastsContent
 import com.caldeirasoft.outcast.ui.components.StorePodcastListItem
 import com.caldeirasoft.outcast.ui.theme.colors
@@ -34,11 +36,10 @@ import kotlinx.coroutines.flow.Flow
 @ExperimentalCoroutinesApi
 @Composable
 fun StoreDataScreen(
-    viewModel: StoreDataViewModel,
-    url: String,
-    navigateToStoreEntry: (String) -> Unit,
-    navigateUp: () -> Unit)
+    url: String)
 {
+    val viewModel = StoreDataViewModelAmbient.current
+    val actions = ActionsAmbient.current
     LaunchedEffect(subject = Unit) {
         viewModel.fetchGrouping(url)
     }
@@ -50,12 +51,12 @@ fun StoreDataScreen(
                     Text(text = "Discover")
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigateUp) {
+                    IconButton(onClick = actions.navigateUp) {
                         Icon(Icons.Filled.ArrowBack)
                     }
                 },
                 actions = {
-                    IconButton(onClick = navigateUp) {
+                    IconButton(onClick = actions.navigateUp) {
                         Icon(asset = Icons.Filled.HourglassFull)
                     }
                 })
@@ -63,8 +64,7 @@ fun StoreDataScreen(
     )
     { innerPadding ->
         StoreDataContent(
-            viewModel = viewModel,
-            navigateToStoreEntry = navigateToStoreEntry)
+            viewModel = viewModel)
     }
 }
 
@@ -72,10 +72,9 @@ fun StoreDataScreen(
 @Composable
 fun StoreDataContent(
     viewModel: StoreDataViewModel,
-    navigateToStoreEntry: (String) -> Unit,
 ) {
     val storeData = viewModel.storeData
-    when (val state = viewModel.screenState) {
+    when (viewModel.screenState) {
         is ScreenState.Loading ->
             Column(
                 modifier = Modifier
@@ -89,15 +88,9 @@ fun StoreDataContent(
         is ScreenState.Success -> {
             when(storeData) {
                 is StoreRoom ->
-                    StoreDataRoomContent(
-                        storeRoom = storeData,
-                        viewModel = viewModel,
-                        navigateToStoreEntry = navigateToStoreEntry)
+                    StoreDataRoomContent(storeRoom = storeData)
                 is StoreMultiRoom ->
-                    StoreDataMultiRoomContent(
-                        storeMultiRoom = storeData,
-                        viewModel = viewModel,
-                        navigateToStoreEntry = navigateToStoreEntry)
+                    StoreDataMultiRoomContent(storeMultiRoom = storeData)
             }
         }
         else -> {
@@ -110,41 +103,24 @@ fun StoreDataContent(
 
 @ExperimentalCoroutinesApi
 @Composable
-fun StoreDataRoomContent(
-    storeRoom: StoreRoom,
-    viewModel: StoreDataViewModel,
-    navigateToStoreEntry: (String) -> Unit,
-) {
-    val pager = remember {
-        Pager(
-            config = PagingConfig(
-                pageSize = 5,
-                enablePlaceholders = false,
-                maxSize = 200,
-                prefetchDistance = 5
-            ),
-            pagingSourceFactory = { viewModel.getStoreItemsPaged(storeRoom) }
-        )
-    }
-    StoreDataItemsPagingBackend(
-        data = pager.flow,
-        navigateToStoreEntry = navigateToStoreEntry)
+fun StoreDataRoomContent(storeRoom: StoreRoom) {
+    val viewModel = StoreDataViewModelAmbient.current
+    val pager = remember { viewModel.getPager(storeRoom) }
+    StoreDataItemsPagingBackend(data = pager.flow)
 }
 
 @ExperimentalCoroutinesApi
 @Composable
-fun StoreDataItemsPagingBackend(
-    data: Flow<PagingData<StoreItem>>,
-    navigateToStoreEntry: (String) -> Unit)
+fun StoreDataItemsPagingBackend(data: Flow<PagingData<StoreItem>>)
 {
     val lazyPagingItems = data.collectAsLazyPagingItems()
     LazyColumn {
         items(lazyPagingItems = lazyPagingItems) { item ->
             when (item) {
-                is StorePodcast ->
-                    StorePodcastListItem(
-                        podcast = item,
-                        navigateToStoreEntry = navigateToStoreEntry)
+                is StorePodcast -> {
+                    StorePodcastListItem(podcast = item)
+                    Divider()
+                }
             }
         }
     }
@@ -152,30 +128,19 @@ fun StoreDataItemsPagingBackend(
 
 @ExperimentalCoroutinesApi
 @Composable
-fun StoreDataMultiRoomContent(
-    storeMultiRoom: StoreMultiRoom,
-    viewModel: StoreDataViewModel,
-    navigateToStoreEntry: (String) -> Unit,
-) {
+fun StoreDataMultiRoomContent(storeMultiRoom: StoreMultiRoom) {
     LazyColumnFor(items = storeMultiRoom.storeList) { collection ->
         when (collection) {
             is StoreCollectionPodcasts ->
-                StoreCollectionPodcastsContent(
-                    storeCollection = collection,
-                    navigateToStoreEntry = navigateToStoreEntry)
+                StoreCollectionPodcastsContent(storeCollection = collection)
             is StoreCollectionEpisodes ->
-                StoreCollectionEpisodesContent(
-                    storeCollection = collection,
-                    navigateToStoreEntry = navigateToStoreEntry)
+                StoreCollectionEpisodesContent(storeCollection = collection)
         }
     }
 }
 
 @Composable
-fun StoreCollectionEpisodesContent(
-    storeCollection: StoreCollectionEpisodes,
-    navigateToStoreEntry: (String) -> Unit,
-) {
+fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
     Text(storeCollection.label, modifier = Modifier.padding(horizontal = 16.dp))
     if (storeCollection.items.isEmpty())
         Row(

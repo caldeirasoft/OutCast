@@ -19,16 +19,6 @@ class FetchStoreDirectoryUseCase @Inject constructor(
             is NetworkResponse.Success -> {
                 val storeDataGrouping = response.body
                 emit(storeDataGrouping)
-
-                storeDataGrouping.storeList
-                    .filterIsInstance<StoreCollectionPodcastsEpisodes>()
-                    .forEach { collection ->
-                        val collResponse = storeRepository.getListStoreItemDataAsync(collection.itemsIds, params.storeFront, storeDataGrouping)
-                        if (collResponse is NetworkResponse.Success) {
-                            collection.items = collResponse.body
-                            emit(storeDataGrouping)
-                        }
-                    }
             }
             is NetworkResponse.NetworkError ->
                 throw Exception(response.error.message)

@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store
+package com.caldeirasoft.outcast.ui.screen.storedata
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,16 +7,14 @@ import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreData
-import com.caldeirasoft.outcast.domain.interfaces.StoreDataWithCollections
-import com.caldeirasoft.outcast.domain.interfaces.StoreDataWithLookup
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.StoreGroupingData
-import com.caldeirasoft.outcast.domain.models.StoreMultiRoom
 import com.caldeirasoft.outcast.domain.models.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.domain.util.Resource
+import com.caldeirasoft.outcast.ui.screen.storedirectory.StoreBaseViewModel
 import com.caldeirasoft.outcast.ui.util.ScreenState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -48,6 +46,20 @@ class StoreDataViewModel @ViewModelInject constructor(
         }
     }
 
+    fun getPager(storeRoom: StoreRoom): Pager<Int, StoreItem> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 5,
+                enablePlaceholders = false,
+                maxSize = 200,
+                prefetchDistance = 5
+            ),
+            pagingSourceFactory = {
+                StoreDataItemsPagingSource(storeRoom.storeIds, storeRoom, storeFront, fetchStoreItemsUseCase)
+            }
+        )
+
+
     fun getStoreItemsPaged(storeRoom: StoreRoom) : PagingSource<Int, StoreItem> =
-        StoreItemsPagingSource(storeRoom.storeIds, storeRoom, storeFront, fetchStoreItemsUseCase)
+        StoreDataItemsPagingSource(storeRoom.storeIds, storeRoom, storeFront, fetchStoreItemsUseCase)
 }

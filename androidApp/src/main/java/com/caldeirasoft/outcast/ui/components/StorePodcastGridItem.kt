@@ -12,19 +12,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.caldeirasoft.outcast.domain.models.StorePodcast
+import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun StorePodcastGridItem(
-    podcast: StorePodcast,
-    navigateToStoreEntry: (String) -> Unit
-)
+fun StorePodcastGridItem(podcast: StorePodcast)
 {
+    val actions = ActionsAmbient.current
     Column(modifier = Modifier
         .padding(horizontal = 8.dp)
         .preferredWidth(100.dp)
-        .clickable(onClick = { navigateToStoreEntry(podcast.url) })) {
+        .clickable(onClick = { actions.navigateToStoreEntry(podcast.url) })) {
         Card(
             backgroundColor = colors[1],
             shape = RoundedCornerShape(8.dp)

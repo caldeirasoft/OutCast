@@ -8,17 +8,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
-import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
-import kotlinx.coroutines.CoroutineScope
-import org.koin.java.KoinJavaComponent.inject
+import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
+import com.caldeirasoft.outcast.ui.ambient.InboxViewModelAmbient
 
 @Composable
-fun InboxScreen(
-    scope: CoroutineScope,
-    viewModel: InboxViewModel,
-    navigateToDiscover: () -> Unit
-) {
+fun InboxScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -26,7 +20,7 @@ fun InboxScreen(
                     Text(text = "Inbox")
                 },
                 actions = {
-                    IconButton(onClick = navigateToDiscover) {
+                    IconButton(onClick = ActionsAmbient.current.navigateToDiscover) {
                         Icon(asset = Icons.Filled.Favorite)
                     }
                 })
@@ -34,16 +28,15 @@ fun InboxScreen(
     )
     { innerPadding ->
         InboxContent(
-            model = viewModel,
             modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
 fun InboxContent(
-    model: InboxViewModel,
     modifier: Modifier = Modifier
 ) {
+    val model = InboxViewModelAmbient.current
     Column(modifier = modifier.padding(16.dp)) {
         Text("Hi there!")
         Text("Thanks for going through the Layouts codelab")
