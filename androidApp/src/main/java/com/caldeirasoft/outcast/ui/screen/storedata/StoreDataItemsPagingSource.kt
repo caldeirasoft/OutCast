@@ -23,11 +23,9 @@ class StoreDataItemsPagingSource(
         if (endPosition > startPosition) {
             subset += ids.subList(startPosition, endPosition)
             if (subset.isNotEmpty()) {
-                val resource = fetchStoreItemsUseCase
+                val fetchItems = fetchStoreItemsUseCase
                     .invoke(FetchStoreItemsUseCase.Params(subset, storeDataWithLookup, storeFront))
-                    .first()
-                if (resource is NetworkResponse.Success)
-                    items.addAll(resource.body)
+                items.addAll(fetchItems)
             }
         }
 

@@ -9,13 +9,12 @@ import javax.inject.Inject
 
 class FetchStorePodcastDataUseCase @Inject constructor(
     val storeRepository: StoreRepository,
-) : UseCase<FetchStorePodcastDataUseCase.Params, Resource<StorePodcast>> {
-
-    override fun invoke(params: Params): Flow<Resource<StorePodcast>> =
-        networkCall(
-            fetchFromRemote = { storeRepository.getPodcastDataAsync(params.url, params.storeFront) },
-        )
-
+) : NetworkUseCase<FetchStorePodcastDataUseCase.Params, StorePodcast>(
+    fetchNetworkCall = { storeRepository.getPodcastDataAsync(
+        it.url,
+        it.storeFront
+    )}
+) {
     data class Params(
         val url: String,
         val storeFront: String)

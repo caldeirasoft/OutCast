@@ -5,10 +5,7 @@ import com.caldeirasoft.outcast.domain.repository.PodcastRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetPodcastUseCase(val podcastRepository: PodcastRepository)
-    : UseCase<GetPodcastUseCase.Params, Podcast> {
-    override fun invoke(params: Params): Flow<Podcast> {
-        return podcastRepository.getPodcast(params.podcastId)
-    }
-
-    data class Params(val podcastId: Long)
+    : FlowUseCase<Long, Podcast> {
+    override fun execute(param: Long) =
+        podcastRepository.getPodcast(param)
 }

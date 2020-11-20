@@ -9,15 +9,17 @@ import javax.inject.Inject
 
 class FetchEpisodesFromPodcastUseCase @Inject constructor(
     val episodeRepository: EpisodeRepository)
-    : UseCase<FetchEpisodesFromPodcastUseCase.Params, List<EpisodeSummary>> {
-    override fun invoke(params: Params): Flow<List<EpisodeSummary>> =
-        when (params.filter) {
-            PodcastEpisodesFilterType.QUEUE -> episodeRepository.fetchEpisodesFromQueueByPodcastId(params.podcastId)
-            PodcastEpisodesFilterType.INBOX -> episodeRepository.fetchEpisodesFromInboxByPodcastId(params.podcastId)
-            PodcastEpisodesFilterType.FAVORITES -> episodeRepository.fetchEpisodesFavoritesByPodcastId(params.podcastId)
-            PodcastEpisodesFilterType.HISTORY -> episodeRepository.fetchEpisodesHistoryByPodcastId(params.podcastId)
-            else -> episodeRepository.fetchEpisodesByPodcastId(params.podcastId)
+    : FlowUseCase<FetchEpisodesFromPodcastUseCase.Params, List<EpisodeSummary>> {
+    override fun execute(param: Params) =
+        when (param.filter) {
+            PodcastEpisodesFilterType.QUEUE -> episodeRepository.fetchEpisodesFromQueueByPodcastId(param.podcastId)
+            PodcastEpisodesFilterType.INBOX -> episodeRepository.fetchEpisodesFromInboxByPodcastId(param.podcastId)
+            PodcastEpisodesFilterType.FAVORITES -> episodeRepository.fetchEpisodesFavoritesByPodcastId(param.podcastId)
+            PodcastEpisodesFilterType.HISTORY -> episodeRepository.fetchEpisodesHistoryByPodcastId(param.podcastId)
+            else -> episodeRepository.fetchEpisodesByPodcastId(param.podcastId)
         }
 
-    data class Params(val podcastId: Long, val filter: PodcastEpisodesFilterType?)
+    data class Params(
+        val podcastId: Long,
+        val filter: PodcastEpisodesFilterType?)
 }

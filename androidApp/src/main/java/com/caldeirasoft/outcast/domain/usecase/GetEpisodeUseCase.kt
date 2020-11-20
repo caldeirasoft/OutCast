@@ -5,10 +5,8 @@ import com.caldeirasoft.outcast.domain.repository.EpisodeRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetEpisodeUseCase(val episodeRepository: EpisodeRepository)
-    : UseCase<GetEpisodeUseCase.Params, EpisodeWithInfos> {
-    override fun invoke(params: Params): Flow<EpisodeWithInfos> {
-        return episodeRepository.getEpisode(params.episodeId)
+    : FlowUseCase<Long, EpisodeWithInfos> {
+    override fun execute(param: Long): Flow<EpisodeWithInfos> {
+        return episodeRepository.getEpisode(param)
     }
-
-    data class Params(val episodeId: Long)
 }

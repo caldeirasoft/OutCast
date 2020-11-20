@@ -49,6 +49,9 @@ dependencies {
     implementation(Libs.AndroidX.Hilt.viewModel)
     kapt(Libs.AndroidX.Hilt.viewModelCompiler)
     kapt(Libs.AndroidX.Hilt.compiler)
+    // DataStore
+    implementation(Libs.AndroidX.DataStore.datastore)
+    implementation(Libs.AndroidX.DataStore.preferences)
     // Kotlin coroutines
     implementation(Libs.Coroutines.core)
     // Kotlinx serialization

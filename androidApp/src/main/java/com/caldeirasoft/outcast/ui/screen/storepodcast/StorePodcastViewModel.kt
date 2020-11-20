@@ -23,9 +23,9 @@ class StorePodcastViewModel(
 
     fun fetchPodcast(url: String) {
         viewModelScope.launch {
-            fetchStorePodcastDataUseCase
+            /*fetchStorePodcastDataUseCase
                 .invoke(FetchStorePodcastDataUseCase.Params(url = url, storeFront = storeFront))
-                .onEach { storeDataPodcast.emit(it) }
+                .onEach { storeDataPodcast.emit(it) }*/
         }
     }
 }

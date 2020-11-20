@@ -1,5 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.storedirectory
 
+import android.content.res.Configuration
+import androidx.compose.runtime.remember
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
@@ -8,6 +10,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
+import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.interfaces.StoreDataWithCollections
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.*
@@ -29,21 +32,38 @@ class StoreDirectoryViewModel @ViewModelInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : StoreBaseViewModel() {
 
-    private val pendingActions = Channel<Action>(Channel.UNLIMITED)
+    private val storeDataChannel: Channel<StoreData> = Channel()
 
-    var storeGroupingData: StateFlow<DataState<StoreGroupingData>> =
-        fetchStoreDirectoryUseCase
-            .invoke(FetchStoreDirectoryUseCase.Params(storeFront = storeFront))
-            .flowOn(Dispatchers.Main)
-            .map { DataState.Success(it) as DataState<StoreGroupingData> }
-            .catch {
-                println("emit!")
-                emit(DataState.Error(it))
+    var storeGroupingDataStateFlow: StateFlow<DataState<StoreGroupingData>> =
+        flow {
+            emit(
+                fetchStoreDirectoryUseCase
+                    .invoke(FetchStoreDirectoryUseCase.Params(storeFront = storeFront))
+            )
+        }
+        .flowOn(Dispatchers.Main)
+        .map { DataState.Success(it) as DataState<StoreGroupingData> }
+        .catch { emit(DataState.Error(it)) }
+        .onCompletion { }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+
+    fun getPager(storeGroupingData: StoreGroupingData) =
+        Pager(
+            config = PagingConfig(
+                pageSize = 3,
+                enablePlaceholders = false,
+                maxSize = 100,
+                prefetchDistance = 2
+            ),
+            pagingSourceFactory = {
+                StoreDataCollectionPagingSource(
+                    storeGroupingData,
+                    storeFront,
+                    fetchStoreItemsUseCase
+                )
             }
-            .onCompletion { }
-            .flowOn(Dispatchers.Default)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
-
+        )
 
     fun getPagingSourceFactory(storeDataWithCollections: StoreDataWithCollections)
             : PagingSource<Int, StoreCollection> =
@@ -52,7 +72,6 @@ class StoreDirectoryViewModel @ViewModelInject constructor(
             storeFront,
             fetchStoreItemsUseCase
         )
-
 
     init {
     }
@@ -63,6 +82,5 @@ class StoreDirectoryViewModel @ViewModelInject constructor(
     }
 
     override fun onCleared() {
-        pendingActions.close()
     }
 }

@@ -7,10 +7,10 @@ import javax.inject.Inject
 
 
 class FetchInboxUseCase @Inject constructor(val inboxRepository: InboxRepository)
-    : UseCase<FetchInboxUseCase.Params, List<EpisodeSummary>> {
-    override fun invoke(params: Params): Flow<List<EpisodeSummary>> =
+    : FlowUseCase<FetchInboxUseCase.Params, List<EpisodeSummary>> {
+    override fun execute(param: Params): Flow<List<EpisodeSummary>> =
         when {
-            params.genreId != null -> inboxRepository.fetchEpisodesByGenre(params.genreId)
+            param.genreId != null -> inboxRepository.fetchEpisodesByGenre(param.genreId)
             else -> inboxRepository.fetchEpisodes()
         }
 

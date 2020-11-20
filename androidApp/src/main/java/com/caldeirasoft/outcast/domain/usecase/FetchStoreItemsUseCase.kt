@@ -10,12 +10,13 @@ import javax.inject.Inject
 
 class FetchStoreItemsUseCase @Inject constructor(
     val storeRepository: StoreRepository,
-) : UseCase<FetchStoreItemsUseCase.Params, NetworkResponse<List<StoreItem>>> {
-
-    override fun invoke(params: Params): Flow<NetworkResponse<List<StoreItem>>> = flow {
-        emit(storeRepository.getListStoreItemDataAsync(params.lookupIds, params.storeFront, params.storeDataWithLookup))
+) : NetworkUseCase<FetchStoreItemsUseCase.Params, List<StoreItem>>(
+    fetchNetworkCall = { storeRepository.getListStoreItemDataAsync(
+        it.lookupIds,
+        it.storeFront,
+        it.storeDataWithLookup)
     }
-
+) {
     data class Params(
         val lookupIds: List<Long>,
         val storeDataWithLookup: StoreDataWithLookup,

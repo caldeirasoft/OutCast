@@ -8,9 +8,9 @@ import javax.inject.Inject
 
 class FetchCountEpisodesBySectionUseCase @Inject constructor(
     val episodeRepository: EpisodeRepository)
-    : UseCase<FetchCountEpisodesBySectionUseCase.Params, SectionWithCount> {
-    override fun invoke(params: Params): Flow<SectionWithCount> =
-        episodeRepository.fetchCountEpisodesBySection(params.podcastId)
+    : FlowUseCase<FetchCountEpisodesBySectionUseCase.Params, SectionWithCount> {
+    override fun execute(param: Params) =
+        episodeRepository.fetchCountEpisodesBySection(param.podcastId)
 
     data class Params(val podcastId: Long)
 }

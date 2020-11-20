@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class UnsubscribeFromPodcastUseCase @Inject constructor(val podcastRepository: PodcastRepository):
-    UseCase<UnsubscribeFromPodcastUseCase.Params, Unit> {
+    FlowUseCase<UnsubscribeFromPodcastUseCase.Params, Unit> {
 
-    override fun invoke(params: Params): Flow<Unit> = flow {
+    override fun execute(params: Params): Flow<Unit> = flow {
         podcastRepository.unsubscribeFromPodcast(podcastId = params.podcastId)
     }
 

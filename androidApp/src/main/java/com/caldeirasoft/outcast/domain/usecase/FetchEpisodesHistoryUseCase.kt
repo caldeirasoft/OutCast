@@ -8,10 +8,10 @@ import javax.inject.Inject
 
 class FetchEpisodesHistoryUseCase @Inject constructor(
     val episodeRepository: EpisodeRepository)
-    : UseCase<FetchEpisodesHistoryUseCase.Params, List<EpisodeSummary>> {
-    override fun invoke(params: Params): Flow<List<EpisodeSummary>> =
+    : FlowUseCase<FetchEpisodesHistoryUseCase.Params, List<EpisodeSummary>> {
+    override fun execute(param: Params) =
         when {
-            params.podcastId != null -> episodeRepository.fetchEpisodesHistoryByPodcastId(params.podcastId)
+            param.podcastId != null -> episodeRepository.fetchEpisodesHistoryByPodcastId(param.podcastId)
             else -> episodeRepository.fetchEpisodesHistory()
         }
 

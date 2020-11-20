@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
     val storeDataViewModel: StoreDataViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        println(applicationContext.resources.configuration.locales.get(0))
+
         super.onCreate(savedInstanceState)
         setContent {
                 OutCastTheme {

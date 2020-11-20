@@ -25,10 +25,12 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.ambient.StoreDataViewModelAmbient
+import com.caldeirasoft.outcast.ui.components.ErrorScreen
+import com.caldeirasoft.outcast.ui.components.LoadingScreen
 import com.caldeirasoft.outcast.ui.components.StoreCollectionPodcastsContent
 import com.caldeirasoft.outcast.ui.components.StorePodcastListItem
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.caldeirasoft.outcast.ui.util.ScreenState
+import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -40,9 +42,6 @@ fun StoreDataScreen(
 {
     val viewModel = StoreDataViewModelAmbient.current
     val actions = ActionsAmbient.current
-    LaunchedEffect(subject = Unit) {
-        viewModel.fetchGrouping(url)
-    }
 
     Scaffold(
         topBar = {
@@ -73,70 +72,44 @@ fun StoreDataScreen(
 fun StoreDataContent(
     viewModel: StoreDataViewModel,
 ) {
-    val storeData = viewModel.storeData
-    when (viewModel.screenState) {
-        is ScreenState.Loading ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        is ScreenState.Success -> {
-            when(storeData) {
-                is StoreRoom ->
-                    StoreDataRoomContent(storeRoom = storeData)
-                is StoreMultiRoom ->
-                    StoreDataMultiRoomContent(storeMultiRoom = storeData)
-            }
-        }
-        else -> {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Error!")
-            }
-        }
-    }
-}
-
-@ExperimentalCoroutinesApi
-@Composable
-fun StoreDataRoomContent(storeRoom: StoreRoom) {
-    val viewModel = StoreDataViewModelAmbient.current
-    val pager = remember { viewModel.getPager(storeRoom) }
-    StoreDataItemsPagingBackend(data = pager.flow)
-}
-
-@ExperimentalCoroutinesApi
-@Composable
-fun StoreDataItemsPagingBackend(data: Flow<PagingData<StoreItem>>)
-{
-    val lazyPagingItems = data.collectAsLazyPagingItems()
-    LazyColumn {
-        items(lazyPagingItems = lazyPagingItems) { item ->
-            when (item) {
-                is StorePodcast -> {
-                    StorePodcastListItem(podcast = item)
-                    Divider()
+    val storeDataFlow = viewModel.storeDataStateFlow
+    storeDataFlow
+        .collectAsState(initial = DataState.Loading())
+        .value
+        .onLoading { LoadingScreen() }
+        .onError { ErrorScreen(t = it) }
+        .onSuccess {
+            when(it) {
+                is StoreRoom -> {
+                    val pager = remember { viewModel.getPager(it) }
+                    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+                    LazyColumn {
+                        items(lazyPagingItems = lazyPagingItems) { item ->
+                            when (item) {
+                                is StorePodcast -> {
+                                    StorePodcastListItem(podcast = item)
+                                    Divider()
+                                }
+                            }
+                        }
+                    }
+                }
+                is StoreMultiRoom -> {
+                    val pager = remember { viewModel.getPager(it) }
+                    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+                    LazyColumn {
+                        items(lazyPagingItems = lazyPagingItems) { collection ->
+                            when (collection) {
+                                is StoreCollectionPodcasts ->
+                                    StoreCollectionPodcastsContent(storeCollection = collection)
+                                is StoreCollectionEpisodes ->
+                                    StoreCollectionEpisodesContent(storeCollection = collection)
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@ExperimentalCoroutinesApi
-@Composable
-fun StoreDataMultiRoomContent(storeMultiRoom: StoreMultiRoom) {
-    LazyColumnFor(items = storeMultiRoom.storeList) { collection ->
-        when (collection) {
-            is StoreCollectionPodcasts ->
-                StoreCollectionPodcastsContent(storeCollection = collection)
-            is StoreCollectionEpisodes ->
-                StoreCollectionEpisodesContent(storeCollection = collection)
-        }
-    }
 }
 
 @Composable

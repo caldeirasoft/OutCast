@@ -31,8 +31,7 @@ class PodcastDetailViewModel(
 
     fun fetchPodcast(podcastId: Long) {
         viewModelScope.launch {
-            getPodcastUseCase
-                .invoke(GetPodcastUseCase.Params(podcastId = podcastId))
+            getPodcastUseCase(param = podcastId)
                 .onEach { podcastData.emit(it) }
         }
     }

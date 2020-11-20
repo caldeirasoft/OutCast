@@ -21,7 +21,6 @@ fun StorePodcastListItem(podcast: StorePodcast)
     val actions = ActionsAmbient.current
 
     Row(modifier = Modifier
-        .padding(8.dp)
         .fillMaxWidth()
         .clickable(onClick = { actions.navigateToStoreEntry(podcast.url) })) {
         ListItem(

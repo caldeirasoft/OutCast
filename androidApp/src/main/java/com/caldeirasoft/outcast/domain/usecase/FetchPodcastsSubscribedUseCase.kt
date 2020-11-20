@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 
 class FetchPodcastsSubscribedUseCase @Inject constructor(val podcastRepository: PodcastRepository)
-    : UseCaseWithoutInput<List<PodcastSummary>> {
-    override fun invoke(): Flow<List<PodcastSummary>> =
+    : FlowUseCaseWithoutParams<List<PodcastSummary>> {
+    override fun execute(): Flow<List<PodcastSummary>> =
         podcastRepository.fetchSubscribedPodcasts()
 }

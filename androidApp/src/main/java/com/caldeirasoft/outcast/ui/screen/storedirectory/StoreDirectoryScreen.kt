@@ -3,7 +3,6 @@ package com.caldeirasoft.outcast.ui.screen.storedirectory
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -11,13 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.HourglassFull
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LifecycleOwnerAmbient
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.whenCreated
-import androidx.lifecycle.whenStarted
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -27,8 +23,6 @@ import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.ambient.StoreDirectoryViewModelAmbient
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.screen.storedata.StoreDataItemsPagingBackend
-import com.caldeirasoft.outcast.ui.screen.storedata.StoreDataItemsPagingSource
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
@@ -70,24 +64,14 @@ fun StoreDirectoryScreen() {
 @Composable
 fun StoreDirectoryContent() {
     val viewModel = StoreDirectoryViewModelAmbient.current
-    val storeGroupingDataFlow = viewModel.storeGroupingData
+    val storeGroupingDataFlow = viewModel.storeGroupingDataStateFlow
     storeGroupingDataFlow
         .collectAsState(initial = DataState.Loading())
         .value
         .onLoading { LoadingScreen() }
         .onError { ErrorScreen(t = it) }
         .onSuccess {
-            val pager = remember {
-                Pager(
-                    config = PagingConfig(
-                        pageSize = 3,
-                        enablePlaceholders = false,
-                        maxSize = 15,
-                        prefetchDistance = 3
-                    ),
-                    pagingSourceFactory = { viewModel.getPagingSourceFactory(it) }
-                )
-            }
+            val pager = remember { viewModel.getPager(it) }
             val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
             LazyColumn {
                 items(lazyPagingItems = lazyPagingItems) { collection ->

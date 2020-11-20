@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 class FetchPlayedEpisodesCountUseCase(
     val episodeRepository: EpisodeRepository)
-    : UseCaseWithoutInput<List<EpisodesCountByPodcast>> {
-    override fun invoke(): Flow<List<EpisodesCountByPodcast>> =
+    : FlowUseCaseWithoutParams<List<EpisodesCountByPodcast>> {
+    override fun execute(): Flow<List<EpisodesCountByPodcast>> =
         episodeRepository.fetchCountEpisodesPlayedByPodcast()
 }

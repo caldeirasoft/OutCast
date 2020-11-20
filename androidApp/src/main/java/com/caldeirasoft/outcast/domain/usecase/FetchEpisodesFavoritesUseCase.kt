@@ -8,10 +8,10 @@ import javax.inject.Inject
 
 class FetchEpisodesFavoritesUseCase @Inject constructor(
     val episodeRepository: EpisodeRepository)
-    : UseCase<FetchEpisodesFavoritesUseCase.Params, List<EpisodeSummary>> {
-    override fun invoke(params: Params): Flow<List<EpisodeSummary>> =
+    : FlowUseCase<FetchEpisodesFavoritesUseCase.Params, List<EpisodeSummary>> {
+    override fun execute(param: Params) =
         when {
-            params.podcastId != null -> episodeRepository.fetchEpisodesFavoritesByPodcastId(params.podcastId)
+            param.podcastId != null -> episodeRepository.fetchEpisodesFavoritesByPodcastId(param.podcastId)
             else -> episodeRepository.fetchEpisodesFavorites()
         }
 

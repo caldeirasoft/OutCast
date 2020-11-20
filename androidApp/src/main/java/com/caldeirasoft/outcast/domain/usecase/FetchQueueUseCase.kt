@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class FetchQueueUseCase @Inject constructor(val queueRepository: QueueRepository)
-    : UseCaseWithoutInput<List<EpisodeSummary>> {
-    override fun invoke(): Flow<List<EpisodeSummary>> =
+    : FlowUseCaseWithoutParams<List<EpisodeSummary>> {
+    override fun execute(): Flow<List<EpisodeSummary>> =
         queueRepository.fetchQueue()
 }

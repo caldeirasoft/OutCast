@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class FetchFavoriteEpisodesCountUseCase @Inject constructor(
     val episodeRepository: EpisodeRepository)
-    : UseCaseWithoutInput<List<EpisodesCountByPodcast>> {
-    override fun invoke(): Flow<List<EpisodesCountByPodcast>> =
+    : FlowUseCaseWithoutParams<List<EpisodesCountByPodcast>> {
+    override fun execute() =
         episodeRepository.fetchCountEpisodesFavoritesByPodcast()
 }
