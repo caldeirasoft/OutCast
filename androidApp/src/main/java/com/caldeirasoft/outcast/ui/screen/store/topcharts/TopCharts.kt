@@ -7,8 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.navigation.Actions
-import com.caldeirasoft.outcast.ui.screen.store.topchartcategory.TopChartsCategory
-import com.caldeirasoft.outcast.ui.screen.store.topchartcategory.TopChartsType
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsEpisode
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsPodcast
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsType
 import com.caldeirasoft.outcast.ui.screen.storedirectory.TopChartsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -68,8 +69,8 @@ fun TopChartsTabLayout(
         }
         Surface(modifier = Modifier.weight(0.5f)) {
             when (selectedTabIndex) {
-                TopChartsTab.PODCASTS.ordinal -> TopChartsCategory(type = TopChartsType(podcast = true, podcastEpisode = false))
-                TopChartsTab.EPISODES.ordinal -> TopChartsCategory(type = TopChartsType(podcast = false, podcastEpisode = true))
+                TopChartsTab.PODCASTS.ordinal -> TopChartsPodcast()
+                TopChartsTab.EPISODES.ordinal -> TopChartsEpisode()
             }
         }
     }

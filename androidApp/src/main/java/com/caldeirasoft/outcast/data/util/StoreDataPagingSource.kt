@@ -12,14 +12,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 
-abstract class StoreDataPagingSource(
+class StoreDataPagingSource(
+    val storeData: StoreData,
     val getStoreItemsUseCase: GetStoreItemsUseCase,
 ) : PagingSource<Int, StoreItem>()
 {
-    abstract fun getStoreData(): Flow<StoreData>
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
-        val storeData = getStoreData().single()
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()
         when (storeData) {

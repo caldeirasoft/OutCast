@@ -5,8 +5,10 @@ import com.caldeirasoft.outcast.domain.models.StoreRoom
 import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import com.caldeirasoft.outcast.ui.screen.store.StoreViewModel
-import com.caldeirasoft.outcast.ui.screen.store.topchartcategory.TopChartsCategoryViewModel
-import com.caldeirasoft.outcast.ui.screen.store.topchartcategory.TopChartsType
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsEpisodeViewModel
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsItemViewModel
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsPodcastViewModel
+import com.caldeirasoft.outcast.ui.screen.store.topchartitem.TopChartsType
 import com.caldeirasoft.outcast.ui.screen.storedirectory.DiscoverViewModel
 import com.caldeirasoft.outcast.ui.screen.storedirectory.TopChartsViewModel
 import com.caldeirasoft.outcast.ui.screen.storeroom.StoreCollectionViewModel
@@ -29,13 +31,17 @@ internal val appModule = module {
         getStoreItemsUseCase = get())
     }
     viewModel { TopChartsViewModel() }
-    viewModel { (type: TopChartsType) ->
-        TopChartsCategoryViewModel(
+    viewModel { TopChartsPodcastViewModel(
             fetchStoreFrontUseCase = get(),
             getStoreItemsUseCase = get(),
-            fetchStoreTopChartsUseCase = get(),
-            topChartsType = type
+            fetchStoreTopChartsUseCase = get()
         )
+    }
+    viewModel { TopChartsEpisodeViewModel(
+        fetchStoreFrontUseCase = get(),
+        getStoreItemsUseCase = get(),
+        fetchStoreTopChartsUseCase = get()
+    )
     }
     viewModel { (room: StoreRoom) -> StoreCollectionViewModel(
         getStoreItemsUseCase = get(),

@@ -9,21 +9,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.datetime.Clock
 import kotlin.time.ExperimentalTime
 
-/**
- * A generic class that can provide a resource backed by both
- * the SQLite database and the network.
- *
- * [ResultType] represents the type for database.
- * [RequestType] represents the type for network.
- */
-inline fun <ResponseType: Any> networkCall(
-    crossinline fetchFromRemote: suspend () -> ResponseType
-) = flow<DataState<ResponseType>> {
-        emit(DataState.Success(fetchFromRemote()))
-    }
-    .onStart { emit(DataState.Loading()) }
-    .catch { emit(DataState.Error<ResponseType>(it)) }
-
 
 /**
  * A generic function that can stream network resource and fetch and save it

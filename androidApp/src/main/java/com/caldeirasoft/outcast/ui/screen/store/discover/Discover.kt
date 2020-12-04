@@ -14,10 +14,17 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.*
+import com.caldeirasoft.outcast.domain.util.onError
+import com.caldeirasoft.outcast.domain.util.onLoading
+import com.caldeirasoft.outcast.domain.util.onSuccess
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.screen.storedirectory.DiscoverViewModel
+import com.caldeirasoft.outcast.ui.util.ScreenState
+import com.caldeirasoft.outcast.ui.util.onError
+import com.caldeirasoft.outcast.ui.util.onLoading
+import com.caldeirasoft.outcast.ui.util.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -31,10 +38,11 @@ typealias NavigateToStoreEntryCallBack = (String) -> Unit
 @Composable
 fun Discover(viewModel: DiscoverViewModel = getViewModel()) {
     val actions = ActionsAmbient.current
-    val discover = viewModel.discover
-    val pagedList = discover.collectAsLazyPagingItems()
+    val viewState by viewModel.state.collectAsState()
+    val pagedList = viewModel.discover.collectAsLazyPagingItems()
 
     DiscoverContent(
+        state = viewState.screenState,
         discoverPagedList = pagedList,
         actions = actions
     )
@@ -42,26 +50,32 @@ fun Discover(viewModel: DiscoverViewModel = getViewModel()) {
 
 @Composable
 fun DiscoverContent(
+    state: ScreenState,
     discoverPagedList: LazyPagingItems<StoreItem>,
-    actions: Actions
-)
+    actions: Actions)
 {
-    StoreContentFeed(
-        lazyPagingItems = discoverPagedList,
-        actions = actions) { item, index ->
-        when (item) {
-            is StorePodcast -> {
-                StorePodcastListItem(podcast = item)
-                Divider()
+    state
+        .onLoading { LoadingScreen() }
+        .onError { ErrorScreen(t = it) }
+        .onSuccess {
+            StoreContentFeed(
+                lazyPagingItems = discoverPagedList,
+                actions = actions
+            ) { item, index ->
+                when (item) {
+                    is StorePodcast -> {
+                        StorePodcastListItem(podcast = item)
+                        Divider()
+                    }
+                    is StoreCollectionPodcasts ->
+                        StoreCollectionPodcastsContent(storeCollection = item)
+                    is StoreCollectionEpisodes ->
+                        StoreCollectionEpisodesContent(storeCollection = item)
+                    is StoreCollectionRooms ->
+                        StoreCollectionRoomsContent(storeCollection = item)
+                    is StoreCollectionFeatured ->
+                        StoreCollectionFeaturedContent(storeCollection = item)
+                }
             }
-            is StoreCollectionPodcasts ->
-                StoreCollectionPodcastsContent(storeCollection = item)
-            is StoreCollectionEpisodes ->
-                StoreCollectionEpisodesContent(storeCollection = item)
-            is StoreCollectionRooms ->
-                StoreCollectionRoomsContent(storeCollection = item)
-            is StoreCollectionFeatured ->
-                StoreCollectionFeaturedContent(storeCollection = item)
         }
-    }
 }
