@@ -1,9 +1,11 @@
 package com.caldeirasoft.outcast.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +40,56 @@ fun <T> LazyGridFor(
                 Box(modifier = Modifier.weight(1F).padding(8.dp)) {}
             }
         }
+    }
+}
+
+fun <T : Any> LazyListScope.gridItems(
+    lazyPagingItems: LazyPagingItems<T>,
+    columns: Int = 3,
+    contentPadding: PaddingValues = PaddingValues(),
+    hPadding: Dp = 0.dp,
+    vPadding: Dp = 0.dp,
+    itemContent: @Composable LazyItemScope.(value: T?) -> Unit
+) {
+    Log.d("itemCount", lazyPagingItems.itemCount.toString())
+    val rows = when {
+        lazyPagingItems.itemCount % columns == 0 -> lazyPagingItems.itemCount / columns
+        else -> (lazyPagingItems.itemCount / columns) + 1
+    }
+
+    for (row in 0 until rows) {
+        if (row == 0) spacerItem(contentPadding.top)
+
+        item {
+            Row(
+                Modifier.fillMaxWidth()
+                    .padding(start = contentPadding.start, end = contentPadding.end)
+            ) {
+                for (column in 0 until columns) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        val index = (row * columns) + column
+                        if (index < lazyPagingItems.itemCount) {
+                            itemContent(lazyPagingItems[index])
+                        }
+                    }
+                    if (column < columns - 1) {
+                        Spacer(modifier = Modifier.preferredWidth(hPadding))
+                    }
+                }
+            }
+        }
+
+        if (row < rows - 1) {
+            spacerItem(vPadding)
+        } else {
+            spacerItem(contentPadding.bottom)
+        }
+    }
+}
+
+fun LazyListScope.spacerItem(height: Dp) {
+    item {
+        Spacer(Modifier.preferredHeight(height).fillParentMaxWidth())
     }
 }
 

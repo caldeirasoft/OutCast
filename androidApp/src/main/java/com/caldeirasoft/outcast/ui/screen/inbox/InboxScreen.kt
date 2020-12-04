@@ -8,11 +8,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
-import com.caldeirasoft.outcast.ui.ambient.InboxViewModelAmbient
+import org.koin.androidx.compose.getViewModel
 
 @Composable
-fun InboxScreen() {
+fun InboxScreen(viewModel: InboxViewModel = getViewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -20,26 +21,17 @@ fun InboxScreen() {
                     Text(text = "Inbox")
                 },
                 actions = {
-                    IconButton(onClick = ActionsAmbient.current.navigateToDiscover) {
+                    IconButton(onClick = ActionsAmbient.current.navigateToStoreDirectory) {
                         Icon(asset = Icons.Filled.Favorite)
                     }
                 })
         }
     )
     { innerPadding ->
-        InboxContent(
-            modifier = Modifier.padding(innerPadding))
-    }
-}
-
-@Composable
-fun InboxContent(
-    modifier: Modifier = Modifier
-) {
-    val model = InboxViewModelAmbient.current
-    Column(modifier = modifier.padding(16.dp)) {
-        Text("Hi there!")
-        Text("Thanks for going through the Layouts codelab")
-        Text(model.textData)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Hi there!")
+            Text("Thanks for going through the Layouts codelab")
+            Text(viewModel.textData)
+        }
     }
 }

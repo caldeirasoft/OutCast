@@ -12,7 +12,7 @@ interface EpisodeRepository {
     /**
      * Select all episodes by podcast id
      */
-    fun fetchEpisodesByPodcastId(podcastId: Long): Flow<List<EpisodeSummary>>
+    fun fetchEpisodesByPodcastId(id: Long): Flow<List<EpisodeSummary>>
 
     /**
      * Select all favorites episodes
@@ -27,22 +27,22 @@ interface EpisodeRepository {
     /**
      * Select favorites episodes from a podcast
      */
-    fun fetchEpisodesFavoritesByPodcastId(podcastId: Long): Flow<List<EpisodeSummary>>
+    fun fetchEpisodesFavoritesByPodcastId(id: Long): Flow<List<EpisodeSummary>>
 
     /**
      * Select all played episodes from a podcast
      */
-    fun fetchEpisodesHistoryByPodcastId(podcastId: Long): Flow<List<EpisodeSummary>>
+    fun fetchEpisodesHistoryByPodcastId(id: Long): Flow<List<EpisodeSummary>>
 
     /**
      * Select inbox episodes by podcast id
      */
-    fun fetchEpisodesFromInboxByPodcastId(podcastId: Long): Flow<List<EpisodeSummary>>
+    fun fetchEpisodesFromInboxByPodcastId(id: Long): Flow<List<EpisodeSummary>>
 
     /**
      * Select queue episodes by podcast id
      */
-    fun fetchEpisodesFromQueueByPodcastId(podcastId: Long): Flow<List<EpisodeSummary>>
+    fun fetchEpisodesFromQueueByPodcastId(id: Long): Flow<List<EpisodeSummary>>
 
     /**
      * Select favorites episodes count by podcasts

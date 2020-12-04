@@ -1,4 +1,6 @@
 package com.caldeirasoft.outcast.domain.interfaces
 
-interface StoreItemFeatured : StoreItem {
+import kotlinx.serialization.Serializable
+
+interface StoreItemFeatured {
 }

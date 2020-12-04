@@ -1,6 +1,9 @@
 package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.navigation.NavBackStackEntry
+import com.caldeirasoft.outcast.domain.models.StoreRoom
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -13,33 +16,44 @@ sealed class Route(val name: String) {
 
     object Podcasts : Route("podcasts")
 
-    object Discover : Route("discover")
+    object StoreDirectory : Route("storeDirectory")
 
     object Podcast : Route("podcast") {
-        fun buildRoute(podcastId: Long): String = "podcast/${podcastId}"
+        fun buildRoute(podcastId: Long): String = "$name/${podcastId}"
         fun getPodcastId(entry: NavBackStackEntry): Long =
-            entry.arguments!!.getString("podcastId")?.toLong()
+            entry.arguments!!.getLong("podcastId")?.toLong()
                 ?: throw IllegalArgumentException("podcastId argument missing.")
     }
 
-    object StoreEntry : Route("storeEntry") {
-        fun buildRoute(url: String): String {
-            val urlEncoded = URLEncoder.encode(url, "UTF-8")
-            return "storeEntry/${urlEncoded}"
-        }
-        fun getUrl(entry: NavBackStackEntry): String {
-            val urlEncoded = entry.arguments!!.getString("url")
-                ?: throw IllegalArgumentException("url argument missing.")
-            val url = URLDecoder.decode(urlEncoded, "UTF-8")
-            return url
+    object StoreCollectionPage : Route("storeCollection") {
+        fun buildRoute(room: StoreRoom) :String {
+            val roomEncoded = URLEncoder.encode(Json.encodeToString(room), "UTF-8")
+            return "$name/$roomEncoded"
         }
 
-        enum class Argument(val key: String) {
-            Url("Url")
+        fun getRoom(entry: NavBackStackEntry): StoreRoom {
+            val roomEncoded = entry.arguments!!.getString("room")
+                ?: throw IllegalArgumentException("room argument missing.")
+            return Json.decodeFromString(StoreRoom.serializer(), URLDecoder.decode(roomEncoded, "UTF-8"))
+        }
+    }
+
+    object StorePodcast : Route("storePodcast") {
+        fun buildRoute(url: String): String {
+            val urlEncoded = URLEncoder.encode(url, "UTF-8")
+            return "$name/${urlEncoded}"
+        }
+
+        fun getUrl(entry: NavBackStackEntry): String {
+            return entry.arguments!!.getString("url")
+                ?: throw IllegalArgumentException("url argument missing.")
         }
     }
 }
 
-object NavigationArguments {
+object NavArgs {
+    const val PodcastId = "podcastId"
     const val Url = "url"
+    const val Room = "room"
+    const val StoreFront = "storeFront"
 }

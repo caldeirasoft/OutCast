@@ -2,6 +2,7 @@
 package com.caldeirasoft.outcast.domain.models
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -25,8 +26,9 @@ class StorePodcastFeatured(
     val copyright: String? = null,
     val contentAdvisoryRating: String? = null,
     val userRating: Float,
-    val genre: Genre?
-) : StoreItemFeatured {
+    val genre: Genre?,
+    override val storeFront: String,
+) : StoreItemWithArtwork, StoreItemFeatured {
 
     override fun getArtworkUrl():String =
         artworkUrl(1060, 520, crop = "fa")

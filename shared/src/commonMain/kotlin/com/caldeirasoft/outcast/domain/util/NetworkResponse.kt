@@ -16,7 +16,7 @@ sealed class NetworkResponse<out T : Any>() {
      * A request that resulted in a response with a non-2xx status code
      */
     data class ServerError<T: Any>(
-        val body: T?,
+        val body: String?,
         val code: Int,
         val headers: Map<String, Any>? = null,
     ) : NetworkResponse<T>()

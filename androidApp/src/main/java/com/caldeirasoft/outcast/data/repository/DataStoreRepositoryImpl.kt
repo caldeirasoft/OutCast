@@ -1,30 +1,29 @@
 package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.createDataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.createDataStore
+import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
 import com.caldeirasoft.outcast.domain.repository.DataStoreRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 import java.io.IOException
+import java.security.InvalidKeyException
 import java.util.*
-import javax.inject.Inject
 
-class DataStoreRepositoryImpl @Inject constructor (@ApplicationContext val context: Context)
+class DataStoreRepositoryImpl(val context: Context)
     : DataStoreRepository {
     companion object {
         const val DATA_STORE_FILE_NAME = "user_prefs"
     }
 
     private object PreferenceKeys {
-        val STORE_REGION = preferencesKey<String>("store_country")
+        val STOREFRONT_REGION = preferencesKey<String>("store_front")
         val LAST_SYNC = preferencesKey<Long>("last_sync")
     }
 
@@ -38,13 +37,16 @@ class DataStoreRepositoryImpl @Inject constructor (@ApplicationContext val conte
             else throw exception
         }
 
-    override val storeCountryPreference: Flow<String>
+    override val storeCountry: Flow<String>
         = preferencesFlow
-        .map { preferences -> preferences[PreferenceKeys.STORE_REGION] ?: "en-US" }
+        .map { preferences ->
+            preferences[PreferenceKeys.STOREFRONT_REGION] ?: "FR"
+            //context.resources.configuration.locales.get(0).country
+        }
 
-    override suspend fun saveStoreCountryPreference(storeRegion: String) {
+    override suspend fun saveStoreCountryPreference(country: String) {
         dataStore.edit { preferences ->
-            preferences[PreferenceKeys.STORE_REGION] = storeRegion
+            preferences[PreferenceKeys.STOREFRONT_REGION] = country
         }
     }
 
@@ -58,4 +60,56 @@ class DataStoreRepositoryImpl @Inject constructor (@ApplicationContext val conte
         }
     }
 
+    /**
+     * getCurrentStoreFront
+     */
+    override fun getCurrentStoreFront(country: String): String {
+        val storeFronts = getStoreFronts()
+        val countriesMap = storeFronts
+            .storeFronts
+            .map { it.countryCode to it }
+            .toMap()
+        val languageMap = storeFronts
+            .languages
+            .map { it.name to it.id }
+            .toMap()
+
+        val contextLocale = context.resources.configuration.locales.get(0)
+        val selectedCountry =
+            countriesMap[country] ?: throw IllegalArgumentException("country not found")
+        var defaultLanguage:String? = null
+        var currentLanguage:String? = null
+        // default language : english
+        selectedCountry
+            .languages
+            .forEach { lang ->
+                val locale = Locale.forLanguageTag(lang.replace('_', '-'))
+                if (locale.language == Locale.ENGLISH.language)
+                    languageMap[lang]?.let {
+                        defaultLanguage = it
+                    }
+                if (locale.language == contextLocale.language)
+                    languageMap[lang]?.let {
+                        currentLanguage = it
+                    }
+            }
+
+        val storeLanguageId = currentLanguage ?: defaultLanguage ?: throw InvalidKeyException("language not found")
+        val storeFront = "${selectedCountry.id}-${storeLanguageId},29"
+
+        return storeFront
+    }
+
+    /**
+     * getStoreFront
+     */
+    private fun getStoreFronts(): StoreFrontDto {
+        val text = context.resources
+            .openRawResource(R.raw.store_fronts)
+            .bufferedReader()
+            .use { it.readText() }
+
+        val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
+        return nonStrictJson.decodeFromString(StoreFrontDto.serializer(), text)
+    }
 }

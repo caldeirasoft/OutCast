@@ -2,23 +2,26 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 import com.caldeirasoft.outcast.domain.models.StoreCollectionPodcasts
+import com.caldeirasoft.outcast.domain.models.StorePodcast
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
+import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.util.toast
+import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
 fun LoadingScreen()
@@ -44,18 +47,17 @@ fun ErrorScreen(t: Throwable) {
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .gravity(Alignment.CenterVertically)
+                .align(Alignment.CenterVertically)
         )
     }
 }
 
 @Composable
 fun StoreHeadingSection(title:String) {
-    val actions = ActionsAmbient.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Text(
             title,
@@ -66,13 +68,12 @@ fun StoreHeadingSection(title:String) {
 }
 
 @Composable
-fun StoreHeadingSectionWithLink(title:String, url: String) {
-    val actions = ActionsAmbient.current
+fun StoreHeadingSectionWithLink(title:String, onClick: () -> Unit) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .clickable(onClick = { actions.navigateToStoreEntry(url) })
+            .padding(horizontal = 16.dp)
+            .clickable(onClick = onClick)
     ) {
         val (text, icon) = createRefs()
         Text(
@@ -94,12 +95,13 @@ fun StoreHeadingSectionWithLink(title:String, url: String) {
     }
 }
 
+
 @Preview
 @Composable
 fun previewStoreHeadingSection() {
     Column(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 16.dp)
+            .padding(vertical = 16.dp)
             .fillMaxWidth()
     ) {
         StoreHeadingSection("Nouveautés et tendances")
@@ -114,6 +116,6 @@ fun previewStoreHeadingSectionWithLink() {
             .padding(horizontal = 8.dp, vertical = 16.dp)
             .fillMaxWidth()
     ) {
-        StoreHeadingSectionWithLink("Nouveautés et tendances", "")
+        StoreHeadingSectionWithLink("Nouveautés et tendances", { })
     }
 }

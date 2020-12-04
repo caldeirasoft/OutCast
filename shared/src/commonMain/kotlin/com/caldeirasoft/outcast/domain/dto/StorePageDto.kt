@@ -37,6 +37,7 @@ class PageDataResult(
     val url: String? = null,
     val fcStructure: PageDataStructureResult? = null,
     val segments: List<SegmentResult> = arrayListOf(),
+    val segmentedControl: SegmentControlResult? = null,
     val adamIds: List<String> = arrayListOf(),
     val adamId: Int? = null,
     val contentData: List<ContentDataResult> = arrayListOf(),
@@ -52,6 +53,7 @@ class PageDataResult(
     val popularityMap: PopularityMapResult? = null,
     val artist: ArtistResult? = null,
     val metricsBase: MetricsBaseResult? = null,
+    val topCharts: List<TopChartResult> = arrayListOf()
 )
 
 @Serializable
@@ -90,6 +92,19 @@ class PageDataModelResult(
     val content: List<ContentResult> = arrayListOf())
 
 @Serializable
+class SegmentControlResult(
+    val segments: List<SegmentControlItemResult> = arrayListOf(),
+    val selectedIndex: Int = 0
+)
+
+@Serializable
+class SegmentControlItemResult(
+    val title: String = "",
+    val url: String = "",
+    val pageData: PageDataResult? = null,
+)
+
+@Serializable
 class Link(
     val type: String = "",
     val label: String = "",
@@ -120,9 +135,24 @@ class ArtistResult(
 class SegmentResult(
     val adamId: String = "",
     val title: String = "",
-    val adamIds: List<Int> = arrayListOf(),
+    val adamIds: List<Long> = arrayListOf(),
     val seeAllUrl: SeeAllUrlResult? = null,
     val fcKind: String? = null,
+)
+
+@Serializable
+class TopChartResult(
+    val shortTitle: String = "",
+    val title: String = "",
+    val adamIds: List<Long> = arrayListOf(),
+    val seeAllUrl: String = "",
+    val kinds: TopChartKindResult? = null,
+)
+
+@Serializable
+class TopChartKindResult(
+    val podcast: Boolean = false,
+    val podcastEpisode: Boolean = false,
 )
 
 @Serializable
@@ -270,7 +300,7 @@ class MetricsBaseResult(
     val pageType: String = "",
     val pageId: String? = null,
     val pageDetails: String? = null,
-    val storeFrontHeader: String? = null,
-    val language: String? = null,
-    val storeFront: String? = null,
+    val storeFrontHeader: String = "",
+    val language: String = "",
+    val storeFront: String = "",
 )

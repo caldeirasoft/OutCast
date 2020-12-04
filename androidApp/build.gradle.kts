@@ -7,7 +7,6 @@ plugins {
     kotlin("plugin.serialization") version Versions.kotlin
     id("com.squareup.sqldelight")
     id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"
@@ -44,11 +43,6 @@ dependencies {
     implementation(Libs.AndroidX.Navigation.compose)
     // Paging
     implementation(Libs.AndroidX.Paging.compose)
-    // Hilt
-    implementation(Libs.AndroidX.Hilt.hilt)
-    implementation(Libs.AndroidX.Hilt.viewModel)
-    kapt(Libs.AndroidX.Hilt.viewModelCompiler)
-    kapt(Libs.AndroidX.Hilt.compiler)
     // DataStore
     implementation(Libs.AndroidX.DataStore.datastore)
     implementation(Libs.AndroidX.DataStore.preferences)
@@ -62,19 +56,36 @@ dependencies {
     implementation(Libs.Koin.core)
     implementation(Libs.Koin.coreExt)
     implementation(Libs.Koin.androidScope)
-    //implementation(Libs.Koin.androidCompose)
+    implementation(Libs.Koin.androidCompose)
     implementation(Libs.Koin.androidViewModel)
+    implementation(Libs.Koin.androidExt)
     // Ktor client
     implementation(Libs.Ktor.clientCore)
+    implementation(Libs.Ktor.clientLogging)
     implementation(Libs.Ktor.encoding)
     implementation(Libs.Ktor.serialization)
     implementation(Libs.Ktor.clientAndroid)
+    implementation(Libs.Ktor.clientOkHttp)
+    // OkHttp
+    implementation(Libs.SquareUp.OkHttp3.okhttp)
     // Landscapist
     implementation(Libs.Landscapist.coil)
     // SQLDelight
-    implementation(Libs.SqlDelight.runtime)
-    implementation(Libs.SqlDelight.coroutines)
-    implementation(Libs.SqlDelight.androidDriver)
+    implementation(Libs.SquareUp.SqlDelight.runtime)
+    implementation(Libs.SquareUp.SqlDelight.coroutines)
+    implementation(Libs.SquareUp.SqlDelight.androidDriver)
+    // Plist
+    implementation(Libs.Plist.ddPlist)
+    // Flipper
+    debugImplementation(Libs.Facebook.Flipper.flipperDebug)
+    releaseImplementation(Libs.Facebook.Flipper.flipperRelease)
+    debugImplementation(Libs.Facebook.Flipper.network)
+    debugImplementation(Libs.Facebook.Flipper.leakCanary)
+    // SoLoader
+    debugImplementation(Libs.Facebook.SoLoader.soloader)
+    // Leak Canary
+    debugImplementation(Libs.SquareUp.LeakCanary.leakCanaryDebug)
+    releaseImplementation(Libs.SquareUp.LeakCanary.leakCanaryRelease)
 }
 android {
     compileSdkVersion(30)
@@ -103,10 +114,10 @@ android {
     }
 }
 
-sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
-        schemaOutputDirectory = file("build/dbs")
-        dialect = "sqlite:3.24"
-    }
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.freeCompilerArgs = listOf(
+        *kotlinOptions.freeCompilerArgs.toTypedArray(),
+        "-Xallow-jvm-ir-dependencies",
+        "-Xskip-prerelease-check")
 }

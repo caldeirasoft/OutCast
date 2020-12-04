@@ -1,5 +1,5 @@
 package com.caldeirasoft.outcast.domain.interfaces
 
-interface StoreDataWithCollections : StoreDataWithLookup {
+interface StoreDataWithCollections : StorePage {
     val storeList: List<StoreCollection>
 }

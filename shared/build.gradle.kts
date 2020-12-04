@@ -3,6 +3,7 @@ plugins {
     id("com.android.library")
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version Versions.kotlin
+    id("com.squareup.sqldelight")
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"
@@ -35,11 +36,14 @@ kotlin {
                 // Koin
                 implementation(Libs.Koin.core)
                 implementation(Libs.Koin.coreExt)
-                implementation(Libs.Koin.KTor)
+                implementation(Libs.Koin.Ktor)
                 // Ktor client
                 implementation(Libs.Ktor.clientCore)
                 implementation(Libs.Ktor.encoding)
                 implementation(Libs.Ktor.serialization)
+                // SQLDelight
+                implementation(Libs.SquareUp.SqlDelight.runtime)
+                implementation(Libs.SquareUp.SqlDelight.coroutines)
             }
         }
         val commonTest by getting {
@@ -62,6 +66,7 @@ kotlin {
                 // Ktor client
                 implementation(Libs.Ktor.clientAndroid)
                 // SQLDelight
+                implementation(Libs.SquareUp.SqlDelight.androidDriver)
             }
         }
         val androidTest by getting
@@ -71,7 +76,7 @@ kotlin {
                 implementation(Libs.Ktor.clientJvm)
                 implementation(Libs.Ktor.serializationJvm)
                 // SQLDelight
-                implementation(Libs.SqlDelight.sqlDriver)
+                implementation(Libs.SquareUp.SqlDelight.sqlDriver)
             }
         }
         val jvmTest by getting {
@@ -101,5 +106,13 @@ android {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+}
+
+sqldelight {
+    database("Database") {
+        packageName = "com.caldeirasoft.outcast"
+        schemaOutputDirectory = file("build/dbs")
+        dialect = "sqlite:3.24"
     }
 }

@@ -2,6 +2,7 @@
 package com.caldeirasoft.outcast.domain.models
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -26,10 +27,11 @@ data class StorePodcast(
     val contentAdvisoryRating: String? = null,
     val userRating: Float,
     val genre: Genre?,
+    override val storeFront: String,
     val episodes: List<StoreEpisode> = listOf(),
     val podcastsByArtist: StoreCollectionPodcasts? = null,
-    val podcastsListenersAlsoFollow: StoreCollectionPodcasts? = null
-) : StoreItem {
+    val podcastsListenersAlsoFollow: StoreCollectionPodcasts? = null,
+) : StoreItemWithArtwork {
     override fun getArtworkUrl():String =
         artworkUrl(200, 200)
 }

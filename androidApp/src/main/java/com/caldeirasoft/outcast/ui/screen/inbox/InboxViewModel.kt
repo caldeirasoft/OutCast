@@ -1,9 +1,6 @@
 package com.caldeirasoft.outcast.presentation.viewmodel
 
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.models.EpisodeSummary
@@ -12,13 +9,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.experimental.property.inject
+import org.koin.java.KoinJavaComponent.inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class InboxViewModel @ViewModelInject constructor(
-    val fetchInboxUseCase: FetchInboxUseCase,
-    @Assisted private val savedStateHandle: SavedStateHandle
-) : ViewModel(), LifecycleObserver
+class InboxViewModel(val fetchInboxUseCase: FetchInboxUseCase) : ViewModel(), LifecycleObserver
 {
     val filterGenre: SharedFlow<Int?> = MutableSharedFlow()
 

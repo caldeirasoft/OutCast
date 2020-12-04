@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 @FlowPreview
 class PodcastDetailViewModel(
-    private val getPodcastUseCase: GetPodcastUseCase,
+    private val fetchPodcastUseCase: FetchPodcastUseCase,
     private val fetchEpisodesFromPodcastUseCase: FetchEpisodesFromPodcastUseCase
 ) : ViewModel() {
     //private val filterData: StateFlow<PodcastEpisodesFilterType?> = MutableStateFlow(null)
@@ -31,7 +31,7 @@ class PodcastDetailViewModel(
 
     fun fetchPodcast(podcastId: Long) {
         viewModelScope.launch {
-            getPodcastUseCase(param = podcastId)
+            fetchPodcastUseCase(param = podcastId)
                 .onEach { podcastData.emit(it) }
         }
     }

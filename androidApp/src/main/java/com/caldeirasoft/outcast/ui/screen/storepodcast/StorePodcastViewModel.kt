@@ -1,31 +1,28 @@
 package com.caldeirasoft.outcast.ui.screen.storepodcast
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.models.StorePodcast
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreItemsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStorePodcastDataUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.ui.screen.storedirectory.StoreBaseViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
+import com.caldeirasoft.outcast.domain.util.DataState
+import kotlinx.coroutines.flow.*
 
 class StorePodcastViewModel(
     private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
-    val fetchStoreItemsUseCase: FetchStoreItemsUseCase,
-) : StoreBaseViewModel() {
+    val getStoreItemsUseCase: GetStoreItemsUseCase,
+) : ViewModel() {
 
-    private val storeDataPodcast
-            = MutableStateFlow<Resource<StorePodcast>>(Resource.Loading(null))
+    private val _storeDataState =
+        MutableStateFlow<DataState<StorePodcast>>(DataState.Loading())
+    val storeDataState: Flow<DataState<StorePodcast>> = _storeDataState
 
-    val storeDataPodcastState
-        get() = storeDataPodcast
-
-    fun fetchPodcast(url: String) {
-        viewModelScope.launch {
-            /*fetchStorePodcastDataUseCase
-                .invoke(FetchStorePodcastDataUseCase.Params(url = url, storeFront = storeFront))
-                .onEach { storeDataPodcast.emit(it) }*/
-        }
+    fun loadData(url: String) {
+        fetchStorePodcastDataUseCase.execute(url, "")
+            .onStart { _storeDataState.emit(DataState.Loading()) }
+            .map { DataState.Success(it) }
+            .onEach { _storeDataState.emit(it) }
+            .catch { _storeDataState.emit(DataState.Error(it)) }
+            .launchIn(viewModelScope)
     }
 }
