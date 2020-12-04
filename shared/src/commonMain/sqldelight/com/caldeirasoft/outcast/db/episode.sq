@@ -1,5 +1,4 @@
 import com.caldeirasoft.outcast.domain.models.Artwork;
-import com.caldeirasoft.outcast.domain.models.EpisodeLocation;
 import com.caldeirasoft.outcast.domain.models.Genre;
 import java.lang.Integer;
 import kotlin.collections.List;
