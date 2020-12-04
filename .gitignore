@@ -5,3 +5,5 @@
 /buildSrc/.gradle/
 /buildSrc/build/
 /jvm/build/
+/shared/build/generated/
+/shared/build/
