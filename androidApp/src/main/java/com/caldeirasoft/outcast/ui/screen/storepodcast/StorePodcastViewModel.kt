@@ -2,7 +2,8 @@ package com.caldeirasoft.outcast.ui.screen.storepodcast
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.domain.models.StorePodcast
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStorePodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import com.caldeirasoft.outcast.domain.util.DataState
@@ -14,8 +15,8 @@ class StorePodcastViewModel(
 ) : ViewModel() {
 
     private val _storeDataState =
-        MutableStateFlow<DataState<StorePodcast>>(DataState.Loading())
-    val storeDataState: Flow<DataState<StorePodcast>> = _storeDataState
+        MutableStateFlow<DataState<StorePodcastPage>>(DataState.Loading())
+    val storeDataState: Flow<DataState<StorePodcastPage>> = _storeDataState
 
     fun loadData(url: String) {
         fetchStorePodcastDataUseCase.execute(url, "")

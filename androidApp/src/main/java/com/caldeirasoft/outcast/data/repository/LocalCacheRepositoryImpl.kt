@@ -7,18 +7,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.createDataStore
-import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
-import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.models.*
-import com.caldeirasoft.outcast.domain.repository.DataStoreRepository
+import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.LocalCacheRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -26,10 +20,6 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import kotlinx.serialization.serializer
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.security.InvalidKeyException
-import java.util.*
 
 class LocalCacheRepositoryImpl(val context: Context)
     : LocalCacheRepository {

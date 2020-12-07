@@ -3,8 +3,6 @@ package com.caldeirasoft.outcast.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyColumnForIndexed
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -16,12 +14,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.items
 import androidx.paging.compose.itemsIndexed
 import androidx.ui.tooling.preview.Preview
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
-import com.caldeirasoft.outcast.domain.models.*
+import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.theme.colors
@@ -226,7 +223,8 @@ fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms)
 
 @Composable
 fun StoreCollectionFeaturedContent(
-    storeCollection: StoreCollectionFeatured) {
+    storeCollection: StoreCollectionFeatured
+) {
     LazyRowFor(
         items = storeCollection.items.filterIsInstance<StoreItemFeatured>(),
         contentPadding = PaddingValues(8.dp),

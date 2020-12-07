@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.domain.models
+package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollectionPodcastsEpisodes

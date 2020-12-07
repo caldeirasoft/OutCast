@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.navigation.NavBackStackEntry
-import com.caldeirasoft.outcast.domain.models.StoreRoom
+import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLDecoder

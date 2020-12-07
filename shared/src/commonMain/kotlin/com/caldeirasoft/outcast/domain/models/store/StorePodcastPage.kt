@@ -1,15 +1,16 @@
 @file:UseSerializers(InstantSerializer::class)
-package com.caldeirasoft.outcast.domain.models
+package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-class StorePodcastFeatured(
+data class StorePodcastPage(
     val id: Long,
     val name: String,
     val url: String,
@@ -28,8 +29,10 @@ class StorePodcastFeatured(
     val userRating: Float,
     val genre: Genre?,
     override val storeFront: String,
-) : StoreItemWithArtwork, StoreItemFeatured {
-
+    val episodes: List<StoreEpisode> = listOf(),
+    val podcastsByArtist: StoreCollectionPodcasts? = null,
+    val podcastsListenersAlsoFollow: StoreCollectionPodcasts? = null,
+) : StoreItemWithArtwork {
     override fun getArtworkUrl():String =
-        artworkUrl(1060, 520, crop = "fa")
+        artworkUrl(200, 200)
 }

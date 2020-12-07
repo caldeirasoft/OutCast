@@ -10,7 +10,7 @@ import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.data.util.TopChartsPagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollectionPodcastsEpisodes
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.StoreDirectory
+import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase

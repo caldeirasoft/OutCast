@@ -2,7 +2,7 @@ package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
-import com.caldeirasoft.outcast.domain.models.StoreRoom
+import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 
 class Actions(navController: NavController) {
     val navigateToStoreDirectory: () -> Unit = {

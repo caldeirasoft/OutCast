@@ -13,7 +13,9 @@ import kotlinx.serialization.UseSerializers
 @Serializable
 class StorePageDto(
     val storePlatformData: StorePlatformDataResult? = null,
-    val pageData: PageDataResult? = null)
+    val pageData: PageDataResult? = null,
+    val properties: PropertiesResult? = null
+)
 
 @Serializable
 class StorePlatformDataResult(
@@ -24,6 +26,12 @@ class StorePlatformDataResult(
 @Serializable
 class LockupResult (
     val results: HashMap<Long, LookupResultItem> = hashMapOf()
+)
+
+@Serializable
+class PropertiesResult(
+    val revNum: String = "",
+    val timestamp: Instant? = null,
 )
 
 @Serializable
@@ -303,4 +311,9 @@ class MetricsBaseResult(
     val storeFrontHeader: String = "",
     val language: String = "",
     val storeFront: String = "",
+)
+
+@Serializable
+class ResultIdsResult (
+    val results: List<Long> = mutableListOf()
 )

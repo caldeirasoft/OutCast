@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.domain.models
+package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
@@ -6,8 +6,8 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StoreCollectionFeatured(
-    override var items: List<StoreItemWithArtwork>,
+class StoreCollectionRooms(
+    var label: String,
     override val storeFront: String,
-) : StoreCollection {
+    override var items: List<StoreItemWithArtwork>) : StoreCollection {
 }

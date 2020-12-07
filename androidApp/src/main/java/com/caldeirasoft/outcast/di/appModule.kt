@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.di
 
 import com.caldeirasoft.outcast.data.repository.*
-import com.caldeirasoft.outcast.domain.models.StoreRoom
+import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import com.caldeirasoft.outcast.ui.screen.store.StoreViewModel

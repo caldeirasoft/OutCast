@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.domain.usecase
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreData
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.repository.DataStoreRepository
 import com.caldeirasoft.outcast.domain.repository.StoreRepository
 import com.caldeirasoft.outcast.domain.util.Resource
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.*
 class FetchStoreDataUseCase(
     val storeRepository: StoreRepository,
 ) {
-    fun execute(url: String, storeFront: String): Flow<Resource<StoreData>> =
+    fun execute(url: String, storeFront: String): Flow<Resource<StorePage>> =
         networkCall {
             storeRepository.getStoreDataAsync(url, storeFront)
         }
