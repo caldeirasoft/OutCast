@@ -20,23 +20,4 @@ class FetchStoreTopChartsUseCase(
             }
         }
 
-    fun execute2(storeFront: String): Flow<Resource<StoreTopCharts>> =
-        networkBoundResource(
-            fetchFromLocal = { localCacheRepository.topCharts },
-            fetchFromRemote = {
-                stopwatch("FetchStoreDirectoryUseCase - getTopChartsAsync") {
-                    storeRepository.getTopChartsAsync(storeFront)
-                }
-            },
-            shouldFetchFromRemote = {
-                it
-                    ?.let { true }
-                    ?: false
-            },
-            saveRemoteData = {
-                stopwatch("FetchStoreDirectoryUseCase - saveTopCharts") {
-                    localCacheRepository.saveTopCharts(it)
-                }
-            }
-        )
 }

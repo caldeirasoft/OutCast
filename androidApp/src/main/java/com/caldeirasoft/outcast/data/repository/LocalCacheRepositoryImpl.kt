@@ -35,12 +35,10 @@ class LocalCacheRepositoryImpl(val context: Context)
     : LocalCacheRepository {
     companion object {
         const val CACHE_STORE_FILE_NAME = "cache.db"
-        const val TOP_CHARTS_STORE_FILE_NAME = "topCharts.db"
     }
 
     private object PreferenceKeys {
         val DIRECTORY = preferencesKey<String>("directory")
-        val TOP_CHARTS = preferencesKey<String>("top_charts")
     }
 
     // Build the DataStore
@@ -54,10 +52,9 @@ class LocalCacheRepositoryImpl(val context: Context)
             else throw exception
         }
 
-    override val directory: Flow<StoreGroupingData>
+    override val directory: Flow<StoreDirectory?>
         = preferencesFlow
         .map { preferences -> preferences[PreferenceKeys.DIRECTORY] }
-        .filterNotNull()
         .map {
             val module = SerializersModule {
                 polymorphic(StoreCollection::class) {
@@ -76,21 +73,13 @@ class LocalCacheRepositoryImpl(val context: Context)
             val format = Json {
                 serializersModule = module
             }
-            val storeData: StoreGroupingData = format.decodeFromString(serializer(), it)
-            storeData
+            it?.let {
+                val storeData: StoreDirectory = format.decodeFromString(serializer(), it)
+                storeData
+            }
         }
 
-    override val topCharts: Flow<StoreTopCharts>
-            = preferencesFlow
-        .map { preferences -> preferences[PreferenceKeys.TOP_CHARTS] }
-        .filterNotNull()
-        .map {
-            val storeData: StoreTopCharts = Json.decodeFromString(serializer(), it)
-            storeData
-        }
-
-
-    override suspend fun saveDirectory(storeData: StoreGroupingData) {
+    override suspend fun saveDirectory(storeData: StoreDirectory) {
         cacheDataStore.edit { preferences ->
             val module = SerializersModule {
                 polymorphic(StoreCollection::class) {
@@ -110,12 +99,6 @@ class LocalCacheRepositoryImpl(val context: Context)
                 serializersModule = module
             }
             preferences[PreferenceKeys.DIRECTORY] = format.encodeToString(serializer(), storeData)
-        }
-    }
-
-    override suspend fun saveTopCharts(storeData: StoreTopCharts) {
-        cacheDataStore.edit { preferences ->
-            preferences[PreferenceKeys.TOP_CHARTS] = Json.encodeToString(serializer(), storeData)
         }
     }
 }

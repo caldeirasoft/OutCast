@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.domain.usecase
 
+import com.caldeirasoft.outcast.domain.models.StoreDirectory
 import com.caldeirasoft.outcast.domain.models.StoreGroupingData
 import com.caldeirasoft.outcast.domain.repository.LocalCacheRepository
 import com.caldeirasoft.outcast.domain.repository.StoreRepository
@@ -15,7 +16,7 @@ class FetchStoreDirectoryUseCase(
     val storeRepository: StoreRepository,
     val localCacheRepository: LocalCacheRepository
 ) {
-    fun execute(storeFront: String): Flow<Resource<StoreGroupingData>> =
+    fun execute(storeFront: String): Flow<Resource<StoreDirectory>> =
         networkBoundResource(
             fetchFromLocal = { localCacheRepository.directory },
             fetchFromRemote = {
@@ -24,7 +25,8 @@ class FetchStoreDirectoryUseCase(
                 }
             },
             shouldFetchFromRemote = {
-                it?.let { true } ?: false
+                true
+                //it?.let { true } ?: false
             },
             saveRemoteData = {
                 stopwatch("FetchStoreDirectoryUseCase - saveDirectory") {

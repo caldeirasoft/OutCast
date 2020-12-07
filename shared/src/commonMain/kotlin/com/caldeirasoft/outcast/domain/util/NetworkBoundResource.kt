@@ -52,7 +52,7 @@ inline fun <ResponseType: Any> networkCall(
  * [RequestType] represents the type for network.
  */
 inline fun <RequestedType: Any> networkBoundResource(
-    crossinline fetchFromLocal: () -> Flow<RequestedType>,
+    crossinline fetchFromLocal: () -> Flow<RequestedType?>,
     crossinline shouldFetchFromRemote: (RequestedType?) -> Boolean = { true },
     crossinline fetchFromRemote: suspend () -> RequestedType,
     crossinline saveRemoteData: suspend (RequestedType) -> Unit = { Unit },

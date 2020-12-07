@@ -13,7 +13,7 @@ interface StoreRepository {
     /**
      * getDirectoryDataAsync
      */
-    suspend fun getDirectoryDataAsync(storeFront: String): StoreGroupingData
+    suspend fun getDirectoryDataAsync(storeFront: String): StoreDirectory
 
     /**
      * getStoreDataAsync

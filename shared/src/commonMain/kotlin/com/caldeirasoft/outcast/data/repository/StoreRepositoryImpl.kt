@@ -25,7 +25,7 @@ class StoreRepositoryImpl (
      * getPodcastDirectoryDataAsync
      */
     @ExperimentalTime
-    override suspend fun getDirectoryDataAsync(storeFront: String): StoreGroupingData {
+    override suspend fun getDirectoryDataAsync(storeFront: String): StoreDirectory {
         // get grouping data
         val storePageDto = stopwatch("getDirectoryDataAsync - getStoreDataApi") { getStoreDataApi(
             "https://itunes.apple.com/genre/id26",
@@ -35,6 +35,8 @@ class StoreRepositoryImpl (
         // parse store page data
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
+        var topPodcasts: StoreCollectionPodcasts? = null
+        var topEpisodes: StoreCollectionEpisodes? = null
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.fcStructure?.model?.children
                 ?.first { element -> element.token == "allPodcasts" }?.children
@@ -101,6 +103,20 @@ class StoreRepositoryImpl (
                                 elementChild.content.map { content -> content.contentId }
                             when (elementChild.type) {
                                 "popularity" -> {
+                                    when (elementChild.fcKind) {
+                                        // podcast
+                                        16 -> topPodcasts = StoreCollectionPodcasts(
+                                                label = elementChild.name,
+                                                itemsIds = ids.take(30), /*elementChild.displayCount*/
+                                                storeFront = storeFront
+                                            )
+                                        186 -> topEpisodes = StoreCollectionEpisodes(
+                                            label = elementChild.name,
+                                            itemsIds = ids.take(30), /*elementChild.displayCount*/
+                                            storeFront = storeFront
+                                        )
+                                        else -> { }
+                                    }
                                 }
                                 "normal" -> {
                                     yield(
@@ -112,6 +128,7 @@ class StoreRepositoryImpl (
                                         )
                                     )
                                 }
+                                else -> { }
                             }
                         }
                     }
@@ -163,11 +180,13 @@ class StoreRepositoryImpl (
             }
         }
 
-        return StoreGroupingData(
+        return StoreDirectory(
             id = "0",
             label = storePageDto.pageData?.categoryList?.name.orEmpty(),
             storeList = collectionSequence.toList(),
             storeFront = storeFront,
+            topPodcasts = topPodcasts ?: throw Exception("missing top podcasts"),
+            topEpisodes = topEpisodes ?: throw Exception("missing top episodes"),
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
     }
