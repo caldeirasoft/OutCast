@@ -1,6 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.store
 
-enum class TopChartsTab {
+enum class Chart {
     PODCASTS,
     EPISODES,
 }

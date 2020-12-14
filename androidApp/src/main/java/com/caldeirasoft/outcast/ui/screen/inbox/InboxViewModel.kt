@@ -9,8 +9,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.koin.experimental.property.inject
-import org.koin.java.KoinJavaComponent.inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi

@@ -14,8 +14,7 @@ class StoreDirectory(
     val label: String,
     override val storeFront: String,
     override val storeList: List<StoreCollection>,
-    val topPodcasts: StoreCollectionPodcasts,
-    val topEpisodes: StoreCollectionEpisodes,
+    val chartList: List<StoreChart> = emptyList(),
     val categories: List<Genre> = emptyList(),
     override var lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf(),
     override val timestamp: Instant

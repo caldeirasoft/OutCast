@@ -58,7 +58,7 @@ fun StorePodcastScreen(viewModel: StorePodcastViewModel = viewModel())
                         },
                         actions = {
                             IconButton(onClick = actions.navigateUp) {
-                                Icon(asset = Icons.Filled.HourglassFull)
+                                Icon(imageVector = Icons.Filled.HourglassFull)
                             }
                         })
                 }

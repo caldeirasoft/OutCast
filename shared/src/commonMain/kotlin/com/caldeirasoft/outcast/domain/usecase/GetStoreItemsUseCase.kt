@@ -10,9 +10,10 @@ import kotlinx.coroutines.flow.map
 class GetStoreItemsUseCase(
     val storeRepository: StoreRepository
 ) {
-    suspend fun execute(lookupIds: List<Long>, storePage: StorePage): List<StoreItem> =
+    suspend fun execute(lookupIds: List<Long>, storeFront: String, storePage: StorePage?): List<StoreItem> =
         storeRepository.getListStoreItemDataAsync(
             lookupIds,
+            storeFront,
             storePage
         )
 }

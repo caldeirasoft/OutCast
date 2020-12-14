@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.createDataStore
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.LocalCacheRepository
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +29,7 @@ class LocalCacheRepositoryImpl(val context: Context)
     }
 
     private object PreferenceKeys {
-        val DIRECTORY = preferencesKey<String>("directory")
+        val DIRECTORY = preferencesKey<String>("storeDirectory")
     }
 
     // Build the DataStore
@@ -42,11 +43,14 @@ class LocalCacheRepositoryImpl(val context: Context)
             else throw exception
         }
 
-    override val directory: Flow<StoreDirectory?>
+    override val storeDirectory: Flow<StorePage?>
         = preferencesFlow
         .map { preferences -> preferences[PreferenceKeys.DIRECTORY] }
         .map {
             val module = SerializersModule {
+                polymorphic(StorePage::class) {
+                    subclass(StoreGroupingData::class)
+                }
                 polymorphic(StoreCollection::class) {
                     subclass(StoreCollectionFeatured::class)
                     subclass(StoreCollectionPodcasts::class)
@@ -58,20 +62,24 @@ class LocalCacheRepositoryImpl(val context: Context)
                     subclass(StoreRoomFeatured::class)
                     subclass(StoreRoom::class)
                     subclass(StorePodcast::class)
+                    subclass(StoreEpisode::class)
                 }
             }
             val format = Json {
                 serializersModule = module
             }
             it?.let {
-                val storeData: StoreDirectory = format.decodeFromString(serializer(), it)
+                val storeData: StorePage = format.decodeFromString(serializer(), it)
                 storeData
             }
         }
 
-    override suspend fun saveDirectory(storeData: StoreDirectory) {
+    override suspend fun saveDirectory(storeData: StorePage) {
         cacheDataStore.edit { preferences ->
             val module = SerializersModule {
+                polymorphic(StorePage::class) {
+                    subclass(StoreGroupingData::class)
+                }
                 polymorphic(StoreCollection::class) {
                     subclass(StoreCollectionFeatured::class)
                     subclass(StoreCollectionPodcasts::class)
@@ -83,6 +91,7 @@ class LocalCacheRepositoryImpl(val context: Context)
                     subclass(StoreRoomFeatured::class)
                     subclass(StoreRoom::class)
                     subclass(StorePodcast::class)
+                    subclass(StoreEpisode::class)
                 }
             }
             val format = Json {

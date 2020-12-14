@@ -11,11 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemsIndexed
-import androidx.ui.tooling.preview.Preview
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.models.store.*

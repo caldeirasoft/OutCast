@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class StoreCollectionPodcasts(
-    var label: String,
-    var url: String? = null,
+    override var label: String,
+    override var url: String? = null,
     override val storeFront: String,
     override val itemsIds: List<Long>) : StoreCollectionPodcastsEpisodes {
 

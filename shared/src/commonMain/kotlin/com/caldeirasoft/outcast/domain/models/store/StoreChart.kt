@@ -7,12 +7,9 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StoreCollectionEpisodes(
-    override var label: String,
-    override var url: String? = null,
-    override val storeFront: String,
-    override val itemsIds: List<Long>) : StoreCollectionPodcastsEpisodes {
-
-    override var items: List<StoreItemWithArtwork> = mutableListOf()
-    val isEmpty = items.isEmpty()
-}
+class StoreChart(
+    val id: Long,
+    val label: String,
+    val url: String,
+    val storeFront: String,
+    val itemsIds: List<Long>)

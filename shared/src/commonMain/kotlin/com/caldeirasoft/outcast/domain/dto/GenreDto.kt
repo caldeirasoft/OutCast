@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.domain.dto
 
 import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import kotlinx.serialization.Serializable
 
 

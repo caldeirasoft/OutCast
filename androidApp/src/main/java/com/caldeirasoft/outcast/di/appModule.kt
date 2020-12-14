@@ -1,6 +1,8 @@
 package com.caldeirasoft.outcast.di
 
 import com.caldeirasoft.outcast.data.repository.*
+import com.caldeirasoft.outcast.domain.models.store.StoreChart
+import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
@@ -19,9 +21,9 @@ internal val appModule = module {
 
     viewModel { InboxViewModel(get()) }
     viewModel { StoreViewModel(
-        fetchStoreDirectoryUseCase = get(),
         fetchStoreFrontUseCase = get(),
-        getStoreItemsUseCase = get())
+        fetchStoreDirectoryUseCase = get(),
+        fetchStoreTopChartsUseCase = get())
     }
     viewModel { (room: StoreRoom) -> StoreCollectionViewModel(
         getStoreItemsUseCase = get(),

@@ -2,6 +2,8 @@ package com.caldeirasoft.outcast.domain.usecase
 
 import com.caldeirasoft.outcast.domain.util.NetworkResponse
 import com.caldeirasoft.outcast.domain.util.suspendCall
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.single
 

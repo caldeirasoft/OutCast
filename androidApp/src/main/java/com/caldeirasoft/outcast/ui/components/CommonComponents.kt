@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import com.caldeirasoft.outcast.ui.util.toast
 
 @Composable
@@ -19,7 +19,7 @@ fun LoadingScreen()
 {
     Box(
         modifier = Modifier.fillMaxSize(),
-        alignment = Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }
@@ -77,7 +77,7 @@ fun StoreHeadingSectionWithLink(title:String, onClick: () -> Unit) {
                 },
             style = MaterialTheme.typography.h6
         )
-        Icon(asset = Icons.Filled.ArrowForward,
+        Icon(imageVector = Icons.Filled.ArrowForward,
             modifier = Modifier
                 .constrainAs(icon) {
                     linkTo(top = parent.top, bottom = parent.bottom)

@@ -1,7 +1,7 @@
 object Versions {
     const val jvm = "1.8"
     const val gradle = "4.2.0-alpha15"
-    const val kotlin = "1.4.10"
+    const val kotlin = "1.4.20"
     const val coroutines = "1.3.9"
     const val serialization = "1.0.0"
     const val appcompat = "1.2.0"
@@ -36,20 +36,20 @@ object Libs {
         }
 
         object Navigation {
-            private const val version = "1.0.0-alpha02"
+            private const val version = "1.0.0-alpha03"
             const val compose = "androidx.navigation:navigation-compose:$version"
         }
 
         object Compose {
-            const val version = "1.0.0-alpha07"
+            const val version = "1.0.0-alpha08"
 
+            const val ui = "androidx.compose.ui:ui:$version"
             const val runtime = "androidx.compose.runtime:runtime:$version"
             const val foundation = "androidx.compose.foundation:foundation:$version"
             const val layout = "androidx.compose.foundation:foundation-layout:$version"
-            const val ui = "androidx.compose.ui:ui:$version"
             const val material = "androidx.compose.material:material:$version"
             const val animation = "androidx.compose.animation:animation:$version"
-            const val tooling = "androidx.ui:ui-tooling:$version"
+            const val tooling = "androidx.compose.ui:ui-tooling:$version"
             const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
         }
 
@@ -66,7 +66,7 @@ object Libs {
     }
 
     object Kotlin {
-        const val version = "1.4.10"
+        const val version = "1.4.20"
         const val stdlibJdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
     }
@@ -89,7 +89,7 @@ object Libs {
     }
 
     object Landscapist {
-        private const val version = "1.0.9"
+        private const val version = "1.1.1"
         const val coil = "com.github.skydoves:landscapist-coil:$version"
     }
 
@@ -99,6 +99,7 @@ object Libs {
         const val coreExt = "org.koin:koin-core-ext:$version"
         const val test = "org.koin:koin-test:$version"
         const val Ktor = "org.koin:koin-ktor:$version"
+        const val android = "org.koin:koin-android:$version"
         const val androidScope = "org.koin:koin-androidx-scope:$version"
         const val androidViewModel = "org.koin:koin-androidx-viewmodel:$version"
         const val androidCompose = "org.koin:koin-androidx-compose:$version"

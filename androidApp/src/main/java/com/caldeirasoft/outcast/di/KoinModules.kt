@@ -65,6 +65,7 @@ internal val commomModule = module {
     factory { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     factory { FetchStoreDataUseCase(storeRepository = get()) }
     factory { FetchStorePodcastDataUseCase(storeRepository = get()) }
+    factory { FetchStoreGenresUseCase(storeRepository = get())}
     factory { FetchStoreTopChartsUseCase(storeRepository = get(), localCacheRepository = get()) }
     factory { GetStoreItemsUseCase(storeRepository = get()) }
 
@@ -94,7 +95,7 @@ internal val platformModule = module {
                         Log.d("HttpClient", message)
                     }
                 }
-                level = LogLevel.HEADERS
+                level = LogLevel.INFO
             }
             engine {
                 clientCacheSize = cacheSize

@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.domain.usecase
 
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
 import com.caldeirasoft.outcast.domain.repository.LocalCacheRepository
 import com.caldeirasoft.outcast.domain.repository.StoreRepository
@@ -12,9 +13,9 @@ class FetchStoreDirectoryUseCase(
     val storeRepository: StoreRepository,
     val localCacheRepository: LocalCacheRepository
 ) {
-    fun execute(storeFront: String): Flow<Resource<StoreDirectory>> =
+    fun execute(storeFront: String): Flow<Resource<StorePage>> =
         networkBoundResource(
-            fetchFromLocal = { localCacheRepository.directory },
+            fetchFromLocal = { localCacheRepository.storeDirectory },
             fetchFromRemote = {
                 stopwatch("FetchStoreDirectoryUseCase - getDirectoryDataAsync") {
                     storeRepository.getDirectoryDataAsync(storeFront)

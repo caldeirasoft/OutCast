@@ -1,36 +1,54 @@
 package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.domain.interfaces.*
+import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.repository.DataStoreRepository
+import com.caldeirasoft.outcast.domain.repository.StoreRepository
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class StoreDataPagingSource(
-    val storePage: StorePage,
-    val getStoreItemsUseCase: GetStoreItemsUseCase,
-) : PagingSource<Int, StoreItem>()
+abstract class StoreDataPagingSource(
+    val scope: CoroutineScope,
+) : PagingSource<Int, StoreItem>(), KoinComponent
 {
+    private val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
+
+    abstract fun fetchStoreData(): Flow<StorePage>
+
+    private val storePageFlow: StateFlow<StorePage?> =
+        fetchStoreData()
+            .stateIn(scope, SharingStarted.Eagerly, null)
+
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
+        val flow = storePageFlow.filterNotNull()
+        val storeData = flow.first()
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()
-        when (storePage) {
+        when (storeData) {
             is StoreDataWithCollections -> {
                 val endPosition =
                     Integer.min(
-                        storePage.storeList.size - 1,
+                        storeData.storeList.size,
                         startPosition + params.loadSize
                     )
                 items +=
                     if (startPosition < endPosition)
-                        getCollections(startPosition, endPosition, storePage)
+                        getCollections(startPosition, endPosition, storeData)
                     else emptyList()
             }
             is StoreRoomPage -> {
-                val ids = storePage.storeIds
-                val endPosition = Integer.min(ids.size - 1, startPosition + params.loadSize)
+                val ids = storeData.storeIds
+                val endPosition = Integer.min(ids.size, startPosition + params.loadSize)
                 val subset = ids.subList(startPosition, endPosition)
-                items += getItemsFromIds(subset, storePage)
+                items += getItemsFromIds(subset, storeData)
             }
         }
 
@@ -49,7 +67,7 @@ class StoreDataPagingSource(
         ids: List<Long>,
         storeData: StorePage
     ): List<StoreItem> {
-        return getStoreItemsUseCase.execute(ids, storeData)
+        return getStoreItemsUseCase.execute(ids, storeData.storeFront, storeData)
     }
 
     protected suspend fun getCollections(
@@ -73,7 +91,7 @@ class StoreDataPagingSource(
             .toMap()
 
         val itemsSequence: Sequence<StoreCollection> = sequence {
-            for (i in startPosition..endPosition) {
+            for (i in startPosition until endPosition) {
                 when (val collection = storeData.storeList[i]) {
                     is StoreCollectionFeatured,
                     is StoreCollectionRooms -> yield(collection)

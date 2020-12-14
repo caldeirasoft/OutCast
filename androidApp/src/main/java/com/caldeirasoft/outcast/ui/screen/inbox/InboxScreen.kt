@@ -22,7 +22,7 @@ fun InboxScreen(viewModel: InboxViewModel = getViewModel()) {
                 },
                 actions = {
                     IconButton(onClick = ActionsAmbient.current.navigateToStoreDirectory) {
-                        Icon(asset = Icons.Filled.Favorite)
+                        Icon(imageVector = Icons.Filled.Favorite)
                     }
                 })
         }

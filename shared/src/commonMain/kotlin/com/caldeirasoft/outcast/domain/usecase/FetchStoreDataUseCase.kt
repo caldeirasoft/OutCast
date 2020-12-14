@@ -8,13 +8,19 @@ import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.domain.util.networkBoundResource
 import com.caldeirasoft.outcast.domain.util.networkCall
 import com.caldeirasoft.outcast.domain.util.stopwatch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 
 class FetchStoreDataUseCase(
-    val storeRepository: StoreRepository,
+    val storeRepository: StoreRepository
 ) {
-    fun execute(url: String, storeFront: String): Flow<Resource<StorePage>> =
+    fun executeAsync(url: String, storeFront: String): Flow<Resource<StorePage>> =
         networkCall {
-            storeRepository.getStoreDataAsync(url, storeFront)
+            stopwatch("FetchStoreDataUseCase - getStoreDataAsync") {
+                storeRepository.getStoreDataAsync(url, storeFront)
+            }
         }
 }

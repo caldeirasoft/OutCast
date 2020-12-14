@@ -47,37 +47,39 @@ fun StorePodcastListItem(podcast: StorePodcast)
 }
 
 @Composable
-fun StorePodcastListItemIndexed(podcast: StorePodcast, index: Int)
-{
+fun StorePodcastListItemIndexed(podcast: StorePodcast, index: Int) {
     val actions = ActionsAmbient.current
 
-    Row(modifier = Modifier
+    ListItem(
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { actions.navigateToStorePodcast(podcast.url) })) {
-        ListItem(
-                text = { Text(text = podcast.name) },
-                secondaryText = { Text(text = podcast.artistName) },
-                icon = {
-                    Row(horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.preferredWidth(90.dp)) {
-                        Text(index.toString(),
-                            style = MaterialTheme.typography.body2)
-                        Card(
-                                backgroundColor = colors[1],
-                                shape = RoundedCornerShape(8.dp)
-                        ) {
-                            CoilImage(
-                                    imageModel = podcast.getArtworkUrl(),
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                            .preferredSize(56.dp)
-                            )
-                        }
-                    }
+            .clickable(onClick = { actions.navigateToStorePodcast(podcast.url) }),
+        text = { Text(text = podcast.name) },
+        secondaryText = { Text(text = podcast.artistName) },
+        icon = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.preferredWidth(90.dp)
+            ) {
+                Text(
+                    index.toString(),
+                    style = MaterialTheme.typography.body2
+                )
+                Card(
+                    backgroundColor = colors[1],
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    CoilImage(
+                        imageModel = podcast.getArtworkUrl(),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .preferredSize(56.dp)
+                    )
                 }
-        )
-    }
+            }
+        }
+    )
 }
 
 @Composable

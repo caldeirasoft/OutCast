@@ -2,6 +2,8 @@
 
 package com.caldeirasoft.outcast.domain.dto
 
+import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.serializers.InstantStringSerializer
 import com.caldeirasoft.outcast.domain.serializers.LocalDateStringSerializer
 import kotlinx.datetime.Instant
@@ -70,8 +72,15 @@ class CategoryListResult(
     val url: String? = null,
     val genreId: Int = 0,
     val kind: String? = null,
-    val children: List<GenreDto> = arrayListOf()
+    val children: List<CategoryDto> = arrayListOf()
 )
+
+@Serializable
+class CategoryDto (
+    var genreId: Int,
+    var name: String = "",
+    var url: String = "",
+    val artwork: List<ArtworkDto> = arrayListOf())
 
 @Serializable
 class PageDataStructureResult(
@@ -315,5 +324,33 @@ class MetricsBaseResult(
 
 @Serializable
 class ResultIdsResult (
-    val results: List<Long> = mutableListOf()
+    val resultIds: List<Long> = mutableListOf()
+)
+
+@Serializable
+class GenreResult (
+    val id: Int,
+    val name: String = "",
+    val url: String = "",
+    val chartUrls: GenreChartUrlsResult? = null,
+    val subgenres: Map<Int, GenreResult> = hashMapOf()
+) {
+    fun toStoreGenre(storeFront: String): StoreGenre =
+        StoreGenre(
+            id = this.id,
+            name = this.name,
+            storeFront = storeFront,
+            url = this.url,
+            artwork = Artwork(
+                url= "",
+                width = 0,
+                height = 0
+            )
+        )
+}
+
+@Serializable
+class GenreChartUrlsResult (
+    val podcasts: String = "",
+    val podcastEpisodes: String = "",
 )

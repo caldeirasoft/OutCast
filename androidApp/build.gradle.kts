@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("kotlin-android-extensions")
     kotlin("plugin.serialization") version Versions.kotlin
     id("com.squareup.sqldelight")
     id("kotlin-kapt")
@@ -33,10 +32,10 @@ dependencies {
     // Compose
     implementation(Libs.AndroidX.Compose.runtime)
     implementation(Libs.AndroidX.Compose.foundation)
-    implementation(Libs.AndroidX.Compose.layout)
     implementation(Libs.AndroidX.Compose.ui)
-    implementation(Libs.AndroidX.Compose.material)
+    implementation(Libs.AndroidX.Compose.layout)
     implementation(Libs.AndroidX.Compose.animation)
+    implementation(Libs.AndroidX.Compose.material)
     implementation(Libs.AndroidX.Compose.iconsExtended)
     implementation(Libs.AndroidX.Compose.tooling)
     // Navigation
@@ -53,12 +52,11 @@ dependencies {
     // Kotlinx datetime
     implementation(Libs.Kotlinx.datetime)
     // Koin
-    implementation(Libs.Koin.core)
-    implementation(Libs.Koin.coreExt)
+    implementation(Libs.Koin.android)
     implementation(Libs.Koin.androidScope)
     implementation(Libs.Koin.androidCompose)
     implementation(Libs.Koin.androidViewModel)
-    implementation(Libs.Koin.androidExt)
+//    implementation(Libs.Koin.androidExt)
     // Ktor client
     implementation(Libs.Ktor.clientCore)
     implementation(Libs.Ktor.clientLogging)

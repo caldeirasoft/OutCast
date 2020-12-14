@@ -7,16 +7,14 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.*
-import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
+import com.caldeirasoft.outcast.domain.models.store.*
 
 interface StoreRepository {
 
     /**
      * getDirectoryDataAsync
      */
-    suspend fun getDirectoryDataAsync(storeFront: String): StoreDirectory
+    suspend fun getDirectoryDataAsync(storeFront: String): StorePage
 
     /**
      * getStoreDataAsync
@@ -31,10 +29,16 @@ interface StoreRepository {
     /**
      * getTopChartsAsync
      */
-    suspend fun getTopChartsIdsAsync(url: String, storeFront: String): List<Long>
+    suspend fun getTopChartsAsync(url: String, storeFront: String): StoreTopCharts
 
     /**
      * getListStoreItemDataAsync
      */
-    suspend fun getListStoreItemDataAsync(lookupIds: List<Long>, storePage: StorePage): List<StoreItem>
+    suspend fun getListStoreItemDataAsync(lookupIds: List<Long>, storeFront: String, storePage: StorePage?): List<StoreItem>
+
+    /**
+     * getGenresDataAsync
+     */
+    suspend fun getGenresDataAsync(storeFront: String): StoreGenreMapData
+
 }

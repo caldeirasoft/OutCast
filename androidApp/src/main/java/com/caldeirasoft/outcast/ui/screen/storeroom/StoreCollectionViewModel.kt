@@ -21,27 +21,10 @@ class StoreCollectionViewModel(
     private val fetchStoreDataUseCase: FetchStoreDataUseCase,
     private val getStoreItemsUseCase: GetStoreItemsUseCase,
     private val room: StoreRoom
-) : ViewModel()
-{
+) : ViewModel() {
     private val screenState = MutableStateFlow<ScreenState>(ScreenState.Idle)
 
-    private val storeResourceData: Flow<Resource<StorePage>> =
-        run {
-            if (room.url.isEmpty()) flowOf(Resource.Success(room.page))
-            else fetchStoreDataUseCase.execute(room.url, room.storeFront)
-        }.onEach {
-                when (it) {
-                    is Resource.Loading -> screenState.tryEmit(ScreenState.Loading)
-                    is Resource.Error -> screenState.tryEmit(ScreenState.Error(it.throwable))
-                    is Resource.Success -> screenState.tryEmit(ScreenState.Success)
-                }
-            }
-            .stateIn(viewModelScope, SharingStarted.Lazily, Resource.Loading())
-
-    private val storeData: Flow<StorePage> =
-        storeResourceData
-            .filterIsInstance<Resource.Success<StorePage>>()
-            .map { it.data }
+    private val storeData: MutableStateFlow<StorePage?> = MutableStateFlow(null)
 
     val state: StateFlow<StoreCollectionViewState> =
         combine(screenState, storeData)
@@ -49,12 +32,6 @@ class StoreCollectionViewModel(
             .stateIn(viewModelScope, SharingStarted.Lazily, StoreCollectionViewState())
 
     val pagedList: Flow<PagingData<StoreItem>> =
-        storeData
-            .flatMapLatest { data -> getPagedList(data) }
-            .cachedIn(viewModelScope)
-
-
-    private fun getPagedList(storeData: StorePage): Flow<PagingData<StoreItem>> =
         Pager(
             PagingConfig(
                 pageSize = 10,
@@ -63,6 +40,23 @@ class StoreCollectionViewModel(
                 prefetchDistance = 3
             )
         ) {
-            StoreDataPagingSource(storeData, getStoreItemsUseCase)
+            object : StoreDataPagingSource(viewModelScope) {
+                override fun fetchStoreData(): Flow<StorePage> =
+                    run {
+                        if (room.url.isEmpty()) flowOf(Resource.Success(room.page))
+                        else fetchStoreDataUseCase.executeAsync(room.url, room.storeFront)
+                    }
+                        .onEach {
+                            when (it) {
+                                is Resource.Loading -> screenState.tryEmit(ScreenState.Loading)
+                                is Resource.Error -> screenState.tryEmit(ScreenState.Error(it.throwable))
+                                is Resource.Success -> screenState.tryEmit(ScreenState.Success)
+                            }
+                        }
+                        .filterIsInstance<Resource.Success<StorePage>>()
+                        .map { it.data }
+            }
         }.flow
+            .cachedIn(viewModelScope)
+
 }
