@@ -17,10 +17,11 @@ import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.navigation.NavArgs
 import com.caldeirasoft.outcast.ui.navigation.Route
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
-import com.caldeirasoft.outcast.ui.screen.store.StoreScreen
+import com.caldeirasoft.outcast.ui.screen.store.StoreDirectoryScreen
+import com.caldeirasoft.outcast.ui.screen.store.StoreGenreScreen
 import com.caldeirasoft.outcast.ui.screen.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.storepodcast.StorePodcastViewModel
-import com.caldeirasoft.outcast.ui.screen.storeroom.StoreCollectionScreen
+import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -29,8 +30,6 @@ import kotlinx.datetime.Clock
 @FlowPreview
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
-    private val storePodcastViewModel by viewModels<StorePodcastViewModel>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
         Log.d("Locale", applicationContext.resources.configuration.locales.get(0).toString())
@@ -53,24 +52,29 @@ class MainActivity : AppCompatActivity() {
                         }
                         composable(Route.StoreDirectory.name) { navBackStackEntry ->
                             Log.d("Route", Route.StoreDirectory.name + " " + Clock.System.now())
-                            StoreScreen()
+                            StoreDirectoryScreen()
                         }
-                        composable(
-                            "${Route.StoreCollectionPage.name}/{room}",
+                        composable(Route.StoreGenrePage.name,
+                            arguments = listOf(
+                                navArgument(NavArgs.Genre) { type = NavType.StringType })
+                        ) { navBackStackEntry ->
+                            StoreGenreScreen(
+                                storeGenre = Route.StoreGenrePage.getGenre(navBackStackEntry),
+                            )
+                        }
+                        composable(Route.StoreRoomPage.name,
                             arguments = listOf(
                                 navArgument(NavArgs.Room) { type = NavType.StringType })
                         ) { navBackStackEntry ->
-                            StoreCollectionScreen(
-                                storeRoom = Route.StoreCollectionPage.getRoom(navBackStackEntry),
+                            StoreRoomScreen(
+                                storeRoom = Route.StoreRoomPage.getRoom(navBackStackEntry),
                             )
                         }
-                        composable(
-                            "${Route.StorePodcast.name}/{url}",
+                        composable(Route.StorePodcast.name,
                             arguments = listOf(
                                 navArgument(NavArgs.Url) { type = NavType.StringType })
                         ) { navBackStackEntry ->
                             StorePodcastScreen(
-                                viewModel = storePodcastViewModel,
                                 url = Route.StorePodcast.getUrl(navBackStackEntry)
                             )
                         }

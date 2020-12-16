@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -8,6 +9,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,7 +29,8 @@ fun LoadingScreen()
 
 @Composable
 fun ErrorScreen(t: Throwable) {
-    ContextAmbient.current.toast("${t.message}")
+    AmbientContext.current.toast("${t.message}")
+    Log.e("ERROR", t.message, t)
 
     Row(
         modifier = Modifier

@@ -15,6 +15,5 @@ class StoreGroupingData(
     override val storeFront: String,
     override val storeList: List<StoreCollection> = mutableListOf(),
     override var lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf(),
-    val genres: List<StoreGenre>?,
     override val timestamp: Instant
 ) : StorePage, StoreDataWithCollections

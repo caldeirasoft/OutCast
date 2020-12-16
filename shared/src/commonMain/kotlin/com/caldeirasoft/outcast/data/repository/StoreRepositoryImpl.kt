@@ -29,17 +29,16 @@ class StoreRepositoryImpl (
      * getPodcastDirectoryDataAsync
      */
     @ExperimentalTime
-    suspend fun getDirectoryDataAsync2(storeFront: String): StoreDirectory {
+    override suspend fun getDirectoryDataAsync(storeFront: String): StoreDirectory {
         // get grouping data
-        val storePageDto = stopwatch("getDirectoryDataAsync - getStoreDataApi") {
-            getStoreDataApi(DIRECTORY_URL, storeFront)
-        }
+        val storePageDto = getStoreDataApi(DIRECTORY_URL, storeFront)
 
         // parse store page data
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
         val storeFrontResult = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
-        val charts: MutableList<StoreChart> = mutableListOf()
+        var topPodcastsChart: StoreChart? = null
+        var topEpisodesChart: StoreChart? = null
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.fcStructure?.model?.children
                 ?.first { element -> element.token == "allPodcasts" }?.children
@@ -111,7 +110,7 @@ class StoreRepositoryImpl (
                                 "popularity" -> {
                                     when (elementChild.fcKind) {
                                         // podcast
-                                        16 -> charts.add(
+                                        16 -> topPodcastsChart =
                                             StoreChart(
                                                 id = elementChild.adamId,
                                                 label = elementChild.name,
@@ -119,8 +118,7 @@ class StoreRepositoryImpl (
                                                 itemsIds = ids.take(30), /*elementChild.displayCount*/
                                                 storeFront = storeFront
                                             )
-                                        )
-                                        186 -> charts.add(
+                                        186 -> topEpisodesChart =
                                             StoreChart(
                                                 id = elementChild.adamId,
                                                 label = elementChild.name,
@@ -128,9 +126,6 @@ class StoreRepositoryImpl (
                                                 itemsIds = ids.take(30), /*elementChild.displayCount*/
                                                 storeFront = storeFront
                                             )
-                                        )
-                                        else -> {
-                                        }
                                     }
                                 }
                                 "normal" -> {
@@ -196,12 +191,26 @@ class StoreRepositoryImpl (
             }
         }
 
+        val genres = storePageDto.pageData?.categoryList?.children?.map {
+            StoreGenre(
+                id = it.genreId,
+                name = it.name,
+                url = it.url,
+                topChartsUrl = it.chartUrl,
+                storeFront = storeFront,
+                artwork = it.artwork.first().toArtwork()
+            )
+        }
+
+
         return StoreDirectory(
             id = "0",
             label = storePageDto.pageData?.categoryList?.name.orEmpty(),
             storeList = collectionSequence.toList(),
             storeFront = storeFront,
-            chartList = charts,
+            topPodcastsChart = topPodcastsChart ?: throw NullPointerException("Missing topPodcastsChart"),
+            topEpisodesChart = topEpisodesChart ?: throw NullPointerException("Missing topEpisodesChart"),
+            genres = genres,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(
                 storePageDto.storePlatformData?.lockup,
@@ -209,12 +218,6 @@ class StoreRepositoryImpl (
             )
         )
     }
-
-    /**
-     * getPodcastDirectoryDataAsync
-     */
-    override suspend fun getDirectoryDataAsync(storeFront: String): StorePage =
-        getStoreDataAsync(DIRECTORY_URL, storeFront)
 
     /**
      * getStoreDataAsync
@@ -388,15 +391,6 @@ class StoreRepositoryImpl (
                 }
             }
         }
-        val genres = storePageDto.pageData?.categoryList?.children?.map {
-            StoreGenre(
-                id = it.genreId,
-                name = it.name,
-                url = it.url,
-                storeFront = storeFront,
-                artwork = it.artwork.first().toArtwork()
-            )
-        }
 
         return StoreGroupingData(
             id = storePageDto.pageData?.contentId.orEmpty(),
@@ -404,7 +398,6 @@ class StoreRepositoryImpl (
             storeFront = storeFront,
             storeList = collectionSequence.toList(),
             timestamp = timestamp,
-            genres = genres,
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
     }
@@ -620,23 +613,33 @@ class StoreRepositoryImpl (
      */
     override suspend fun getTopChartsAsync(url: String, storeFront: String): StoreTopCharts
     {
-        val podcastIds: MutableList<Long> = mutableListOf();
-        val episodeIds: MutableList<Long> = mutableListOf();
-
         // get top charts data
         val storePageDto = getStoreDataApi(url, storeFront)
         // parse store page data
+        var topPodcastsChart: StoreChart? = null
+        var topEpisodesChart: StoreChart? = null
         storePageDto.pageData
             ?.segmentedControl?.segments
             ?.firstOrNull()
-            ?.pageData?.topCharts?.forEach {
-                if(it.kinds?.podcast == true) {
-                    podcastIds += it.adamIds
+            ?.pageData?.topCharts?.onEach {
+                if (it.kinds?.podcast == true) {
+                    topPodcastsChart = StoreChart(
+                        id = it.id,
+                        label = it.title,
+                        storeFront = storeFront,
+                        itemsIds = it.adamIds
+                    )
                 }
                 else if (it.kinds?.podcastEpisode == true) {
-                    episodeIds += it.adamIds
+                    topEpisodesChart = StoreChart(
+                        id = it.id,
+                        label = it.title,
+                        storeFront = storeFront,
+                        itemsIds = it.adamIds
+                    )
                 }
             }
+            .orEmpty()
 
         return StoreTopCharts(
             id = 0,
@@ -644,11 +647,21 @@ class StoreRepositoryImpl (
                 ?.segmentedControl?.segments
                 ?.firstOrNull()?.title.orEmpty(),
             storeFront = storeFront,
-            storeEpisodesIds = episodeIds,
-            storePodcastsIds = podcastIds,
+            topPodcastsChart = topPodcastsChart ?: throw NullPointerException("Missing topPodcastsChart"),
+            topEpisodesChart = topEpisodesChart ?: throw NullPointerException("Missing topEpisodesChart"),
             timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST,
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
+    }
+
+    /**
+     * getTopChartsIdsAsync
+     */
+    override suspend fun getTopChartsIdsAsync(url: String, storeFront: String): List<Long>
+    {
+        // get top charts data
+        val resultIdsResult = getResultIdsAsync(url, storeFront, limit = 200)
+        return resultIdsResult.resultIds
     }
 
     /**
@@ -813,9 +826,10 @@ class StoreRepositoryImpl (
     /**
      * getStoreDataApi
      */
-    suspend fun getResultIdsAsync(url: String, storeFront: String): ResultIdsResult =
+    suspend fun getResultIdsAsync(url: String, storeFront: String, limit: Int = 10): ResultIdsResult =
         httpClient.get {
             url(url)
+            parameter("limit", limit)
             header("X-Apple-Store-Front", storeFront)
         }
 

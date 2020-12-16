@@ -12,5 +12,6 @@ class StoreGenre(
     var name: String,
     val storeFront: String,
     val url: String,
+    val topChartsUrl: String,
     val artwork: Artwork
 )

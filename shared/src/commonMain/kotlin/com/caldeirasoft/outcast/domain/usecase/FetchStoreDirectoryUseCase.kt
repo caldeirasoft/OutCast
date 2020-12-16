@@ -13,7 +13,7 @@ class FetchStoreDirectoryUseCase(
     val storeRepository: StoreRepository,
     val localCacheRepository: LocalCacheRepository
 ) {
-    fun execute(storeFront: String): Flow<Resource<StorePage>> =
+    fun execute(storeFront: String): Flow<Resource<StoreDirectory>> =
         networkBoundResource(
             fetchFromLocal = { localCacheRepository.storeDirectory },
             fetchFromRemote = {

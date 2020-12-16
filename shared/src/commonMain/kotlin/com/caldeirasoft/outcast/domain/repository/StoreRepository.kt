@@ -14,7 +14,7 @@ interface StoreRepository {
     /**
      * getDirectoryDataAsync
      */
-    suspend fun getDirectoryDataAsync(storeFront: String): StorePage
+    suspend fun getDirectoryDataAsync(storeFront: String): StoreDirectory
 
     /**
      * getStoreDataAsync
@@ -30,6 +30,11 @@ interface StoreRepository {
      * getTopChartsAsync
      */
     suspend fun getTopChartsAsync(url: String, storeFront: String): StoreTopCharts
+
+    /**
+     * getTopChartsIdsAsync
+     */
+    suspend fun getTopChartsIdsAsync(url: String, storeFront: String): List<Long>
 
     /**
      * getListStoreItemDataAsync

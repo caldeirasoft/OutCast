@@ -21,12 +21,13 @@ object AndroidSdk {
     const val target = compile
 }
 
-object Libs {
+object Dependencies {
     const val androidGradlePlugin = "com.android.tools.build:gradle:4.2.0-alpha16"
     const val junit = "junit:junit:4.13"
 
     object AndroidX {
         const val appcompat = "androidx.appcompat:appcompat:1.2.0"
+        const val palette = "androidx.palette:palette:1.0.0"
         const val coreKtx = "androidx.core:core-ktx:1.5.0-alpha02"
 
         object LifeCycle {

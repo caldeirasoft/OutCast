@@ -27,62 +27,62 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 // Kotlin
-                implementation(Libs.Coroutines.core)
+                implementation(Dependencies.Coroutines.core)
                 // Kotlinx serialization
-                implementation(Libs.Kotlinx.serialization)
+                implementation(Dependencies.Kotlinx.serialization)
                 // Kotlinx datetime
-                implementation(Libs.Kotlinx.datetime)
+                implementation(Dependencies.Kotlinx.datetime)
                 // Koin
-                implementation(Libs.Koin.core)
-                implementation(Libs.Koin.coreExt)
-                implementation(Libs.Koin.Ktor)
+                implementation(Dependencies.Koin.core)
+                implementation(Dependencies.Koin.coreExt)
+                implementation(Dependencies.Koin.Ktor)
                 // Ktor client
-                implementation(Libs.Ktor.clientCore)
-                implementation(Libs.Ktor.encoding)
-                implementation(Libs.Ktor.serialization)
+                implementation(Dependencies.Ktor.clientCore)
+                implementation(Dependencies.Ktor.encoding)
+                implementation(Dependencies.Ktor.serialization)
                 // SQLDelight
-                implementation(Libs.SquareUp.SqlDelight.runtime)
-                implementation(Libs.SquareUp.SqlDelight.coroutines)
+                implementation(Dependencies.SquareUp.SqlDelight.runtime)
+                implementation(Dependencies.SquareUp.SqlDelight.coroutines)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation(Libs.Coroutines.core)
-                implementation(Libs.Coroutines.test)
-                implementation(Libs.Ktor.clientMock)
-                implementation(Libs.Ktor.encoding)
-                implementation(Libs.Koin.test)
+                implementation(Dependencies.Coroutines.core)
+                implementation(Dependencies.Coroutines.test)
+                implementation(Dependencies.Ktor.clientMock)
+                implementation(Dependencies.Ktor.encoding)
+                implementation(Dependencies.Koin.test)
             }
         }
         val androidMain by getting {
             dependencies {
-                implementation(Libs.AndroidX.coreKtx)
-                implementation(Libs.AndroidX.appcompat)
-                implementation(Libs.Coroutines.core)
-                implementation(Libs.Coroutines.android)
+                implementation(Dependencies.AndroidX.coreKtx)
+                implementation(Dependencies.AndroidX.appcompat)
+                implementation(Dependencies.Coroutines.core)
+                implementation(Dependencies.Coroutines.android)
                 // Ktor client
-                implementation(Libs.Ktor.clientAndroid)
+                implementation(Dependencies.Ktor.clientAndroid)
                 // SQLDelight
-                implementation(Libs.SquareUp.SqlDelight.androidDriver)
+                implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
             }
         }
         val androidTest by getting
         val jvmMain by getting {
             dependencies {
                 // Ktor client
-                implementation(Libs.Ktor.clientJvm)
-                implementation(Libs.Ktor.serializationJvm)
+                implementation(Dependencies.Ktor.clientJvm)
+                implementation(Dependencies.Ktor.serializationJvm)
                 // SQLDelight
-                implementation(Libs.SquareUp.SqlDelight.sqlDriver)
+                implementation(Dependencies.SquareUp.SqlDelight.sqlDriver)
             }
         }
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation(Libs.junit)
-                implementation(Libs.Ktor.clientMock)
+                implementation(Dependencies.junit)
+                implementation(Dependencies.Ktor.clientMock)
             }
         }
     }

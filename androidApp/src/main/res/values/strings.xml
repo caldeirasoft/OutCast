@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">OutCast</string>
+
+    <!-- store -->
+    <string name="store_tab_discover">Discover</string>
+    <string name="store_tab_charts">Charts</string>
+    <string name="store_tab_categories">Categories</string>
+    <string name="store_tab_chart_podcasts">Top podcast charts</string>
+    <string name="store_tab_chart_episodes">Top episodes charts</string>
 </resources>

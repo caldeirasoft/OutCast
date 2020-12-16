@@ -20,9 +20,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Composable
 fun StorePodcastScreen(
-    viewModel: StorePodcastViewModel = viewModel(),
-    url: String
-)
+    url: String,
+    viewModel: StorePodcastViewModel = viewModel())
 {
     DisposableEffect(subject = url) {
         viewModel.loadData(url)

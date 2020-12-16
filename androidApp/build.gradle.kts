@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -24,66 +22,67 @@ dependencies {
     // Android
     implementation("com.google.android.material:material:1.2.1")
     // AndroidX
-    implementation(Libs.AndroidX.coreKtx)
-    implementation(Libs.AndroidX.appcompat)
+    implementation(Dependencies.AndroidX.coreKtx)
+    implementation(Dependencies.AndroidX.appcompat)
+    implementation(Dependencies.AndroidX.palette)
     // LifeCycle
-    implementation(Libs.AndroidX.LifeCycle.lifecycle)
-    implementation(Libs.AndroidX.LifeCycle.viewModel)
+    implementation(Dependencies.AndroidX.LifeCycle.lifecycle)
+    implementation(Dependencies.AndroidX.LifeCycle.viewModel)
     // Compose
-    implementation(Libs.AndroidX.Compose.runtime)
-    implementation(Libs.AndroidX.Compose.foundation)
-    implementation(Libs.AndroidX.Compose.ui)
-    implementation(Libs.AndroidX.Compose.layout)
-    implementation(Libs.AndroidX.Compose.animation)
-    implementation(Libs.AndroidX.Compose.material)
-    implementation(Libs.AndroidX.Compose.iconsExtended)
-    implementation(Libs.AndroidX.Compose.tooling)
+    implementation(Dependencies.AndroidX.Compose.runtime)
+    implementation(Dependencies.AndroidX.Compose.foundation)
+    implementation(Dependencies.AndroidX.Compose.ui)
+    implementation(Dependencies.AndroidX.Compose.layout)
+    implementation(Dependencies.AndroidX.Compose.animation)
+    implementation(Dependencies.AndroidX.Compose.material)
+    implementation(Dependencies.AndroidX.Compose.iconsExtended)
+    implementation(Dependencies.AndroidX.Compose.tooling)
     // Navigation
-    implementation(Libs.AndroidX.Navigation.compose)
+    implementation(Dependencies.AndroidX.Navigation.compose)
     // Paging
-    implementation(Libs.AndroidX.Paging.compose)
+    implementation(Dependencies.AndroidX.Paging.compose)
     // DataStore
-    implementation(Libs.AndroidX.DataStore.datastore)
-    implementation(Libs.AndroidX.DataStore.preferences)
+    implementation(Dependencies.AndroidX.DataStore.datastore)
+    implementation(Dependencies.AndroidX.DataStore.preferences)
     // Kotlin coroutines
-    implementation(Libs.Coroutines.core)
+    implementation(Dependencies.Coroutines.core)
     // Kotlinx serialization
-    implementation(Libs.Kotlinx.serialization)
+    implementation(Dependencies.Kotlinx.serialization)
     // Kotlinx datetime
-    implementation(Libs.Kotlinx.datetime)
+    implementation(Dependencies.Kotlinx.datetime)
     // Koin
-    implementation(Libs.Koin.android)
-    implementation(Libs.Koin.androidScope)
-    implementation(Libs.Koin.androidCompose)
-    implementation(Libs.Koin.androidViewModel)
+    implementation(Dependencies.Koin.android)
+    implementation(Dependencies.Koin.androidScope)
+    implementation(Dependencies.Koin.androidCompose)
+    implementation(Dependencies.Koin.androidViewModel)
 //    implementation(Libs.Koin.androidExt)
     // Ktor client
-    implementation(Libs.Ktor.clientCore)
-    implementation(Libs.Ktor.clientLogging)
-    implementation(Libs.Ktor.encoding)
-    implementation(Libs.Ktor.serialization)
-    implementation(Libs.Ktor.clientAndroid)
-    implementation(Libs.Ktor.clientOkHttp)
+    implementation(Dependencies.Ktor.clientCore)
+    implementation(Dependencies.Ktor.clientLogging)
+    implementation(Dependencies.Ktor.encoding)
+    implementation(Dependencies.Ktor.serialization)
+    implementation(Dependencies.Ktor.clientAndroid)
+    implementation(Dependencies.Ktor.clientOkHttp)
     // OkHttp
-    implementation(Libs.SquareUp.OkHttp3.okhttp)
+    implementation(Dependencies.SquareUp.OkHttp3.okhttp)
     // Landscapist
-    implementation(Libs.Landscapist.coil)
+    implementation(Dependencies.Landscapist.coil)
     // SQLDelight
-    implementation(Libs.SquareUp.SqlDelight.runtime)
-    implementation(Libs.SquareUp.SqlDelight.coroutines)
-    implementation(Libs.SquareUp.SqlDelight.androidDriver)
+    implementation(Dependencies.SquareUp.SqlDelight.runtime)
+    implementation(Dependencies.SquareUp.SqlDelight.coroutines)
+    implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
     // Plist
-    implementation(Libs.Plist.ddPlist)
+    implementation(Dependencies.Plist.ddPlist)
     // Flipper
-    debugImplementation(Libs.Facebook.Flipper.flipperDebug)
-    releaseImplementation(Libs.Facebook.Flipper.flipperRelease)
-    debugImplementation(Libs.Facebook.Flipper.network)
-    debugImplementation(Libs.Facebook.Flipper.leakCanary)
+    debugImplementation(Dependencies.Facebook.Flipper.flipperDebug)
+    releaseImplementation(Dependencies.Facebook.Flipper.flipperRelease)
+    debugImplementation(Dependencies.Facebook.Flipper.network)
+    debugImplementation(Dependencies.Facebook.Flipper.leakCanary)
     // SoLoader
-    debugImplementation(Libs.Facebook.SoLoader.soloader)
+    debugImplementation(Dependencies.Facebook.SoLoader.soloader)
     // Leak Canary
-    debugImplementation(Libs.SquareUp.LeakCanary.leakCanaryDebug)
-    releaseImplementation(Libs.SquareUp.LeakCanary.leakCanaryRelease)
+    debugImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryDebug)
+    releaseImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryRelease)
 }
 android {
     compileSdkVersion(30)
@@ -107,8 +106,8 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Libs.AndroidX.Compose.version
-        kotlinCompilerVersion = Libs.Kotlin.version
+        kotlinCompilerExtensionVersion = Dependencies.AndroidX.Compose.version
+        kotlinCompilerVersion = Dependencies.Kotlin.version
     }
 }
 

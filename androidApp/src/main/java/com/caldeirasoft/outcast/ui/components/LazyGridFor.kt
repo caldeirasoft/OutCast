@@ -22,11 +22,11 @@ import kotlin.math.ceil
 @Composable
 fun <T> LazyGridFor(
     items: List<T> = listOf(),
-    rows: Int = 3,
+    columns: Int = 3,
     hPadding: Int = 8,
     itemContent: @Composable LazyItemScope.(T, Int) -> Unit
 ) {
-    val chunkedList = items.chunked(rows)
+    val chunkedList = items.chunked(columns)
     LazyColumnForIndexed(items = chunkedList, modifier = Modifier.padding(horizontal = hPadding.dp)) { index, it ->
         if (index == 0) {
             Spacer(modifier = Modifier.preferredHeight(8.dp))
@@ -36,10 +36,10 @@ fun <T> LazyGridFor(
             it.forEachIndexed { rowIndex, item ->
                 Box(modifier = Modifier.weight(1F).align(Alignment.Top).padding(8.dp),
                     contentAlignment = Alignment.Center) {
-                    itemContent(item, index * rows + rowIndex)
+                    itemContent(item, index * columns + rowIndex)
                 }
             }
-            repeat(rows - it.size) {
+            repeat(columns - it.size) {
                 Box(modifier = Modifier.weight(1F).padding(8.dp)) {}
             }
         }

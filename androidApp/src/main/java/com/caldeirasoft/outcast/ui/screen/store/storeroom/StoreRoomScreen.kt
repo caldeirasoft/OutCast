@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.storeroom
+package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,13 +18,13 @@ import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
-fun StoreCollectionScreen(
+fun StoreRoomScreen(
     storeRoom: StoreRoom,
-    viewModel: StoreCollectionViewModel = getViewModel { parametersOf(storeRoom) },
+    viewModel: StoreRoomViewModel = getViewModel { parametersOf(storeRoom) },
 )
 {
     val actions = ActionsAmbient.current
-    val lazyPagingItems = viewModel.pagedList.collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel.storeDataPagedList.collectAsLazyPagingItems()
 
     StoreCollectionContent(
         title = storeRoom.label,

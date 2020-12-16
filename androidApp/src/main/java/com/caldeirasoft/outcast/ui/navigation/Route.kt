@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.navigation.NavBackStackEntry
+import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -16,19 +17,32 @@ sealed class Route(val name: String) {
 
     object Podcasts : Route("podcasts")
 
-    object StoreDirectory : Route("storeDirectory")
-
-    object Podcast : Route("podcast") {
-        fun buildRoute(podcastId: Long): String = "$name/${podcastId}"
+    object Podcast : Route("podcast/{podcastId}") {
+        fun buildRoute(podcastId: Long): String = "podcast/${podcastId}"
         fun getPodcastId(entry: NavBackStackEntry): Long =
-            entry.arguments!!.getLong("podcastId")?.toLong()
+            entry.arguments!!.getLong("podcastId")
                 ?: throw IllegalArgumentException("podcastId argument missing.")
     }
 
-    object StoreCollectionPage : Route("storeCollection") {
+    object StoreDirectory : Route("storeDirectory")
+
+    object StoreGenrePage : Route("storeGenre/{genre}") {
+        fun buildRoute(genre: StoreGenre) :String {
+            val roomEncoded = URLEncoder.encode(Json.encodeToString(genre), "UTF-8")
+            return "storeGenre/$roomEncoded"
+        }
+
+        fun getGenre(entry: NavBackStackEntry): StoreGenre {
+            val genreEncoded = entry.arguments!!.getString("genre")
+                ?: throw IllegalArgumentException("genre argument missing.")
+            return Json.decodeFromString(StoreGenre.serializer(), URLDecoder.decode(genreEncoded, "UTF-8"))
+        }
+    }
+
+    object StoreRoomPage : Route("storeRoom/{room}") {
         fun buildRoute(room: StoreRoom) :String {
             val roomEncoded = URLEncoder.encode(Json.encodeToString(room), "UTF-8")
-            return "$name/$roomEncoded"
+            return "storeRoom/$roomEncoded"
         }
 
         fun getRoom(entry: NavBackStackEntry): StoreRoom {
@@ -38,10 +52,10 @@ sealed class Route(val name: String) {
         }
     }
 
-    object StorePodcast : Route("storePodcast") {
+    object StorePodcast : Route("storePodcast/{url}") {
         fun buildRoute(url: String): String {
             val urlEncoded = URLEncoder.encode(url, "UTF-8")
-            return "$name/${urlEncoded}"
+            return "storePodcast/${urlEncoded}"
         }
 
         fun getUrl(entry: NavBackStackEntry): String {
@@ -55,5 +69,6 @@ object NavArgs {
     const val PodcastId = "podcastId"
     const val Url = "url"
     const val Room = "room"
+    const val Genre = "genre"
     const val StoreFront = "storeFront"
 }

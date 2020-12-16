@@ -43,7 +43,7 @@ class LocalCacheRepositoryImpl(val context: Context)
             else throw exception
         }
 
-    override val storeDirectory: Flow<StorePage?>
+    override val storeDirectory: Flow<StoreDirectory?>
         = preferencesFlow
         .map { preferences -> preferences[PreferenceKeys.DIRECTORY] }
         .map {
@@ -69,12 +69,12 @@ class LocalCacheRepositoryImpl(val context: Context)
                 serializersModule = module
             }
             it?.let {
-                val storeData: StorePage = format.decodeFromString(serializer(), it)
+                val storeData: StoreDirectory = format.decodeFromString(serializer(), it)
                 storeData
             }
         }
 
-    override suspend fun saveDirectory(storeData: StorePage) {
+    override suspend fun saveDirectory(storeData: StoreDirectory) {
         cacheDataStore.edit { preferences ->
             val module = SerializersModule {
                 polymorphic(StorePage::class) {

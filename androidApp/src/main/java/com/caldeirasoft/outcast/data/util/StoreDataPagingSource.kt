@@ -15,21 +15,14 @@ import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-abstract class StoreDataPagingSource(
+class StoreDataPagingSource(
+    val storeData: StoreData,
     val scope: CoroutineScope,
 ) : PagingSource<Int, StoreItem>(), KoinComponent
 {
     private val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
 
-    abstract fun fetchStoreData(): Flow<StorePage>
-
-    private val storePageFlow: StateFlow<StorePage?> =
-        fetchStoreData()
-            .stateIn(scope, SharingStarted.Eagerly, null)
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
-        val flow = storePageFlow.filterNotNull()
-        val storeData = flow.first()
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()
         when (storeData) {

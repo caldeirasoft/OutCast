@@ -7,10 +7,7 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StoreChart(
-    val id: Long,
-    val label: String,
-    val storeFront: String,
-    val itemsIds: List<Long>,
-    val url: String? = null,
-)
+enum class StoreChartType {
+    PODCAST,
+    EPISODE,
+}

@@ -13,8 +13,8 @@ class StoreTopCharts(
     var id: Long,
     var label: String,
     override val storeFront: String,
-    var storePodcastsIds: List<Long> = arrayListOf(),
-    var storeEpisodesIds: List<Long> = arrayListOf(),
+    val topPodcastsChart: StoreChart,
+    val topEpisodesChart: StoreChart,
     override val timestamp: Instant,
     override var lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf()
 ) : StorePage {

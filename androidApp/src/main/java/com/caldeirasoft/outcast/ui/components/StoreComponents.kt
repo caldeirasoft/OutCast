@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.components
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,15 +15,65 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.theme.colors
+import com.caldeirasoft.outcast.ui.util.ScreenState
+import com.caldeirasoft.outcast.ui.util.onError
+import com.caldeirasoft.outcast.ui.util.onLoading
+import com.caldeirasoft.outcast.ui.util.onSuccess
 import com.skydoves.landscapist.coil.CoilImage
+import kotlinx.coroutines.flow.Flow
+
+enum class StoreChartTab(val titleId: Int) {
+    Podcasts(R.string.store_tab_chart_podcasts),
+    Episodes(R.string.store_tab_chart_episodes),
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun DiscoverContent(
+    state: ScreenState,
+    discover: Flow<PagingData<StoreItem>>,
+    actions: Actions)
+{
+    state
+        .onLoading { LoadingScreen() }
+        .onError { ErrorScreen(t = it) }
+        .onSuccess {
+            Column {
+                val pagedList = discover.collectAsLazyPagingItems()
+                StoreContentFeed(
+                    lazyPagingItems = pagedList,
+                    actions = actions
+                ) { item, index ->
+                    when (item) {
+                        is StorePodcast -> {
+                            StorePodcastListItem(podcast = item)
+                            Divider()
+                        }
+                        is StoreCollectionPodcasts ->
+                            StoreCollectionPodcastsContent(storeCollection = item)
+                        is StoreCollectionEpisodes ->
+                            StoreCollectionEpisodesContent(storeCollection = item)
+                        is StoreCollectionRooms ->
+                            StoreCollectionRoomsContent(storeCollection = item)
+                        is StoreCollectionFeatured ->
+                            StoreCollectionFeaturedContent(storeCollection = item)
+                    }
+                }
+            }
+        }
+}
+
 
 @Composable
 fun StoreContentFeed(
@@ -76,6 +127,7 @@ fun StoreContentFeed(
         }
     }
 }
+
 
 @Composable
 fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
@@ -144,7 +196,7 @@ fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
         StoreHeadingSectionWithLink(
             title = storeCollection.label,
             onClick = {
-                actions.navigateToStoreCollection(
+                actions.navigateToStoreRoom(
                     StoreRoom(
                         id = 0,
                         label = storeCollection.label,
@@ -205,7 +257,7 @@ fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms)
                     .padding(horizontal = 8.dp)
                     .preferredWidth(200.dp)
                     .clickable(onClick = {
-                        actions.navigateToStoreCollection(room)
+                        actions.navigateToStoreRoom(room)
                     })
             )
             {

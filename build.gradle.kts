@@ -6,10 +6,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath(Libs.Kotlin.gradlePlugin)
-        classpath(Libs.androidGradlePlugin)
-        classpath(Libs.SquareUp.SqlDelight.gradlePlugin)
-        classpath(Libs.Koin.gradlePlugin)
+        classpath(Dependencies.Kotlin.gradlePlugin)
+        classpath(Dependencies.androidGradlePlugin)
+        classpath(Dependencies.SquareUp.SqlDelight.gradlePlugin)
+        classpath(Dependencies.Koin.gradlePlugin)
     }
 }
 group = "com.caldeirasoft.outcast"

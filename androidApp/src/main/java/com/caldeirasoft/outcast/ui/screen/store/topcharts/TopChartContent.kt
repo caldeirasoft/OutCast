@@ -9,6 +9,7 @@ import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.StoreChart
 import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
@@ -25,23 +26,22 @@ import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
-fun TopChartsContent(
+fun TopChartContent(
     topChart: StoreChart,
-    storeDirectory: StoreDirectory,
+    storePage: StorePage,
 ) {
-    /*//val viewModel = getViewModel<TopChartsViewModel> { parametersOf(topChart, storeDirectory) }
-    val viewModel: TopChartsViewModel = viewModel(
+    val viewModel: TopChartViewModel = viewModel(
         key = "store_chart_${topChart.id}",
-        factory = viewModelProviderFactoryOf { TopChartsViewModel(topChart, storeDirectory) }
+        factory = viewModelProviderFactoryOf { TopChartViewModel(topChart, storePage) }
     )
-    val topCharts = viewModel.topCharts
+    val topCharts = viewModel.pagedList
     val actions = ActionsAmbient.current
-    TopChartsContent(topCharts = topCharts, actions = actions)*/
+    TopChartContent(topCharts = topCharts, actions = actions)
 }
 
 @ExperimentalCoroutinesApi
 @Composable
-fun TopChartsContent(
+fun TopChartContent(
     topCharts: Flow<PagingData<StoreItem>>,
     actions: Actions
 ) {

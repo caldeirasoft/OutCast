@@ -77,9 +77,10 @@ class CategoryListResult(
 
 @Serializable
 class CategoryDto (
-    var genreId: Int,
-    var name: String = "",
-    var url: String = "",
+    val genreId: Int,
+    val name: String = "",
+    val url: String = "",
+    val chartUrl: String = "",
     val artwork: List<ArtworkDto> = arrayListOf())
 
 @Serializable
@@ -159,6 +160,7 @@ class SegmentResult(
 
 @Serializable
 class TopChartResult(
+    val id: Long = 0,
     val shortTitle: String = "",
     val title: String = "",
     val adamIds: List<Long> = arrayListOf(),
@@ -341,6 +343,7 @@ class GenreResult (
             name = this.name,
             storeFront = storeFront,
             url = this.url,
+            topChartsUrl = this.url,
             artwork = Artwork(
                 url= "",
                 width = 0,
