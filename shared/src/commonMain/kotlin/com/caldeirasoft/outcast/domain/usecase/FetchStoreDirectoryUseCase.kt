@@ -8,12 +8,16 @@ import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.domain.util.networkBoundResource
 import com.caldeirasoft.outcast.domain.util.stopwatch
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class FetchStoreDirectoryUseCase(
     val storeRepository: StoreRepository,
     val localCacheRepository: LocalCacheRepository
 ) {
-    fun execute(storeFront: String): Flow<Resource<StoreDirectory>> =
+    fun execute(storeFront: String): Flow<Resource<StoreDirectory>> = flow {
+
+    }
+    /*
         networkBoundResource(
             fetchFromLocal = { localCacheRepository.storeDirectory },
             fetchFromRemote = {
@@ -34,4 +38,5 @@ class FetchStoreDirectoryUseCase(
                 }
             }
         )
+     */
 }

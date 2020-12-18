@@ -6,8 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-class StoreGenreMapData(
+class StoreGenreData(
     val root: StoreGenre,
-    val genreMap: Map<Int, StoreGenre> = hashMapOf(),
-    val genreChildren: Map<Int, List<StoreGenre>> = hashMapOf(),
+    val genres: List<StoreGenre> = mutableListOf(),
 )

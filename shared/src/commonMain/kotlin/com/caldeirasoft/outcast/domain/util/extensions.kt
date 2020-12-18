@@ -47,3 +47,12 @@ suspend inline fun <R> stopwatch(msg: String, crossinline action: suspend () -> 
         Log_D("TAG", "${msg} - (${elapsed.toString()})", )
     }
 }
+
+inline fun <reified T> Any?.checkType(): Boolean =
+    (this is T)
+
+inline fun <reified T> Any?.tryCast(block: T.() -> Unit) {
+    if (this is T) {
+        block()
+    }
+}

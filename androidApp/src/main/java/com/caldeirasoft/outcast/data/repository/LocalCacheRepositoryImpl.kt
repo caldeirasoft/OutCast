@@ -22,7 +22,9 @@ import kotlinx.serialization.modules.subclass
 import kotlinx.serialization.serializer
 import java.io.IOException
 
-class LocalCacheRepositoryImpl(val context: Context)
+class LocalCacheRepositoryImpl(
+    val context: Context,
+    val json: Json)
     : LocalCacheRepository {
     companion object {
         const val CACHE_STORE_FILE_NAME = "cache.db"
@@ -47,57 +49,15 @@ class LocalCacheRepositoryImpl(val context: Context)
         = preferencesFlow
         .map { preferences -> preferences[PreferenceKeys.DIRECTORY] }
         .map {
-            val module = SerializersModule {
-                polymorphic(StorePage::class) {
-                    subclass(StoreGroupingData::class)
-                }
-                polymorphic(StoreCollection::class) {
-                    subclass(StoreCollectionFeatured::class)
-                    subclass(StoreCollectionPodcasts::class)
-                    subclass(StoreCollectionRooms::class)
-                    subclass(StoreCollectionEpisodes::class)
-                }
-                polymorphic(StoreItemWithArtwork::class) {
-                    subclass(StorePodcastFeatured::class)
-                    subclass(StoreRoomFeatured::class)
-                    subclass(StoreRoom::class)
-                    subclass(StorePodcast::class)
-                    subclass(StoreEpisode::class)
-                }
-            }
-            val format = Json {
-                serializersModule = module
-            }
             it?.let {
-                val storeData: StoreDirectory = format.decodeFromString(serializer(), it)
+                val storeData: StoreDirectory = json.decodeFromString(serializer(), it)
                 storeData
             }
         }
 
     override suspend fun saveDirectory(storeData: StoreDirectory) {
         cacheDataStore.edit { preferences ->
-            val module = SerializersModule {
-                polymorphic(StorePage::class) {
-                    subclass(StoreGroupingData::class)
-                }
-                polymorphic(StoreCollection::class) {
-                    subclass(StoreCollectionFeatured::class)
-                    subclass(StoreCollectionPodcasts::class)
-                    subclass(StoreCollectionRooms::class)
-                    subclass(StoreCollectionEpisodes::class)
-                }
-                polymorphic(StoreItemWithArtwork::class) {
-                    subclass(StorePodcastFeatured::class)
-                    subclass(StoreRoomFeatured::class)
-                    subclass(StoreRoom::class)
-                    subclass(StorePodcast::class)
-                    subclass(StoreEpisode::class)
-                }
-            }
-            val format = Json {
-                serializersModule = module
-            }
-            preferences[PreferenceKeys.DIRECTORY] = format.encodeToString(serializer(), storeData)
+            preferences[PreferenceKeys.DIRECTORY] = json.encodeToString(serializer(), storeData)
         }
     }
 }

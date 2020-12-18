@@ -30,8 +30,8 @@ data class StorePodcastPage(
     val genre: Genre?,
     override val storeFront: String,
     val episodes: List<StoreEpisode> = listOf(),
-    val podcastsByArtist: StoreCollectionPodcasts? = null,
-    val podcastsListenersAlsoFollow: StoreCollectionPodcasts? = null,
+    val podcastsByArtist: StoreCollectionPodcastIds? = null,
+    val podcastsListenersAlsoFollow: StoreCollectionPodcastIds? = null,
 ) : StoreItemWithArtwork {
     override fun getArtworkUrl():String =
         artworkUrl(200, 200)

@@ -13,7 +13,7 @@ class StoreGroupingData(
     val id: String,
     val label: String,
     override val storeFront: String,
-    override val storeList: List<StoreCollection> = mutableListOf(),
+    override val storeList: MutableList<StoreCollection> = mutableListOf(),
     override var lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf(),
     override val timestamp: Instant
 ) : StorePage, StoreDataWithCollections

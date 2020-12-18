@@ -343,12 +343,8 @@ class GenreResult (
             name = this.name,
             storeFront = storeFront,
             url = this.url,
-            topChartsUrl = this.url,
-            artwork = Artwork(
-                url= "",
-                width = 0,
-                height = 0
-            )
+            topChartPodcastsUrl = this.chartUrls?.podcasts.orEmpty(),
+            topChartEpisodesUrl = this.chartUrls?.podcastEpisodes.orEmpty()
         )
 }
 

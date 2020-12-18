@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast
 
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Providers
 import androidx.compose.runtime.remember
@@ -18,10 +17,9 @@ import com.caldeirasoft.outcast.ui.navigation.NavArgs
 import com.caldeirasoft.outcast.ui.navigation.Route
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.store.StoreDirectoryScreen
-import com.caldeirasoft.outcast.ui.screen.store.StoreGenreScreen
-import com.caldeirasoft.outcast.ui.screen.storepodcast.StorePodcastScreen
-import com.caldeirasoft.outcast.ui.screen.storepodcast.StorePodcastViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
+import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
+import com.caldeirasoft.outcast.ui.screen.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -54,12 +52,12 @@ class MainActivity : AppCompatActivity() {
                             Log.d("Route", Route.StoreDirectory.name + " " + Clock.System.now())
                             StoreDirectoryScreen()
                         }
-                        composable(Route.StoreGenrePage.name,
+                        composable(Route.StoreChartsPage.name,
                             arguments = listOf(
-                                navArgument(NavArgs.Genre) { type = NavType.StringType })
+                                navArgument(NavArgs.Charts) { type = NavType.StringType })
                         ) { navBackStackEntry ->
-                            StoreGenreScreen(
-                                storeGenre = Route.StoreGenrePage.getGenre(navBackStackEntry),
+                            TopChartsScreen(
+                                topCharts = Route.StoreChartsPage.getCharts(navBackStackEntry),
                             )
                         }
                         composable(Route.StoreRoomPage.name,

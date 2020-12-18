@@ -7,7 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -21,19 +21,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.paging.LoadState
 import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
-import com.caldeirasoft.outcast.domain.models.store.StoreGenre
-import com.caldeirasoft.outcast.domain.models.store.StoreGenreMapData
-import com.caldeirasoft.outcast.domain.models.store.StoreRoom
+import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.util.checkType
+import com.caldeirasoft.outcast.domain.util.tryCast
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Actions
-import com.caldeirasoft.outcast.ui.screen.store.base.StoreRoomBaseViewModel
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryViewModel
-import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartContent
 import com.caldeirasoft.outcast.ui.theme.FetchDominantColorFromPoster
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.util.ScreenState
@@ -46,18 +47,30 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
 
-typealias StoreDirectoryState = StoreRoomBaseViewModel.State<StoreDirectory>
-
-private enum class StoreDirectoryTab(
-    val titleId: Int,
-) {
-    Discover(R.string.store_tab_discover),
-    Charts(R.string.store_tab_charts),
-    Categories(R.string.store_tab_categories),
+enum class StoreGenreTab(val genreId: Int, val titleId: Int) {
+    Arts(1301, R.string.store_genre_1301),
+    Business(1321, R.string.store_genre_1321),
+    Comedy(1303, R.string.store_genre_1303),
+    Education(1304, R.string.store_genre_1304),
+    Fiction(1483, R.string.store_genre_1483),
+    Government(1511, R.string.store_genre_1511),
+    Health_Fitness(1512, R.string.store_genre_1512),
+    History(1487, R.string.store_genre_1487),
+    Kids_Family(1305, R.string.store_genre_1305),
+    Leisure(1502, R.string.store_genre_1502),
+    Music(1310, R.string.store_genre_1310),
+    News(1489, R.string.store_genre_1489),
+    Religion_Spirtuality(1314, R.string.store_genre_1314),
+    Science(1533, R.string.store_genre_1533),
+    Society_Culture(1324, R.string.store_genre_1324),
+    Sports(1545, R.string.store_genre_1545),
+    TV_Film(1309, R.string.store_genre_1309),
+    Technology(1318, R.string.store_genre_1318),
+    True_Crime(1488, R.string.store_genre_1488)
 }
 
-private val AmbientDominantColor = ambientOf<MutableState<Color>> { error("No dominant color") }
 
+private val AmbientDominantColor = ambientOf<MutableState<Color>> { error("No dominant color") }
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -66,33 +79,22 @@ fun StoreDirectoryScreen() {
     val actions = ActionsAmbient.current
     val viewModel: StoreDirectoryViewModel = viewModel()
     val viewState by viewModel.state.collectAsState()
-    var selectedTab: StoreDirectoryTab by remember { mutableStateOf(StoreDirectoryTab.Discover) }
-    var selectedChartTab: StoreChartTab by remember { mutableStateOf(StoreChartTab.Podcasts) }
-    val genres by viewModel.genres.collectAsState()
 
     Log.d("Compose", "Compose StoreDirectoryScreen : ${Clock.System.now()}")
 
     StoreDirectoryContent(
         state = viewState,
-        discover = viewModel.storeDataPagedList,
-        genres = genres,
-        selectedTab = selectedTab,
-        onTabSelected = { selectedTab = it },
-        selectedChartTab = selectedChartTab,
-        onChartSelected = { selectedChartTab = it },
+        discover = viewModel.discover,
+        onGenreSelected = viewModel::onGenreDiscoverSelected,
         actions = actions
     )
 }
 
 @Composable
 private fun StoreDirectoryContent(
-    state: StoreDirectoryState,
+    state: StoreDirectoryViewModel.State,
     discover: Flow<PagingData<StoreItem>>,
-    genres: List<StoreGenre>,
-    selectedTab: StoreDirectoryTab,
-    onTabSelected: (StoreDirectoryTab) -> Unit,
-    selectedChartTab: StoreChartTab,
-    onChartSelected: (StoreChartTab) -> Unit,
+    onGenreSelected: (Int) -> Unit,
     actions: Actions
 ) {
     Log.d("Compose", "Compose StoreTabLayout : ${Clock.System.now()}")
@@ -117,110 +119,106 @@ private fun StoreDirectoryContent(
         }
     )
     {
-        Column {
-            Tabs(
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected)
-
-            Surface(modifier = Modifier.weight(0.5f)) {
-                when (selectedTab) {
-                    StoreDirectoryTab.Discover -> DiscoverContent(
-                        state = state.screenState,
-                        discover = discover,
-                        actions = actions
-                    )
-                    StoreDirectoryTab.Charts -> TopChartsTabContent(
-                        state = state.screenState,
-                        selectedChartTab = selectedChartTab,
-                        onChartSelected = onChartSelected,
-                        storeDirectory = state.storeData
-                    )
-                    StoreDirectoryTab.Categories -> GenreListContent(
-                        state = state.screenState,
-                        genres = genres,
-                        actions = actions
-                    )
-                }
-            }
-        }
+        DiscoverContent(
+            state = state.screenState,
+            selectedGenre = state.selectedGenre,
+            onGenreSelected = onGenreSelected,
+            discover = discover,
+            actions = actions
+        )
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun Tabs(
-    selectedTab: StoreDirectoryTab,
-    onTabSelected: (StoreDirectoryTab) -> Unit,
-) {
-    TabRow(
-        selectedTabIndex = selectedTab.ordinal,
-        backgroundColor = Color.Transparent
-    )
-    {
-        StoreDirectoryTab.values().forEachIndexed { index, tab ->
-            Tab(
-                selected = (index == selectedTab.ordinal),
-                onClick = { onTabSelected(tab) },
-                text = {
-                    Text(
-                        text = stringResource(id = tab.titleId),
-                        style = MaterialTheme.typography.body2
-                    )
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun TopChartsTabContent (
+fun DiscoverContent(
     state: ScreenState,
-    selectedChartTab: StoreChartTab,
-    onChartSelected: (StoreChartTab) -> Unit,
-    storeDirectory: StoreDirectory?,
-) {
+    selectedGenre: Int?,
+    onGenreSelected: (Int) -> Unit,
+    discover: Flow<PagingData<StoreItem>>,
+    actions: Actions)
+{
     state
         .onLoading { LoadingScreen() }
         .onError { ErrorScreen(t = it) }
         .onSuccess {
-            storeDirectory?.let { directory ->
-                Column {
-                    TabRow(
-                        selectedTabIndex = selectedChartTab.ordinal,
-                        backgroundColor = Color.Transparent
+            val lazyPagingItems = discover.collectAsLazyPagingItems()
+            val loadState = lazyPagingItems.loadState
+            val refreshState = loadState.refresh
+            LazyColumn {
+                item {
+                    GenreTabs(
+                        selectedGenre = selectedGenre,
+                        onGenreSelected = onGenreSelected
                     )
-                    {
-                        StoreChartTab.values().forEachIndexed { index, tab ->
-                            Tab(
-                                selected = (index == selectedChartTab.ordinal),
-                                onClick = { onChartSelected(tab) },
-                                text = {
-                                    Text(
-                                        text = stringResource(id = tab.titleId),
-                                        style = MaterialTheme.typography.body2
-                                    )
+                }
+
+                when {
+                    refreshState is LoadState.Loading -> {
+                        item { LoadingScreen() }
+                    }
+                    refreshState is LoadState.Error -> {
+                        item {
+                            ErrorScreen(t = refreshState.error)
+                        }
+                    }
+                    refreshState is LoadState.NotLoading
+                            && loadState.append.endOfPaginationReached
+                            && lazyPagingItems.itemCount == 0 -> {
+                        item {
+                            Text("Empty")
+                        }
+                    }
+                    refreshState is LoadState.NotLoading ->
+                        itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
+                            item?.let {
+                                when (item) {
+                                    is StorePodcast -> {
+                                        StorePodcastListItem(podcast = item)
+                                        Divider()
+                                    }
+                                    is StoreCollectionPodcasts ->
+                                        StoreCollectionPodcastsContent(storeCollection = item)
+                                    is StoreCollectionEpisodes ->
+                                        StoreCollectionEpisodesContent(storeCollection = item)
+                                    is StoreCollectionCharts ->
+                                        StoreCollectionChartsContent(storeCollection = item)
+                                    is StoreCollectionRooms ->
+                                        StoreCollectionRoomsContent(storeCollection = item)
+                                    is StoreCollectionFeatured ->
+                                        StoreCollectionFeaturedContent(storeCollection = item)
                                 }
+                            }
+                        }
+                }
+
+                when (val appendState = loadState.append) {
+                    is LoadState.Loading -> {
+                        item {
+                            Text(
+                                modifier = Modifier.padding(
+                                    vertical = 16.dp,
+                                    horizontal = 4.dp
+                                ),
+                                text = "Loading next"
                             )
                         }
                     }
-                    Surface(modifier = Modifier.weight(0.5f)) {
-                        when (selectedChartTab) {
-                            StoreChartTab.Podcasts ->
-                                TopChartContent(
-                                    topChart = directory.topPodcastsChart,
-                                    storePage = directory
-                                )
-                            StoreChartTab.Episodes ->
-                                TopChartContent(
-                                    topChart = directory.topEpisodesChart,
-                                    storePage = directory
-                                )
+                    is LoadState.Error -> {
+                        item {
+                            Text(
+                                modifier = Modifier.padding(
+                                    vertical = 16.dp,
+                                    horizontal = 4.dp
+                                ),
+                                text = "Error getting next: ${appendState.error}"
+                            )
                         }
                     }
                 }
             }
         }
 }
-
 
 @Composable
 fun GenreListContent(
@@ -235,7 +233,7 @@ fun GenreListContent(
             val primaryColor = colors[1]
             LazyGridFor(items = genres, columns = 2) { genre, idx ->
                 val dominantColor = remember(genre) { mutableStateOf(primaryColor) }
-                FetchDominantColorFromPoster(posterUrl = genre.artwork.url, colorState = dominantColor)
+                FetchDominantColorFromPoster(posterUrl = genre.url, colorState = dominantColor)
                 Card(
                     backgroundColor = animate(target = dominantColor.value),
                     shape = RoundedCornerShape(8.dp),
@@ -243,14 +241,14 @@ fun GenreListContent(
                         .fillMaxWidth()
                         .preferredHeight(100.dp)
                         .clickable(onClick = {
-                            actions.navigateToStoreGenre(genre)
+                            //actions.navigateToStoreGenre(genre)
                         })
                 )
                 {
                     Row {
                         Text(text = genre.name)
                         CoilImage(
-                            imageModel = genre.artwork.url,
+                            imageModel = genre.url,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .preferredSize(100.dp))
@@ -287,12 +285,12 @@ fun GenreListContent(
 
 private val emptyTabIndicator: @Composable (List<TabPosition>) -> Unit = {}
 
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun GenreTabs(
-    genreMap: StoreGenreMapData,
-    selectedGenres: List<StoreGenre>,
-    onGenreSelected: (StoreGenre, Int) -> Unit,
+    selectedGenre: Int?,
+    onGenreSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -304,35 +302,36 @@ private fun GenreTabs(
             //color = MaterialTheme.colors.onSurface.copy(alpha = 0.48f),
             contentColor = MaterialTheme.colors.onSurface,
             border = BorderStroke(width = 1.dp,
-                if (selectedGenres.drop(1).isNotEmpty())
-                    MaterialTheme.colors.primary
-                else MaterialTheme.colors.onSurface.copy(alpha = 0.48f)
+                selectedGenre
+                    ?.let { MaterialTheme.colors.primary }
+                    ?: MaterialTheme.colors.onSurface.copy(alpha = 0.48f)
             ),
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
             Row {
-                selectedGenres.forEachIndexed { i, storeGenre ->
-                    genreMap.genreChildren[storeGenre.id]?.forEachIndexed { index, category ->
+                StoreGenreTab
+                    .values()
+                    //.sortedBy { stringResource(id = it.titleId) }
+                    .forEachIndexed { index, category ->
                         AnimatedVisibility(
-                            visible = selectedGenres.size - 1 <= i || selectedGenres.contains(category),
+                            visible = selectedGenre == null || selectedGenre == category.genreId,
                             enter = expandHorizontally(animSpec = tween(durationMillis = 250))
                                     + fadeIn(animSpec = tween(durationMillis = 250)),
                             exit = shrinkHorizontally(animSpec = tween(durationMillis = 250))
                                     + fadeOut(animSpec = tween(durationMillis = 250)),
                         ) {
                             ChoiceChipContent(
-                                text = category.name,
-                                selected = selectedGenres.contains(category),
-                                selectedGenres = selectedGenres,
+                                text = stringResource(id = category.titleId),
+                                selected = selectedGenre == category.genreId,
                                 onGenreClick = {
-                                    onGenreSelected(category, i + 1)
+                                    onGenreSelected(category.genreId)
                                     scrollState.smoothScrollTo(0f)
                                 }
                             )
+
                         }
                     }
-                }
             }
         }
     }
@@ -342,8 +341,6 @@ private fun GenreTabs(
 private fun ChoiceChipContent(
     text: String,
     selected: Boolean,
-    selectedGenres: List<StoreGenre>,
-    modifier: Modifier = Modifier,
     onGenreClick: () -> Unit,
 ) {
     val backgroundColor: Color = when {

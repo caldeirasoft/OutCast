@@ -11,11 +11,6 @@ import kotlinx.serialization.UseSerializers
 @Serializable
 class StoreTopCharts(
     var id: Long,
-    var label: String,
-    override val storeFront: String,
-    val topPodcastsChart: StoreChart,
-    val topEpisodesChart: StoreChart,
-    override val timestamp: Instant,
-    override var lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf()
-) : StorePage {
-}
+    val genreId: Int?,
+    val storeFront: String,
+)

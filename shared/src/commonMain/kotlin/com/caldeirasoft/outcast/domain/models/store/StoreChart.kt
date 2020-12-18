@@ -1,7 +1,6 @@
 package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreCollectionPodcastsEpisodes
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import kotlinx.serialization.Serializable
@@ -10,7 +9,6 @@ import kotlinx.serialization.Serializable
 class StoreChart(
     val id: Long,
     val label: String,
+    val genreId: Int?,
     val storeFront: String,
-    val itemsIds: List<Long>,
-    val url: String? = null,
 )

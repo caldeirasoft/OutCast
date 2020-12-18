@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.navigation
 import androidx.navigation.NavBackStackEntry
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
+import com.caldeirasoft.outcast.domain.models.store.StoreTopCharts
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLDecoder
@@ -26,16 +27,16 @@ sealed class Route(val name: String) {
 
     object StoreDirectory : Route("storeDirectory")
 
-    object StoreGenrePage : Route("storeGenre/{genre}") {
-        fun buildRoute(genre: StoreGenre) :String {
-            val roomEncoded = URLEncoder.encode(Json.encodeToString(genre), "UTF-8")
-            return "storeGenre/$roomEncoded"
+    object StoreChartsPage : Route("storeCharts/{charts}") {
+        fun buildRoute(charts: StoreTopCharts) :String {
+            val chartsEncoded = URLEncoder.encode(Json.encodeToString(charts), "UTF-8")
+            return "storeCharts/$chartsEncoded"
         }
 
-        fun getGenre(entry: NavBackStackEntry): StoreGenre {
-            val genreEncoded = entry.arguments!!.getString("genre")
-                ?: throw IllegalArgumentException("genre argument missing.")
-            return Json.decodeFromString(StoreGenre.serializer(), URLDecoder.decode(genreEncoded, "UTF-8"))
+        fun getCharts(entry: NavBackStackEntry): StoreTopCharts {
+            val chartsEncoded = entry.arguments!!.getString("charts")
+                ?: throw IllegalArgumentException("charts argument missing.")
+            return Json.decodeFromString(StoreTopCharts.serializer(), URLDecoder.decode(chartsEncoded, "UTF-8"))
         }
     }
 
@@ -69,6 +70,6 @@ object NavArgs {
     const val PodcastId = "podcastId"
     const val Url = "url"
     const val Room = "room"
-    const val Genre = "genre"
+    const val Charts = "charts"
     const val StoreFront = "storeFront"
 }

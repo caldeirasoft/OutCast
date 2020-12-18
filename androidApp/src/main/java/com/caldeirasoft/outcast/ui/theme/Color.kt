@@ -30,6 +30,10 @@ val colors = listOf(
 private val colorRange = 0..256
 fun Color.Companion.randomColor() = Color(colorRange.random(), colorRange.random(), colorRange.random())
 
+fun Color.Companion.getColor(colorString: String): Color {
+    return Color(android.graphics.Color.parseColor("#$colorString"))
+}
+
 @Composable
 fun FetchDominantColorFromPoster(
     posterUrl: String,

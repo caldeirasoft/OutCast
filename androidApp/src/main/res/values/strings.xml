@@ -1,6 +1,27 @@
 <resources>
     <string name="app_name">OutCast</string>
 
+    <!-- genre -->
+    <string name="store_genre_1301">Arts</string>
+    <string name="store_genre_1321">Business</string>
+    <string name="store_genre_1303">Comedy</string>
+    <string name="store_genre_1304">Education</string>
+    <string name="store_genre_1483">Fiction</string>
+    <string name="store_genre_1511">Government</string>
+    <string name="store_genre_1512">Health &amp; Fitness</string>
+    <string name="store_genre_1487">History</string>
+    <string name="store_genre_1305">Kids &amp; Family</string>
+    <string name="store_genre_1502">Leisure</string>
+    <string name="store_genre_1310">Music</string>
+    <string name="store_genre_1489">News</string>
+    <string name="store_genre_1314">Religion &amp; Spirituality</string>
+    <string name="store_genre_1533">Science</string>
+    <string name="store_genre_1324">Society &amp; Culture</string>
+    <string name="store_genre_1545">Sports</string>
+    <string name="store_genre_1309">TV &amp; Films</string>
+    <string name="store_genre_1318">Technology</string>
+    <string name="store_genre_1488">True Crime</string>
+
     <!-- store -->
     <string name="store_tab_discover">Discover</string>
     <string name="store_tab_charts">Charts</string>

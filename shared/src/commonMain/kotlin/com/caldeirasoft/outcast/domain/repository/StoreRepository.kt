@@ -12,9 +12,9 @@ import com.caldeirasoft.outcast.domain.models.store.*
 interface StoreRepository {
 
     /**
-     * getDirectoryDataAsync
+     * getGroupingDataAsync
      */
-    suspend fun getDirectoryDataAsync(storeFront: String): StoreDirectory
+    suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingData
 
     /**
      * getStoreDataAsync
@@ -27,14 +27,14 @@ interface StoreRepository {
     suspend fun getPodcastDataAsync(url: String, storeFront: String): StorePodcastPage
 
     /**
-     * getTopChartsAsync
+     * getTopChartsIdsAsync
      */
-    suspend fun getTopChartsAsync(url: String, storeFront: String): StoreTopCharts
+    suspend fun getTopChartsPodcastsIdsAsync(genre: Int?, storeFront: String, limit: Int): List<Long>
 
     /**
      * getTopChartsIdsAsync
      */
-    suspend fun getTopChartsIdsAsync(url: String, storeFront: String): List<Long>
+    suspend fun getTopChartsEpisodesIdsAsync(genre: Int?, storeFront: String, limit: Int): List<Long>
 
     /**
      * getListStoreItemDataAsync
@@ -44,6 +44,6 @@ interface StoreRepository {
     /**
      * getGenresDataAsync
      */
-    suspend fun getGenresDataAsync(storeFront: String): StoreGenreMapData
+    suspend fun getGenresDataAsync(storeFront: String): StoreGenreData
 
 }

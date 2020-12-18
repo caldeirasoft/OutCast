@@ -7,6 +7,10 @@ import com.caldeirasoft.outcast.data.db.createDatabase
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteResponseInterceptor
+import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.facebook.flipper.plugins.network.FlipperOkhttpInterceptor
@@ -14,7 +18,6 @@ import com.facebook.flipper.plugins.network.NetworkFlipperPlugin
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import io.ktor.client.*
-import io.ktor.client.engine.android.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.cache.*
 import io.ktor.client.features.compression.*
@@ -24,6 +27,9 @@ import io.ktor.client.features.logging.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.koin.core.KoinApplication
@@ -33,48 +39,41 @@ import org.koin.dsl.module
 import java.io.File
 
 fun KoinApplication.initKoinModules(appModule: Module) {
-    modules(commomModule, platformModule, appModule)
+    modules(platformModule, commomModule, appModule)
 }
 
 internal val mainDispatcherQualifier = named("MainDispatcher")
 
-internal val commomModule = module {
-    single { createDatabase(get()) }
-
-    single<PodcastRepository> { PodcastRepositoryImpl(database = get()) }
-    single<EpisodeRepository> { EpisodeRepositoryImpl(database = get()) }
-    single<StoreRepository> { StoreRepositoryImpl(httpClient = get()) }
-    single<InboxRepository> { InboxRepositoryImpl(database = get()) }
-    single<QueueRepository> { QueueRepositoryImpl(database = get()) }
-    single<LocalCacheRepository> { LocalCacheRepositoryImpl(context = get()) }
-
-    factory { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
-    factory { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
-    factory { FetchEpisodesFavoritesUseCase(episodeRepository = get()) }
-    factory { FetchEpisodesHistoryUseCase(episodeRepository = get()) }
-    factory { FetchFavoriteEpisodesCountUseCase(episodeRepository = get()) }
-    factory { FetchPlayedEpisodesCountUseCase(episodeRepository = get()) }
-    factory { FetchCountEpisodesBySectionUseCase(episodeRepository = get()) }
-    factory { FetchInboxUseCase(inboxRepository = get()) }
-    factory { FetchQueueUseCase(queueRepository = get()) }
-    factory { SubscribeToPodcastUseCase(podcastRepository = get()) }
-    factory { UnsubscribeFromPodcastUseCase(podcastRepository = get()) }
-    factory { FetchPodcastUseCase(podcastRepository = get()) }
-    factory { FetchEpisodeUseCase(episodeRepository = get()) }
-    factory { FetchStoreDirectoryUseCase(storeRepository = get(), localCacheRepository = get()) }
-    factory { FetchStoreFrontUseCase(dataStoreRepository = get()) }
-    factory { FetchStoreDataUseCase(storeRepository = get()) }
-    factory { FetchStorePodcastDataUseCase(storeRepository = get()) }
-    factory { FetchStoreGenresUseCase(storeRepository = get())}
-    factory { FetchStoreTopChartsUseCase(storeRepository = get(), localCacheRepository = get()) }
-    factory { FetchStoreTopChartsIdsUseCase(storeRepository = get(), localCacheRepository = get())}
-    factory { GetStoreItemsUseCase(storeRepository = get()) }
-
-}
-
 internal val platformModule = module {
     single<SqlDriver> { AndroidSqliteDriver(Database.Schema, get(), "outCastDb.db") }
     single<CoroutineDispatcher>(mainDispatcherQualifier) { Dispatchers.Main }
+    single<Json> {
+        val serializer = SerializersModule {
+            polymorphic(StorePage::class) {
+                subclass(StoreGroupingData::class)
+            }
+            polymorphic(StoreCollection::class) {
+                subclass(StoreCollectionRooms::class)
+                subclass(StoreCollectionFeatured::class)
+                subclass(StoreCollectionPodcastIds::class)
+                subclass(StoreCollectionPodcasts::class)
+                subclass(StoreCollectionEpisodeIds::class)
+                subclass(StoreCollectionEpisodes::class)
+                subclass(StoreCollectionCharts::class)
+                subclass(StoreCollectionChartsIds::class)
+            }
+            polymorphic(StoreItemWithArtwork::class) {
+                subclass(StorePodcastFeatured::class)
+                subclass(StoreRoomFeatured::class)
+                subclass(StoreRoom::class)
+                subclass(StorePodcast::class)
+                subclass(StoreEpisode::class)
+            }
+        }
+        Json {
+            serializersModule = serializer
+        }
+    }
     single<NetworkFlipperPlugin> { NetworkFlipperPlugin() }
     factory<HttpClient> {
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
@@ -112,4 +111,39 @@ internal val platformModule = module {
         }
         httpClient
     }
+}
+
+internal val commomModule = module {
+    single { createDatabase(get()) }
+
+    single<PodcastRepository> { PodcastRepositoryImpl(database = get()) }
+    single<EpisodeRepository> { EpisodeRepositoryImpl(database = get()) }
+    single<StoreRepository> { StoreRepositoryImpl(httpClient = get()) }
+    single<InboxRepository> { InboxRepositoryImpl(database = get()) }
+    single<QueueRepository> { QueueRepositoryImpl(database = get()) }
+    single<LocalCacheRepository> { LocalCacheRepositoryImpl(context = get(), json = get()) }
+
+    factory { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
+    factory { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
+    factory { FetchEpisodesFavoritesUseCase(episodeRepository = get()) }
+    factory { FetchEpisodesHistoryUseCase(episodeRepository = get()) }
+    factory { FetchFavoriteEpisodesCountUseCase(episodeRepository = get()) }
+    factory { FetchPlayedEpisodesCountUseCase(episodeRepository = get()) }
+    factory { FetchCountEpisodesBySectionUseCase(episodeRepository = get()) }
+    factory { FetchInboxUseCase(inboxRepository = get()) }
+    factory { FetchQueueUseCase(queueRepository = get()) }
+    factory { SubscribeToPodcastUseCase(podcastRepository = get()) }
+    factory { UnsubscribeFromPodcastUseCase(podcastRepository = get()) }
+    factory { FetchPodcastUseCase(podcastRepository = get()) }
+    factory { FetchEpisodeUseCase(episodeRepository = get()) }
+    factory { FetchStoreDirectoryUseCase(storeRepository = get(), localCacheRepository = get()) }
+    factory { FetchStoreGroupingUseCase(storeRepository = get(), localCacheRepository = get())}
+    factory { FetchStoreFrontUseCase(dataStoreRepository = get()) }
+    factory { FetchStoreDataUseCase(storeRepository = get()) }
+    factory { FetchStorePodcastDataUseCase(storeRepository = get()) }
+    factory { FetchStoreGenresUseCase(storeRepository = get())}
+    factory { FetchStoreTopChartsPodcastsIdsUseCase(storeRepository = get())}
+    factory { FetchStoreTopChartsEpisodesIdsUseCase(storeRepository = get())}
+    factory { GetStoreItemsUseCase(storeRepository = get()) }
+
 }

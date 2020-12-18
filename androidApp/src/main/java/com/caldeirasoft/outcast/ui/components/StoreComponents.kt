@@ -1,77 +1,43 @@
 package com.caldeirasoft.outcast.ui.components
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lens
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.VerticalGradient
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.WithConstraints
+import androidx.compose.ui.platform.AmbientAnimationClock
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.caldeirasoft.outcast.ui.util.ScreenState
-import com.caldeirasoft.outcast.ui.util.onError
-import com.caldeirasoft.outcast.ui.util.onLoading
-import com.caldeirasoft.outcast.ui.util.onSuccess
+import com.caldeirasoft.outcast.ui.theme.getColor
+import com.caldeirasoft.outcast.ui.theme.typography
 import com.skydoves.landscapist.coil.CoilImage
-import kotlinx.coroutines.flow.Flow
 
 enum class StoreChartTab(val titleId: Int) {
     Podcasts(R.string.store_tab_chart_podcasts),
     Episodes(R.string.store_tab_chart_episodes),
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun DiscoverContent(
-    state: ScreenState,
-    discover: Flow<PagingData<StoreItem>>,
-    actions: Actions)
-{
-    state
-        .onLoading { LoadingScreen() }
-        .onError { ErrorScreen(t = it) }
-        .onSuccess {
-            Column {
-                val pagedList = discover.collectAsLazyPagingItems()
-                StoreContentFeed(
-                    lazyPagingItems = pagedList,
-                    actions = actions
-                ) { item, index ->
-                    when (item) {
-                        is StorePodcast -> {
-                            StorePodcastListItem(podcast = item)
-                            Divider()
-                        }
-                        is StoreCollectionPodcasts ->
-                            StoreCollectionPodcastsContent(storeCollection = item)
-                        is StoreCollectionEpisodes ->
-                            StoreCollectionEpisodesContent(storeCollection = item)
-                        is StoreCollectionRooms ->
-                            StoreCollectionRoomsContent(storeCollection = item)
-                        is StoreCollectionFeatured ->
-                            StoreCollectionFeaturedContent(storeCollection = item)
-                    }
-                }
-            }
-        }
 }
 
 
@@ -100,11 +66,12 @@ fun StoreContentFeed(
                     Text("Empty")
                 }
             }
-        }
-        itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
-            item?.let {
-                itemContent(item, index)
-            }
+            refreshState is LoadState.NotLoading ->
+                itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
+                    item?.let {
+                        itemContent(item, index)
+                    }
+                }
         }
 
         when (val appendState = loadState.append) {
@@ -143,7 +110,8 @@ fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
                 Card(
                     backgroundColor = colors[0],
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.padding(horizontal = 8.dp))
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
                 {
                     Spacer(modifier = Modifier.preferredSize(100.dp))
                 }
@@ -151,16 +119,18 @@ fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
         }
     else
         LazyRowFor(
-            items = storeCollection.items.filterIsInstance<StoreEpisode>(),
+            items = storeCollection.items,
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth()
         ) { episode ->
             //StoreItemEpisodeContent(episode = episode)
-            Column(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .preferredWidth(100.dp)
-                .clickable(onClick = {})) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .preferredWidth(100.dp)
+                    .clickable(onClick = {})
+            ) {
                 Card(
                     backgroundColor = colors[1],
                     shape = RoundedCornerShape(8.dp)
@@ -170,12 +140,15 @@ fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
                         imageModel = episode.getArtworkUrl(),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .preferredSize(100.dp))
+                            .preferredSize(100.dp)
+                    )
                 }
                 Text(
                     episode.name,
                     modifier = Modifier.width(100.dp),
-                    overflow = TextOverflow.Ellipsis, maxLines = 2, style = MaterialTheme.typography.body2
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    style = MaterialTheme.typography.body2
                 )
                 Text(
                     episode.podcastName,
@@ -190,9 +163,11 @@ fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
 @Composable
 fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
     val actions = ActionsAmbient.current
-    Column(modifier = Modifier.padding(
-        vertical = 16.dp
-    )) {
+    Column(
+        modifier = Modifier.padding(
+            vertical = 16.dp
+        )
+    ) {
         StoreHeadingSectionWithLink(
             title = storeCollection.label,
             onClick = {
@@ -218,7 +193,8 @@ fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
                     Card(
                         backgroundColor = colors[0],
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp))
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
                     {
                         Spacer(modifier = Modifier.preferredSize(100.dp))
                     }
@@ -226,7 +202,7 @@ fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
             }
         else
             LazyRowFor(
-                items = storeCollection.items.filterIsInstance<StorePodcast>(),
+                items = storeCollection.items,
                 contentPadding = PaddingValues(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -238,12 +214,13 @@ fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
 }
 
 @Composable
-fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms)
-{
+fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms) {
     val actions = ActionsAmbient.current
-    Column(modifier = Modifier.padding(
-        vertical = 16.dp
-    )) {
+    Column(
+        modifier = Modifier.padding(
+            vertical = 16.dp
+        )
+    ) {
         StoreHeadingSection(title = storeCollection.label)
         Spacer(modifier = Modifier.preferredHeight(8.dp))
         LazyRowFor(
@@ -277,19 +254,170 @@ fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms)
 fun StoreCollectionFeaturedContent(
     storeCollection: StoreCollectionFeatured
 ) {
-    LazyRowFor(
-        items = storeCollection.items.filterIsInstance<StoreItemFeatured>(),
-        contentPadding = PaddingValues(8.dp),
-        modifier = Modifier
-            .preferredHeight(200.dp)
-            .fillMaxWidth())
-    { room ->
-        Card(
-            backgroundColor = colors[0],
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.padding(horizontal = 8.dp))
+    val pagerState: PagerState = run {
+        val clock = AmbientAnimationClock.current
+        remember(clock) { PagerState(clock, 0, 0, storeCollection.items.size - 1) }
+    }
+    val selectedPage = remember { mutableStateOf(0) }
+
+    Column {
+        Pager(
+            state = pagerState, modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1.53f)
+        )
         {
-            Spacer(modifier = Modifier.preferredHeight(200.dp).preferredWidth(250.dp))
+            val item = storeCollection.items[page]
+            selectedPage.value = pagerState.currentPage
+            val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
+            Card(
+                backgroundColor = bgDominantColor,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxSize(0.95f)
+                    .padding(horizontal = 4.dp)
+            )
+            {
+                Box {
+                    CoilImage(
+                        imageModel = item.getArtworkUrl(),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(2.03f)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(3.33f)
+                            .align(Alignment.BottomCenter)
+                    ) {
+                        WithConstraints {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        brush = VerticalGradient(
+                                            listOf(bgDominantColor.copy(alpha = 0f), bgDominantColor),
+                                            startY = 0.0f,
+                                            endY = constraints.maxHeight.toFloat() * 0.30f
+                                        )
+                                    )
+                            )
+                            {
+                                Log_D("HEIGHT", constraints.maxHeight.toFloat().toString())
+                            }
+
+                        }
+                    }
+                    if (item is StorePodcastFeatured) {
+                        Text(
+                            text = item.name,
+                            style = typography.h6.copy(color = Color.White),
+                            modifier = Modifier.fillMaxWidth().padding(24.dp)
+                                .align(Alignment.BottomStart),
+                        )
+                    }
+                }
+            }
+        }
+        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            storeCollection.items.forEachIndexed { index, _ ->
+                CarouselDot(
+                    selected = index == selectedPage.value,
+                    MaterialTheme.colors.primary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CarouselDot(selected: Boolean, color: Color) {
+    Icon(
+        imageVector = Icons.Filled.Lens,
+        modifier = Modifier.padding(4.dp).preferredSize(12.dp),
+        tint = if (selected) color else Color.Gray
+    )
+}
+
+@Composable
+fun StoreCollectionChartsContent(storeCollection: StoreCollectionCharts) {
+    val actions = ActionsAmbient.current
+    var selectedChartTab: StoreChartTab by remember { mutableStateOf(StoreChartTab.Podcasts) }
+    Column(
+        modifier = Modifier.padding(
+            vertical = 16.dp
+        )
+    ) {
+        StoreHeadingSectionWithLink(
+            title = "TODO: Charts",
+            onClick = { actions.navigateToStoreCharts(
+                StoreTopCharts(
+                    id = storeCollection.genreId?.toLong() ?: 0L,
+                    genreId = storeCollection.genreId,
+                    storeFront = storeCollection.storeFront
+                )
+            ) }
+        )
+        Spacer(modifier = Modifier.preferredHeight(8.dp))
+        TopChartsTabContent(
+            storeCollection = storeCollection,
+            selectedChartTab = selectedChartTab,
+            onChartSelected = { selectedChartTab = it }
+        )
+    }
+}
+
+@Composable
+private fun TopChartsTabContent(
+    storeCollection: StoreCollectionCharts,
+    selectedChartTab: StoreChartTab,
+    onChartSelected: (StoreChartTab) -> Unit
+) {
+    Column {
+        TabRow(
+            selectedTabIndex = selectedChartTab.ordinal,
+            backgroundColor = Color.Transparent
+        )
+        {
+            StoreChartTab.values().forEachIndexed { index, tab ->
+                Tab(
+                    selected = (index == selectedChartTab.ordinal),
+                    onClick = { onChartSelected(tab) },
+                    text = {
+                        Text(
+                            text = stringResource(id = tab.titleId),
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                )
+            }
+        }
+        when (selectedChartTab) {
+            StoreChartTab.Podcasts ->
+                TopChartContent(storeCollection.topPodcasts)
+            StoreChartTab.Episodes ->
+                TopChartContent(storeCollection.topEpisodes)
+        }
+    }
+}
+
+@Composable
+private fun TopChartContent(
+    topCharts: List<StoreItem>,
+) {
+    topCharts.forEachIndexed { index, storeItem ->
+        when (storeItem) {
+            is StorePodcast -> {
+                StorePodcastListItemIndexed(podcast = storeItem, index = index + 1)
+                Divider()
+            }
+            is StoreEpisode -> {
+                StoreEpisodeListItem(episode = storeItem/*, index = index + 1*/)
+                Divider()
+            }
         }
     }
 }
@@ -297,6 +425,4 @@ fun StoreCollectionFeaturedContent(
 @Preview
 @Composable
 fun previewStoreCollectionPodcastContent() {
-    val collection = remember { StoreCollectionPodcasts("Nouveautés et tendances", itemsIds = mutableListOf(), storeFront = "") }
-    StoreCollectionPodcastsContent(storeCollection = collection)
 }
