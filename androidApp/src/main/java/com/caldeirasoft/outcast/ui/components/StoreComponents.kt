@@ -1,50 +1,123 @@
 package com.caldeirasoft.outcast.ui.components
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRowFor
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lens
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.emptyContent
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.VerticalGradient
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientAnimationClock
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
-import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.util.Log_D
-import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
-import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.theme.typography
 import com.skydoves.landscapist.coil.CoilImage
+import kotlinx.coroutines.flow.Flow
 
-enum class StoreChartTab(val titleId: Int) {
-    Podcasts(R.string.store_tab_chart_podcasts),
-    Episodes(R.string.store_tab_chart_episodes),
+
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun DiscoverContent(
+    discover: Flow<PagingData<StoreItem>>,
+    headerContent: @Composable () -> Unit = emptyContent(),
+    itemContent: @Composable LazyItemScope.(index: Int, value: StoreItem) -> Unit,
+)
+{
+    val lazyPagingItems = discover.collectAsLazyPagingItems()
+    val loadState = lazyPagingItems.loadState
+    val refreshState = loadState.refresh
+    LazyColumn {
+        // header
+        item {
+            headerContent()
+        }
+
+        // content
+        when {
+            refreshState is LoadState.Loading -> {
+                item {
+                    LoadingListShimmer()
+                }
+            }
+            refreshState is LoadState.Error -> {
+                item {
+                    ErrorScreen(t = refreshState.error)
+                }
+            }
+            refreshState is LoadState.NotLoading
+                    && loadState.append.endOfPaginationReached
+                    && lazyPagingItems.itemCount == 0 -> {
+                item {
+                    Text("Empty")
+                }
+            }
+            refreshState is LoadState.NotLoading ->
+                itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
+                    item?.let {
+                        itemContent(index, item)
+                    }
+                }
+        }
+
+        when (val appendState = loadState.append) {
+            is LoadState.Loading -> {
+                item {
+                    Text(
+                        modifier = Modifier.padding(
+                            vertical = 16.dp,
+                            horizontal = 4.dp
+                        ),
+                        text = "Loading next"
+                    )
+                }
+            }
+            is LoadState.Error -> {
+                item {
+                    Text(
+                        modifier = Modifier.padding(
+                            vertical = 16.dp,
+                            horizontal = 4.dp
+                        ),
+                        text = "Error getting next: ${appendState.error}"
+                    )
+                }
+            }
+        }
+    }
 }
-
 
 @Composable
 fun StoreContentFeed(
     lazyPagingItems: LazyPagingItems<StoreItem>,
-    actions: Actions,
     itemContent: @Composable (StoreItem, Int) -> Unit
 ) {
     LazyColumn {
@@ -106,7 +179,7 @@ fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
                 .preferredHeight(100.dp)
                 .fillMaxWidth()
         ) {
-            (1..7).forEach { episode ->
+            (1..7).forEach { _ ->
                 Card(
                     backgroundColor = colors[0],
                     shape = RoundedCornerShape(8.dp),
@@ -118,51 +191,56 @@ fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {
             }
         }
     else
-        LazyRowFor(
-            items = storeCollection.items,
+        LazyRow(
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth()
-        ) { episode ->
-            //StoreItemEpisodeContent(episode = episode)
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .preferredWidth(100.dp)
-                    .clickable(onClick = {})
-            ) {
-                Card(
-                    backgroundColor = colors[1],
-                    shape = RoundedCornerShape(8.dp)
-                )
-                {
-                    CoilImage(
-                        imageModel = episode.getArtworkUrl(),
-                        contentScale = ContentScale.Crop,
+        ) {
+            items(items = storeCollection.items,
+                itemContent = { episode ->
+                    //StoreItemEpisodeContent(episode = episode)
+                    Column(
                         modifier = Modifier
-                            .preferredSize(100.dp)
-                    )
-                }
-                Text(
-                    episode.name,
-                    modifier = Modifier.width(100.dp),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    style = MaterialTheme.typography.body2
-                )
-                Text(
-                    episode.podcastName,
-                    modifier = Modifier.width(100.dp),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.caption
-                )
-            }
+                            .padding(horizontal = 8.dp)
+                            .preferredWidth(100.dp)
+                            .clickable(onClick = {})
+                    ) {
+                        Card(
+                            backgroundColor = colors[1],
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        {
+                            CoilImage(
+                                imageModel = episode.getArtworkUrl(),
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .preferredSize(100.dp)
+                            )
+                        }
+                        Text(
+                            episode.name,
+                            modifier = Modifier.width(100.dp),
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2,
+                            style = MaterialTheme.typography.body2
+                        )
+                        Text(
+                            episode.podcastName,
+                            modifier = Modifier.width(100.dp),
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.caption
+                        )
+                    }
+                })
         }
 }
 
 @Composable
-fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
-    val actions = ActionsAmbient.current
+fun StoreCollectionPodcastsContent(
+    storeCollection: StoreCollectionPodcasts,
+    navigateToRoom: (StoreRoom) -> Unit,
+    navigateToPodcast: (String) -> Unit,
+) {
     Column(
         modifier = Modifier.padding(
             vertical = 16.dp
@@ -171,7 +249,7 @@ fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
         StoreHeadingSectionWithLink(
             title = storeCollection.label,
             onClick = {
-                actions.navigateToStoreRoom(
+                navigateToRoom(
                     StoreRoom(
                         id = 0,
                         label = storeCollection.label,
@@ -183,39 +261,28 @@ fun StoreCollectionPodcastsContent(storeCollection: StoreCollectionPodcasts) {
             }
         )
         Spacer(modifier = Modifier.preferredHeight(8.dp))
-        if (storeCollection.items.isEmpty())
-            Row(
-                modifier = Modifier
-                    .preferredHeight(100.dp)
-                    .fillMaxWidth()
-            ) {
-                (1..2).forEach { _ ->
-                    Card(
-                        backgroundColor = colors[0],
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    {
-                        Spacer(modifier = Modifier.preferredSize(100.dp))
-                    }
-                }
-            }
-        else
-            LazyRowFor(
-                items = storeCollection.items,
-                contentPadding = PaddingValues(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) { podcast ->
-                StorePodcastGridItem(podcast = podcast)
-            }
-
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            items(items = storeCollection.items,
+                itemContent = { podcast ->
+                    PodcastGridItem(
+                        modifier = Modifier
+                            .preferredWidth(100.dp)
+                            .clickable(onClick = { navigateToPodcast(podcast.url) }),
+                        podcast = podcast)
+                })
+        }
     }
 }
 
 @Composable
-fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms) {
-    val actions = ActionsAmbient.current
+fun StoreCollectionRoomsContent(
+    storeCollection: StoreCollectionRooms,
+    navigateToRoom: (StoreRoom) -> Unit
+) {
     Column(
         modifier = Modifier.padding(
             vertical = 16.dp
@@ -223,32 +290,74 @@ fun StoreCollectionRoomsContent(storeCollection: StoreCollectionRooms) {
     ) {
         StoreHeadingSection(title = storeCollection.label)
         Spacer(modifier = Modifier.preferredHeight(8.dp))
-        LazyRowFor(
-            items = storeCollection.items.filterIsInstance<StoreRoom>(),
+        LazyRow(
             contentPadding = PaddingValues(8.dp)
-        ) { room ->
-            Card(
-                backgroundColor = colors[0],
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .preferredWidth(200.dp)
-                    .clickable(onClick = {
-                        actions.navigateToStoreRoom(room)
-                    })
-            )
-            {
-                CoilImage(
-                    imageModel = room.getArtworkUrl(),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(18 / 9f)
-                )
+        ) {
+            items(items = storeCollection.items.filterIsInstance<StoreRoom>(),
+                itemContent = { room ->
+                    Card(
+                        backgroundColor = colors[0],
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .preferredWidth(200.dp)
+                            .clickable(onClick = {
+                                navigateToRoom(room)
+                            })
+                    )
+                    {
+                        CoilImage(
+                            imageModel = room.getArtworkUrl(),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(18 / 9f)
+                        )
+                    }
+                })
+        }
+    }
+}
+
+@Composable
+fun StoreCollectionGenresContent(
+    storeCollection: StoreCollectionGenres,
+    navigateToCategories: (StoreCollectionGenres) -> Unit,
+    navigateToGenre: (Int, String) -> Unit,
+)
+{
+    val columns = 2
+    val maxLines = 3
+    val genreMore: StoreGenre = StoreGenre(-1, "More", "", "")
+    val genresToDisplay =
+        storeCollection.genres.let {
+            if (it.size > columns * maxLines) it.take(columns * maxLines - 1).plus(genreMore)
+            else it
+        }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        StoreHeadingSectionWithLink(title = storeCollection.label, onClick = { navigateToCategories(storeCollection) })
+
+        Grid(
+            mainAxisSpacing = 8.dp,
+            contentPadding = PaddingValues(8.dp),
+            items = genresToDisplay,
+            columns = 2,
+        ) { item, innerPadding ->
+            when(item.id) {
+                -1 ->
+                    GenreGridItemMore(
+                        storeGenre = item,
+                        howManyMore = storeCollection.genres.size - (columns * maxLines - 1),
+                        onGenreClick = { navigateToCategories(storeCollection) })
+                else ->
+                    GenreGridItem(
+                        storeGenre = item,
+                        onGenreClick = { navigateToGenre(item.id, item.name) })
             }
         }
     }
 }
+
 
 @Composable
 fun StoreCollectionFeaturedContent(
@@ -298,7 +407,7 @@ fun StoreCollectionFeaturedContent(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(
-                                        brush = VerticalGradient(
+                                        brush = Brush.verticalGradient(
                                             listOf(bgDominantColor.copy(alpha = 0f), bgDominantColor),
                                             startY = 0.0f,
                                             endY = constraints.maxHeight.toFloat() * 0.30f
@@ -312,12 +421,68 @@ fun StoreCollectionFeaturedContent(
                         }
                     }
                     if (item is StorePodcastFeatured) {
-                        Text(
-                            text = item.name,
-                            style = typography.h6.copy(color = Color.White),
-                            modifier = Modifier.fillMaxWidth().padding(24.dp)
-                                .align(Alignment.BottomStart),
-                        )
+                        ConstraintLayout(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .preferredHeight(100.dp)
+                                .padding(horizontal = 24.dp, vertical = 16.dp)
+                                .align(Alignment.BottomCenter)
+                        ) {
+                            val (thumbnail, name, artist, icon) = createRefs()
+                            Card(
+                                backgroundColor = Color.Transparent,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .constrainAs(thumbnail) {
+                                        linkTo(top = parent.top, bottom = parent.bottom)
+                                        linkTo(start = parent.start, end = name.start)
+                                        width = Dimension.value(70.dp)
+                                    }
+                                    .padding(end = 15.dp)
+                            ) {
+                                CoilImage(
+                                    imageModel = item.getPodcastArtworkUrl(),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                )
+                            }
+                            Text(
+                                item.name,
+                                modifier = Modifier
+                                    .constrainAs(name) {
+                                        linkTo(top = parent.top, bottom = artist.top, bias = 1f)
+                                        linkTo(start = thumbnail.end, end = icon.start)
+                                        width = Dimension.fillToConstraints
+                                        height = Dimension.wrapContent
+
+                                    },
+                                style = MaterialTheme.typography.h6,
+                                color = Color.getColor(item.artwork?.textColor1!!)
+                            )
+                            Text(
+                                item.artistName,
+                                modifier = Modifier
+                                    .constrainAs(artist) {
+                                        linkTo(top = name.bottom, bottom = parent.bottom, bias = 1f)
+                                        linkTo(start = thumbnail.end, end = icon.start)
+                                        width = Dimension.fillToConstraints
+                                        height = Dimension.fillToConstraints
+                                    },
+                                style = MaterialTheme.typography.body2,
+                                color = Color.getColor(item.artwork?.textColor2!!)
+                            )
+                            Icon(imageVector = Icons.Filled.Add,
+                                tint = Color.getColor(item.artwork?.textColor1!!),
+                                modifier = Modifier
+                                    .constrainAs(icon) {
+                                        linkTo(top = parent.top, bottom = parent.bottom)
+                                        linkTo(start = name.end, end = parent.end)
+                                        width = Dimension.wrapContent
+                                    })
+                        }
+
                     }
                 }
             }
@@ -343,86 +508,48 @@ fun CarouselDot(selected: Boolean, color: Color) {
 }
 
 @Composable
-fun StoreCollectionChartsContent(storeCollection: StoreCollectionCharts) {
-    val actions = ActionsAmbient.current
-    var selectedChartTab: StoreChartTab by remember { mutableStateOf(StoreChartTab.Podcasts) }
-    Column(
-        modifier = Modifier.padding(
-            vertical = 16.dp
-        )
-    ) {
-        StoreHeadingSectionWithLink(
-            title = "TODO: Charts",
-            onClick = { actions.navigateToStoreCharts(
-                StoreTopCharts(
-                    id = storeCollection.genreId?.toLong() ?: 0L,
-                    genreId = storeCollection.genreId,
-                    storeFront = storeCollection.storeFront
-                )
-            ) }
-        )
-        Spacer(modifier = Modifier.preferredHeight(8.dp))
-        TopChartsTabContent(
-            storeCollection = storeCollection,
-            selectedChartTab = selectedChartTab,
-            onChartSelected = { selectedChartTab = it }
-        )
-    }
-}
-
-@Composable
-private fun TopChartsTabContent(
-    storeCollection: StoreCollectionCharts,
-    selectedChartTab: StoreChartTab,
-    onChartSelected: (StoreChartTab) -> Unit
+fun ChoiceChipTab(
+    selected: Boolean,
+    text: String,
+    onClick: () -> Unit,
 ) {
-    Column {
-        TabRow(
-            selectedTabIndex = selectedChartTab.ordinal,
-            backgroundColor = Color.Transparent
+    val backgroundColor: Color = when {
+        selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
+        else -> Color.Transparent
+    }
+    val contentColor: Color = when {
+        selected -> MaterialTheme.colors.primary
+        else -> MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    }
+    Tab(selected, onClick) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         )
         {
-            StoreChartTab.values().forEachIndexed { index, tab ->
-                Tab(
-                    selected = (index == selectedChartTab.ordinal),
-                    onClick = { onChartSelected(tab) },
-                    text = {
-                        Text(
-                            text = stringResource(id = tab.titleId),
-                            style = MaterialTheme.typography.body2
-                        )
-                    }
+            OutlinedButton(
+                colors = ButtonDefaults.textButtonColors(
+                    backgroundColor = animate(backgroundColor),
+                    contentColor = animate(contentColor),
+                    disabledContentColor = MaterialTheme.colors.onSurface
+                        .copy(alpha = ContentAlpha.disabled)
+                ),
+                shape = MaterialTheme.shapes.small,
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 0.dp),
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth().height(32.dp)
+            ) {
+                Text(
+                    text = text,
+                    style = TextStyle(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        letterSpacing = 0.25.sp
+                    )
                 )
             }
         }
-        when (selectedChartTab) {
-            StoreChartTab.Podcasts ->
-                TopChartContent(storeCollection.topPodcasts)
-            StoreChartTab.Episodes ->
-                TopChartContent(storeCollection.topEpisodes)
-        }
     }
-}
-
-@Composable
-private fun TopChartContent(
-    topCharts: List<StoreItem>,
-) {
-    topCharts.forEachIndexed { index, storeItem ->
-        when (storeItem) {
-            is StorePodcast -> {
-                StorePodcastListItemIndexed(podcast = storeItem, index = index + 1)
-                Divider()
-            }
-            is StoreEpisode -> {
-                StoreEpisodeListItem(episode = storeItem/*, index = index + 1*/)
-                Divider()
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun previewStoreCollectionPodcastContent() {
 }

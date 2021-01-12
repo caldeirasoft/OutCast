@@ -7,11 +7,13 @@ interface StoreItemWithArtwork : StoreItem {
 
     fun getArtworkUrl(): String;
 
-    fun artworkUrl(width:Int, height: Int, crop:String = "bb", format:String = "jpg"): String {
-        return artwork?.url?.replace("{w}", width.toString())
-            ?.replace("{h}", height.toString())
-            ?.replace("{c}", crop)
-            ?.replace("{f}", format)
-            .orEmpty()
+    companion object {
+        fun artworkUrl(artwork: Artwork?, width:Int, height: Int, crop:String = "bb", format:String = "jpg"): String {
+            return artwork?.url?.replace("{w}", width.toString())
+                ?.replace("{h}", height.toString())
+                ?.replace("{c}", crop)
+                ?.replace("{f}", format)
+                .orEmpty()
+        }
     }
 }

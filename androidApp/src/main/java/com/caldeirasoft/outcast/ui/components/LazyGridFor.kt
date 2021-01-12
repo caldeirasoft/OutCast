@@ -2,56 +2,78 @@ package com.caldeirasoft.outcast.ui.components
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.MeasureBlock
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.items
-import androidx.paging.compose.itemsIndexed
-import kotlin.math.ceil
 
 @Composable
 fun <T> LazyGridFor(
     items: List<T> = listOf(),
     columns: Int = 3,
     hPadding: Int = 8,
-    itemContent: @Composable LazyItemScope.(T, Int) -> Unit
+    itemContent: @Composable BoxScope.(T, Int) -> Unit
 ) {
     val chunkedList = items.chunked(columns)
-    LazyColumnForIndexed(items = chunkedList, modifier = Modifier.padding(horizontal = hPadding.dp)) { index, it ->
-        if (index == 0) {
-            Spacer(modifier = Modifier.preferredHeight(8.dp))
-        }
-
-        Row {
-            it.forEachIndexed { rowIndex, item ->
-                Box(modifier = Modifier.weight(1F).align(Alignment.Top).padding(8.dp),
-                    contentAlignment = Alignment.Center) {
-                    itemContent(item, index * columns + rowIndex)
+    Column(modifier = Modifier
+        .padding(horizontal = hPadding.dp)
+        .padding(top = 8.dp)) {
+        chunkedList.forEachIndexed { index, list ->
+            Row {
+                /*list.forEachIndexed { rowIndex, item ->
+                    Box(modifier = Modifier.weight(1F).align(Alignment.Top).padding(8.dp),
+                        contentAlignment = Alignment.Center)
+                    {
+                        //itemContent(item, index * columns + rowIndex)
+                    }
+                }*/
+                repeat(columns - list.size) {
+                    Box(modifier = Modifier.weight(1F).padding(8.dp)) {}
                 }
-            }
-            repeat(columns - it.size) {
-                Box(modifier = Modifier.weight(1F).padding(8.dp)) {}
             }
         }
     }
+}
+
+@Composable
+fun <T> ColumnScope.Grid(
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    mainAxisSpacing: Dp = 0.dp,
+    crossAxisSpacing: Dp = 0.dp,
+    columns: Int = 2,
+    items: List<T>,
+    child: @Composable (item: T, innerPadding: PaddingValues) -> Unit
+) {
+    //Column(modifier = Modifier.fillMaxWidth().padding(contentPadding)) {
+        val mainAxisPadding = PaddingValues(start = mainAxisSpacing, end = mainAxisSpacing)
+        val crossAxisPadding =
+            PaddingValues(start = crossAxisSpacing / columns, end = crossAxisSpacing / columns)
+        items.chunked(columns).forEach { rowList ->
+            Row(modifier = Modifier.fillMaxWidth().padding(mainAxisPadding)) {
+                rowList.forEach {
+                    Box(modifier = Modifier.weight(1f)
+                        .padding(contentPadding)) {
+                        child(it, crossAxisPadding)
+                    }
+                }
+                val emptyRows = (columns - rowList.size)
+                repeat(emptyRows) {
+                    Spacer(modifier = Modifier.weight(1f).padding(contentPadding))
+                }
+            }
+        }
+    //}
 }
 
 fun <T : Any> LazyListScope.gridItems(
     lazyPagingItems: LazyPagingItems<T>,
     columns: Int = 3,
     contentPadding: PaddingValues = PaddingValues(),
-    hPadding: Dp = 0.dp,
-    vPadding: Dp = 0.dp,
+    verticalInnerPadding: Dp = 0.dp,
+    horizontalInnerPadding: Dp = 0.dp,
     itemContent: @Composable LazyItemScope.(value: T?) -> Unit
 ) {
     Log.d("itemCount", lazyPagingItems.itemCount.toString())
@@ -76,17 +98,16 @@ fun <T : Any> LazyListScope.gridItems(
                         }
                     }
                     if (column < columns - 1) {
-                        Spacer(modifier = Modifier.preferredWidth(hPadding))
+                        Spacer(modifier = Modifier.preferredWidth(horizontalInnerPadding))
                     }
                 }
             }
         }
 
-        if (row < rows - 1) {
-            spacerItem(vPadding)
-        } else {
+        if (row < rows - 1)
+            spacerItem(verticalInnerPadding)
+        else
             spacerItem(contentPadding.bottom)
-        }
     }
 }
 

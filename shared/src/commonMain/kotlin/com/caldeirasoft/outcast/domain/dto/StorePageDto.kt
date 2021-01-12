@@ -72,16 +72,9 @@ class CategoryListResult(
     val url: String? = null,
     val genreId: Int = 0,
     val kind: String? = null,
-    val children: List<CategoryDto> = arrayListOf()
+    val parentCategoryLabel: String? = null,
+    val children: List<GenreDto> = arrayListOf()
 )
-
-@Serializable
-class CategoryDto (
-    val genreId: Int,
-    val name: String = "",
-    val url: String = "",
-    val chartUrl: String = "",
-    val artwork: List<ArtworkDto> = arrayListOf())
 
 @Serializable
 class PageDataStructureResult(
@@ -343,8 +336,8 @@ class GenreResult (
             name = this.name,
             storeFront = storeFront,
             url = this.url,
-            topChartPodcastsUrl = this.chartUrls?.podcasts.orEmpty(),
-            topChartEpisodesUrl = this.chartUrls?.podcastEpisodes.orEmpty()
+            //topChartPodcastsUrl = this.chartUrls?.podcasts.orEmpty(),
+            //topChartEpisodesUrl = this.chartUrls?.podcastEpisodes.orEmpty()
         )
 }
 

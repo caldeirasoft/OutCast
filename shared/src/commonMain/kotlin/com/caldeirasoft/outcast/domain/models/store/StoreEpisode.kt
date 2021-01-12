@@ -34,5 +34,5 @@ class StoreEpisode(val id: Long,
                    override val artwork: Artwork? = null,
 ) : StoreItemWithArtwork {
     override fun getArtworkUrl(): String =
-        artworkUrl(200, 200)
+        StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 }

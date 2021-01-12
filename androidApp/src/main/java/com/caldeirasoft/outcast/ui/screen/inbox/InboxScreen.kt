@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
-import com.caldeirasoft.outcast.ui.ambient.ActionsAmbient
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -21,7 +20,7 @@ fun InboxScreen(viewModel: InboxViewModel = getViewModel()) {
                     Text(text = "Inbox")
                 },
                 actions = {
-                    IconButton(onClick = ActionsAmbient.current.navigateToStoreDirectory) {
+                    IconButton(onClick = {  }) {
                         Icon(imageVector = Icons.Filled.Favorite)
                     }
                 })

@@ -12,5 +12,5 @@ class StoreRoomFeatured(var label: String,
                         override var artwork: Artwork?)
     : StoreItemWithArtwork, StoreItemFeatured {
     override fun getArtworkUrl(): String =
-        artworkUrl(1060, 520, crop = "fa")
+        StoreItemWithArtwork.artworkUrl(artwork, 1060, 520, crop = "fa")
 }

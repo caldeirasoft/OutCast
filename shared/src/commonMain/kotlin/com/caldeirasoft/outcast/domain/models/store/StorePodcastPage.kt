@@ -34,5 +34,5 @@ data class StorePodcastPage(
     val podcastsListenersAlsoFollow: StoreCollectionPodcastIds? = null,
 ) : StoreItemWithArtwork {
     override fun getArtworkUrl():String =
-        artworkUrl(200, 200)
+        StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 }

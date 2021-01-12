@@ -1,8 +1,8 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
@@ -22,5 +22,5 @@ data class StoreRoomPage(
     override val timestamp: Instant,
 ) : StoreItemWithArtwork, StorePage {
     override fun getArtworkUrl(): String =
-        artworkUrl(400, 196, crop = "fa")
+        StoreItemWithArtwork.artworkUrl(artwork, 400, 196, crop = "fa")
 }

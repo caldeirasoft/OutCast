@@ -21,12 +21,11 @@ class GenreDto (
             url = url
         )
 
-    companion object {
-        fun toGenre(dto: GenreDto) =
-            Genre(
-                id = dto.genreId,
-                name = dto.name,
-                url = dto.url
-            )
-    }
+    fun toStoreGenre(storeFront: String) =
+        StoreGenre(
+            id = genreId,
+            name = name,
+            url = url,
+            storeFront = storeFront
+        )
 }

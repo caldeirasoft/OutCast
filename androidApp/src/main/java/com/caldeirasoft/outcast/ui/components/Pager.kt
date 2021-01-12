@@ -6,6 +6,7 @@ import androidx.compose.animation.core.fling
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.layout.Layout
@@ -103,15 +104,16 @@ fun Pager(
     modifier: Modifier = Modifier,
     state: PagerState,
     orientation: Orientation = Orientation.Horizontal,
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     offscreenLimit: Int = 2,
     content: @Composable PagerScope.() -> Unit
 ) {
     var pageSize by remember { mutableStateOf(0) }
+    val minPage = (state.currentPage - offscreenLimit).coerceAtLeast(state.minPage)
+    val maxPage = (state.currentPage + offscreenLimit).coerceAtMost(state.maxPage)
+
     Layout(
         content = {
-            val minPage = (state.currentPage - offscreenLimit).coerceAtLeast(state.minPage)
-            val maxPage = (state.currentPage + offscreenLimit).coerceAtMost(state.maxPage)
-
             for (page in minPage..maxPage) {
                 val pageData = PageData(page)
                 val scope = PagerScope(state, page)
@@ -142,20 +144,34 @@ fun Pager(
             }
         }
     ) { measurables, constraints ->
-        layout(constraints.maxWidth, constraints.maxHeight) {
-            val currentPage = state.currentPage
-            val offset = state.currentPageOffset
-            val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-
+        val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeableMap =
             measurables
                 .map {
                     it.measure(childConstraints) to it.page
                 }
+        val rowHeights = placeableMap.map { (placeable, _) -> placeable.height }
+        val maxHeight = rowHeights
+            .maxOrNull()
+            ?.coerceIn(constraints.minHeight.rangeTo(constraints.maxHeight))
+            ?: constraints.minHeight
+
+        layout(constraints.maxWidth, maxHeight) {
+            val currentPage = state.currentPage
+            val offset = state.currentPageOffset
+
+            placeableMap
                 .forEach { (placeable, page) ->
-                    // TODO: current this centers each page. We should investigate reading
-                    //  gravity modifiers on the child, or maybe as a param to Pager.
-                    val xCenterOffset = (constraints.maxWidth - placeable.width) / 2
-                    val yCenterOffset = (constraints.maxHeight - placeable.height) / 2
+                    val xCenterOffset =
+                        when (contentAlignment) {
+                            Alignment.Start -> 0
+                            Alignment.End -> (constraints.maxWidth - placeable.width)
+                            Alignment.CenterHorizontally ->
+                                (constraints.maxWidth - placeable.width) / 2
+                            else ->
+                                (constraints.maxWidth - placeable.width) / 2
+                        }
+                    val yCenterOffset = (maxHeight - placeable.height) / 2
 
                     if (currentPage == page) {
                         pageSize = if (orientation == Orientation.Horizontal) {

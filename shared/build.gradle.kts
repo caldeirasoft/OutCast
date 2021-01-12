@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    kotlin("plugin.serialization") version Versions.kotlin
+    kotlin("plugin.serialization") version Dependencies.Kotlin.version
     id("com.squareup.sqldelight")
 }
 group = "com.caldeirasoft.outcast"
@@ -16,6 +16,18 @@ repositories {
     maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
     maven(url = uri("https://dl.bintray.com/ekito/koin/")) // koin
 }
+
+android {
+    configurations {
+        create("androidTestApi")
+        create("androidTestDebugApi")
+        create("androidTestReleaseApi")
+        create("testApi")
+        create("testDebugApi")
+        create("testReleaseApi")
+    }
+}
+
 kotlin {
     android()
     jvm {

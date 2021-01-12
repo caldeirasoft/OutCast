@@ -1,7 +1,6 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -11,7 +10,5 @@ class StoreGenre(
     val id: Int,
     var name: String,
     val storeFront: String,
-    val url: String,
-    val topChartPodcastsUrl: String,
-    val topChartEpisodesUrl: String,
+    val url: String
 )

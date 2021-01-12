@@ -23,6 +23,7 @@ class StorePodcastFeatured(
     val releaseDate: Instant,
     val releaseDateTime: Instant,
     override val artwork: Artwork?,
+    val podcastArtwork: Artwork?,
     val trackCount: Int,
     val podcastWebsiteUrl: String? = null,
     val copyright: String? = null,
@@ -33,5 +34,8 @@ class StorePodcastFeatured(
 ) : StoreItemWithArtwork, StoreItemFeatured {
 
     override fun getArtworkUrl():String =
-        artworkUrl(1060, 520, crop = "fa")
+        StoreItemWithArtwork.artworkUrl(artwork, 1060, 520, crop = "fa")
+
+    fun getPodcastArtworkUrl(): String =
+        StoreItemWithArtwork.artworkUrl(podcastArtwork, 200, 200)
 }

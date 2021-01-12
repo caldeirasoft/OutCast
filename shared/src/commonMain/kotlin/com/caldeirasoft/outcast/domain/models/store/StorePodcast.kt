@@ -32,5 +32,5 @@ data class StorePodcast(
     val episodes: List<StoreEpisode> = listOf(),
 ) : StoreItemWithArtwork {
     override fun getArtworkUrl():String =
-        artworkUrl(200, 200)
+        StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 }

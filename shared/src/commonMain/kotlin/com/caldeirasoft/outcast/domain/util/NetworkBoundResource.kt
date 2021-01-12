@@ -37,11 +37,11 @@ inline fun <ResponseType: Any> networkCall(
  */
 inline fun <ResponseType: Any> networkCall(
     crossinline fetchFromRemote: suspend () -> ResponseType
-) = flow<Resource<ResponseType>> {
+) = flow<Resource> {
     fetchFromRemote().let {
         emit(Resource.Success(it))
     }
-}.onStart { emit(Resource.Loading()) }
+}.onStart { emit(Resource.Loading) }
     .catch { emit(Resource.Error(it)) }
 
 /**
@@ -56,7 +56,7 @@ inline fun <RequestedType: Any> networkBoundResource(
     crossinline shouldFetchFromRemote: (RequestedType?) -> Boolean = { true },
     crossinline fetchFromRemote: suspend () -> RequestedType,
     crossinline saveRemoteData: suspend (RequestedType) -> Unit = { Unit },
-) = flow<Resource<RequestedType>> {
+) = flow<Resource> {
     val source = fetchFromLocal.invoke()
     val cachedData = source.firstOrNull()
 
@@ -70,7 +70,7 @@ inline fun <RequestedType: Any> networkBoundResource(
             emit(Resource.Success(cachedData))
         }
     }
-}.onStart { emit(Resource.Loading()) }
+}.onStart { emit(Resource.Loading) }
     .catch { emit(Resource.Error(it)) }
 
 /**
@@ -83,9 +83,9 @@ inline fun <RequestedType: Any> networkBoundResource(
 inline fun <ResponseType: Any> fetchResourceAndCache(
     crossinline networkCall: suspend () -> NetworkResponse<ResponseType>,
     crossinline saveRemoteData: suspend (ResponseType) -> Unit = { Unit },
-) = flow<Resource<Unit>> {
+) = flow<Resource> {
 
-    emit(Resource.Loading())
+    emit(Resource.Loading)
     when (val response = networkCall.invoke()) {
         is NetworkResponse.Success -> {
             saveRemoteData(response.body)

@@ -7,6 +7,6 @@ import kotlinx.serialization.Serializable
 class StoreCollectionChartsIds(
     val topPodcastsIds: List<Long>,
     val topEpisodesIds: List<Long>,
-    val genreId: Int?,
+    val genreId: Int,
     override val storeFront: String,
 ) : StoreCollection

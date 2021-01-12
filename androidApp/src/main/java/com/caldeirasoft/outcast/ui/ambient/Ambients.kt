@@ -13,5 +13,5 @@ val StoreDirectoryViewModelAmbient =
     staticAmbientOf<StoreDirectoryViewModel> { error("not viewModel") }
 val StoreDataViewModelAmbient =
     staticAmbientOf<StoreDataViewModel> { error("not viewModel") }*/
-val ActionsAmbient = staticAmbientOf<Actions>()
+private val ActionsAmbient = staticAmbientOf<Actions>()
 

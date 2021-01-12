@@ -1,13 +1,11 @@
 package com.caldeirasoft.outcast.domain.repository
 
-import com.caldeirasoft.outcast.domain.dto.LockupResult
-import com.caldeirasoft.outcast.domain.dto.ResultIdsResult
-import com.caldeirasoft.outcast.domain.dto.StorePageDto
-import com.caldeirasoft.outcast.domain.interfaces.StoreData
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.*
-import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.models.store.StoreGenreData
+import com.caldeirasoft.outcast.domain.models.store.StoreGroupingData
+import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 
 interface StoreRepository {
 
@@ -29,12 +27,7 @@ interface StoreRepository {
     /**
      * getTopChartsIdsAsync
      */
-    suspend fun getTopChartsPodcastsIdsAsync(genre: Int?, storeFront: String, limit: Int): List<Long>
-
-    /**
-     * getTopChartsIdsAsync
-     */
-    suspend fun getTopChartsEpisodesIdsAsync(genre: Int?, storeFront: String, limit: Int): List<Long>
+    suspend fun getTopChartsIdsAsync(genre: Int?, storeFront: String, storeItemType: StoreItemType, limit: Int): List<Long>
 
     /**
      * getListStoreItemDataAsync

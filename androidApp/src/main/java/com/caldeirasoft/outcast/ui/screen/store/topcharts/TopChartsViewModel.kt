@@ -6,39 +6,44 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.data.repository.StoreRepositoryImpl
 import com.caldeirasoft.outcast.data.util.StoreChartsPagingSource
-import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.models.Genre
-import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.domain.util.Resource
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
+import com.caldeirasoft.outcast.ui.screen.store.base.StoreChartTab
 import com.caldeirasoft.outcast.ui.util.ScreenState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @ExperimentalCoroutinesApi
-class TopChartsViewModel(val topCharts: StoreTopCharts)
+class TopChartsViewModel(genreId: Int?)
     : ViewModel(), KoinComponent {
-    private val fetchStoreTopChartsPodcastsIdsUseCase: FetchStoreTopChartsPodcastsIdsUseCase by inject()
-    private val fetchStoreTopChartsEpisodesIdsUseCase: FetchStoreTopChartsEpisodesIdsUseCase by inject()
+    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()
+    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
 
+    // storefront
+    private val storeFront = fetchStoreFrontUseCase.getStoreFront()
+    // selected tab
+    private val selectedTab = MutableStateFlow(StoreItemType.PODCAST)
+
+    // topPodcastsCharts
     val topPodcastsCharts: Flow<PagingData<StoreItem>> =
-        getTopChartPagedList(StoreItemType.PODCAST)
+        storeFront
+            .flatMapLatest { getTopChartPagedList(genreId = genreId, type = StoreItemType.PODCAST, storeFront = it) }
             .cachedIn(viewModelScope)
 
+    // topEpisodesCharts
     val topEpisodesCharts: Flow<PagingData<StoreItem>> =
-        getTopChartPagedList(StoreItemType.EPISODE)
+        storeFront
+            .flatMapLatest { getTopChartPagedList(genreId = genreId, type = StoreItemType.EPISODE, storeFront = it) }
             .cachedIn(viewModelScope)
 
-    private fun getTopChartPagedList(type: StoreItemType): Flow<PagingData<StoreItem>> =
+    private fun getTopChartPagedList(genreId: Int?, type: StoreItemType, storeFront: String): Flow<PagingData<StoreItem>> =
         Pager(
             PagingConfig(
                 pageSize = 10,
@@ -48,16 +53,21 @@ class TopChartsViewModel(val topCharts: StoreTopCharts)
             )
         ) {
             StoreChartsPagingSource(
-                storeFront = topCharts.storeFront,
+                storeFront = storeFront,
                 scope = viewModelScope) {
-                when (type) {
-                    StoreItemType.PODCAST ->
-                        fetchStoreTopChartsPodcastsIdsUseCase.execute(storeGenre = topCharts.genreId, storeFront = topCharts.storeFront)
-                    StoreItemType.EPISODE ->
-                        fetchStoreTopChartsEpisodesIdsUseCase.execute(storeGenre = topCharts.genreId, storeFront = topCharts.storeFront)
-                }
+                fetchStoreTopChartsIdsUseCase.execute(storeGenre = genreId, storeItemType = type, storeFront = storeFront)
             }
         }.flow
+
+    fun onTabSelected(tab: StoreItemType) {
+        selectedTab.tryEmit(tab)
+    }
+
+    data class State(
+        val screenState: ScreenState = ScreenState.Idle,
+        val selectedChartTab: StoreChartTab = StoreChartTab.Podcasts,
+        val storeFront: String? = null,
+    )
 }
 
 

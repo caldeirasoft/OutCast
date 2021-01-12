@@ -1,9 +1,8 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("plugin.serialization") version Versions.kotlin
-    id("com.squareup.sqldelight")
-    id("kotlin-kapt")
+    kotlin("kapt")
+    kotlin("plugin.serialization") version Dependencies.Kotlin.version
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"

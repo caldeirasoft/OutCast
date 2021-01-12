@@ -2,47 +2,33 @@ package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
 import androidx.paging.PagingSource
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.*
-import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcastIds
-import com.caldeirasoft.outcast.domain.repository.DataStoreRepository
-import com.caldeirasoft.outcast.domain.repository.StoreRepository
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.domain.util.checkType
-import com.caldeirasoft.outcast.domain.util.tryCast
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.awaitAll
+import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@KoinApiExtension
 class StoreDataPagingSource(
     val scope: CoroutineScope,
-    inline val dataFlow: () -> Flow<StoreData>
+    private val storeData: StoreData,
 ) : PagingSource<Int, StoreItem>(), KoinComponent
 {
     private val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
 
-    private val storeDataFlow: StateFlow<StoreData?> =
-        dataFlow()
-            .stateIn(scope, SharingStarted.Eagerly, null)
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
-        val flow = storeDataFlow
-        val flowNotNull = flow.filterNotNull()
-        val storeData = flowNotNull.first()
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()
         when (storeData) {
             is StoreDataWithCollections -> {
                 val endPosition =
                     Integer.min(
-                        storeData.storeList.size - 1,
+                        storeData.storeList.size,
                         startPosition + params.loadSize
                     )
                 items +=
@@ -72,10 +58,14 @@ class StoreDataPagingSource(
     protected suspend fun getItemsFromIds(
         ids: List<Long>,
         storeData: StorePage
-    ): List<StoreItem> =
-        scope.async {
-            getStoreItemsUseCase.execute(ids, storeData.storeFront, storeData)
-        }.await()
+    ): List<StoreItem> {
+        val idsSplit = ids.chunked(20)
+        val deferredList = idsSplit.map {
+            scope.async(Dispatchers.IO) { getStoreItemsUseCase.execute(it, storeData.storeFront, storeData) }
+        }
+        val lstOfReturnData = deferredList.awaitAll()
+        return lstOfReturnData.flatten()
+    }
 
     protected suspend fun getCollections(
         startPosition: Int,
@@ -112,23 +102,24 @@ class StoreDataPagingSource(
             .toMap()
 
         val itemsSequence: Sequence<StoreCollection> = sequence {
-            for (i in startPosition..endPosition) {
+            for (i in startPosition until endPosition) {
                 when (val collection = storeData.storeList[i])
                 {
                     is StoreCollectionFeatured,
-                    is StoreCollectionRooms -> yield(collection)
+                    is StoreCollectionRooms,
+                    is StoreCollectionGenres,
+                    is StoreCollectionTopChart<*> ->
+                        yield(collection)
                     is StoreCollectionChartsIds -> {
                         yield(
                             StoreCollectionCharts(
                                 genreId = collection.genreId,
                                 topPodcasts = collection.topPodcastsIds
                                     .filter { podcastItemsMap.contains(it) }
-                                    .map { podcastItemsMap[it] }
-                                    .filterNotNull(),
+                                    .mapNotNull { podcastItemsMap[it] },
                                 topEpisodes = collection.topEpisodesIds
                                     .filter { episodeItemsMap.contains(it) }
-                                    .map { episodeItemsMap[it] }
-                                    .filterNotNull(),
+                                    .mapNotNull { episodeItemsMap[it] },
                                 storeFront = collection.storeFront
                             )
                         )
@@ -142,8 +133,7 @@ class StoreDataPagingSource(
                                 itemsIds = collection.itemsIds,
                                 items = collection.itemsIds
                                     .filter { podcastItemsMap.contains(it) }
-                                    .map { podcastItemsMap[it] }
-                                    .filterNotNull()
+                                    .mapNotNull { podcastItemsMap[it] }
                             )
                         )
                     }
@@ -156,8 +146,7 @@ class StoreDataPagingSource(
                                 itemsIds = collection.itemsIds,
                                 items = collection.itemsIds
                                     .filter { episodeItemsMap.contains(it) }
-                                    .map { episodeItemsMap[it] }
-                                    .filterNotNull()
+                                    .mapNotNull { episodeItemsMap[it] }
                             )
                         )
 

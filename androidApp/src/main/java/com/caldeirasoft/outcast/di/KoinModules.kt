@@ -142,8 +142,7 @@ internal val commomModule = module {
     factory { FetchStoreDataUseCase(storeRepository = get()) }
     factory { FetchStorePodcastDataUseCase(storeRepository = get()) }
     factory { FetchStoreGenresUseCase(storeRepository = get())}
-    factory { FetchStoreTopChartsPodcastsIdsUseCase(storeRepository = get())}
-    factory { FetchStoreTopChartsEpisodesIdsUseCase(storeRepository = get())}
+    factory { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
     factory { GetStoreItemsUseCase(storeRepository = get()) }
 
 }

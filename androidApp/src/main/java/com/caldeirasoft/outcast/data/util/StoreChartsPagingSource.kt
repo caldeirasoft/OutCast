@@ -2,22 +2,23 @@ package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
 import androidx.paging.PagingSource
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.interfaces.*
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsPodcastsIdsUseCase
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@KoinApiExtension
 class StoreChartsPagingSource(
     val storeFront: String,
     val scope: CoroutineScope,
     inline val dataFlow: () -> Flow<List<Long>>
 ) : PagingSource<Int, StoreItem>(), KoinComponent {
 
-    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsPodcastsIdsUseCase by inject()
+    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()
     private val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
 
     private val idsFlow: StateFlow<List<Long>?> =
