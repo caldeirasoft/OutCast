@@ -121,14 +121,12 @@ private fun StoreDirectoryContent(
     {
         viewState
             .storeResourceData
-            .onLoading { LoadingListShimmer() }
+            .onLoading { ShimmerStoreCollectionsList() }
             .onError { ErrorScreen(t = it) }
             .onSuccess {
                 DiscoverContent(
                     discover = discover,
-                    headerContent = {
-                        SearchButton()
-                    }
+                    headerContent = { SearchButton() }
                 ) { _, item ->
                     when (item) {
                         is StoreCollectionPodcasts ->
@@ -185,9 +183,9 @@ private fun StoreDirectoryContent(
                                     )
                                 },
                             ) { index, storeItem ->
-                                EpisodeCardItemIndexed(
-                                    modifier = Modifier.fillMaxWidth()
-                                        .clickable(onClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) }),
+                                StoreEpisodeCardItemFromCharts(
+                                    onEpisodeClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) },
+                                    onThumbnailClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) },
                                     storeEpisode = storeItem,
                                     index = index + 1)
                             }

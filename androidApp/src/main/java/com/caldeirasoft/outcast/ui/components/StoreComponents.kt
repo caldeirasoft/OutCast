@@ -65,7 +65,7 @@ fun DiscoverContent(
         when {
             refreshState is LoadState.Loading -> {
                 item {
-                    LoadingListShimmer()
+                    ShimmerStoreCollectionsList()
                 }
             }
             refreshState is LoadState.Error -> {

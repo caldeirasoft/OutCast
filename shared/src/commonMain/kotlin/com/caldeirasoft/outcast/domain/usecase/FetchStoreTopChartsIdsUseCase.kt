@@ -11,7 +11,7 @@ class FetchStoreTopChartsIdsUseCase(
 ) {
     fun execute(storeGenre: Int?, storeItemType: StoreItemType, storeFront: String): Flow<List<Long>> =
         flow {
-            emit(stopwatch("FetchStoreTopChartsPodcastsIdsUseCase - getTopChartsPodcastsIdsAsync") {
+            emit(stopwatch("FetchStoreTopChartsIdsUseCase - getTopChartsIdsAsync") {
                 storeRepository.getTopChartsIdsAsync(storeGenre, storeFront, storeItemType, 200)
             })
         }

@@ -97,7 +97,7 @@ private fun StoreGenreContent(
     {
         viewState
             .storeResourceData
-            .onLoading { LoadingListShimmer() }
+            .onLoading { ShimmerStoreCollectionsList() }
             .onError { ErrorScreen(t = it) }
             .onSuccess {
                 DiscoverContent(

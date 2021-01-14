@@ -21,7 +21,7 @@ object AndroidSdk {
 }
 
 object Dependencies {
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha03"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha04"
     const val junit = "junit:junit:4.13"
 
     object AndroidX {

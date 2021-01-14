@@ -22,7 +22,8 @@ class StoreRepositoryImpl (
         const val DEFAULT_GENRE = 26
         const val GENRE_URL = "https://podcasts.apple.com/genre/id{genre}"
         const val GENRES_URL = "https://itunes.apple.com/WebObjects/MZStoreServices.woa/ws/genres"
-        const val TOP_CHARTS_URL = "https://itunes.apple.com/WebObjects/MZStoreServices.woa/ws/charts"
+        const val TOP_CHARTS_IDS_URL = "https://itunes.apple.com/WebObjects/MZStoreServices.woa/ws/charts"
+        const val TOP_CHARTS_URL = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop"
         const val LOOKUP_URL = "https://uclient-api.itunes.apple.com/WebObjects/MZStorePlatform.woa/wa/lookup"
     }
 
@@ -492,7 +493,10 @@ class StoreRepositoryImpl (
         limit: Int
     ): List<Long> {
         // get top charts data
-        val type = when (storeItemType) { StoreItemType.PODCAST -> "Podcasts" else -> "PodcastEpisodes" }
+        val type = when (storeItemType) {
+            StoreItemType.PODCAST -> "Podcasts"
+            StoreItemType.EPISODE -> "PodcastEpisodes"
+        }
         val resultIdsResult = getTopChartsIdsAsync(genre, type, storeFront, limit)
         return resultIdsResult.resultIds
     }
@@ -502,7 +506,7 @@ class StoreRepositoryImpl (
      */
     private suspend fun getTopChartsIdsAsync(genre: Int?, type: String, storeFront: String, limit: Int): ResultIdsResult =
         httpClient.get {
-            url(TOP_CHARTS_URL)
+            url(TOP_CHARTS_IDS_URL)
             parameter("name", type)
             genre?.let {
                 parameter("g", genre)

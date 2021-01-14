@@ -11,8 +11,6 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
-import com.caldeirasoft.outcast.ui.screen.store.base.StoreChartTab
-import com.caldeirasoft.outcast.ui.util.ScreenState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +28,8 @@ class TopChartsViewModel(genreId: Int?)
     private val storeFront = fetchStoreFrontUseCase.getStoreFront()
     // selected tab
     private val selectedTab = MutableStateFlow(StoreItemType.PODCAST)
+    // state
+    val state = MutableStateFlow(State())
 
     // topPodcastsCharts
     val topPodcastsCharts: Flow<PagingData<StoreItem>> =
@@ -64,9 +64,7 @@ class TopChartsViewModel(genreId: Int?)
     }
 
     data class State(
-        val screenState: ScreenState = ScreenState.Idle,
-        val selectedChartTab: StoreChartTab = StoreChartTab.Podcasts,
-        val storeFront: String? = null,
+        val selectedChartTab: StoreItemType = StoreItemType.PODCAST,
     )
 }
 

@@ -83,7 +83,7 @@ private fun StoreRoomScreen(
     {
         viewState
             .storeResourceData
-            .onLoading { LoadingListShimmer() }
+            .onLoading { ShimmerStoreCollectionsList() }
             .onError { ErrorScreen(t = it) }
             .onSuccess<StoreRoomPage> {
                 StoreRoomPodcastContent(
@@ -116,7 +116,7 @@ private fun StoreRoomPodcastContent(
         when {
             refreshState is LoadState.Loading -> {
                 item {
-                    LoadingListShimmer()
+                    ShimmerStoreCollectionsList()
                 }
             }
             refreshState is LoadState.Error -> {
