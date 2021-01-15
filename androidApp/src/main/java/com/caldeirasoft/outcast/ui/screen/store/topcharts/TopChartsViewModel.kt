@@ -11,10 +11,9 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
+import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -29,7 +28,9 @@ class TopChartsViewModel(genreId: Int?)
     // selected tab
     private val selectedTab = MutableStateFlow(StoreItemType.PODCAST)
     // state
-    val state = MutableStateFlow(State())
+    val state: StateFlow<State> =
+        selectedTab.map { State(selectedChartTab = it) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, State())
 
     // topPodcastsCharts
     val topPodcastsCharts: Flow<PagingData<StoreItem>> =

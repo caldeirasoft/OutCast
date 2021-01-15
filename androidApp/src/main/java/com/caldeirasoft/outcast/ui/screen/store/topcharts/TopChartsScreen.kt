@@ -17,15 +17,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
+import androidx.paging.compose.itemsIndexed
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.components.ChoiceChipTab
-import com.caldeirasoft.outcast.ui.components.DiscoverContent
-import com.caldeirasoft.outcast.ui.components.PodcastListItemIndexed
-import com.caldeirasoft.outcast.ui.components.StoreEpisodeItemFromCharts
+import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -108,7 +106,7 @@ fun TopChartsScreen(
             when (viewState.selectedChartTab) {
                 StoreItemType.PODCAST ->
                     TopChartTabContent(
-                        topEpisodesCharts,
+                        topPodcastsCharts,
                         navigateToPodcast = navigateToPodcast
                     )
                 StoreItemType.EPISODE ->
@@ -130,24 +128,29 @@ private fun TopChartTabContent(
     navigateToPodcast: (String) -> Unit,
 ) {
     DiscoverContent(
-        discover = topCharts
-    ) { index, item ->
-        when (item) {
-            is StorePodcast -> {
-                PodcastListItemIndexed(
-                    modifier = Modifier.fillMaxWidth()
-                        .clickable(onClick = { navigateToPodcast(item.url) }),
-                    storePodcast = item,
-                    index = index + 1)
-                Divider()
-            }
-            is StoreEpisode -> {
-                StoreEpisodeItemFromCharts(
-                    onEpisodeClick = { navigateToPodcast(item.podcastEpisodeWebsiteUrl.orEmpty()) },
-                    onThumbnailClick = { navigateToPodcast(item.podcastEpisodeWebsiteUrl.orEmpty()) },
-                    storeEpisode = item,
-                    index = index + 1)
-                Divider()
+        discover = topCharts,
+        loadingContent = { ShimmerStorePodcastList() },
+    ) { lazyPagingItems ->
+        itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
+            when (item) {
+                is StorePodcast -> {
+                    PodcastListItemIndexed(
+                        modifier = Modifier.fillMaxWidth()
+                            .clickable(onClick = { navigateToPodcast(item.url) }),
+                        storePodcast = item,
+                        index = index + 1
+                    )
+                    Divider()
+                }
+                is StoreEpisode -> {
+                    StoreEpisodeItemFromCharts(
+                        onEpisodeClick = { navigateToPodcast(item.podcastEpisodeWebsiteUrl.orEmpty()) },
+                        onThumbnailClick = { navigateToPodcast(item.podcastEpisodeWebsiteUrl.orEmpty()) },
+                        storeEpisode = item,
+                        index = index + 1
+                    )
+                    Divider()
+                }
             }
         }
     }

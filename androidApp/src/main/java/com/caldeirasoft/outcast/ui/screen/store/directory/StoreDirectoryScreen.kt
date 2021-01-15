@@ -23,6 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollectionTopChart
@@ -119,79 +122,72 @@ private fun StoreDirectoryContent(
         }
     )
     {
-        viewState
-            .storeResourceData
-            .onLoading { ShimmerStoreCollectionsList() }
-            .onError { ErrorScreen(t = it) }
-            .onSuccess {
-                DiscoverContent(
-                    discover = discover,
-                    headerContent = { SearchButton() }
-                ) { _, item ->
-                    when (item) {
-                        is StoreCollectionPodcasts ->
-                            StoreCollectionPodcastsContent(
-                                storeCollection = item,
-                                navigateToRoom = navigateToRoom,
-                                navigateToPodcast = navigateToPodcast,
-                            )
-                        is StoreCollectionEpisodes ->
-                            StoreCollectionEpisodesContent(
-                                storeCollection = item)
-                        is StoreCollectionRooms ->
-                            StoreCollectionRoomsContent(
-                                storeCollection = item,
-                                navigateToRoom = navigateToRoom)
-                        is StoreCollectionFeatured ->
-                            StoreCollectionFeaturedContent(
-                                storeCollection = item)
-                        is StoreCollectionGenres ->
-                            StoreCollectionGenresContent(
-                                storeCollection = item,
-                                navigateToGenre = navigateToGenre,
-                                navigateToCategories = navigateToCategories
-                            )
-                        is StoreCollectionTopPodcasts ->
-                            StoreCollectionTopChartsContent(
-                                storeCollection = item,
-                                numRows = 4,
-                                headerContent = {
-                                    StoreHeadingSectionWithLink(
-                                        title = item.label,
-                                        onClick = {
-                                            navigateToTopCharts(item.genreId, StoreItemType.PODCAST)
-                                        }
-                                    )
-                                },
-                            ) { index, storeItem ->
-                                SmallPodcastListItemIndexed(
-                                    modifier = Modifier.fillMaxWidth()
-                                        .clickable(onClick = { navigateToPodcast(storeItem.url) }),
-                                    storePodcast = storeItem,
-                                    index = index + 1)
+        DiscoverContent(
+            discover = discover,
+            loadingContent = { ShimmerStoreCollectionsList() },
+            headerContent = { SearchButton() }
+        ) { lazyPagingItems ->
+            items(lazyPagingItems = lazyPagingItems) { item ->
+                when (item) {
+                    is StoreCollectionPodcasts ->
+                        StoreCollectionPodcastsContent(
+                            storeCollection = item,
+                            navigateToRoom = navigateToRoom,
+                            navigateToPodcast = navigateToPodcast,
+                        )
+                    is StoreCollectionEpisodes ->
+                        StoreCollectionEpisodesContent(
+                            storeCollection = item
+                        )
+                    is StoreCollectionRooms ->
+                        StoreCollectionRoomsContent(
+                            storeCollection = item,
+                            navigateToRoom = navigateToRoom
+                        )
+                    is StoreCollectionFeatured ->
+                        StoreCollectionFeaturedContent(
+                            storeCollection = item
+                        )
+                    is StoreCollectionGenres ->
+                        StoreCollectionGenresContent(
+                            storeCollection = item,
+                            navigateToGenre = navigateToGenre,
+                            navigateToCategories = navigateToCategories
+                        )
+                    is StoreCollectionTopPodcasts ->
+                        StoreCollectionTopChartsContent(
+                            storeCollection = item,
+                            numRows = 4,
+                            navigateToTopCharts = {
+                                navigateToTopCharts(item.genreId, StoreItemType.PODCAST)
                             }
-                        is StoreCollectionTopEpisodes ->
-                            StoreCollectionTopChartsContent(
-                                storeCollection = item,
-                                numRows = 3,
-                                headerContent = {
-                                    StoreHeadingSectionWithLink(
-                                        title = item.label,
-                                        onClick = {
-                                            navigateToTopCharts(item.genreId, StoreItemType.EPISODE)
-                                        }
-                                    )
-                                },
-                            ) { index, storeItem ->
-                                StoreEpisodeCardItemFromCharts(
-                                    onEpisodeClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) },
-                                    onThumbnailClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) },
-                                    storeEpisode = storeItem,
-                                    index = index + 1)
+                        ) { index, storeItem ->
+                            SmallPodcastListItemIndexed(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(onClick = { navigateToPodcast(storeItem.url) }),
+                                storePodcast = storeItem,
+                                index = index + 1
+                            )
+                        }
+                    is StoreCollectionTopEpisodes ->
+                        StoreCollectionTopChartsContent(
+                            storeCollection = item,
+                            numRows = 3,
+                            navigateToTopCharts = {
+                                navigateToTopCharts(item.genreId, StoreItemType.EPISODE)
                             }
-                    }
+                        ) { index, storeItem ->
+                            StoreEpisodeCardItemFromCharts(
+                                onEpisodeClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) },
+                                onThumbnailClick = { navigateToPodcast(storeItem.podcastEpisodeWebsiteUrl.orEmpty()) },
+                                storeEpisode = storeItem,
+                                index = index + 1
+                            )
+                        }
                 }
             }
+        }
     }
 }
 
@@ -199,7 +195,7 @@ private fun StoreDirectoryContent(
 private fun <T: StoreItem> StoreCollectionTopChartsContent(
     storeCollection: StoreCollectionTopChart<T>,
     numRows: Int = 4,
-    headerContent: @Composable (ColumnScope.() -> Unit),
+    navigateToTopCharts: () -> Unit,
     itemContent: @Composable (Int, T) -> Unit,
 ) {
     val indexedItems =
@@ -212,7 +208,10 @@ private fun <T: StoreItem> StoreCollectionTopChartsContent(
     val selectedPage = remember { mutableStateOf(0) }
 
     Column {
-        headerContent()
+        StoreHeadingSectionWithLink(
+            title = storeCollection.label,
+            onClick = navigateToTopCharts
+        )
 
         Pager(
             state = pagerState,

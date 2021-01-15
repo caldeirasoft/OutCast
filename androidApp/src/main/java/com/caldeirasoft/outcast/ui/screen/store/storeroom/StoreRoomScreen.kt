@@ -19,6 +19,7 @@ import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onError
@@ -81,115 +82,49 @@ private fun StoreRoomScreen(
         }
     )
     {
-        viewState
-            .storeResourceData
-            .onLoading { ShimmerStoreCollectionsList() }
-            .onError { ErrorScreen(t = it) }
-            .onSuccess<StoreRoomPage> {
-                StoreRoomPodcastContent(
-                    storeData = it,
-                    discover = discover,
-                    navigateToPodcast = navigateToPodcast, )
-            }
-            .onSuccess<StoreMultiRoomPage> {
-                StoreMutiRoomContent(
-                    storeData = it,
-                    discover = discover,
-                    navigateToRoom = navigateToRoom,
-                    navigateToPodcast = navigateToPodcast)
-            }
-    }
-}
-
-@Composable
-private fun StoreRoomPodcastContent(
-    storeData: StoreRoomPage,
-    discover: Flow<PagingData<StoreItem>>,
-    navigateToPodcast: (String) -> Unit,
-) {
-    val lazyPagingItems = discover.collectAsLazyPagingItems()
-    val loadState = lazyPagingItems.loadState
-    val refreshState = loadState.refresh
-    val appendState = loadState.append
-    LazyColumn {
-        // content
-        when {
-            refreshState is LoadState.Loading -> {
-                item {
-                    ShimmerStoreCollectionsList()
-                }
-            }
-            refreshState is LoadState.Error -> {
-                item {
-                    ErrorScreen(t = refreshState.error)
-                }
-            }
-            refreshState is LoadState.NotLoading -> {
-                gridItems(
-                    lazyPagingItems = lazyPagingItems,
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalInnerPadding = 8.dp,
-                    verticalInnerPadding = 8.dp,
-                    columns = 3
-                ) { item ->
-                    item?.let {
+        DiscoverContent(
+            discover = discover,
+            loadingContent = { ShimmerStoreCollectionsList() },
+        ) { lazyPagingItems ->
+            when (viewState.storeData) {
+                is StoreMultiRoomPage ->
+                    items(lazyPagingItems = lazyPagingItems) { item ->
                         when (item) {
-                            is StorePodcast -> {
-                                PodcastGridItem(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = { navigateToPodcast(item.url) }),
-                                    podcast = item)
-                            }
+                            is StoreCollectionPodcasts ->
+                                StoreCollectionPodcastsContent(
+                                    storeCollection = item,
+                                    navigateToRoom = navigateToRoom,
+                                    navigateToPodcast = navigateToPodcast,
+                                )
+                            is StoreCollectionEpisodes ->
+                                StoreCollectionEpisodesContent(
+                                    storeCollection = item
+                                )
+                            is StoreCollectionRooms ->
+                                StoreCollectionRoomsContent(
+                                    storeCollection = item,
+                                    navigateToRoom = navigateToRoom
+                                )
                         }
                     }
-                }
+                is StoreRoomPage ->
+                    gridItems(
+                        lazyPagingItems = lazyPagingItems,
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalInnerPadding = 8.dp,
+                        verticalInnerPadding = 8.dp,
+                        columns = 3
+                    ) { item ->
+                        if (item is StorePodcast) {
+                            PodcastGridItem(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(onClick = { navigateToPodcast(item.url) }),
+                                podcast = item
+                            )
+                        }
+                    }
             }
-        }
-
-        when (appendState) {
-            is LoadState.Loading -> {
-                item {
-                    Text(
-                        modifier = Modifier.padding(
-                            vertical = 16.dp,
-                            horizontal = 4.dp
-                        ),
-                        text = "Loading next"
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-private fun StoreMutiRoomContent(
-    storeData: StoreMultiRoomPage,
-    discover: Flow<PagingData<StoreItem>>,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateToPodcast: (String) -> Unit,
-) {
-    DiscoverContent(
-        discover = discover,
-    ) { _, item ->
-        when (item) {
-            is StoreCollectionPodcasts ->
-                StoreCollectionPodcastsContent(
-                    storeCollection = item,
-                    navigateToRoom = navigateToRoom,
-                    navigateToPodcast = navigateToPodcast,
-                )
-            is StoreCollectionEpisodes ->
-                StoreCollectionEpisodesContent(
-                    storeCollection = item
-                )
-            is StoreCollectionRooms ->
-                StoreCollectionRoomsContent(
-                    storeCollection = item,
-                    navigateToRoom = navigateToRoom
-                )
         }
     }
 }

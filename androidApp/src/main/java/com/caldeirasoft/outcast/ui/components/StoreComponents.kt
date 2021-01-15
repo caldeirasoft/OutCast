@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -48,8 +49,9 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun DiscoverContent(
     discover: Flow<PagingData<StoreItem>>,
+    loadingContent: @Composable () -> Unit = emptyContent(),
     headerContent: @Composable () -> Unit = emptyContent(),
-    itemContent: @Composable LazyItemScope.(index: Int, value: StoreItem) -> Unit,
+    itemsContent: LazyListScope.(LazyPagingItems<StoreItem>) -> Unit,
 )
 {
     val lazyPagingItems = discover.collectAsLazyPagingItems()
@@ -65,7 +67,7 @@ fun DiscoverContent(
         when {
             refreshState is LoadState.Loading -> {
                 item {
-                    ShimmerStoreCollectionsList()
+                    loadingContent()
                 }
             }
             refreshState is LoadState.Error -> {
@@ -81,11 +83,7 @@ fun DiscoverContent(
                 }
             }
             refreshState is LoadState.NotLoading ->
-                itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
-                    item?.let {
-                        itemContent(index, item)
-                    }
-                }
+                itemsContent(lazyPagingItems)
         }
 
         when (val appendState = loadState.append) {
@@ -114,60 +112,6 @@ fun DiscoverContent(
         }
     }
 }
-
-@Composable
-fun StoreContentFeed(
-    lazyPagingItems: LazyPagingItems<StoreItem>,
-    itemContent: @Composable (StoreItem, Int) -> Unit
-) {
-    LazyColumn {
-        val loadState = lazyPagingItems.loadState
-        val refreshState = loadState.refresh
-        when {
-            refreshState is LoadState.Loading -> {
-                item { LoadingScreen() }
-            }
-            refreshState is LoadState.Error -> {
-                item {
-                    ErrorScreen(t = refreshState.error)
-                }
-            }
-            refreshState is LoadState.NotLoading
-                    && loadState.append.endOfPaginationReached
-                    && lazyPagingItems.itemCount == 0 -> {
-                item {
-                    Text("Empty")
-                }
-            }
-            refreshState is LoadState.NotLoading ->
-                itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
-                    item?.let {
-                        itemContent(item, index)
-                    }
-                }
-        }
-
-        when (val appendState = loadState.append) {
-            is LoadState.Loading -> {
-                item {
-                    Text(
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 4.dp),
-                        text = "Loading next"
-                    )
-                }
-            }
-            is LoadState.Error -> {
-                item {
-                    Text(
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 4.dp),
-                        text = "Error getting next: ${appendState.error}"
-                    )
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
 fun StoreCollectionEpisodesContent(storeCollection: StoreCollectionEpisodes) {

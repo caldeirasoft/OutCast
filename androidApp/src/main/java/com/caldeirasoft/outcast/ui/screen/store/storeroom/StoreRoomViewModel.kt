@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
 import androidx.lifecycle.viewModelScope
+import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
@@ -19,19 +20,20 @@ class StoreRoomViewModel(
 
     // state
     val state: StateFlow<State> =
-        storeResourceData.map { State(storeResourceData = it)}
+        storeData
+            .map { State(storeData = it)}
             .stateIn(viewModelScope, SharingStarted.Eagerly, State())
 
-    init {
+    override fun getStoreDataFlow(): Flow<StoreData> =
         run {
             if (room.url.isEmpty()) flowOf(Resource.Success(room.page))
             else fetchStoreDataUseCase.executeAsync(room.url, room.storeFront)
         }
             .onEach { storeResourceData.emit(it) }
-            .launchIn(viewModelScope)
-    }
+            .filterIsInstance<Resource.Success<StoreData>>()
+            .map { it.data }
 
     data class State(
-        val storeResourceData: Resource = Resource.Loading,
+        val storeData: StorePage? = null,
     )
 }

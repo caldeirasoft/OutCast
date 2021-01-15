@@ -17,13 +17,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
+import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onError
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -95,45 +93,42 @@ private fun StoreGenreContent(
         }
     )
     {
-        viewState
-            .storeResourceData
-            .onLoading { ShimmerStoreCollectionsList() }
-            .onError { ErrorScreen(t = it) }
-            .onSuccess {
-                DiscoverContent(
-                    discover = discover,
-                ) { _, item ->
-                    when (item) {
-                        is StoreCollectionPodcasts ->
-                            StoreCollectionPodcastsContent(
-                                storeCollection = item,
-                                navigateToRoom = navigateToRoom,
-                                navigateToPodcast = navigateToPodcast,
-                            )
-                        is StoreCollectionEpisodes ->
-                            StoreCollectionEpisodesContent(
-                                storeCollection = item
-                            )
-                        is StoreCollectionCharts ->
-                            StoreCollectionChartsContent(
-                                storeCollection = item,
-                                selectedTab = viewState.selectedChartTab,
-                                onTabSelected = onChartTabSelected,
-                                navigateToTopCharts = navigateToTopCharts,
-                                navigateToPodcast = navigateToPodcast,
-                            )
-                        is StoreCollectionRooms ->
-                            StoreCollectionRoomsContent(
-                                storeCollection = item,
-                                navigateToRoom = navigateToRoom
-                            )
-                        is StoreCollectionFeatured ->
-                            StoreCollectionFeaturedContent(
-                                storeCollection = item
-                            )
-                    }
+        DiscoverContent(
+            discover = discover,
+            loadingContent = { ShimmerStoreCollectionsList() },
+        ) { lazyPagingItems ->
+            items(lazyPagingItems = lazyPagingItems) { item ->
+                when (item) {
+                    is StoreCollectionPodcasts ->
+                        StoreCollectionPodcastsContent(
+                            storeCollection = item,
+                            navigateToRoom = navigateToRoom,
+                            navigateToPodcast = navigateToPodcast,
+                        )
+                    is StoreCollectionEpisodes ->
+                        StoreCollectionEpisodesContent(
+                            storeCollection = item
+                        )
+                    is StoreCollectionCharts ->
+                        StoreCollectionChartsContent(
+                            storeCollection = item,
+                            selectedTab = viewState.selectedChartTab,
+                            onTabSelected = onChartTabSelected,
+                            navigateToTopCharts = navigateToTopCharts,
+                            navigateToPodcast = navigateToPodcast,
+                        )
+                    is StoreCollectionRooms ->
+                        StoreCollectionRoomsContent(
+                            storeCollection = item,
+                            navigateToRoom = navigateToRoom
+                        )
+                    is StoreCollectionFeatured ->
+                        StoreCollectionFeaturedContent(
+                            storeCollection = item
+                        )
                 }
             }
+        }
     }
 }
 

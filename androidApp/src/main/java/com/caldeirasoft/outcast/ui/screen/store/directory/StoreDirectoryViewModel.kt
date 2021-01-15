@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.store.directory
 
 import androidx.lifecycle.viewModelScope
+import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingData
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
@@ -18,14 +19,6 @@ class StoreDirectoryViewModel : StoreCollectionsViewModel<StoreGroupingData>(), 
     val state = MutableStateFlow(State())
 
     init {
-        storeFront
-            .flatMapConcat {
-                fetchStoreDirectoryUseCase
-                    .executeAsync(storeFront = it)
-            }
-            .onEach { storeResourceData.emit(it) }
-            .launchIn(viewModelScope)
-
         combine(
             storeResourceData,
             storeFront)
@@ -35,6 +28,15 @@ class StoreDirectoryViewModel : StoreCollectionsViewModel<StoreGroupingData>(), 
             .onEach { state.emit(it) }
             .launchIn(viewModelScope)
     }
+
+    override fun getStoreDataFlow(): Flow<StoreData> =
+        storeFront
+            .flatMapConcat {
+                fetchStoreDirectoryUseCase
+                    .executeAsync(storeFront = it)
+            }
+            .filterIsInstance<Resource.Success<StoreData>>()
+            .map { it.data }
 
     data class State(
         val storeResourceData: Resource = Resource.Loading,

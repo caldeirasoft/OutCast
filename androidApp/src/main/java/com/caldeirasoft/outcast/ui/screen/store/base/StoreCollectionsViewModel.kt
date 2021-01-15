@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
+import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
@@ -39,26 +40,26 @@ abstract class StoreCollectionsViewModel<T : StorePage> : ViewModel(), KoinCompo
 
     // paged list
     val discover: Flow<PagingData<StoreItem>> =
-        storeData
-            .filterNotNull()
-            .flatMapLatest { getStoreDataPagedList(storeData = it) }
+        getStoreDataPagedList()
             .cachedIn(viewModelScope)
 
-    private fun getStoreDataPagedList(storeData: T): Flow<PagingData<StoreItem>> =
+    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
         Pager(
             /*TODO : change paging config for Room pages */
             PagingConfig(
-                pageSize = 3,
+                pageSize = 5,
                 enablePlaceholders = false,
                 maxSize = 100,
                 prefetchDistance = 2
             )
         ) {
-            StoreDataPagingSource(scope = viewModelScope, storeData = storeData)
+            StoreDataPagingSource(scope = viewModelScope, dataFlow = { getStoreDataFlow() })
                 .also {
                     pagingSource = it
                 }
         }.flow
+
+    protected abstract fun getStoreDataFlow(): Flow<StoreData>
 
     fun refresh() {
         pagingSource?.invalidate()

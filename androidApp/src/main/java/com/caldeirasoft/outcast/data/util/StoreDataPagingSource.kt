@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -16,12 +17,19 @@ import org.koin.core.component.inject
 @KoinApiExtension
 class StoreDataPagingSource(
     val scope: CoroutineScope,
-    private val storeData: StoreData,
+    inline val dataFlow: () -> Flow<StoreData>
 ) : PagingSource<Int, StoreItem>(), KoinComponent
 {
     private val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
 
+    private val storeDataFlow: StateFlow<StoreData?> =
+        dataFlow()
+            .stateIn(scope, SharingStarted.Eagerly, null)
+
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
+        val flow = storeDataFlow
+        val flowNotNull = flow.filterNotNull()
+        val storeData = flowNotNull.first()
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()
         when (storeData) {
