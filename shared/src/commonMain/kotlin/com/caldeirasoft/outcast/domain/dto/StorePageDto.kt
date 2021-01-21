@@ -210,7 +210,18 @@ class UberListResult(
     val titleTextColorOnBlack: String? = null,
     val description: String? = null,
     val masterArt: List<ArtworkDto> = arrayListOf()
-)
+) {
+    fun toArtwork() =
+        Artwork(
+            width = 0,
+            height = 0,
+            url = masterArt.first().run {
+                url.replace("${width}x${height}", "{w}x{h}")
+            },
+            bgColor = backgroundColor,
+            textColor1 = titleTextColor,
+            textColor2 = primaryTextColor)
+}
 
 @Serializable
 class EditorialArtworkResult(

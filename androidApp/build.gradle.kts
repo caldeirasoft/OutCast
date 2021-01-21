@@ -64,6 +64,9 @@ dependencies {
     implementation(Dependencies.Ktor.clientOkHttp)
     // OkHttp
     implementation(Dependencies.SquareUp.OkHttp3.okhttp)
+    // Accompanist
+    //implementation(Dependencies.Accompanist.coil)
+    //implementation(Dependencies.Accompanist.insets)
     // Landscapist
     implementation(Dependencies.Landscapist.coil)
     // SQLDelight

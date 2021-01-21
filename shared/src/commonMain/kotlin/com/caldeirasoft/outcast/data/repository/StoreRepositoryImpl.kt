@@ -338,7 +338,7 @@ class StoreRepositoryImpl (
         return StoreMultiRoomPage(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
-            artwork = storePageDto.pageData?.uber?.masterArt?.firstOrNull()?.toArtwork(),
+            artwork = storePageDto.pageData?.uber?.toArtwork(),
             storeFront = storeFront,
             storeList = collectionSequence.toList(),
             timestamp = timestamp,
@@ -359,8 +359,7 @@ class StoreRepositoryImpl (
             id = storePageDto.pageData?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.pageTitle.orEmpty(),
             description = storePageDto.pageData?.description,
-            artwork = storePageDto.pageData?.uber?.masterArt?.lastOrNull()
-                ?.toArtwork(),
+            artwork = storePageDto.pageData?.uber?.toArtwork(),
             storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty(),
             storeIds = ids,
             timestamp = timestamp,
@@ -393,8 +392,7 @@ class StoreRepositoryImpl (
             id = storePageDto.pageData?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.pageTitle.orEmpty(),
             description = storePageDto.pageData?.description,
-            artwork = storePageDto.pageData?.uber?.masterArt?.lastOrNull()
-                ?.toArtwork(),
+            artwork = storePageDto.pageData?.uber?.toArtwork(),
             storeFront = storeFront,
             storeList = collectionSequence.toList(),
             timestamp = timestamp,

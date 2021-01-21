@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,7 +33,6 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.util.Log_D
@@ -108,6 +106,63 @@ fun DiscoverContent(
                         text = "Error getting next: ${appendState.error}"
                     )
                 }
+            }
+        }
+    }
+}
+
+fun LazyListScope.DiscoverContents(
+    lazyPagingItems: LazyPagingItems<StoreItem>,
+    loadingContent: @Composable () -> Unit = emptyContent(),
+    itemsContent: LazyListScope.(LazyPagingItems<StoreItem>) -> Unit,
+) {
+    val loadState = lazyPagingItems.loadState
+    val refreshState = loadState.refresh
+
+    // content
+    when {
+        refreshState is LoadState.Loading -> {
+            item {
+                loadingContent()
+            }
+        }
+        refreshState is LoadState.Error -> {
+            item {
+                ErrorScreen(t = refreshState.error)
+            }
+        }
+        refreshState is LoadState.NotLoading
+                && loadState.append.endOfPaginationReached
+                && lazyPagingItems.itemCount == 0 -> {
+            item {
+                Text("Empty")
+            }
+        }
+        refreshState is LoadState.NotLoading ->
+            itemsContent(lazyPagingItems)
+    }
+
+    when (val appendState = loadState.append) {
+        is LoadState.Loading -> {
+            item {
+                Text(
+                    modifier = Modifier.padding(
+                        vertical = 16.dp,
+                        horizontal = 4.dp
+                    ),
+                    text = "Loading next"
+                )
+            }
+        }
+        is LoadState.Error -> {
+            item {
+                Text(
+                    modifier = Modifier.padding(
+                        vertical = 16.dp,
+                        horizontal = 4.dp
+                    ),
+                    text = "Error getting next: ${appendState.error}"
+                )
             }
         }
     }
@@ -279,7 +334,9 @@ fun StoreCollectionGenresContent(
             else it
         }
     Column(modifier = Modifier.fillMaxWidth()) {
-        StoreHeadingSectionWithLink(title = storeCollection.label, onClick = { navigateToCategories(storeCollection) })
+        StoreHeadingSectionWithLink(
+            title = storeCollection.label,
+            onClick = { navigateToCategories(storeCollection) })
 
         Grid(
             mainAxisSpacing = 8.dp,

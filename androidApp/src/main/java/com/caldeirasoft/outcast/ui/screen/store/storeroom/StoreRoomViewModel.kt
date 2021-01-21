@@ -2,7 +2,7 @@ package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.interfaces.StoreData
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.StoreFeaturedPage
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
@@ -15,14 +15,15 @@ import org.koin.core.component.inject
 @ExperimentalCoroutinesApi
 class StoreRoomViewModel(
     private val room: StoreRoom,
-) : StoreCollectionsViewModel<StorePage>(), KoinComponent {
+) : StoreCollectionsViewModel<StoreFeaturedPage>(), KoinComponent {
     private val fetchStoreDataUseCase: FetchStoreDataUseCase by inject()
 
     // state
     val state: StateFlow<State> =
         storeData
+            .filterNotNull()
             .map { State(storeData = it)}
-            .stateIn(viewModelScope, SharingStarted.Eagerly, State())
+            .stateIn(viewModelScope, SharingStarted.Eagerly, State(room.page))
 
     override fun getStoreDataFlow(): Flow<StoreData> =
         run {
@@ -34,6 +35,6 @@ class StoreRoomViewModel(
             .map { it.data }
 
     data class State(
-        val storeData: StorePage? = null,
+        val storeData: StoreFeaturedPage
     )
 }

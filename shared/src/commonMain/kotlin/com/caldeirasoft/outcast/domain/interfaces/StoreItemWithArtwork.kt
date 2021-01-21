@@ -5,7 +5,7 @@ import com.caldeirasoft.outcast.domain.models.Artwork
 interface StoreItemWithArtwork : StoreItem {
     val artwork: Artwork?
 
-    fun getArtworkUrl(): String;
+    fun getArtworkUrl(): String
 
     companion object {
         fun artworkUrl(artwork: Artwork?, width:Int, height: Int, crop:String = "bb", format:String = "jpg"): String {

@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.navigation
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
@@ -119,6 +120,7 @@ inline fun <reified T> NavBackStackEntry.getObjectNotNull(key: String): T {
 fun NavController.navigate(screen: Screen, vararg fromToPairs: Pair<String, Any>) =
     this.navigate(Screen.path(screen, *fromToPairs))
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainNavHost(startScreen: Screen) {
     val navController = rememberNavController()

@@ -25,7 +25,6 @@ data class StoreRoom(
             id = id,
             label = label,
             url = url,
-            artwork = artwork,
             storeFront = storeFront,
             storeIds = storeIds,
             timestamp = Clock.System.now()
