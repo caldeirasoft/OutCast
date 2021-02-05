@@ -102,16 +102,3 @@ private object PlayButtonDefaults {
     val ContentInnerPadding = 8.dp
     private val ThreeLineTrailingTopPadding = 16.dp
 }
-
-private fun applyTextStyle(
-    textStyle: TextStyle,
-    contentAlpha: Float,
-    icon: @Composable (() -> Unit)?
-): @Composable (() -> Unit)? {
-    if (icon == null) return null
-    return {
-        Providers(AmbientContentAlpha provides contentAlpha) {
-            ProvideTextStyle(textStyle, icon)
-        }
-    }
-}

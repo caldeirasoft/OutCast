@@ -1,8 +1,9 @@
 package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.domain.interfaces.StoreData
+import com.caldeirasoft.outcast.domain.interfaces.StoreFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreFeaturedPage
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
@@ -22,19 +23,16 @@ class StoreRoomViewModel(
     val state: StateFlow<State> =
         storeData
             .filterNotNull()
-            .map { State(storeData = it)}
-            .stateIn(viewModelScope, SharingStarted.Eagerly, State(room.page))
+            .map { State(storePage = it)}
+            .stateIn(viewModelScope, SharingStarted.Eagerly, State(room.getPage()))
 
-    override fun getStoreDataFlow(): Flow<StoreData> =
+    override fun getStoreDataFlow(): Flow<Resource> =
         run {
-            if (room.url.isEmpty()) flowOf(Resource.Success(room.page))
+            if (room.url.isEmpty()) flowOf(Resource.Success(room.getPage()))
             else fetchStoreDataUseCase.executeAsync(room.url, room.storeFront)
         }
-            .onEach { storeResourceData.emit(it) }
-            .filterIsInstance<Resource.Success<StoreData>>()
-            .map { it.data }
 
     data class State(
-        val storeData: StoreFeaturedPage
+        val storePage: StoreFeaturedPage
     )
 }

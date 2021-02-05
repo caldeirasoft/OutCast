@@ -1,19 +1,15 @@
-@file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.interfaces
 
-import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
+import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import kotlinx.datetime.Instant
-import kotlinx.serialization.UseSerializers
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
-interface StoreFeaturedPage : StoreItemWithArtwork, StorePage {
-    var label: String
-    val url: String
-    var description: String?
-    override var artwork: Artwork?
-    override val storeFront: String
-    override var lookup: Map<Long, StoreItemWithArtwork>
-    override val timestamp: Instant
-    override fun getArtworkUrl(): String =
-        StoreItemWithArtwork.artworkUrl(artwork, 400, 196, crop = "fa")
+@Serializable
+abstract class StoreFeaturedPage(private val storeData: StoreFeatured)
+    : StorePage {
+    val label get() = this.storeData.label
+    val description get() = this.storeData.description
+    val url get() = this.storeData.url
+    val artwork get() = this.storeData.artwork
 }

@@ -1,8 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.store.directory
 
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.domain.interfaces.StoreData
-import com.caldeirasoft.outcast.domain.models.store.StoreGroupingData
+import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,33 +12,28 @@ import org.koin.core.component.inject
 
 @KoinApiExtension
 @ExperimentalCoroutinesApi
-class StoreDirectoryViewModel : StoreCollectionsViewModel<StoreGroupingData>(), KoinComponent {
+class StoreDirectoryViewModel : StoreCollectionsViewModel<StoreGroupingPage>(), KoinComponent {
     private val fetchStoreDirectoryUseCase: FetchStoreDirectoryUseCase by inject()
     // state
     val state = MutableStateFlow(State())
 
     init {
         combine(
-            storeResourceData,
-            storeFront)
-        { storeResourceData, storeFront ->
-            State(storeResourceData, storeFront)
+            storeData, storeFront)
+        { storeData, storeFront ->
+            State(storeData, storeFront)
         }
             .onEach { state.emit(it) }
             .launchIn(viewModelScope)
     }
 
-    override fun getStoreDataFlow(): Flow<StoreData> =
+    override fun getStoreDataFlow(): Flow<Resource> =
         storeFront
-            .flatMapConcat {
-                fetchStoreDirectoryUseCase
-                    .executeAsync(storeFront = it)
-            }
-            .filterIsInstance<Resource.Success<StoreData>>()
-            .map { it.data }
+            .flatMapConcat { fetchStoreDirectoryUseCase.executeAsync(storeFront = it) }
+
 
     data class State(
-        val storeResourceData: Resource = Resource.Loading,
+        val storeData: StoreGroupingPage? = null,
         val storeFront: String? = null,
     )
 }

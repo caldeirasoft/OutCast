@@ -14,12 +14,11 @@ import org.koin.core.component.inject
 @KoinApiExtension
 class StoreChartsPagingSource(
     val storeFront: String,
-    val scope: CoroutineScope,
+    override val scope: CoroutineScope,
     inline val dataFlow: () -> Flow<List<Long>>
-) : PagingSource<Int, StoreItem>(), KoinComponent {
+) : PagingSource<Int, StoreItem>(), StorePagingSource, KoinComponent {
 
-    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()
-    private val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
+    override val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
 
     private val idsFlow: StateFlow<List<Long>?> =
         dataFlow()
@@ -33,7 +32,7 @@ class StoreChartsPagingSource(
         val items = mutableListOf<StoreItem>()
         val endPosition = Integer.min(ids.size, startPosition + params.loadSize)
         val subset = ids.subList(startPosition, endPosition)
-        items += getStoreItemsUseCase.execute(subset, storeFront, null)
+        items += getItemsFromIds(subset, storeFront, null)
 
         val prevKey = if (startPosition > 0) startPosition - items.size else null
         val nextKey = if (items.isNotEmpty() && items.size == params.loadSize)

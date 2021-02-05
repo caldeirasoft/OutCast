@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class StoreCollectionFeatured(
-    var items: List<StoreItemFeatured>,
+    override val id: Long,
+    var items: List<StoreItemWithArtwork>,
     override val storeFront: String,
-) : StoreCollection {
-}
+) : StoreCollection

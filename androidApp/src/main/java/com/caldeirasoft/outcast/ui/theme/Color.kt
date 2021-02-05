@@ -1,13 +1,12 @@
 package com.caldeirasoft.outcast.ui.theme
 
+import androidx.annotation.FloatRange
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.LaunchedTask
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.platform.ContextAmbient
 import androidx.core.graphics.drawable.toBitmap
 import androidx.palette.graphics.Palette
 import coil.ImageLoader
@@ -32,6 +31,19 @@ fun Color.Companion.randomColor() = Color(colorRange.random(), colorRange.random
 
 fun Color.Companion.getColor(colorString: String): Color {
     return Color(android.graphics.Color.parseColor("#$colorString"))
+}
+
+fun Color.Companion.blendARGB(
+    color1: Color, color2: Color,
+    @FloatRange(from = 0.0, to = 1.0) ratio: Float,
+): Color {
+    val inverseRatio = 1 - ratio
+    val a = color1.alpha * inverseRatio + color2.alpha * ratio
+    val r =
+        color1.red * inverseRatio + color2.red * ratio
+    val g = color1.green * inverseRatio + color2.green * ratio
+    val b = color1.blue * inverseRatio + color2.blue * ratio
+    return Color(red = r, green = g, blue = b, alpha = a)
 }
 
 @Composable

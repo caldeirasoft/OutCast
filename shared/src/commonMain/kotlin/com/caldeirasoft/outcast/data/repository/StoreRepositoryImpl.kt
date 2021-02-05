@@ -2,13 +2,12 @@ package com.caldeirasoft.outcast.data.repository
 
 import com.caldeirasoft.outcast.domain.dto.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.StoreRepository
+import com.caldeirasoft.outcast.domain.util.checkType
 import com.caldeirasoft.outcast.domain.util.stopwatch
+import com.caldeirasoft.outcast.domain.util.tryCast
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.datetime.Clock
@@ -64,18 +63,18 @@ class StoreRepositoryImpl (
     /**
      * getGroupingDataAsync
      */
-    override suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingData {
+    override suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
         val url = GENRE_URL.replace("{genre}", (genre ?: DEFAULT_GENRE).toString())
         val storeData = getStoreDataAsync(url, storeFront)
-        if (storeData !is StoreGroupingData)
-            throw NullPointerException("Invalid cast to StoreGroupingData")
+        if (storeData !is StoreGroupingPage)
+            throw NullPointerException("Invalid cast to StoreGroupingPage")
         return storeData
     }
 
     /**
      * getGroupingDataAsync
      */
-    private fun getGroupingDataAsync(storePageDto: StorePageDto): StoreGroupingData {
+    private fun getGroupingDataAsync(storePageDto: StorePageDto): StoreGroupingPage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
@@ -89,7 +88,7 @@ class StoreRepositoryImpl (
             entries?.forEach { element ->
                 when (element.fcKind) {
                     258 -> { // parse header collection
-                        val sequence: Sequence<StoreItemFeatured> = sequence {
+                        val sequence: Sequence<StoreItemWithArtwork> = sequence {
                             element.children.forEach { elementChild ->
                                 when (elementChild.link.type) {
                                     "content" -> {
@@ -97,7 +96,7 @@ class StoreRepositoryImpl (
                                         if (lockupResult.containsKey(id)) {
                                             lockupResult[id]?.let {
                                                 yield(
-                                                    StorePodcastFeatured(
+                                                    StorePodcast(
                                                         id = it.id?.toLong() ?: 0,
                                                         name = it.name.orEmpty(),
                                                         url = it.url.orEmpty(),
@@ -110,8 +109,7 @@ class StoreRepositoryImpl (
                                                             ?: Clock.System.now(),
                                                         releaseDateTime = it.releaseDateTime
                                                             ?: Clock.System.now(),
-                                                        artwork = elementChild.artwork!!.toArtwork(),
-                                                        podcastArtwork = it.artwork?.toArtwork(),
+                                                        artwork = it.artwork?.toArtwork(),
                                                         trackCount = it.trackCount ?: 0,
                                                         podcastWebsiteUrl = it.podcastWebsiteUrl,
                                                         copyright = it.copyright,
@@ -128,7 +126,8 @@ class StoreRepositoryImpl (
                                     }
                                     "link" -> {
                                         yield(
-                                            StoreRoomFeatured(
+                                            StoreRoom(
+                                                id = elementChild.adamId,
                                                 label = elementChild.link.label,
                                                 url = elementChild.link.url,
                                                 artwork = elementChild.artwork!!.toArtwork(),
@@ -141,6 +140,7 @@ class StoreRepositoryImpl (
                         }
                         yield(
                             StoreCollectionFeatured(
+                                id = element.adamId,
                                 items = sequence.toList(),
                                 storeFront = storeFront
                             )
@@ -151,22 +151,20 @@ class StoreRepositoryImpl (
                             val ids =
                                 elementChild.content.map { content -> content.contentId }
                             when (elementChild.type) {
-                                "popularity" -> {
+                                "popularity" -> { // top podcasts // top episodes
                                     when (elementChild.fcKind) {
                                         // podcast
                                         16 -> yield(
                                             StoreCollectionTopPodcasts(
+                                                id = elementChild.adamId,
                                                 label = elementChild.name,
                                                 genreId = DEFAULT_GENRE,
-                                                storeList = ids.take(15)
-                                                    .filter { storeLookup.contains(it) }
-                                                    .map { storeLookup[it] }
-                                                    .filterIsInstance<StorePodcast>(),
+                                                itemsIds = ids.take(15),
                                                 storeFront = storeFront,
                                             )
                                         )
                                         // episodes
-                                        186 -> yield(
+                                        /*186 -> yield(
                                             StoreCollectionTopEpisodes(
                                                 label = elementChild.name,
                                                 genreId = DEFAULT_GENRE,
@@ -176,34 +174,22 @@ class StoreRepositoryImpl (
                                                     .filterIsInstance<StoreEpisode>(),
                                                 storeFront = storeFront,
                                             )
-                                        )
+                                        )*/
                                         else -> {
                                         }
                                     }
                                 }
                                 "normal" -> {
-                                    when (elementChild.content.first().kindIds.first()) {
-                                        4 -> // podcast
-                                            yield(
-                                                StoreCollectionPodcastIds(
-                                                    label = elementChild.name,
-                                                    url = elementChild.seeAllUrl,
-                                                    itemsIds = ids,
-                                                    storeFront = storeFront
-                                                )
-                                            )
-                                        15 -> // episodes
-                                            yield(
-                                                StoreCollectionEpisodeIds(
-                                                    label = elementChild.name,
-                                                    url = elementChild.seeAllUrl,
-                                                    itemsIds = ids,
-                                                    storeFront = storeFront
-                                                )
-                                            )
-                                        else -> {
-                                        }
-                                    }
+                                    yield(
+                                        StoreCollectionItems(
+                                            id = elementChild.adamId,
+                                            label = elementChild.name,
+                                            url = elementChild.seeAllUrl,
+                                            itemsIds = ids,
+                                            storeFront = storeFront,
+                                            sortByPopularity = (elementChild.sort == 4)
+                                        )
+                                    )
                                 }
                                 else -> {
                                 }
@@ -247,6 +233,7 @@ class StoreRepositoryImpl (
                         if (roomSequence.toList().isNotEmpty()) {
                             yield(
                                 StoreCollectionRooms(
+                                    id = element.adamId,
                                     label = element.name,
                                     items = roomSequence.toList(),
                                     storeFront = storeFront
@@ -261,20 +248,24 @@ class StoreRepositoryImpl (
         val storeGenres: StoreCollectionGenres? =
             storePageDto.pageData?.categoryList?.children?.let {
                 StoreCollectionGenres(
+                    id = storePageDto.pageData.categoryList.genreId.toLong(),
                     label = storePageDto.pageData.categoryList.parentCategoryLabel.orEmpty(),
                     genres = it.map { child -> child.toStoreGenre(storeFront) },
                     storeFront = storeFront
                 )
             }
 
-        return StoreGroupingData(
-            id = storePageDto.pageData?.contentId.orEmpty(),
-            label = storePageDto.pageData?.categoryList?.name.orEmpty(),
+        return StoreGroupingPage(
+            storeData = StoreGroupingData(
+                id = storePageDto.pageData?.contentId.orEmpty(),
+                label = storePageDto.pageData?.categoryList?.name.orEmpty(),
+                storeFront = storeFront,
+                storeList = collectionSequence.toMutableList(),
+                genres = storeGenres,
+            ),
             storeFront = storeFront,
-            storeList = collectionSequence.toMutableList(),
+            lookup = storeLookup,
             timestamp = timestamp,
-            genres = storeGenres,
-            lookup = storeLookup
         )
     }
 
@@ -289,13 +280,18 @@ class StoreRepositoryImpl (
         val ids = storePageDto.pageData?.contentData?.first()?.adamIds?.map { id -> id.toLong() }
             ?: emptyList()
 
-        return StoreRoomPage(
+        val storeData = StoreRoom(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
             artwork = storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
                 ?.toArtwork(),
             storeFront = storeFront,
             storeIds = ids,
+        )
+
+        return StoreRoomPage(
+            storeRoom = storeData,
+            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
@@ -310,24 +306,38 @@ class StoreRepositoryImpl (
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.contentData
             entries?.forEach { contentData ->
-                when (contentData.dkId) {
-                    1 -> { // parse episodes
-                        val ids = contentData.adamIds.map { id -> id.toLong() }
+                val ids = contentData.adamIds.map { id -> id.toLong() }
+                when {
+                    contentData.dkId != null -> {
+                        // popular episodes
                         yield(
-                            StoreCollectionEpisodeIds(
+                            StoreCollectionTopEpisodes(
+                                id = contentData.dkId.toLong(),
                                 label = contentData.title,
                                 itemsIds = ids,
-                                storeFront = storeFront
+                                storeFront = storeFront,
                             )
                         )
                     }
-                    else -> { // parse podcasts
-                        val ids = contentData.adamIds.map { id -> id.toLong() }
+                    contentData.chunkId.isNullOrEmpty() -> {
+                        // popular podcasts
                         yield(
-                            StoreCollectionPodcastIds(
+                            StoreCollectionTopPodcasts(
+                                id = 0L,
                                 label = contentData.title,
                                 itemsIds = ids,
-                                storeFront = storeFront
+                                storeFront = storeFront,
+                            )
+                        )
+                    }
+                    else -> {
+                        // regular podcasts
+                        yield(
+                            StoreCollectionItems(
+                                id = contentData.chunkId.toLong(),
+                                label = contentData.title,
+                                itemsIds = ids,
+                                storeFront = storeFront,
                             )
                         )
                     }
@@ -335,12 +345,17 @@ class StoreRepositoryImpl (
             }
         }
 
-        return StoreMultiRoomPage(
+        val storeData = StoreMultiRoom(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
             artwork = storePageDto.pageData?.uber?.toArtwork(),
             storeFront = storeFront,
-            storeList = collectionSequence.toList(),
+            storeList = collectionSequence.toMutableList(),
+        )
+
+        return StoreMultiRoomPage(
+            storeRoom = storeData,
+            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
@@ -349,19 +364,26 @@ class StoreRepositoryImpl (
     /**
      * getRoomPodcastDataAsync
      */
-    fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StoreRoomPage {
+    private fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StoreRoomPage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val ids = storePageDto.pageData?.adamIds?.map { id -> id.toLong() } ?: emptyList()
+        val isIndexed = (storePageDto.pageData?.defaultSort == 18)
+
+        val storeData = StoreRoom(
+            id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
+            label = storePageDto.pageData?.artist?.name.orEmpty(),
+            artwork = storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
+                ?.toArtwork(),
+            storeFront = storeFront,
+            storeIds = ids,
+            isIndexed = isIndexed
+        )
 
         return StoreRoomPage(
-            id = storePageDto.pageData?.adamId?.toLong() ?: 0,
-            label = storePageDto.pageData?.pageTitle.orEmpty(),
-            description = storePageDto.pageData?.description,
-            artwork = storePageDto.pageData?.uber?.toArtwork(),
-            storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty(),
-            storeIds = ids,
+            storeRoom = storeData,
+            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
@@ -378,7 +400,8 @@ class StoreRepositoryImpl (
             entries?.forEach { segmentData ->
                 val ids = segmentData.adamIds
                 yield(
-                    StoreCollectionPodcastIds(
+                    StoreCollectionItems(
+                        id = segmentData.adamId.toLong(),
                         label = segmentData.title,
                         url = segmentData.seeAllUrl?.url,
                         itemsIds = ids,
@@ -388,13 +411,17 @@ class StoreRepositoryImpl (
             }
         }
 
-        return StoreMultiRoomPage(
-            id = storePageDto.pageData?.adamId?.toLong() ?: 0,
-            label = storePageDto.pageData?.pageTitle.orEmpty(),
-            description = storePageDto.pageData?.description,
+        val storeData = StoreMultiRoom(
+            id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
+            label = storePageDto.pageData?.artist?.name.orEmpty(),
             artwork = storePageDto.pageData?.uber?.toArtwork(),
             storeFront = storeFront,
-            storeList = collectionSequence.toList(),
+            storeList = collectionSequence.toMutableList(),
+        )
+
+        return StoreMultiRoomPage(
+            storeRoom = storeData,
+            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         )
@@ -420,35 +447,42 @@ class StoreRepositoryImpl (
         // parse podcast
         storePageDto.storePlatformData?.producDv?.results?.entries?.firstOrNull()
             ?.let { (key, podcastEntry) ->
-                val podcastData = StorePodcastPage(
-                    id = key,
-                    name = podcastEntry.name.orEmpty(),
-                    url = podcastEntry.url.orEmpty(),
-                    artistName = podcastEntry.artistName.orEmpty(),
-                    artistId = podcastEntry.artistId?.toLong(),
-                    artistUrl = podcastEntry.artistUrl,
-                    description = podcastEntry.description?.standard,
-                    feedUrl = podcastEntry.feedUrl.orEmpty(),
-                    releaseDate = podcastEntry.releaseDateTime ?: Clock.System.now(),
-                    releaseDateTime = podcastEntry.releaseDateTime ?: Clock.System.now(),
-                    artwork = podcastEntry.artwork?.toArtwork(),
-                    trackCount = podcastEntry.trackCount ?: 0,
-                    podcastWebsiteUrl = podcastEntry.podcastWebsiteUrl,
-                    copyright = podcastEntry.copyright,
-                    contentAdvisoryRating = podcastEntry.contentRatingsBySystem?.riaa?.name,
-                    userRating = podcastEntry.userRating?.value?.toFloat() ?: 0f,
-                    genre = podcastEntry.genres.firstOrNull()?.toGenre(),
+                val podcastData = getStoreItemFromLookupResultItem(podcastEntry, storeFront) as StorePodcast
+                val podcastPage = StorePodcastPage(
+                    storeData = podcastData,
                     storeFront = storeFront,
-                    podcastsByArtist = StoreCollectionPodcastIds(
-                        "",
-                        itemsIds = moreByArtist.toList(),
-                        storeFront = storeFront
-                    ),
-                    podcastsListenersAlsoFollow = StoreCollectionPodcastIds(
-                        "",
-                        itemsIds = listenersAlsoBought.toList(),
-                        storeFront = storeFront
-                    ),
+                    otherPodcasts = sequence<StoreCollection> {
+                        if (moreByArtist.isEmpty().not()) {
+                            yield(
+                                StoreCollectionItems(
+                                    0L,
+                                    "podcastsByArtist",
+                                    itemsIds = moreByArtist.toList(),
+                                    storeFront = storeFront
+                                )
+                            )
+                        }
+                        if (listenersAlsoBought.isEmpty().not()) {
+                            yield(
+                                StoreCollectionItems(
+                                    0L,
+                                    "podcastsListenersAlsoFollow",
+                                    itemsIds = listenersAlsoBought.toList(),
+                                    storeFront = storeFront
+                                )
+                            )
+                        }
+                        if (topPodcastsInGenre.isEmpty().not()) {
+                            yield(
+                                StoreCollectionItems(
+                                    0L,
+                                    "topPodcastsInGenre",
+                                    itemsIds = topPodcastsInGenre.toList(),
+                                    storeFront = storeFront
+                                )
+                            )
+                        }
+                    }.toMutableList(),
                     episodes = podcastEntry.children.map { (key, episodeEntry) ->
                         StoreEpisode(
                             id = key.toLong(),
@@ -472,11 +506,13 @@ class StoreRepositoryImpl (
                             podcastEpisodeSeason = episodeEntry.podcastEpisodeSeason,
                             podcastEpisodeType = episodeEntry.podcastEpisodeType.orEmpty(),
                             podcastEpisodeWebsiteUrl = episodeEntry.podcastEpisodeWebsiteUrl,
+                            podcast = podcastData
                         )
                     },
+                    timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
                 )
 
-                return podcastData
+                return podcastPage
             }
             ?: throw Exception("missing podcast entry")
     }
@@ -574,7 +610,9 @@ class StoreRepositoryImpl (
                     podcastEpisodeSeason = item.podcastEpisodeSeason,
                     podcastEpisodeType = item.podcastEpisodeType.orEmpty(),
                     podcastEpisodeWebsiteUrl = item.podcastEpisodeWebsiteUrl,
-                    storeFront = storeFront
+                    storeFront = storeFront,
+                    podcast = requireNotNull(
+                        getStoreItemFromLookupResultItem(item.collection.values.first(), storeFront) as StorePodcast)
                 )
             }
             else -> null

@@ -2,6 +2,7 @@
     <string name="app_name">OutCast</string>
 
     <!-- genre -->
+    <string name="store_genre_all">All categories</string>
     <string name="store_genre_1301">Arts</string>
     <string name="store_genre_1321">Business</string>
     <string name="store_genre_1303">Comedy</string>
@@ -32,4 +33,20 @@
     <string name="store_charts">Top Charts</string>
     <string name="store_podcasts">Podcasts</string>
     <string name="store_episodes">Episodes</string>
+
+    <!-- podcasts -->
+    <string name="podcast_podcastsByArtist">More by %1$s</string>
+    <string name="podcast_podcastsListenersAlsoFollow">Listeners Also Subscribed To</string>
+    <string name="podcast_topPodcastsInGenre">Top Podcasts in %1$s</string>
+
+    <!-- screen -->
+    <string name="screen_queue">Queue</string>
+    <string name="screen_inbox">Inbox</string>
+    <string name="screen_library">Library</string>
+    <string name="screen_discover">Discover</string>
+    <string name="screen_profile">Profile</string>
+
+    <!-- actions -->
+    <string name="action_subscribe">Subscribe</string>
+    <string name="action_unsubscribe">Unsubscribe</string>
 </resources>

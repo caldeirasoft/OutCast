@@ -1,6 +1,6 @@
 object Versions {
     const val jvm = "1.8"
-    const val kotlin = "1.4.20"
+    const val kotlin = "1.4.30"
     const val coroutines = "1.3.9"
     const val serialization = "1.0.0"
     const val appcompat = "1.2.0"
@@ -21,7 +21,7 @@ object AndroidSdk {
 }
 
 object Dependencies {
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha04"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha05"
     const val junit = "junit:junit:4.13"
 
     object AndroidX {
@@ -36,12 +36,12 @@ object Dependencies {
         }
 
         object Navigation {
-            private const val version = "1.0.0-alpha04"
+            private const val version = "1.0.0-alpha05"
             const val compose = "androidx.navigation:navigation-compose:$version"
         }
 
         object Compose {
-            const val version = "1.0.0-alpha09"
+            const val version = "1.0.0-alpha10"
 
             const val ui = "androidx.compose.ui:ui:$version"
             const val runtime = "androidx.compose.runtime:runtime:$version"
@@ -67,7 +67,6 @@ object Dependencies {
 
     object Kotlin {
         const val version = "1.4.21"
-        const val stdlibJdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
     }
 

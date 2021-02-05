@@ -21,10 +21,10 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onError
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
-import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.components.Pager
+import com.caldeirasoft.outcast.ui.components.PagerState
+import com.caldeirasoft.outcast.ui.components.SmallPodcastListItemIndexed
+import com.caldeirasoft.outcast.ui.components.StoreEpisodeSmallListItemIndexed
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -124,12 +124,12 @@ private fun StoreCollectionChartsContent(
     navigateToTopCharts: (Int, StoreItemType) -> Unit,
     navigateToPodcast: (String) -> Unit,
 ) {
-    viewState
+    /*viewState
         .storeResourceData
         .onLoading { LoadingScreen() }
         .onError { ErrorScreen(t = it) }
         .onSuccess {
-            /*
+
             LazyColumn {
                 val storeCollectionCharts = viewState.storeCollectionCharts
                 storeCollectionCharts.forEach { collection ->
@@ -151,8 +151,8 @@ private fun StoreCollectionChartsContent(
                         )
                     }
                 }
-            }*/
-        }
+            }
+        }*/
 }
 
 @Composable

@@ -1,7 +1,10 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
+import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.StorePageWithCollection
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
@@ -10,29 +13,22 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-data class StorePodcastPage(
-    val id: Long,
-    val name: String,
-    val url: String,
-    val artistName: String,
-    val artistId: Long? = null,
-    val artistUrl: String? = null,
-    val description: String? = null,
-    val feedUrl: String,
-    val releaseDate: Instant,
-    val releaseDateTime: Instant,
-    override val artwork: Artwork?,
-    val trackCount: Int,
-    val podcastWebsiteUrl: String? = null,
-    val copyright: String? = null,
-    val contentAdvisoryRating: String? = null,
-    val userRating: Float,
-    val genre: Genre?,
+class StorePodcastPage(
+    val storeData: StorePodcast,
     override val storeFront: String,
-    val episodes: List<StoreEpisode> = listOf(),
-    val podcastsByArtist: StoreCollectionPodcastIds? = null,
-    val podcastsListenersAlsoFollow: StoreCollectionPodcastIds? = null,
-) : StoreItemWithArtwork {
-    override fun getArtworkUrl():String =
-        StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
+    val episodes: List<StoreEpisode>,
+    val otherPodcasts: MutableList<StoreCollection> = mutableListOf(),
+    override val timestamp: Instant
+) : StorePage, StorePageWithCollection {
+    override val lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf()
+
+    val name = storeData.name
+    val artistName = storeData.artistName
+    val artwork = storeData.artwork
+    override val storeList: MutableList<StoreCollection> = otherPodcasts
+
+    fun getArtworkUrl() = storeData.getArtworkUrl()
+
+    val storeEpisodeTrailer: StoreEpisode? = episodes.firstOrNull { it.podcastEpisodeType == "trailer" }
+    val recentEpisodes: List<StoreEpisode> = episodes.take(5)
 }

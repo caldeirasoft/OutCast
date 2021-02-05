@@ -3,16 +3,14 @@ package com.caldeirasoft.outcast.domain.repository
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.models.store.StoreGenreData
-import com.caldeirasoft.outcast.domain.models.store.StoreGroupingData
-import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
+import com.caldeirasoft.outcast.domain.models.store.*
 
 interface StoreRepository {
 
     /**
      * getGroupingDataAsync
      */
-    suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingData
+    suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage
 
     /**
      * getStoreDataAsync

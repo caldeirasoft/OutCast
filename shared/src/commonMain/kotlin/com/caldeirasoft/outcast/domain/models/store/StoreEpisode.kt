@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-class StoreEpisode(val id: Long,
+class StoreEpisode(override val id: Long,
                    val name: String,
                    val podcastId: Long,
                    val podcastName: String,
@@ -32,6 +32,7 @@ class StoreEpisode(val id: Long,
                    val podcastEpisodeType: String = "",
                    override val storeFront: String = "",
                    override val artwork: Artwork? = null,
+                   val podcast: StorePodcast
 ) : StoreItemWithArtwork {
     override fun getArtworkUrl(): String =
         StoreItemWithArtwork.artworkUrl(artwork, 200, 200)

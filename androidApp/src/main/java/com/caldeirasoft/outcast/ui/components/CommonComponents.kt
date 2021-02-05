@@ -58,7 +58,9 @@ fun StoreHeadingSection(title:String) {
     ) {
         Text(
             title,
-            modifier = Modifier,
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically),
             style = MaterialTheme.typography.h6
         )
     }

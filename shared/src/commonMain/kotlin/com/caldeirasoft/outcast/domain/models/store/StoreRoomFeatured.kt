@@ -6,10 +6,12 @@ import com.caldeirasoft.outcast.domain.models.Artwork
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StoreRoomFeatured(var label: String,
-                        var url: String,
-                        override val storeFront: String,
-                        override var artwork: Artwork?)
+class StoreRoomFeatured(
+    override val id: Long,
+    var label: String,
+    var url: String,
+    override val storeFront: String,
+    override var artwork: Artwork?)
     : StoreItemWithArtwork, StoreItemFeatured {
     override fun getArtworkUrl(): String =
         StoreItemWithArtwork.artworkUrl(artwork, 1060, 520, crop = "fa")

@@ -7,9 +7,7 @@ import com.caldeirasoft.outcast.data.db.createDatabase
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteResponseInterceptor
-import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.domain.usecase.*
@@ -49,21 +47,24 @@ internal val platformModule = module {
     single<CoroutineDispatcher>(mainDispatcherQualifier) { Dispatchers.Main }
     single<Json> {
         val serializer = SerializersModule {
+            polymorphic(StoreFeatured::class) {
+                subclass(StoreRoom::class)
+                subclass(StoreMultiRoom::class)
+            }
             polymorphic(StorePage::class) {
-                subclass(StoreGroupingData::class)
+                subclass(StoreGroupingPage::class)
+                subclass(StorePodcastPage::class)
+                subclass(StoreRoomPage::class)
+                subclass(StoreMultiRoomPage::class)
             }
             polymorphic(StoreCollection::class) {
                 subclass(StoreCollectionRooms::class)
                 subclass(StoreCollectionFeatured::class)
-                subclass(StoreCollectionPodcastIds::class)
-                subclass(StoreCollectionPodcasts::class)
-                subclass(StoreCollectionEpisodeIds::class)
-                subclass(StoreCollectionEpisodes::class)
-                subclass(StoreCollectionCharts::class)
-                subclass(StoreCollectionChartsIds::class)
+                subclass(StoreCollectionItems::class)
+                subclass(StoreCollectionTopPodcasts::class)
+                subclass(StoreCollectionTopEpisodes::class)
             }
             polymorphic(StoreItemWithArtwork::class) {
-                subclass(StorePodcastFeatured::class)
                 subclass(StoreRoomFeatured::class)
                 subclass(StoreRoom::class)
                 subclass(StorePodcast::class)

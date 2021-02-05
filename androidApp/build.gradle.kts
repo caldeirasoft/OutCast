@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -65,7 +67,6 @@ dependencies {
     // OkHttp
     implementation(Dependencies.SquareUp.OkHttp3.okhttp)
     // Accompanist
-    //implementation(Dependencies.Accompanist.coil)
     //implementation(Dependencies.Accompanist.insets)
     // Landscapist
     implementation(Dependencies.Landscapist.coil)
@@ -85,6 +86,8 @@ dependencies {
     // Leak Canary
     debugImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryDebug)
     releaseImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryRelease)
+    // Java 8+ API desugaring support
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
 }
 android {
     compileSdkVersion(30)
@@ -94,11 +97,18 @@ android {
         targetSdkVersion(30)
         versionCode = 1
         versionName = "1.0"
+        // Required when setting minSdkVersion to 20 or lower
+        multiDexEnabled = true
     }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
         }
+    }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -109,8 +119,8 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = Dependencies.AndroidX.Compose.version
-        kotlinCompilerVersion = Dependencies.Kotlin.version
     }
+    buildToolsVersion = "30.0.2"
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
@@ -118,5 +128,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.freeCompilerArgs = listOf(
         *kotlinOptions.freeCompilerArgs.toTypedArray(),
         "-Xallow-jvm-ir-dependencies",
-        "-Xskip-prerelease-check")
+        "-Xskip-prerelease-check",
+        "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi")
 }

@@ -50,6 +50,7 @@ class PageDataResult(
     val segmentedControl: SegmentControlResult? = null,
     val adamIds: List<String> = arrayListOf(),
     val adamId: Int? = null,
+    val defaultSort: Int? = null,
     val contentData: List<ContentDataResult> = arrayListOf(),
     val mt: Int? = null,
     val genreId: Int = 0,
@@ -171,6 +172,7 @@ class TopChartKindResult(
 class ContentDataResult(
     val title: String = "",
     val adamIds: List<String> = arrayListOf(),
+    val chunkId: String? = null,
     val dkId: Int? = null,
     val dkEternalId: String? = null,
 )
@@ -211,16 +213,19 @@ class UberListResult(
     val description: String? = null,
     val masterArt: List<ArtworkDto> = arrayListOf()
 ) {
-    fun toArtwork() =
-        Artwork(
-            width = 0,
-            height = 0,
-            url = masterArt.first().run {
-                url.replace("${width}x${height}", "{w}x{h}")
-            },
-            bgColor = backgroundColor,
-            textColor1 = titleTextColor,
-            textColor2 = primaryTextColor)
+    fun toArtwork(): Artwork? =
+        if (masterArt.isNotEmpty()) {
+            Artwork(
+                width = 0,
+                height = 0,
+                url = masterArt.first().run {
+                    url.replace("${width}x${height}", "{w}x{h}")
+                },
+                bgColor = backgroundColor,
+                textColor1 = titleTextColor,
+                textColor2 = primaryTextColor)
+        }
+        else null
 }
 
 @Serializable

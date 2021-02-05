@@ -1,11 +1,10 @@
 package com.caldeirasoft.outcast.domain.repository
 
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.models.store.StoreDirectory
+import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import kotlinx.coroutines.flow.Flow
 
 interface LocalCacheRepository {
-    val storeDirectory : Flow<StoreDirectory?>
+    val storeDirectory : Flow<StoreGroupingPage?>
 
-    suspend fun saveDirectory(storeData: StoreDirectory)
+    suspend fun saveDirectory(storeData: StoreGroupingPage)
 }

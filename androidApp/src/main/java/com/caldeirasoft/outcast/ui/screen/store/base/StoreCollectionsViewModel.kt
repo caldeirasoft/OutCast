@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
-import com.caldeirasoft.outcast.domain.interfaces.StoreData
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
@@ -28,8 +27,7 @@ abstract class StoreCollectionsViewModel<T : StorePage> : ViewModel(), KoinCompo
     // storefront
     protected val storeFront = fetchStoreFrontUseCase.getStoreFront()
     // store resource data
-    protected val storeResourceData: MutableStateFlow<Resource> =
-        MutableStateFlow(Resource.Loading)
+    protected val storeResourceData = MutableStateFlow<Resource>(Resource.Loading)
 
     // store data
     protected val storeData: StateFlow<T?> =
@@ -53,13 +51,15 @@ abstract class StoreCollectionsViewModel<T : StorePage> : ViewModel(), KoinCompo
                 prefetchDistance = 2
             )
         ) {
-            StoreDataPagingSource(scope = viewModelScope, dataFlow = { getStoreDataFlow() })
-                .also {
-                    pagingSource = it
-                }
+            StoreDataPagingSource(
+                scope = viewModelScope,
+                dataFlow = { getStoreDataFlow().onEach { storeResourceData.emit(it) } }
+            ).also {
+                pagingSource = it
+            }
         }.flow
 
-    protected abstract fun getStoreDataFlow(): Flow<StoreData>
+    protected abstract fun getStoreDataFlow(): Flow<Resource>
 
     fun refresh() {
         pagingSource?.invalidate()

@@ -14,10 +14,7 @@ import kotlinx.serialization.UseSerializers
 class StoreGroupingData(
     val id: String,
     val label: String,
-    override val storeFront: String,
+    val storeFront: String,
     override val storeList: MutableList<StoreCollection> = mutableListOf(),
-    override var lookup: Map<Long, StoreItemWithArtwork> = mutableMapOf(),
     val genres: StoreCollectionGenres? = null,
-    val topCharts: List<StoreCollectionTopPodcasts> = emptyList(),
-    override val timestamp: Instant
-) : StorePage, StoreDataWithCollections
+) : StoreDataWithCollections

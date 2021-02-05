@@ -45,17 +45,17 @@ class LocalCacheRepositoryImpl(
             else throw exception
         }
 
-    override val storeDirectory: Flow<StoreDirectory?>
+    override val storeDirectory: Flow<StoreGroupingPage?>
         = preferencesFlow
         .map { preferences -> preferences[PreferenceKeys.DIRECTORY] }
         .map {
             it?.let {
-                val storeData: StoreDirectory = json.decodeFromString(serializer(), it)
+                val storeData: StoreGroupingPage = json.decodeFromString(serializer(), it)
                 storeData
             }
         }
 
-    override suspend fun saveDirectory(storeData: StoreDirectory) {
+    override suspend fun saveDirectory(storeData: StoreGroupingPage) {
         cacheDataStore.edit { preferences ->
             preferences[PreferenceKeys.DIRECTORY] = json.encodeToString(serializer(), storeData)
         }

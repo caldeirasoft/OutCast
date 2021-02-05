@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.R
@@ -53,37 +54,46 @@ private object GenreDefaults {
     // content padding
     val ContentHorizontalPadding = 16.dp
     // content padding
+    val ContentVerticalPadding = 8.dp
+    // content padding
     val ContentHorizontalInnerPadding = 24.dp
+    // content padding
+    val ContentVerticalInnerPadding = 8.dp
     // min height
     val MinHeight = 64.dp
+    // min height
+    val GridItemHeight = 80.dp
 
     @Composable
     fun GridItem(
         storeGenre: StoreGenre,
         onGenreClick: () -> Unit,
     ) {
-        Box(modifier = Modifier.fillMaxWidth().preferredHeight(MinHeight)) {
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                border = ButtonDefaults.outlinedBorder,
-                elevation = 0.dp,
-                modifier = Modifier.fillMaxSize().clickable(onClick = onGenreClick)
-            ) {
-                Row(Modifier
-                    .padding(start = ContentHorizontalPadding, end = ContentHorizontalPadding)
-                    .fillMaxSize()) {
-                    val columnModifier = Modifier.weight(1f)
-                        .padding(start = ContentHorizontalPadding, end = ContentHorizontalPadding)
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onGenreClick)) {
+            Column(Modifier
+                .padding(
+                    top = ContentVerticalPadding,
+                    bottom = ContentVerticalPadding)
+                .fillMaxSize())
+            {
+                Image(
+                    imageVector = vectorResource(id = storeGenre.getIcon()),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .weight(2f)
+                        .align(Alignment.CenterHorizontally)
+                )
 
-                    Image(imageVector = vectorResource(id = storeGenre.getIcon()),
-                        modifier = Modifier.size(32.dp).align(Alignment.CenterVertically)
-                    )
-
-                    Text(text = storeGenre.name,
-                        modifier = Modifier
-                            .padding(start = ContentHorizontalInnerPadding)
-                            .align(Alignment.CenterVertically))
-                }
+                Text(text = storeGenre.name,
+                    style = MaterialTheme.typography.caption.copy(fontSize = 11.sp),
+                    maxLines = 2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp)
+                        .align(Alignment.CenterHorizontally))
             }
         }
     }
@@ -94,29 +104,31 @@ private object GenreDefaults {
         howManyMore: Int,
         onGenreClick: () -> Unit,
     ) {
-        Box(modifier = Modifier.fillMaxWidth().preferredHeight(MinHeight)) {
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                border = ButtonDefaults.outlinedBorder,
-                elevation = 0.dp,
-                modifier = Modifier.fillMaxSize().clickable(onClick = onGenreClick)
-            ) {
-                Row(Modifier
-                    .padding(start = ContentHorizontalPadding, end = ContentHorizontalPadding)
-                    .fillMaxSize()) {
-                    Text(text = "+$howManyMore",
-                        style = TextStyle(
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            letterSpacing = 0.15.sp
-                        ),
-                        modifier = Modifier.width(32.dp).align(Alignment.CenterVertically))
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onGenreClick)) {
+            Column(Modifier
+                .padding(top = ContentVerticalPadding, bottom = ContentVerticalPadding)
+                .fillMaxSize())
+            {
+                Text(text = "+$howManyMore",
+                    style = TextStyle(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        letterSpacing = 0.15.sp
+                    ),
+                    modifier = Modifier
+                        .height(24.dp)
+                        .weight(2f)
+                        .align(Alignment.CenterHorizontally))
 
-                    Text(text = storeGenre.name,
-                        modifier = Modifier
-                            .padding(start = ContentHorizontalInnerPadding)
-                            .align(Alignment.CenterVertically))
-                }
+                Text(text = storeGenre.name,
+                    style = MaterialTheme.typography.caption,
+                    maxLines = 2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterHorizontally))
             }
         }
     }

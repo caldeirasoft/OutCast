@@ -5,13 +5,15 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 @Serializable
 data class StorePodcast(
-    val id: Long,
+    override val id: Long,
     val name: String,
     val url: String,
     val artistName: String,
@@ -31,6 +33,15 @@ data class StorePodcast(
     override val storeFront: String,
     val episodes: List<StoreEpisode> = listOf(),
 ) : StoreItemWithArtwork {
+    @Transient
+    val page: StorePodcastPage =
+        StorePodcastPage(
+            storeData = this,
+            storeFront = this.storeFront,
+            timestamp = Clock.System.now(),
+            episodes = this.episodes,
+        )
+
     override fun getArtworkUrl():String =
         StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 }

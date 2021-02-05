@@ -11,38 +11,43 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
-import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @ExperimentalCoroutinesApi
-class TopChartsViewModel(genreId: Int?)
-    : ViewModel(), KoinComponent {
+class TopChartsViewModel(storeItemType: StoreItemType) : ViewModel(), KoinComponent {
     private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
 
     // storefront
     private val storeFront = fetchStoreFrontUseCase.getStoreFront()
     // selected tab
-    private val selectedTab = MutableStateFlow(StoreItemType.PODCAST)
+    private val selectedTab = MutableStateFlow(storeItemType)
+    // selected tab
+    private val selectedGenre = MutableStateFlow<Int?>(null)
     // state
-    val state: StateFlow<State> =
-        selectedTab.map { State(selectedChartTab = it) }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, State())
-
-    // topPodcastsCharts
-    val topPodcastsCharts: Flow<PagingData<StoreItem>> =
-        storeFront
-            .flatMapLatest { getTopChartPagedList(genreId = genreId, type = StoreItemType.PODCAST, storeFront = it) }
-            .cachedIn(viewModelScope)
+    val state = MutableStateFlow(State())
 
     // topEpisodesCharts
-    val topEpisodesCharts: Flow<PagingData<StoreItem>> =
-        storeFront
-            .flatMapLatest { getTopChartPagedList(genreId = genreId, type = StoreItemType.EPISODE, storeFront = it) }
+    val topCharts: Flow<PagingData<StoreItem>> =
+        combine(storeFront, selectedTab, selectedGenre) {
+                storeFront, selectedTab, selectedGenre ->
+            getTopChartPagedList(genreId = selectedGenre, type = selectedTab, storeFront = storeFront)
+        }
+            .flattenMerge()
             .cachedIn(viewModelScope)
+
+    init {
+        combine(selectedTab, selectedGenre)
+        { selectedTab, selectedGenre ->
+            State(selectedTab, selectedGenre)
+        }
+            .onEach { state.emit(it) }
+            .launchIn(viewModelScope)
+    }
+
 
     private fun getTopChartPagedList(genreId: Int?, type: StoreItemType, storeFront: String): Flow<PagingData<StoreItem>> =
         Pager(
@@ -64,8 +69,13 @@ class TopChartsViewModel(genreId: Int?)
         selectedTab.tryEmit(tab)
     }
 
+    fun onGenreSelected(genreId: Int?) {
+        selectedGenre.tryEmit(genreId)
+    }
+
     data class State(
         val selectedChartTab: StoreItemType = StoreItemType.PODCAST,
+        val selectedGenre: Int? = null
     )
 }
 
