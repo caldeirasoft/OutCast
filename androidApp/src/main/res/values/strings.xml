@@ -33,6 +33,7 @@
     <string name="store_charts">Top Charts</string>
     <string name="store_podcasts">Podcasts</string>
     <string name="store_episodes">Episodes</string>
+    <string name="store_trailer">Trailer</string>
 
     <!-- podcasts -->
     <string name="podcast_podcastsByArtist">More by %1$s</string>
@@ -49,4 +50,5 @@
     <!-- actions -->
     <string name="action_subscribe">Subscribe</string>
     <string name="action_unsubscribe">Unsubscribe</string>
+    <string name="action_show_more">Show more ▼</string>
 </resources>

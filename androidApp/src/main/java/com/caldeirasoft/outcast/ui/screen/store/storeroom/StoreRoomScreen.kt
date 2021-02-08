@@ -39,6 +39,8 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -52,10 +54,8 @@ import kotlin.math.log10
 @Composable
 fun StoreRoomScreen(
     storeRoom: StoreRoom,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 )
 {
     val viewModel: StoreRoomViewModel = viewModel(
@@ -67,10 +67,9 @@ fun StoreRoomScreen(
         title = storeRoom.label,
         viewState = viewState,
         discover = viewModel.discover,
-        navigateToRoom = navigateToRoom,
-        navigateToPodcast = navigateToPodcast,
-        navigateToEpisode = navigateToEpisode,
-        navigateUp = navigateUp)
+        navigateTo = navigateTo,
+        navigateBack = navigateBack
+    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -79,10 +78,8 @@ private fun StoreRoomScreen(
     title: String,
     viewState: StoreRoomViewModel.State,
     discover: Flow<PagingData<StoreItem>>,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
     val lazyPagingItems = discover.collectAsLazyPagingItems()
@@ -140,13 +137,12 @@ private fun StoreRoomScreen(
                                         // header
                                         StoreHeadingSectionWithLink(
                                             title = collection.label,
-                                            onClick = { navigateToRoom(collection.room) }
+                                            onClick = { navigateTo(Screen.Room(collection.room)) }
                                         )
                                         // content
                                         StoreCollectionItemsContent(
                                             storeCollection = collection,
-                                            navigateToPodcast = navigateToPodcast,
-                                            navigateToEpisode = {}
+                                            navigateTo = navigateTo
                                         )
                                     }
                                     is StoreCollectionRooms -> {
@@ -155,30 +151,29 @@ private fun StoreRoomScreen(
                                         // genres
                                         StoreCollectionRoomsContent(
                                             storeCollection = collection,
-                                            navigateToRoom = navigateToRoom
+                                            navigateTo = navigateTo
                                         )
                                     }
                                     is StoreCollectionTopPodcasts -> {
                                         // header
                                         StoreHeadingSectionWithLink(
                                             title = collection.label,
-                                            onClick = { navigateToRoom(collection.room) }
+                                            onClick = { navigateTo(Screen.Room(collection.room)) }
                                         )
                                         StoreCollectionTopPodcastsContent(
                                             storeCollection = collection,
                                             numRows = 4,
-                                            navigateToPodcast = navigateToPodcast)
+                                            navigateTo = navigateTo)
                                     }
                                     is StoreCollectionTopEpisodes -> {
                                         // header
                                         StoreHeadingSectionWithLink(
                                             title = collection.label,
-                                            onClick = { navigateToRoom(collection.room) }
+                                            onClick = { navigateTo(Screen.Room(collection.room)) }
                                         )
                                         StoreCollectionTopEpisodesContent(
                                             storeCollection = collection,
-                                            navigateToPodcast = navigateToPodcast,
-                                            navigateToEpisode = {})
+                                            navigateTo = navigateTo)
                                     }
                                 }
                             }
@@ -190,7 +185,7 @@ private fun StoreRoomScreen(
                                             PodcastListItemIndexed(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clickable(onClick = { navigateToPodcast(item) }),
+                                                    .clickable(onClick = { navigateTo(Screen.StorePodcastScreen(item)) }),
                                                 storePodcast = item,
                                                 index = index + 1
                                             )
@@ -198,8 +193,8 @@ private fun StoreRoomScreen(
                                         }
                                         is StoreEpisode -> {
                                             StoreEpisodeItem(
-                                                onEpisodeClick = { navigateToEpisode(item) },
-                                                onPodcastClick = { navigateToPodcast(item.podcast) },
+                                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
+                                                onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                                 storeEpisode = item,
                                                 index = index + 1
                                             )
@@ -220,7 +215,7 @@ private fun StoreRoomScreen(
                                         PodcastGridItem(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable(onClick = { navigateToPodcast(item) }),
+                                                .clickable(onClick = { navigateTo(Screen.StorePodcastScreen(item)) }),
                                             podcast = item
                                         )
                                     }
@@ -325,7 +320,7 @@ private fun StoreRoomScreen(
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = navigateUp) {
+                        IconButton(onClick = navigateBack) {
                             Icon(Icons.Filled.ArrowBack)
                         }
                     },

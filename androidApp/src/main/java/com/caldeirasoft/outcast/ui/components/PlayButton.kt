@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -26,8 +27,9 @@ fun PlayButton(
 ) {
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(),
-        shape = MaterialTheme.shapes.small,
-        contentPadding = PaddingValues(start = 4.dp,
+        shape = RoundedCornerShape(50),
+        contentPadding = PaddingValues(
+            start = 4.dp,
             end = 12.dp,
             top = 0.dp,
             bottom = 0.dp),

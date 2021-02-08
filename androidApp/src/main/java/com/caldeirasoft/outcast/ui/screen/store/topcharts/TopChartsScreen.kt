@@ -27,8 +27,10 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
+import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import com.caldeirasoft.outcast.ui.util.*
@@ -40,9 +42,8 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun TopChartsScreen(
     storeItemType: StoreItemType = StoreItemType.PODCAST,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val viewModel: TopChartsViewModel = viewModel(
         key = "store_chart",
@@ -54,9 +55,8 @@ fun TopChartsScreen(
         topCharts = viewModel.topCharts,
         onChartTabSelected = viewModel::onTabSelected,
         onChartsGenreSelected = viewModel::onGenreSelected,
-        navigateToPodcast = navigateToPodcast,
-        navigateToEpisode = navigateToEpisode,
-        navigateUp = navigateUp
+        navigateTo = navigateTo,
+        navigateBack = navigateBack
     )
 }
 
@@ -68,9 +68,8 @@ fun TopChartsScreen(
     topCharts: Flow<PagingData<StoreItem>>,
     onChartTabSelected: (StoreItemType) -> Unit,
     onChartsGenreSelected: (Int?) -> Unit,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val selectedGenre = viewState.selectedGenre
     val drawerState = AmbientBottomDrawerState.current
@@ -150,7 +149,7 @@ fun TopChartsScreen(
                                 PodcastListItemIndexed(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable(onClick = { navigateToPodcast(item) }),
+                                        .clickable(onClick = { navigateTo(Screen.StorePodcastScreen(item)) }),
                                     storePodcast = item,
                                     index = index + 1
                                 )
@@ -158,8 +157,8 @@ fun TopChartsScreen(
                             }
                             is StoreEpisode -> {
                                 StoreEpisodeItem(
-                                    onEpisodeClick = { navigateToEpisode(item) },
-                                    onPodcastClick = { navigateToPodcast(item.podcast) },
+                                    onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
+                                    onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                     storeEpisode = item,
                                     index = index + 1
                                 )
@@ -173,7 +172,7 @@ fun TopChartsScreen(
         ReachableAppBar(
             title = { Text(text = stringResource(id = R.string.store_tab_charts)) },
             navigationIcon = {
-                IconButton(onClick = navigateUp) {
+                IconButton(onClick = navigateBack) {
                     Icon(Icons.Filled.ArrowBack)
                 }
             },

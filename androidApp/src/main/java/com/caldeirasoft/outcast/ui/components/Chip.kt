@@ -3,12 +3,17 @@ package com.caldeirasoft.outcast.ui.components
 import androidx.compose.animation.animate
 import androidx.compose.animation.animateAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.typography
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -102,6 +107,41 @@ fun <T: Any> ChipRadioSelector(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ActionChipButton(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
+    text: @Composable () -> Unit
+) {
+    val backgroundColor: Color = when {
+        selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
+        else -> Color.Transparent
+    }
+    val contentColor: Color = when {
+        selected -> MaterialTheme.colors.primary
+        else -> MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    }
+    OutlinedButton(
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = animateAsState(backgroundColor).value,
+            contentColor = animateAsState(contentColor).value,
+            disabledContentColor = MaterialTheme.colors.onSurface
+                .copy(alpha = ContentAlpha.disabled)
+        ),
+        shape = RoundedCornerShape(50),
+        modifier = Modifier.padding(0.dp),
+        contentPadding = PaddingValues(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+        onClick = onClick
+    ) {
+        Box(modifier = Modifier.padding(end = 4.dp)) {
+            icon()
+        }
+        val styledText = applyTextStyleCustom(typography.body2, ContentAlpha.high, text)
+        styledText()
     }
 }
 

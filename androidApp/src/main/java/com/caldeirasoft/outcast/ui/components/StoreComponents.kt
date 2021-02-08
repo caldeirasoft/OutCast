@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.skydoves.landscapist.coil.CoilImage
@@ -31,8 +33,7 @@ import com.skydoves.landscapist.coil.CoilImage
 @Composable
 fun StoreCollectionItemsContent(
     storeCollection: StoreCollectionItems,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
+    navigateTo: (Screen) -> Unit
 )
 {
     // content
@@ -48,15 +49,15 @@ fun StoreCollectionItemsContent(
                         modifier = Modifier
                             .preferredWidth(100.dp)
                             .clickable(onClick = {
-                                navigateToPodcast(item)
+                                navigateTo(Screen.StorePodcastScreen(item))
                             }),
                         podcast = item)
                 }
                 is StoreEpisode -> {
                     StoreEpisodeCardItem(
                         modifier = Modifier.width(320.dp),
-                        onPodcastClick = { navigateToPodcast(item.podcast) },
-                        onEpisodeClick = { navigateToEpisode(item) },
+                        onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
+                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
                         storeEpisode = item,
                         //index = index + 1
                     )
@@ -69,7 +70,7 @@ fun StoreCollectionItemsContent(
 @Composable
 fun StoreRoomItem(
     room: StoreRoom,
-    navigateToRoom: (StoreRoom) -> Unit
+    navigateTo: (Screen) -> Unit
 ) {
     Card(
         backgroundColor = colors[0],
@@ -78,7 +79,7 @@ fun StoreRoomItem(
             .padding(horizontal = 8.dp)
             .preferredWidth(200.dp)
             .clickable(onClick = {
-                navigateToRoom(room)
+                navigateTo(Screen.Room(room))
             })
     )
     {
@@ -95,7 +96,7 @@ fun StoreRoomItem(
 @Composable
 fun StoreCollectionRoomsContent(
     storeCollection: StoreCollectionRooms,
-    navigateToRoom: (StoreRoom) -> Unit
+    navigateTo: (Screen) -> Unit
 )
 {
     // room content
@@ -107,8 +108,7 @@ fun StoreCollectionRoomsContent(
         items(items = storeCollection.items) { item ->
             when (item) {
                 is StoreRoom -> {
-                    StoreRoomItem(room = item,
-                        navigateToRoom = { navigateToRoom(item) })
+                    StoreRoomItem(room = item, navigateTo = navigateTo)
                 }
             }
         }
@@ -118,8 +118,7 @@ fun StoreCollectionRoomsContent(
 @Composable
 fun StoreCollectionGenresContent(
     storeCollection: StoreCollectionGenres,
-    navigateToCategories: (StoreCollectionGenres) -> Unit,
-    navigateToGenre: (Int, String) -> Unit,
+    navigateTo: (Screen) -> Unit
 )
 {
     val columns = 4
@@ -151,11 +150,11 @@ fun StoreCollectionGenresContent(
                             GenreGridItemMore(
                                 storeGenre = item,
                                 howManyMore = storeCollection.genres.size - (columns * maxLines - 1),
-                                onGenreClick = { navigateToCategories(storeCollection) })
+                                onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })
                         else ->
                             GenreGridItem(
                                 storeGenre = item,
-                                onGenreClick = { navigateToGenre(item.id, item.name) })
+                                onGenreClick = { navigateTo(Screen.Genre(item.id, item.name)) })
                     }
                 }
             }
@@ -166,7 +165,8 @@ fun StoreCollectionGenresContent(
 
 @Composable
 fun StoreCollectionFeaturedContent(
-    storeCollection: StoreCollectionFeatured
+    storeCollection: StoreCollectionFeatured,
+    navigateTo: (Screen) -> Unit
 ) {
     val pagerState: PagerState = run {
         val clock = AmbientAnimationClock.current
@@ -265,7 +265,7 @@ fun StoreCollectionFeaturedContent(
 fun StoreCollectionTopPodcastsContent(
     storeCollection: StoreCollectionTopPodcasts,
     numRows: Int,
-    navigateToPodcast: (StorePodcast) -> Unit,
+    navigateTo: (Screen) -> Unit
 ) {
     val indexedItems =
         storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
@@ -298,7 +298,7 @@ fun StoreCollectionTopPodcastsContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = {
-                            navigateToPodcast(storeItem)
+                            navigateTo(Screen.StorePodcastScreen(storeItem))
                         }),
                     storePodcast = storeItem,
                     index = index + 1
@@ -311,8 +311,7 @@ fun StoreCollectionTopPodcastsContent(
 @Composable
 fun StoreCollectionTopEpisodesContent(
     storeCollection: StoreCollectionTopEpisodes,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
+    navigateTo: (Screen) -> Unit
 ) {
     // content
     LazyRow(
@@ -323,8 +322,8 @@ fun StoreCollectionTopEpisodesContent(
         itemsIndexed(items = storeCollection.items) { index, item ->
             StoreEpisodeCardItem(
                 modifier = Modifier.width(320.dp),
-                onPodcastClick = { navigateToPodcast(item.podcast) },
-                onEpisodeClick = { navigateToEpisode(item) },
+                onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
+                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
                 storeEpisode = item,
                 index = index + 1
             )

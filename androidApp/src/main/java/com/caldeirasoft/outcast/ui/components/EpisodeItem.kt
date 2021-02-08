@@ -104,11 +104,12 @@ fun StoreEpisodeCardItem(
 
 @Composable
 fun EpisodeItem(
+    modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     onEpisodeClick: () -> Unit,
 ) {
     EpisodeDefaults.EpisodeItem(
-        modifier = Modifier
+        modifier = modifier
             .clickable(onClick = onEpisodeClick),
         text = { Text(text = storeEpisode.name, maxLines = 2, fontSize = 14.sp) },
         overlineText = {
@@ -125,53 +126,50 @@ fun EpisodeItem(
 }
 
 @Composable
-fun EpisodeCardItem(
+fun EpisodeDetailItem(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     onEpisodeClick: () -> Unit,
 ) {
-    EpisodeDefaults.CardItem(
+    EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .clickable(onClick = onEpisodeClick),
-    ) {
-        EpisodeDefaults.EpisodeItem(
-            text = { Text(text = storeEpisode.name, maxLines = 1) },
-            overlineText = {
-                val context = AmbientContext.current
-                Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
-            },
-            descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
-            actionButtons = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    PlayButton(storeEpisode = storeEpisode)
-                    QueueButton(storeEpisode = storeEpisode)
-                }
+        text = { Text(text = storeEpisode.name, maxLines = 1) },
+        overlineText = {
+            val context = AmbientContext.current
+            Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
+        },
+        descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
+        actionButtons = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(storeEpisode = storeEpisode)
+                QueueButton(storeEpisode = storeEpisode)
             }
-        )
-    }
+        }
+    )
 }
 
 @Composable
-fun TrailerCardItem(
+fun TrailerItem(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     onEpisodeClick: () -> Unit,
 ) {
-    EpisodeDefaults.CardItem(
+    EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .clickable(onClick = onEpisodeClick),
-    ) {
-        EpisodeDefaults.EpisodeItem(
-            text = { Text(text = storeEpisode.name, maxLines = 1, modifier = Modifier.padding(bottom = 8.dp)) },
-            overlineText = { Text(text = "TRAILER") },
-            actionButtons = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    PlayButton(storeEpisode = storeEpisode)
-                    QueueButton(storeEpisode = storeEpisode)
-                }
+        text = { Text(text = storeEpisode.name, maxLines = 1) },
+        overlineText = {
+            val context = AmbientContext.current
+            Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
+        },
+        actionButtons = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(storeEpisode = storeEpisode)
+                QueueButton(storeEpisode = storeEpisode)
             }
-        )
-    }
+        }
+    )
 }
 
 @Composable
@@ -355,7 +353,7 @@ private object EpisodeDefaults {
 
         val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
         val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.medium, podcastText)
-        val styledReleasedTimeText = applyTextStyleCustom(typography.overline, ContentAlpha.high, releasedTimeText)!!
+        val styledReleasedTimeText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, releasedTimeText)!!
         val styledTrailing = applyTextStyleCustom(typography.caption, ContentAlpha.high, actionButtons)
         val styledDescriptionText = applyTextStyleNullable(typography.subtitle1, ContentAlpha.high, descriptionText)
 
@@ -403,6 +401,7 @@ private object EpisodeDefaults {
         val styledDescriptionText = applyTextStyleNullable(typography.body2, ContentAlpha.high, descriptionText)
 
         Column(modifier
+            .fillMaxWidth()
             .preferredHeightIn(min = MinHeight)
             .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
         {
@@ -425,8 +424,8 @@ private object EpisodeDefaults {
 
         val typography = MaterialTheme.typography
 
-        val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.medium, podcastText)
-        val styledReleasedTimeText = applyTextStyleCustom(typography.overline, ContentAlpha.high, releasedTimeText)!!
+        val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.high, podcastText)
+        val styledReleasedTimeText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, releasedTimeText)!!
 
         Row(modifier = modifier
             .fillMaxWidth()
@@ -494,7 +493,7 @@ private object EpisodeDefaults {
         val typography = MaterialTheme.typography
 
         val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
-        val styledOverlineText = applyTextStyleCustom(typography.overline, ContentAlpha.high, overlineText)!!
+        val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.high, overlineText)!!
 
         val semanticsModifier = modifier.semantics(mergeDescendants = true) {}
 

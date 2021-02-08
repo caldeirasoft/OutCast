@@ -26,6 +26,8 @@ import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*
@@ -36,9 +38,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @Composable
 fun StorePodcastEpisodesScreen(
     storePodcast: StorePodcast,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val viewModel: StorePodcastViewModel = viewModel(
         key = storePodcast.url,
@@ -48,18 +49,17 @@ fun StorePodcastEpisodesScreen(
 
     StorePodcastEpisodesScreen(
         viewState = viewState,
-        navigateToPodcast = navigateToPodcast,
-        navigateToEpisode = navigateToEpisode,
-        navigateUp = navigateUp)
+        navigateTo = navigateTo,
+        navigateBack = navigateBack
+    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StorePodcastEpisodesScreen(
     viewState: StorePodcastViewModel.State,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(1)
 
@@ -92,7 +92,7 @@ private fun StorePodcastEpisodesScreen(
                     items(it.episodes) {
                         EpisodeItem(
                             storeEpisode = it,
-                            onEpisodeClick = { /*TODO*/ })
+                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(it)) })
 
                         Divider()
                     }
@@ -211,7 +211,7 @@ private fun StorePodcastEpisodesScreen(
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = navigateUp) {
+                        IconButton(onClick = navigateBack) {
                             Icon(Icons.Filled.ArrowBack)
                         }
                     },

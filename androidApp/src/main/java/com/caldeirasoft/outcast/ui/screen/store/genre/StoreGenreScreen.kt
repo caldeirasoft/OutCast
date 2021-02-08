@@ -27,6 +27,8 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -39,10 +41,8 @@ import kotlinx.datetime.Clock
 fun StoreGenreScreen(
     genreId: Int,
     title: String,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val viewModel: StoreGenreViewModel = viewModel(
         key = genreId.toString(),
@@ -56,10 +56,8 @@ fun StoreGenreScreen(
         title = title,
         viewState = viewState,
         discover = viewModel.discover,
-        navigateToRoom = navigateToRoom,
-        navigateToPodcast = navigateToPodcast,
-        navigateToEpisode = navigateToEpisode,
-        navigateUp = navigateUp,
+        navigateTo = navigateTo,
+        navigateBack = navigateBack
     )
 }
 
@@ -69,10 +67,8 @@ private fun StoreGenreContent(
     title: String,
     viewState: StoreGenreViewModel.State,
     discover: Flow<PagingData<StoreItem>>,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
     val lazyPagingItems = discover.collectAsLazyPagingItems()
@@ -109,18 +105,18 @@ private fun StoreGenreContent(
                             is StoreCollectionFeatured ->
                                 StoreCollectionFeaturedContent(
                                     storeCollection = collection,
+                                    navigateTo = navigateTo
                                 )
                             is StoreCollectionItems -> {
                                 // header
                                 StoreHeadingSectionWithLink(
                                     title = collection.label,
-                                    onClick = { navigateToRoom(collection.room) }
+                                    onClick = { navigateTo(Screen.Room(collection.room)) }
                                 )
                                 // content
                                 StoreCollectionItemsContent(
                                     storeCollection = collection,
-                                    navigateToPodcast = navigateToPodcast,
-                                    navigateToEpisode = {}
+                                    navigateTo = navigateTo
                                 )
                             }
                             is StoreCollectionRooms -> {
@@ -129,7 +125,7 @@ private fun StoreGenreContent(
                                 // genres
                                 StoreCollectionRoomsContent(
                                     storeCollection = collection,
-                                    navigateToRoom = navigateToRoom
+                                    navigateTo = navigateTo
                                 )
                             }
                         }
@@ -151,7 +147,7 @@ private fun StoreGenreContent(
         ReachableAppBar(
             title = { Text(text = title) },
             navigationIcon = {
-                IconButton(onClick = navigateUp) {
+                IconButton(onClick = navigateBack) {
                     Icon(Icons.Filled.ArrowBack)
                 }
             },

@@ -21,6 +21,8 @@ import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.ui.components.GenreItem
 import com.caldeirasoft.outcast.ui.components.ReachableAppBar
 import com.caldeirasoft.outcast.ui.components.ReachableScaffold
+import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.px
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -30,13 +32,13 @@ import kotlinx.coroutines.FlowPreview
 @Composable
 fun StoreCategoriesScreen(
     storeCollection: StoreCollectionGenres,
-    navigateToGenre: (Int, String) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     StoreCategoriesContent(
         storeCollection = storeCollection,
-        navigateToGenre = navigateToGenre,
-        navigateUp = navigateUp,
+        navigateTo = navigateTo,
+        navigateBack = navigateBack
     )
 }
 
@@ -44,8 +46,8 @@ fun StoreCategoriesScreen(
 @Composable
 private fun StoreCategoriesContent(
     storeCollection: StoreCollectionGenres,
-    navigateToGenre: (Int, String) -> Unit,
-    navigateUp: () -> Unit,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
 
@@ -67,14 +69,14 @@ private fun StoreCategoriesContent(
             items(storeCollection.genres) { itemContent ->
                 GenreItem(
                     storeGenre = itemContent,
-                    onGenreClick = { navigateToGenre(itemContent.id, itemContent.name) })
+                    onGenreClick = { navigateTo(Screen.Genre(itemContent.id, itemContent.name)) })
             }
         }
 
         ReachableAppBar(
             title = { Text(text = storeCollection.label) },
             navigationIcon = {
-                IconButton(onClick = navigateUp) {
+                IconButton(onClick = navigateBack) {
                     Icon(Icons.Filled.ArrowBack)
                 }
             },

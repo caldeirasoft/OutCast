@@ -30,5 +30,5 @@ class StorePodcastPage(
     fun getArtworkUrl() = storeData.getArtworkUrl()
 
     val storeEpisodeTrailer: StoreEpisode? = episodes.firstOrNull { it.podcastEpisodeType == "trailer" }
-    val recentEpisodes: List<StoreEpisode> = episodes.take(5)
+    val recentEpisodes: List<StoreEpisode> = episodes.sortedByDescending { it.releaseDateTime }.take(5)
 }

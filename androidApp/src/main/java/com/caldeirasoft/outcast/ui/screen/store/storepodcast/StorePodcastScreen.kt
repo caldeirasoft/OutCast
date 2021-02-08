@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.*
@@ -24,9 +25,15 @@ import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
@@ -40,6 +47,8 @@ import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*
@@ -51,12 +60,8 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun StorePodcastScreen(
     storePodcast: StorePodcast,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToPodcastEpisodes: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateToGenre: (Int, String) -> Unit,
-    navigateUp: () -> Unit
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val viewModel: StorePodcastViewModel = viewModel(
         key = storePodcast.url,
@@ -67,12 +72,8 @@ fun StorePodcastScreen(
     StorePodcastScreen(
         viewState = viewState,
         otherPodcasts = viewModel.otherPodcasts,
-        navigateToPodcast = navigateToPodcast,
-        navigateToEpisode = navigateToEpisode,
-        navigateToPodcastEpisodes = { navigateToPodcastEpisodes(storePodcast) },
-        navigateToRoom = navigateToRoom,
-        navigateToGenre = navigateToGenre,
-        navigateUp = navigateUp)
+        navigateTo = navigateTo,
+        navigateBack = navigateBack)
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -80,12 +81,8 @@ fun StorePodcastScreen(
 private fun StorePodcastScreen(
     viewState: StorePodcastViewModel.State,
     otherPodcasts: Flow<PagingData<StoreItem>>,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToPodcastEpisodes: () -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateToGenre: (Int, String) -> Unit,
-    navigateToRoom: (StoreRoom) -> Unit,
-    navigateUp: () -> Unit
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
     val podcastData = viewState.storePage.storeData
@@ -109,9 +106,15 @@ private fun StorePodcastScreen(
 
             item {
                 // buttons
-                Row(modifier = Modifier.padding(horizontal = 16.dp),
+                Row(modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    ChipButton(selected = true, onClick = { /*TODO*/ }) {
+                    ActionChipButton(
+                        selected = true,
+                        onClick = { /*TODO*/ },
+                        icon = { Icon(Icons.Default.CheckCircle)}
+                    ) {
                         Text(text = stringResource(id = R.string.action_subscribe))
                     }
 
@@ -133,7 +136,7 @@ private fun StorePodcastScreen(
                     podcastData.genre?.let { genre ->
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                             ChipButton(selected = false,
-                                onClick = { navigateToGenre(genre.id, genre.name) }) {
+                                onClick = { navigateTo(Screen.Genre(genre.id, genre.name)) }) {
                                 Text(text = genre.name)
                             }
                         }
@@ -153,9 +156,11 @@ private fun StorePodcastScreen(
                     // trailer
                     it.storeEpisodeTrailer?.let {
                         item {
+                            // trailer header
+                            StoreHeadingSection(
+                                title = stringResource(id = R.string.store_trailer))
                             // trailer
-                            TrailerCardItem(
-                                modifier = Modifier.padding(horizontal = 16.dp),
+                            TrailerItem(
                                 storeEpisode = it,
                                 onEpisodeClick = { /*TODO*/ })
                             Spacer(modifier = Modifier.height(16.dp))
@@ -165,18 +170,18 @@ private fun StorePodcastScreen(
                     // recent episodes
                     item {
                         StoreHeadingSectionWithLink(
-                            title = "Recent episodes",
-                            onClick = navigateToPodcastEpisodes)
+                            title = stringResource(id = R.string.store_episodes),
+                            onClick = { navigateTo(Screen.StoreEpisodesScreen(podcastData)) })
                     }
                     items(it.recentEpisodes) {
-                        EpisodeCardItem(
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                        EpisodeDetailItem(
                             storeEpisode = it,
                             onEpisodeClick = { /*TODO*/ })
 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
+                    // other podcasts
                     items(lazyPagingItems = otherPodcastsLazyPagingItems) { collection ->
                         when (collection) {
                             is StoreCollectionItems -> {
@@ -192,13 +197,12 @@ private fun StorePodcastScreen(
                                 )
                                 StoreHeadingSectionWithLink(
                                     title = collectionWithTitle.label,
-                                    onClick = { navigateToRoom(collectionWithTitle.room) }
+                                    onClick = { navigateTo(Screen.Room(collectionWithTitle.room)) }
                                 )
                                 // content
                                 StoreCollectionItemsContent(
                                     storeCollection = collection,
-                                    navigateToPodcast = navigateToPodcast,
-                                    navigateToEpisode = {}
+                                    navigateTo = navigateTo
                                 )
                             }
                         }
@@ -217,7 +221,7 @@ private fun StorePodcastScreen(
                     viewState = viewState,
                     listState = listState,
                     headerHeight = headerHeight,
-                    navigateUp = navigateUp)
+                    navigateUp = navigateBack)
             },
             state = listState,
             headerHeight = headerHeight)
@@ -271,7 +275,8 @@ fun StorePodcastExpandedHeader(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 56.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 84.dp, bottom = 8.dp)
                     .alpha(alphaLargeHeader)
             ) {
                 Card(
@@ -292,15 +297,16 @@ fun StorePodcastExpandedHeader(
                     .padding(start = 16.dp)
                     .fillMaxHeight()) {
                     Box(modifier = Modifier
-                        .weight(1f)
-                        .background(Color.Yellow)) {
-                        Text(
-                            viewState.storePage.name,
+                        .weight(1f)) {
+                        AutoSizedText(
+                            text = viewState.storePage.name,
                             modifier = Modifier
-                                .align(Alignment.CenterStart),
+                                .align(Alignment.CenterStart)
+                                .fillMaxHeight(),
                             style = MaterialTheme.typography.h5,
-                            maxLines = 2,
-                            color = Color.getColor(viewState.storePage.artwork?.textColor1!!)
+                            maxFontSize = 35.sp,
+                            minFontSize = 20.sp,
+                            //color = Color.getColor(viewState.storePage.artwork?.textColor1!!)
                         )
                     }
                     Text(
@@ -309,7 +315,7 @@ fun StorePodcastExpandedHeader(
                             .padding(bottom = 4.dp),
                         style = MaterialTheme.typography.body1,
                         maxLines = 2,
-                        color = Color.getColor(viewState.storePage.artwork?.textColor2!!)
+                        //color = Color.getColor(viewState.storePage.artwork?.textColor2!!)
                     )
                 }
             }
@@ -362,58 +368,14 @@ fun StorePodcastCollapsedHeader(
 
 @Composable
 private fun StorePodcastDescriptionContent(description: String) {
-    var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            .padding(start = 16.dp, end = 16.dp)
             .animateContentSize()
-            .clickable { expanded = !expanded }
     ) {
-        Text(text = description,
-            overflow = TextOverflow.Ellipsis,
+        OverflowText(text = description,
+            overflow = TextOverflow.Clip,
             textAlign = TextAlign.Justify,
-            maxLines = if (expanded) Int.MAX_VALUE else 3)
+            maxLines = 3)
     }
 }
-
-
-@Composable
-fun Greeting() {
-    var width by remember { mutableStateOf(0) }
-    var height by remember { mutableStateOf(0) }
-    var fontSize by remember { mutableStateOf(35) }
-    val msg =
-        "My really long long long long long text that needs to be resized to the height of this Column. My really long long long long long text that needs to be resized to the height of this Column. My really long long long long long text that needs to be resized to the height of this Column. My really long long long long long text "
-    Column(modifier = Modifier
-        .height(100.dp)
-        .padding(8.dp)
-        .background(Color.Blue)
-        .onGloballyPositioned {
-            width = it.size.width
-            height = it.size.height
-        }) {
-        Log.d("mainactivity", "width = $width")
-        Log.d("mainactivity", "height = $height")
-        Text(
-            modifier = Modifier
-                .background(Color.Green)
-                .fillMaxHeight(),
-            style = TextStyle(fontSize = fontSize.sp),
-            text = msg,
-            onTextLayout = { result ->
-                Log.d("mainactivity", "lines = ${result.lineCount}")
-                Log.d("mainactivity", "size = ${result.size}")
-                Log.d("mainactivity", "didOverflowHeight = ${result.didOverflowHeight}")
-                if (result.didOverflowHeight && fontSize > 25) {
-                    fontSize = (fontSize * 0.8f).toInt()
-                    Log.d("mainactivity", "fontSize = ${fontSize}")
-                }
-            }
-        )
-    }
-}
-
-fun calculateFontSize(msg: String, height: Int): Int {
-    return height / (msg.length / 8)
-}
-

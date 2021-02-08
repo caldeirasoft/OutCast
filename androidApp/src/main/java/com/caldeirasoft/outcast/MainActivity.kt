@@ -7,6 +7,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.platform.setContent
 import com.caldeirasoft.outcast.ui.navigation.MainNavHost
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.navigation.ScreenName
 import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             OutCastTheme {
-                MainNavHost(Screen.STORE_DIRECTORY)
+                MainNavHost(ScreenName.STORE_DISCOVER)
             }
         }
     }
