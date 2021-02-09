@@ -34,8 +34,9 @@ class StoreRepositoryImpl (
         storeFront: String
     ): StorePage {
         val storePageDto = getStoreDataApi(url, storeFront)
+        val pageData = storePageDto.pageData
         // retrieve data
-        return when (storePageDto.pageData?.componentName) {
+        return when (pageData?.componentName) {
             "grouping_page" -> {
                 getGroupingDataAsync(storePageDto)
             }
@@ -46,7 +47,7 @@ class StoreRepositoryImpl (
                 getMultiRoomDataAsync(storePageDto)
             }
             "artist_page" -> {
-                when (storePageDto.pageData.metricsBase?.pageType) {
+                when (pageData.metricsBase?.pageType) {
                     "Artist" ->
                         getArtistPodcastDataAsync(storePageDto)
                     "Provider" ->
@@ -84,7 +85,7 @@ class StoreRepositoryImpl (
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.fcStructure?.model?.children
                 ?.first { element -> element.token == "allPodcasts" }?.children
-                ?.first()?.children;
+                ?.first()?.children
             entries?.forEach { element ->
                 when (element.fcKind) {
                     258 -> { // parse header collection
@@ -246,11 +247,11 @@ class StoreRepositoryImpl (
         }
 
         val storeGenres: StoreCollectionGenres? =
-            storePageDto.pageData?.categoryList?.children?.let {
+            storePageDto.pageData?.categoryList?.let { categoryList ->
                 StoreCollectionGenres(
-                    id = storePageDto.pageData.categoryList.genreId.toLong(),
-                    label = storePageDto.pageData.categoryList.parentCategoryLabel.orEmpty(),
-                    genres = it.map { child -> child.toStoreGenre(storeFront) },
+                    id = categoryList.genreId.toLong(),
+                    label = categoryList.parentCategoryLabel.orEmpty(),
+                    genres = categoryList.children.map { child -> child.toStoreGenre(storeFront) },
                     storeFront = storeFront
                 )
             }
@@ -307,19 +308,21 @@ class StoreRepositoryImpl (
             val entries = storePageDto.pageData?.contentData
             entries?.forEach { contentData ->
                 val ids = contentData.adamIds.map { id -> id.toLong() }
+                val dkId = contentData.dkId
+                val chunkId = contentData.chunkId
                 when {
-                    contentData.dkId != null -> {
+                    dkId != null -> {
                         // popular episodes
                         yield(
                             StoreCollectionTopEpisodes(
-                                id = contentData.dkId.toLong(),
+                                id = dkId.toLong(),
                                 label = contentData.title,
                                 itemsIds = ids,
                                 storeFront = storeFront,
                             )
                         )
                     }
-                    contentData.chunkId.isNullOrEmpty() -> {
+                    chunkId.isNullOrEmpty() -> {
                         // popular podcasts
                         yield(
                             StoreCollectionTopPodcasts(
@@ -334,7 +337,7 @@ class StoreRepositoryImpl (
                         // regular podcasts
                         yield(
                             StoreCollectionItems(
-                                id = contentData.chunkId.toLong(),
+                                id = chunkId.toLong(),
                                 label = contentData.title,
                                 itemsIds = ids,
                                 storeFront = storeFront,
@@ -446,7 +449,7 @@ class StoreRepositoryImpl (
 
         // parse podcast
         storePageDto.storePlatformData?.producDv?.results?.entries?.firstOrNull()
-            ?.let { (key, podcastEntry) ->
+            ?.let { (_, podcastEntry) ->
                 val podcastData = getStoreItemFromLookupResultItem(podcastEntry, storeFront) as StorePodcast
                 val podcastPage = StorePodcastPage(
                     storeData = podcastData,

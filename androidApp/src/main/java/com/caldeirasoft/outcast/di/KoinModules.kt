@@ -76,7 +76,7 @@ internal val platformModule = module {
         }
     }
     single<NetworkFlipperPlugin> { NetworkFlipperPlugin() }
-    factory<HttpClient> {
+    single<HttpClient> {
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
         val httpCacheDirectory = File(get<Context>().cacheDir, "httpCache")
         val cache = Cache(httpCacheDirectory, cacheSize.toLong())
@@ -124,26 +124,26 @@ internal val commomModule = module {
     single<QueueRepository> { QueueRepositoryImpl(database = get()) }
     single<LocalCacheRepository> { LocalCacheRepositoryImpl(context = get(), json = get()) }
 
-    factory { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
-    factory { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
-    factory { FetchEpisodesFavoritesUseCase(episodeRepository = get()) }
-    factory { FetchEpisodesHistoryUseCase(episodeRepository = get()) }
-    factory { FetchFavoriteEpisodesCountUseCase(episodeRepository = get()) }
-    factory { FetchPlayedEpisodesCountUseCase(episodeRepository = get()) }
-    factory { FetchCountEpisodesBySectionUseCase(episodeRepository = get()) }
-    factory { FetchInboxUseCase(inboxRepository = get()) }
-    factory { FetchQueueUseCase(queueRepository = get()) }
-    factory { SubscribeToPodcastUseCase(podcastRepository = get()) }
-    factory { UnsubscribeFromPodcastUseCase(podcastRepository = get()) }
-    factory { FetchPodcastUseCase(podcastRepository = get()) }
-    factory { FetchEpisodeUseCase(episodeRepository = get()) }
-    factory { FetchStoreDirectoryUseCase(storeRepository = get(), localCacheRepository = get()) }
-    factory { FetchStoreGroupingUseCase(storeRepository = get(), localCacheRepository = get())}
-    factory { FetchStoreFrontUseCase(dataStoreRepository = get()) }
-    factory { FetchStoreDataUseCase(storeRepository = get()) }
-    factory { FetchStorePodcastDataUseCase(storeRepository = get()) }
-    factory { FetchStoreGenresUseCase(storeRepository = get())}
-    factory { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
-    factory { GetStoreItemsUseCase(storeRepository = get()) }
+    single { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
+    single { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
+    single { FetchEpisodesFavoritesUseCase(episodeRepository = get()) }
+    single { FetchEpisodesHistoryUseCase(episodeRepository = get()) }
+    single { FetchFavoriteEpisodesCountUseCase(episodeRepository = get()) }
+    single { FetchPlayedEpisodesCountUseCase(episodeRepository = get()) }
+    single { FetchCountEpisodesBySectionUseCase(episodeRepository = get()) }
+    single { FetchInboxUseCase(inboxRepository = get()) }
+    single { FetchQueueUseCase(queueRepository = get()) }
+    single { SubscribeToPodcastUseCase(podcastRepository = get()) }
+    single { UnsubscribeFromPodcastUseCase(podcastRepository = get()) }
+    single { FetchPodcastUseCase(podcastRepository = get()) }
+    single { FetchEpisodeUseCase(episodeRepository = get()) }
+    single { FetchStoreDirectoryUseCase(storeRepository = get(), localCacheRepository = get()) }
+    single { FetchStoreGroupingUseCase(storeRepository = get(), localCacheRepository = get())}
+    single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
+    single { FetchStoreDataUseCase(storeRepository = get()) }
+    single { FetchStorePodcastDataUseCase(storeRepository = get()) }
+    single { FetchStoreGenresUseCase(storeRepository = get())}
+    single { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
+    single { GetStoreItemsUseCase(storeRepository = get()) }
 
 }

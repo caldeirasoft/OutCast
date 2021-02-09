@@ -141,6 +141,16 @@ object Dependencies {
             const val okhttp = "com.squareup.okhttp3:okhttp:$version"
         }
 
+        object Retrofit {
+            private const val version = "2.9.0"
+            const val retrofit = "com.squareup.retrofit2:retrofit:$version"
+
+            object KotlinXSerialization {
+                private const val version = "0.8.0"
+                const val serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$version"
+            }
+        }
+
         object LeakCanary {
             private const val version = "1.6.1"
             const val leakCanaryRelease = "com.squareup.leakcanary:leakcanary-android-no-op:$version"

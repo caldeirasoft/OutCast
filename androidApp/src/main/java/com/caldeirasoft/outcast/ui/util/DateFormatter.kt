@@ -23,9 +23,6 @@ object DateFormatter {
     fun Instant.formatRelativeDisplay(context: Context): String {
         val localDateTime = this.toLocalDateTime(TimeZone.currentSystemDefault())
         val localDate = localDateTime.date
-        val diffWithLastWeek = localDate - lastWeek
-        val diffWithLastYear = localDate - lastYear
-        val df = getDateFormatterWithoutYear()
         return when {
             localDate == today -> {
                 // SHORT: 2:05 AM

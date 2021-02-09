@@ -1,3 +1,4 @@
+import Versions.sqldelight
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 
 plugins {
@@ -5,6 +6,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.serialization") version Dependencies.Kotlin.version
+    id("com.squareup.sqldelight")
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"
@@ -56,7 +58,7 @@ dependencies {
     implementation(Dependencies.Koin.androidScope)
     implementation(Dependencies.Koin.androidCompose)
     implementation(Dependencies.Koin.androidViewModel)
-//    implementation(Libs.Koin.androidExt)
+    //    implementation(Libs.Koin.androidExt)
     // Ktor client
     implementation(Dependencies.Ktor.clientCore)
     implementation(Dependencies.Ktor.clientLogging)
@@ -70,6 +72,9 @@ dependencies {
     //implementation(Dependencies.Accompanist.insets)
     // Landscapist
     implementation(Dependencies.Landscapist.coil)
+    // Retrofit
+    implementation(Dependencies.SquareUp.Retrofit.retrofit)
+    implementation(Dependencies.SquareUp.Retrofit.KotlinXSerialization.serialization)
     // SQLDelight
     implementation(Dependencies.SquareUp.SqlDelight.runtime)
     implementation(Dependencies.SquareUp.SqlDelight.coroutines)
@@ -83,6 +88,8 @@ dependencies {
     debugImplementation(Dependencies.Facebook.Flipper.leakCanary)
     // SoLoader
     debugImplementation(Dependencies.Facebook.SoLoader.soloader)
+    // SQLDelight
+    implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
     // Leak Canary
     debugImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryDebug)
     releaseImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryRelease)
@@ -121,6 +128,14 @@ android {
         kotlinCompilerExtensionVersion = Dependencies.AndroidX.Compose.version
     }
     buildToolsVersion = "30.0.2"
+}
+
+sqldelight {
+    database("Database") {
+        packageName = "com.caldeirasoft.outcast"
+        schemaOutputDirectory = file("build/dbs")
+        dialect = "sqlite:3.24"
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {

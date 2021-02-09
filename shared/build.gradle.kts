@@ -2,7 +2,6 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     kotlin("plugin.serialization") version Dependencies.Kotlin.version
-    id("com.squareup.sqldelight")
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"
@@ -76,8 +75,6 @@ kotlin {
                 implementation(Dependencies.Coroutines.android)
                 // Ktor client
                 implementation(Dependencies.Ktor.clientAndroid)
-                // SQLDelight
-                implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
             }
         }
         val androidTest by getting
@@ -86,8 +83,6 @@ kotlin {
                 // Ktor client
                 implementation(Dependencies.Ktor.clientJvm)
                 implementation(Dependencies.Ktor.serializationJvm)
-                // SQLDelight
-                implementation(Dependencies.SquareUp.SqlDelight.sqlDriver)
             }
         }
         val jvmTest by getting {
@@ -117,13 +112,5 @@ android {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-}
-
-sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
-        schemaOutputDirectory = file("build/dbs")
-        dialect = "sqlite:3.24"
     }
 }
