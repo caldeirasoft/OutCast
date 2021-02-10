@@ -12,10 +12,14 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@FlowPreview
+@OptIn(KoinApiExtension::class)
 @ExperimentalCoroutinesApi
 class TopChartsViewModel(storeItemType: StoreItemType) : ViewModel(), KoinComponent {
     private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()

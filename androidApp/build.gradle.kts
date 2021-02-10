@@ -1,4 +1,3 @@
-import Versions.sqldelight
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 
 plugins {
@@ -16,11 +15,12 @@ repositories {
     google()
     jcenter()
     mavenCentral()
-    maven(url = uri("https://dl.bintray.com/kotlin/kotlin-eap")) //ktor
     maven(url = uri("https://dl.bintray.com/ekito/koin/")) // koin
+    maven(url = uri("https://dl.bintray.com/kotlin/kotlin-eap")) //ktor
     maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
 }
 dependencies {
+    implementation(kotlin("stdlib-jdk8", Dependencies.Kotlin.version))
     implementation(project(":shared"))
     // Android
     implementation("com.google.android.material:material:1.2.1")
@@ -59,15 +59,17 @@ dependencies {
     implementation(Dependencies.Koin.androidCompose)
     implementation(Dependencies.Koin.androidViewModel)
     //    implementation(Libs.Koin.androidExt)
-    // Ktor client
-    implementation(Dependencies.Ktor.clientCore)
-    implementation(Dependencies.Ktor.clientLogging)
-    implementation(Dependencies.Ktor.encoding)
-    implementation(Dependencies.Ktor.serialization)
-    implementation(Dependencies.Ktor.clientAndroid)
-    implementation(Dependencies.Ktor.clientOkHttp)
+    // Chucker
+    debugImplementation(Dependencies.Chucker.library)
+    releaseImplementation(Dependencies.Chucker.libraryNoOp)
     // OkHttp
     implementation(Dependencies.SquareUp.OkHttp3.okhttp)
+    implementation(Dependencies.SquareUp.OkHttp3.loggingInterceptor)
+    implementation(Dependencies.SquareUp.OkHttp3.dns)
+    // OkLog3
+    implementation(Dependencies.OkLog3.okLog3)
+    // Timber
+    implementation(Dependencies.Timber.timber)
     // Accompanist
     //implementation(Dependencies.Accompanist.insets)
     // Landscapist
@@ -81,13 +83,9 @@ dependencies {
     implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
     // Plist
     implementation(Dependencies.Plist.ddPlist)
-    // Flipper
-    debugImplementation(Dependencies.Facebook.Flipper.flipperDebug)
-    releaseImplementation(Dependencies.Facebook.Flipper.flipperRelease)
-    debugImplementation(Dependencies.Facebook.Flipper.network)
-    debugImplementation(Dependencies.Facebook.Flipper.leakCanary)
-    // SoLoader
-    debugImplementation(Dependencies.Facebook.SoLoader.soloader)
+    // Stetho
+    implementation(Dependencies.Stetho.runtime)
+    implementation(Dependencies.Stetho.okhttp3)
     // SQLDelight
     implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
     // Leak Canary
@@ -95,6 +93,7 @@ dependencies {
     releaseImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryRelease)
     // Java 8+ API desugaring support
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
+    implementation("androidx.core:core-ktx:+")
 }
 android {
     compileSdkVersion(30)

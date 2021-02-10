@@ -36,8 +36,7 @@ object AnimationDefinitions {
         state(AnimationState.END) { this[shimmerDpPropKey] = 2000.dp }
         transition(AnimationState.START, AnimationState.END)
         {
-            shimmerDpPropKey using repeatable(
-                iterations = AnimationConstants.Infinite,
+            shimmerDpPropKey using InfiniteRepeatableSpec(
                 animation = tween(
                     durationMillis = 1200,
                     easing = LinearEasing

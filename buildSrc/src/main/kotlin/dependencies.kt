@@ -7,10 +7,6 @@ object Versions {
     const val support = "1.3.1"
     const val room = "2.2.5"
 
-    const val ktor = "1.4.0"
-    const val sqldelight = "1.4.3"
-    const val datetime = "0.1.0"
-
     const val junit = "4.13"
 }
 
@@ -93,12 +89,17 @@ object Dependencies {
         const val coil = "com.github.skydoves:landscapist-coil:$version"
     }
 
+    object Chucker {
+        private const val version = "3.4.0"
+        const val library = "com.github.chuckerteam.chucker:library:$version"
+        const val libraryNoOp = "com.github.chuckerteam.chucker:library-no-op:$version"
+    }
+
     object Koin {
         private const val version = "2.2.1"
         const val core = "org.koin:koin-core:$version"
         const val coreExt = "org.koin:koin-core-ext:$version"
         const val test = "org.koin:koin-test:$version"
-        const val Ktor = "org.koin:koin-ktor:$version"
         const val android = "org.koin:koin-android:$version"
         const val androidScope = "org.koin:koin-androidx-scope:$version"
         const val androidViewModel = "org.koin:koin-androidx-viewmodel:$version"
@@ -107,21 +108,14 @@ object Dependencies {
         const val gradlePlugin = "org.koin:koin-gradle-plugin:$version"
     }
 
-    object Ktor {
-        private const val version = "1.5.0"
-        const val clientCore = "io.ktor:ktor-client-core:$version"
-        const val clientAndroid = "io.ktor:ktor-client-android:$version"
-        const val clientOkHttp = "io.ktor:ktor-client-okhttp:$version"
-        const val clientJvm = "io.ktor:ktor-client-core-jvm:$version"
-        const val clientJs = "io.ktor:ktor-client-core-js:$version"
-        const val clientMock = "io.ktor:ktor-client-mock:$version"
-        const val clientLogging = "io.ktor:ktor-client-logging:$version"
+    object OkLog3 {
+        private const val version = "2.3.0"
+        const val okLog3 = "com.github.simonpercic:oklog3:$version"
+    }
 
-        const val serialization = "io.ktor:ktor-client-serialization:$version"
-        const val serializationJvm = "io.ktor:ktor-client-serialization-jvm:$version"
-
-        const val features = "io.ktor:ktor-features:$version"
-        const val encoding = "io.ktor:ktor-client-encoding:$version"
+    object Timber {
+        private const val version = "4.7.1"
+        const val timber = "com.jakewharton.timber:timber:$version"
     }
 
     object SquareUp {
@@ -139,6 +133,8 @@ object Dependencies {
         object OkHttp3 {
             private const val version = "4.9.0"
             const val okhttp = "com.squareup.okhttp3:okhttp:$version"
+            const val dns = "com.squareup.okhttp3:okhttp-dnsoverhttps:$version"
+            const val loggingInterceptor = "com.squareup.okhttp3:logging-interceptor:$version"
         }
 
         object Retrofit {
@@ -158,21 +154,11 @@ object Dependencies {
         }
     }
 
-    object Facebook {
-        object Flipper {
-            private const val version = "0.67.0"
-            const val flipperDebug = "com.facebook.flipper:flipper:$version"
-            const val flipperRelease = "com.facebook.flipper:flipper-noop:$version"
-            const val network = "com.facebook.flipper:flipper-network-plugin:$version"
-            const val leakCanary = "com.facebook.flipper:flipper-leakcanary-plugin:$version"
-        }
-
-        object SoLoader {
-            private const val version = "0.9.0"
-            const val soloader = "com.facebook.soloader:soloader:$version"
-        }
+    object Stetho {
+        private const val version = "1.5.1"
+        const val runtime = "com.facebook.stetho:stetho:$version"
+        const val okhttp3 = "com.facebook.stetho:stetho-okhttp3:$version"
     }
-
 
     object Plist {
         private const val version = "1.23"

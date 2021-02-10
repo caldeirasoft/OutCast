@@ -1,15 +1,9 @@
 package com.caldeirasoft.outcast.domain.util
 
-import io.ktor.client.features.*
-import io.ktor.client.statement.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
 import kotlinx.datetime.Clock
 import kotlin.time.ExperimentalTime
 
-
+/*
 /**
  * A generic function that can stream network resource and fetch and save it
  * It is used for retry resource when we already observe data from database
@@ -33,7 +27,7 @@ inline fun <ResponseType: Any> fetchResourceAndSave(
         is NetworkResponse.UnknownError -> emit(DataState.Error(response.error))
     }
 }
-
+*/
 @OptIn(ExperimentalTime::class)
 suspend inline fun <R> stopwatch(msg: String, crossinline action: suspend () -> R): R {
     val start = Clock.System.now()

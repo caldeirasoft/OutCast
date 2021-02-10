@@ -1,39 +1,58 @@
 package com.caldeirasoft.outcast.data.repository
 
+import com.caldeirasoft.outcast.data.api.ItunesAPI
+import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.domain.dto.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.StoreRepository
-import com.caldeirasoft.outcast.domain.util.checkType
-import com.caldeirasoft.outcast.domain.util.stopwatch
-import com.caldeirasoft.outcast.domain.util.tryCast
-import io.ktor.client.*
-import io.ktor.client.request.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import retrofit2.HttpException
 
 class StoreRepositoryImpl (
-    val httpClient:HttpClient,
+    val itunesAPI: ItunesAPI,
+    val searchAPI: ItunesSearchAPI
 ) : StoreRepository {
 
     companion object {
         const val DEFAULT_GENRE = 26
-        const val GENRE_URL = "https://podcasts.apple.com/genre/id{genre}"
-        const val GENRES_URL = "https://itunes.apple.com/WebObjects/MZStoreServices.woa/ws/genres"
-        const val TOP_CHARTS_IDS_URL = "https://itunes.apple.com/WebObjects/MZStoreServices.woa/ws/charts"
-        const val TOP_CHARTS_URL = "https://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop"
-        const val LOOKUP_URL = "https://uclient-api.itunes.apple.com/WebObjects/MZStorePlatform.woa/wa/lookup"
     }
 
     /**
-     * getStoreDataAsync
+     * getStoreDataAsync{
      */
     override suspend fun getStoreDataAsync(
         url: String,
         storeFront: String
     ): StorePage {
-        val storePageDto = getStoreDataApi(url, storeFront)
+        val storeResponse = itunesAPI.storeData(storeFront = storeFront, url = url)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
+        return getStoreData(storePageDto)
+    }
+
+
+    /**
+     * getGroupingDataAsync
+     */
+    override suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
+        val storeResponse = itunesAPI.groupingData(storeFront = storeFront, genre =  genre ?: DEFAULT_GENRE)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
+        val storePage = getStoreData(storePageDto)
+        if (storePage !is StoreGroupingPage)
+            throw NullPointerException("Invalid cast to StoreGroupingPage")
+        return storePage
+    }
+
+    /**
+     * getStoreDataAsync{
+     */
+    private fun getStoreData(storePageDto: StorePageDto): StorePage {
         val pageData = storePageDto.pageData
         // retrieve data
         return when (pageData?.componentName) {
@@ -58,18 +77,6 @@ class StoreRepositoryImpl (
             }
             else -> throw Exception("Invalid store data")
         }
-    }
-
-
-    /**
-     * getGroupingDataAsync
-     */
-    override suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
-        val url = GENRE_URL.replace("{genre}", (genre ?: DEFAULT_GENRE).toString())
-        val storeData = getStoreDataAsync(url, storeFront)
-        if (storeData !is StoreGroupingPage)
-            throw NullPointerException("Invalid cast to StoreGroupingPage")
-        return storeData
     }
 
     /**
@@ -435,7 +442,10 @@ class StoreRepositoryImpl (
      */
     override suspend fun getPodcastDataAsync(url: String, storeFront: String): StorePodcastPage {
         // get grouping data
-        val storePageDto = getStoreDataApi(url, storeFront)
+        val storeResponse = itunesAPI.storeData(storeFront = storeFront, url = url)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
 
         // get missing lookup ids
         val moreByArtist =
@@ -534,35 +544,11 @@ class StoreRepositoryImpl (
             StoreItemType.PODCAST -> "Podcasts"
             StoreItemType.EPISODE -> "PodcastEpisodes"
         }
-        val resultIdsResult = getTopChartsIdsAsync(genre, type, storeFront, limit)
+        val storeResponse = itunesAPI.topCharts(storeFront = storeFront, genre =  genre ?: DEFAULT_GENRE, limit = limit, name = type)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val resultIdsResult = storeResponse.body() ?: throw HttpException(storeResponse)
         return resultIdsResult.resultIds
-    }
-
-    /**
-     * getTopChartsIdsAsync
-     */
-    private suspend fun getTopChartsIdsAsync(genre: Int?, type: String, storeFront: String, limit: Int): ResultIdsResult =
-        httpClient.get {
-            url(TOP_CHARTS_IDS_URL)
-            parameter("name", type)
-            genre?.let {
-                parameter("g", genre)
-            }
-            parameter("limit", limit)
-            header("X-Apple-Store-Front", storeFront)
-        }
-
-    /**
-     * getGenresDataAsync
-     */
-    override suspend fun getGenresDataAsync(storeFront: String): StoreGenreData {
-        val map: Map<Int, GenreResult> = getGenreMapAsync(GENRES_URL, storeFront)
-
-        val rootEntry = map.values.first()
-        return StoreGenreData(
-            root = rootEntry.toStoreGenre(storeFront),
-            genres = rootEntry.subgenres.values.map { it.toStoreGenre(storeFront) }
-        )
     }
 
     /**
@@ -656,7 +642,10 @@ class StoreRepositoryImpl (
 
         // retrieve missing lookups
         if (dataIds.isNotEmpty()) {
-            val lookupItems = stopwatch("getListStoreItemDataAsync - getLookupDataAsync") { getLookupDataAsync(dataIds, storeFront) }
+            val storeResponse = itunesAPI.lookup(storeFront = storeFront, ids = dataIds.joinToString(","))
+            if (storeResponse.isSuccessful.not())
+                throw HttpException(storeResponse)
+            val lookupItems = storeResponse.body() ?: throw HttpException(storeResponse)
             lookupItems.results
                 .mapValues { v -> getStoreItemFromLookupResultItem(v.value, storeFront) }
                 .forEach {
@@ -668,36 +657,4 @@ class StoreRepositoryImpl (
             .filter { id -> newLookup.containsKey(id) }
             .mapNotNull { id -> newLookup.get(id) }
     }
-
-    /**
-     * getLookupDataAsync
-     */
-    private suspend fun getLookupDataAsync(lookupIds: List<Long>, storeFront: String): LockupResult =
-        httpClient.get {
-            url(LOOKUP_URL)
-            parameter("version", 2)
-            parameter("p", "lockup")
-            parameter("caller", "DI6")
-            parameter("id", lookupIds.joinToString(","))
-            header("X-Apple-Store-Front", storeFront)
-        }
-
-    /**
-     * getStoreDataApi
-     */
-    private suspend fun getStoreDataApi(url: String, storeFront: String): StorePageDto =
-        httpClient.get {
-            url(url)
-            header("X-Apple-Store-Front", storeFront)
-        }
-
-    /**
-     * getGenreMapAsync
-     */
-    suspend fun getGenreMapAsync(url: String, storeFront: String): Map<Int, GenreResult> =
-        httpClient.get {
-            url(url)
-            parameter("id", 26)
-            header("X-Apple-Store-Front", storeFront)
-        }
 }

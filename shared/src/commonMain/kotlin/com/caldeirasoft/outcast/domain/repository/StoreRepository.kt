@@ -32,9 +32,4 @@ interface StoreRepository {
      */
     suspend fun getListStoreItemDataAsync(lookupIds: List<Long>, storeFront: String, storePage: StorePage?): List<StoreItem>
 
-    /**
-     * getGenresDataAsync
-     */
-    suspend fun getGenresDataAsync(storeFront: String): StoreGenreData
-
 }

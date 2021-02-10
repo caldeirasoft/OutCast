@@ -1,49 +1,99 @@
 package com.caldeirasoft.outcast.di
 
+import android.app.Application
 import android.content.Context
-import android.util.Log
+import com.caldeirasoft.outcast.BuildConfig
 import com.caldeirasoft.outcast.Database
+import com.caldeirasoft.outcast.data.api.ItunesAPI
+import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.data.db.createDatabase
 import com.caldeirasoft.outcast.data.repository.*
+import com.caldeirasoft.outcast.data.util.network.DnsProviders
+import com.caldeirasoft.outcast.data.util.network.GzipRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteResponseInterceptor
-import com.caldeirasoft.outcast.domain.interfaces.*
+import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
+import com.caldeirasoft.outcast.domain.interfaces.StoreFeatured
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.domain.usecase.*
-import com.facebook.flipper.plugins.network.FlipperOkhttpInterceptor
-import com.facebook.flipper.plugins.network.NetworkFlipperPlugin
+import com.chuckerteam.chucker.api.ChuckerCollector
+import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.chuckerteam.chucker.api.RetentionManager
+import com.facebook.stetho.okhttp3.StethoInterceptor
+import com.github.simonpercic.oklog3.OkLogInterceptor
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.cache.*
-import io.ktor.client.features.compression.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
-import io.ktor.client.features.logging.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import okhttp3.Cache
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.KoinApplication
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import java.io.File
+import retrofit2.Retrofit
+import java.util.concurrent.TimeUnit
 
 fun KoinApplication.initKoinModules(appModule: Module) {
-    modules(platformModule, commomModule, appModule)
+    modules(networkModule, databaseModule, repositoryModule, usecaseModule, appModule)
 }
 
 internal val mainDispatcherQualifier = named("MainDispatcher")
 
-internal val platformModule = module {
-    single<SqlDriver> { AndroidSqliteDriver(Database.Schema, get(), "outCastDb.db") }
+internal val networkModule = module {
+    fun provideCache(application: Application): Cache {
+        val cacheSize = 10 * 1024 * 1024
+        return Cache(application.cacheDir, cacheSize.toLong())
+    }
+
+    fun provideHttpClientBuilder(): OkHttpClient.Builder =
+        OkHttpClient.Builder().apply {
+            connectTimeout(20, TimeUnit.SECONDS)
+            readTimeout(60, TimeUnit.SECONDS)
+            writeTimeout(20, TimeUnit.SECONDS)
+            addInterceptor(GzipRequestInterceptor)
+            addNetworkInterceptor(StethoInterceptor())
+            if (BuildConfig.DEBUG) {
+                // create an instance of OkLogInterceptor using a builder()
+                val okLogInterceptor = OkLogInterceptor.builder().build()
+                addInterceptor(okLogInterceptor)
+            }
+            val customDns = DnsProviders.buildCloudflare(OkHttpClient())
+            dns(customDns)
+        }
+
+    fun OkHttpClient.Builder.withCacheControl(context: Context) = this.apply {
+        addNetworkInterceptor(RewriteResponseInterceptor())
+        addInterceptor(RewriteOfflineRequestInterceptor(context))
+    }
+
+    fun OkHttpClient.Builder.withChucker(context: Context) = this.apply {
+        // Create the Collector
+        val chuckerCollector = ChuckerCollector(
+            context = context,
+            // Toggles visibility of the push notification
+            showNotification = true,
+            // Allows to customize the retention period of collected data
+            retentionPeriod = RetentionManager.Period.ONE_HOUR
+        )
+        val chuckerInterceptor = ChuckerInterceptor
+            .Builder(context)
+            .collector(chuckerCollector)
+            .build()
+        addInterceptor(chuckerInterceptor)
+    }
+
     single<CoroutineDispatcher>(mainDispatcherQualifier) { Dispatchers.Main }
     single<Json> {
         val serializer = SerializersModule {
@@ -75,55 +125,35 @@ internal val platformModule = module {
             serializersModule = serializer
         }
     }
-    single<NetworkFlipperPlugin> { NetworkFlipperPlugin() }
-    single<HttpClient> {
-        val cacheSize = 10 * 1024 * 1024 // 10 MiB
-        val httpCacheDirectory = File(get<Context>().cacheDir, "httpCache")
-        val cache = Cache(httpCacheDirectory, cacheSize.toLong())
-
-        val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
-        val httpClient = HttpClient(OkHttp) {
-            install(JsonFeature) {
-                serializer = KotlinxSerializer(nonStrictJson)
-            }
-            ContentEncoding {
-                gzip()
-                deflate()
-            }
-            Logging {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.d("HttpClient", message)
-                    }
-                }
-                level = LogLevel.INFO
-            }
-            engine {
-                clientCacheSize = cacheSize
-                preconfigured = OkHttpClient.Builder()
-                    .cache(cache)
-                    .build()
-
-                addNetworkInterceptor(FlipperOkhttpInterceptor(get()))
-                addNetworkInterceptor(RewriteResponseInterceptor())
-                addInterceptor(RewriteOfflineRequestInterceptor(get()))
-            }
-            install(HttpCache)
-        }
-        httpClient
+    single { provideHttpClientBuilder()
+        .withChucker(context = androidContext())
+        .build()
     }
+    single(named("cacheControl")) {
+        provideHttpClientBuilder()
+            .withChucker(context = androidContext())
+            .withCacheControl(context = androidContext())
+            .build()
+    }
+    single<ItunesAPI> { provideRetrofit(client = get(named("cacheControl"))) }
+    single<ItunesSearchAPI> { provideRetrofit(client = get(named("cacheControl"))) }
 }
 
-internal val commomModule = module {
+internal val databaseModule = module {
+    single<SqlDriver> { AndroidSqliteDriver(Database.Schema, get(), "outCastDb.db") }
     single { createDatabase(get()) }
+}
 
+internal val repositoryModule = module {
     single<PodcastRepository> { PodcastRepositoryImpl(database = get()) }
     single<EpisodeRepository> { EpisodeRepositoryImpl(database = get()) }
-    single<StoreRepository> { StoreRepositoryImpl(httpClient = get()) }
+    single<StoreRepository> { StoreRepositoryImpl(itunesAPI = get(), searchAPI = get()) }
     single<InboxRepository> { InboxRepositoryImpl(database = get()) }
     single<QueueRepository> { QueueRepositoryImpl(database = get()) }
     single<LocalCacheRepository> { LocalCacheRepositoryImpl(context = get(), json = get()) }
+}
 
+internal val usecaseModule = module {
     single { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
     single { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
     single { FetchEpisodesFavoritesUseCase(episodeRepository = get()) }
@@ -142,8 +172,20 @@ internal val commomModule = module {
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     single { FetchStoreDataUseCase(storeRepository = get()) }
     single { FetchStorePodcastDataUseCase(storeRepository = get()) }
-    single { FetchStoreGenresUseCase(storeRepository = get())}
     single { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
     single { GetStoreItemsUseCase(storeRepository = get()) }
+}
 
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T> provideRetrofit(client: OkHttpClient): T {
+    val baseURL = T::class.java.getField("baseUrl").get(null) as String
+    val contentType = "application/json".toMediaType()
+    val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
+    val retrofit = Retrofit.Builder()
+        .baseUrl(baseURL)
+        .client(client)
+        .addConverterFactory(nonStrictJson.asConverterFactory(contentType = contentType))
+        .build()
+
+    return retrofit.create(T::class.java)
 }

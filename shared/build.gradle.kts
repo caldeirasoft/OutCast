@@ -11,9 +11,9 @@ repositories {
     google()
     jcenter()
     mavenCentral()
-    maven(url = uri("https://dl.bintray.com/kotlin/kotlin-eap")) //ktor
     maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
     maven(url = uri("https://dl.bintray.com/ekito/koin/")) // koin
+    maven(url = uri("https://dl.bintray.com/kotlin/kotlin-eap")) //ktor
 }
 
 android {
@@ -46,14 +46,6 @@ kotlin {
                 // Koin
                 implementation(Dependencies.Koin.core)
                 implementation(Dependencies.Koin.coreExt)
-                implementation(Dependencies.Koin.Ktor)
-                // Ktor client
-                implementation(Dependencies.Ktor.clientCore)
-                implementation(Dependencies.Ktor.encoding)
-                implementation(Dependencies.Ktor.serialization)
-                // SQLDelight
-                implementation(Dependencies.SquareUp.SqlDelight.runtime)
-                implementation(Dependencies.SquareUp.SqlDelight.coroutines)
             }
         }
         val commonTest by getting {
@@ -62,8 +54,6 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
                 implementation(Dependencies.Coroutines.core)
                 implementation(Dependencies.Coroutines.test)
-                implementation(Dependencies.Ktor.clientMock)
-                implementation(Dependencies.Ktor.encoding)
                 implementation(Dependencies.Koin.test)
             }
         }
@@ -73,23 +63,17 @@ kotlin {
                 implementation(Dependencies.AndroidX.appcompat)
                 implementation(Dependencies.Coroutines.core)
                 implementation(Dependencies.Coroutines.android)
-                // Ktor client
-                implementation(Dependencies.Ktor.clientAndroid)
             }
         }
         val androidTest by getting
         val jvmMain by getting {
             dependencies {
-                // Ktor client
-                implementation(Dependencies.Ktor.clientJvm)
-                implementation(Dependencies.Ktor.serializationJvm)
             }
         }
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation(Dependencies.junit)
-                implementation(Dependencies.Ktor.clientMock)
             }
         }
     }
