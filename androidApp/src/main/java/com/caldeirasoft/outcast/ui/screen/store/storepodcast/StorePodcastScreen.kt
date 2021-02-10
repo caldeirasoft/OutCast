@@ -40,6 +40,7 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
+import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -133,6 +134,7 @@ private fun StorePodcastScreen(
                 }
             }
 
+            // episodes + trailer + related podcasts
             viewState.storeResourceData
                 .onLoading {
                     item {
@@ -165,10 +167,22 @@ private fun StorePodcastScreen(
                             storeEpisode = it,
                             onEpisodeClick = { /*TODO*/ })
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    // button show all episodes
+                    if (it.episodes.size > it.recentEpisodes.size) {
+                        item {
+                            TextButton(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                onClick = { navigateTo(Screen.StoreEpisodesScreen(podcastData)) }) {
+                                Text(text = stringResource(id = R.string.action_show_all_episodes),
+                                    style = typography.button.copy(letterSpacing = 0.25.sp))
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
 
-                    // other podcasts
+                    // related podcasts
                     items(lazyPagingItems = otherPodcastsLazyPagingItems) { collection ->
                         when (collection) {
                             is StoreCollectionItems -> {
