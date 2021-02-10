@@ -1,10 +1,8 @@
 package com.caldeirasoft.outcast.ui.screen.store.storepodcast
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,18 +20,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.WithConstraints
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.viewModel
@@ -47,7 +37,6 @@ import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
@@ -89,8 +78,6 @@ private fun StorePodcastScreen(
     val otherPodcastsLazyPagingItems = otherPodcasts.collectAsLazyPagingItems()
 
     ReachableScaffold(headerRatio = 1/3f) { headerHeight ->
-        val spacerHeight = headerHeight - 56.px
-
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -160,7 +147,7 @@ private fun StorePodcastScreen(
                             StoreHeadingSection(
                                 title = stringResource(id = R.string.store_trailer))
                             // trailer
-                            TrailerItem(
+                            EpisodeTrailerItem(
                                 storeEpisode = it,
                                 onEpisodeClick = { /*TODO*/ })
                             Spacer(modifier = Modifier.height(16.dp))
@@ -174,7 +161,7 @@ private fun StorePodcastScreen(
                             onClick = { navigateTo(Screen.StoreEpisodesScreen(podcastData)) })
                     }
                     items(it.recentEpisodes) {
-                        EpisodeDetailItem(
+                        EpisodeItemWithDesc(
                             storeEpisode = it,
                             onEpisodeClick = { /*TODO*/ })
 

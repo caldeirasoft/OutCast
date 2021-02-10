@@ -3,7 +3,6 @@ package com.caldeirasoft.outcast.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Ambient
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,44 +22,7 @@ import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
 
 
 @Composable
-fun StoreEpisodeItem(
-    storeEpisode: StoreEpisode,
-    index: Int? = null,
-    onEpisodeClick: () -> Unit,
-    onPodcastClick: () -> Unit
-) {
-    EpisodeDefaults.EpisodeItem(
-        modifier = Modifier
-            .clickable(onClick = onEpisodeClick),
-        text = {
-            Text(text = AnnotatedString.Builder()
-                .apply {
-                    if (index != null) {
-                        withStyle(SpanStyle(color = Color.Red)) {
-                            append("${index}. ")
-                        }
-                    }
-                    append(storeEpisode.name)
-                }.toAnnotatedString(),
-                maxLines = 2)
-        },
-        overlineText = {
-            PodcastEpisodeItemHeader(
-                modifier = Modifier.clickable(onClick = onPodcastClick),
-                storeEpisode = storeEpisode
-            )
-        },
-        actionButtons = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
-            }
-        }
-    )
-}
-
-@Composable
-fun StoreEpisodeCardItem(
+fun EpisodeCardItemWithArtwork(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     index: Int? = null,
@@ -72,24 +34,33 @@ fun StoreEpisodeCardItem(
             .clickable(onClick = onEpisodeClick),
     ) {
         EpisodeDefaults.EpisodeItem(
-            text = {
-                Text(text = AnnotatedString.Builder()
-                    .apply {
-                        if (index != null) {
-                            withStyle(SpanStyle(color = Color.Red)) {
-                                append("${index}. ")
-                            }
-                        }
-                        append(storeEpisode.name)
-                    }.toAnnotatedString(),
-                    maxLines = 2,
-                    modifier = Modifier.height(40.dp)
-                )
-            },
             overlineText = {
-                PodcastEpisodeItemHeader(
-                    modifier = Modifier.clickable(onClick = onPodcastClick),
-                    storeEpisode = storeEpisode
+                EpisodeDefaults.EpisodeItemArtworkHeader(
+                    icon = {
+                        PodcastThumbnail(
+                            imageModel = storeEpisode.getArtworkUrl(),
+                            modifier = Modifier
+                                .preferredSize(EpisodeDefaults.ThumbnailSize)
+                                .clickable(onClick = onPodcastClick)
+                        )
+                    },
+                    podcastText = {
+                        Text(text = storeEpisode.podcastName, maxLines = 1)
+                    },
+                    text = {
+                        Text(text = AnnotatedString.Builder()
+                            .apply {
+                                if (index != null) {
+                                    withStyle(SpanStyle(color = Color.Red)) {
+                                        append("${index}. ")
+                                    }
+                                }
+                                append(storeEpisode.name)
+                            }.toAnnotatedString(),
+                            maxLines = 2,
+                            modifier = Modifier.height(45.dp)
+                        )
+                    }
                 )
             },
             actionButtons = {
@@ -126,7 +97,7 @@ fun EpisodeItem(
 }
 
 @Composable
-fun EpisodeDetailItem(
+fun EpisodeItemWithDesc(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     onEpisodeClick: () -> Unit,
@@ -150,7 +121,7 @@ fun EpisodeDetailItem(
 }
 
 @Composable
-fun TrailerItem(
+fun EpisodeTrailerItem(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     onEpisodeClick: () -> Unit,
@@ -173,33 +144,88 @@ fun TrailerItem(
 }
 
 @Composable
-fun PodcastEpisodeCardItem(
+fun EpisodeItemWithDescAndArtwork(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
     onEpisodeClick: () -> Unit,
     onPodcastClick: () -> Unit,
 ) {
-    EpisodeDefaults.CardItem(
+    EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .clickable(onClick = onEpisodeClick),
-    ) {
-        EpisodeDefaults.EpisodeItem(
-            text = { Text(text = storeEpisode.name, maxLines = 1) },
-            overlineText = {
-                PodcastEpisodeItemHeader(
-                    modifier = Modifier.clickable(onClick = onPodcastClick),
-                    storeEpisode = storeEpisode
-                )
-            },
-            descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
-            actionButtons = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    PlayButton(storeEpisode = storeEpisode)
-                    QueueButton(storeEpisode = storeEpisode)
+        overlineText = {
+            EpisodeDefaults.EpisodeItemArtworkHeader(
+                icon = {
+                    PodcastThumbnail(
+                        imageModel = storeEpisode.getArtworkUrl(),
+                        modifier = Modifier
+                            .preferredSize(EpisodeDefaults.ThumbnailSize)
+                            .clickable(onClick = onPodcastClick)
+                    )
+                },
+                podcastText = {
+                    Text(text = storeEpisode.podcastName, maxLines = 1)
+                },
+                text = {
+                    Text(text = storeEpisode.name, maxLines = 2)
                 }
+            )
+        },
+        descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
+        actionButtons = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(storeEpisode = storeEpisode)
+                QueueButton(storeEpisode = storeEpisode)
             }
-        )
-    }
+        }
+    )
+}
+
+@Composable
+fun EpisodeItemWithArtwork(
+    modifier: Modifier = Modifier,
+    storeEpisode: StoreEpisode,
+    index: Int? = null,
+    onEpisodeClick: () -> Unit,
+    onPodcastClick: () -> Unit,
+) {
+    EpisodeDefaults.EpisodeItem(
+        modifier = modifier
+            .clickable(onClick = onEpisodeClick),
+        overlineText = {
+            EpisodeDefaults.EpisodeItemArtworkHeader(
+                icon = {
+                    PodcastThumbnail(
+                        imageModel = storeEpisode.getArtworkUrl(),
+                        modifier = Modifier
+                            .preferredSize(EpisodeDefaults.ThumbnailSize)
+                            .clickable(onClick = onPodcastClick)
+                    )
+                },
+                podcastText = {
+                    Text(text = storeEpisode.podcastName, maxLines = 1)
+                },
+                text = {
+                    Text(text = AnnotatedString.Builder()
+                        .apply {
+                            if (index != null) {
+                                withStyle(SpanStyle(color = Color.Red)) {
+                                    append("${index}. ")
+                                }
+                            }
+                            append(storeEpisode.name)
+                        }.toAnnotatedString(),
+                        maxLines = 2)
+                }
+            )
+        },
+        actionButtons = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(storeEpisode = storeEpisode)
+                QueueButton(storeEpisode = storeEpisode)
+            }
+        }
+    )
 }
 
 @Composable
@@ -233,11 +259,11 @@ fun LibraryEpisodeItem(
 }
 
 @Composable
-private fun PodcastEpisodeItemHeader(
+private fun EpisodeItemArtworkHeader(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode)
 {
-    EpisodeDefaults.PodcastEpisodeItemHeader(
+    EpisodeDefaults.EpisodeItemArtworkHeader(
         modifier = modifier,
         icon = {
             PodcastThumbnail(
@@ -252,7 +278,11 @@ private fun PodcastEpisodeItemHeader(
         releasedTimeText = {
             val context = AmbientContext.current
             Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context), maxLines = 1)
-        })
+        },
+        text = {
+            Text(text = storeEpisode.name)
+        }
+    )
 }
 
 private object EpisodeDefaults {
@@ -391,12 +421,13 @@ private object EpisodeDefaults {
         modifier: Modifier = Modifier,
         overlineText: @Composable () -> Unit,
         descriptionText: @Composable (() -> Unit)? = null,
+        text: (@Composable () -> Unit)? = null,
         actionButtons: @Composable (() -> Unit),
-        text: @Composable () -> Unit)
+    )
     {
         val typography = MaterialTheme.typography
 
-        val styledText = applyTextStyleCustom(typography.subtitle1.copy(fontWeight = FontWeight.Medium), ContentAlpha.high, text)
+        val styledText = applyTextStyleNullable(typography.subtitle1.copy(fontWeight = FontWeight.Medium), ContentAlpha.high, text)
         val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, overlineText)
         val styledDescriptionText = applyTextStyleNullable(typography.body2, ContentAlpha.high, descriptionText)
 
@@ -406,32 +437,37 @@ private object EpisodeDefaults {
             .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
         {
             styledOverlineText()
-            styledText()
-            if (styledDescriptionText != null)
-                styledDescriptionText()
+            styledText?.let {
+                it()
+            }
+            styledDescriptionText?.let {
+                it()
+            }
 
             actionButtons()
         }
     }
 
     @Composable
-    fun PodcastEpisodeItemHeader(
+    fun EpisodeItemArtworkHeader(
         modifier: Modifier = Modifier,
         icon: @Composable () -> Unit,
-        podcastText: @Composable () -> Unit,
-        releasedTimeText: @Composable () -> Unit)
+        podcastText: (@Composable () -> Unit)? = null,
+        releasedTimeText: @Composable (() -> Unit)? = null,
+        text: @Composable () -> Unit,
+    )
     {
-
         val typography = MaterialTheme.typography
 
-        val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.high, podcastText)
-        val styledReleasedTimeText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, releasedTimeText)!!
+        val styledPodcastText = applyTextStyleNullable(typography.caption, ContentAlpha.medium, podcastText)
+        val styledReleasedTimeText = applyTextStyleNullable(typography.caption, ContentAlpha.medium, releasedTimeText)
+        val styledText = applyTextStyleCustom(typography.subtitle1.copy(fontWeight = FontWeight.Medium), ContentAlpha.high, text)
 
         Row(modifier = modifier
             .fillMaxWidth()
             .padding(bottom = ContentInnerPadding))
         {
-            Box(modifier = Modifier.preferredSize(32.dp)) {
+            Box(modifier = Modifier.preferredSize(64.dp)) {
                 icon()
             }
 
@@ -439,8 +475,13 @@ private object EpisodeDefaults {
                 .weight(1f)
                 .padding(start = ContentInnerPadding))
             {
-                styledPodcastText()
-                styledReleasedTimeText()
+                styledReleasedTimeText?.let {
+                    it()
+                }
+                styledText()
+                styledPodcastText?.let {
+                    it()
+                }
             }
         }
     }

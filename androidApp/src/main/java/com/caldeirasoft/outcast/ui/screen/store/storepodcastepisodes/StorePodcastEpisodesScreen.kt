@@ -63,19 +63,18 @@ private fun StorePodcastEpisodesScreen(
 ) {
     val listState = rememberLazyListState(1)
 
-    ReachableScaffold() { headerHeight ->
-        val spacerHeight = headerHeight - 56.px
-
+    ReachableScaffold { headerHeight ->
         LazyColumn(
             state = listState,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 56.dp, bottom = 56.dp)) {
+                .fillMaxSize()) {
 
             item {
-                with(AmbientDensity.current) {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
+                StorePodcastExpandedHeader(
+                    viewState = viewState,
+                    listState = listState,
+                    headerHeight = headerHeight
+                )
             }
 
             viewState.storeResourceData
@@ -96,129 +95,21 @@ private fun StorePodcastEpisodesScreen(
 
                         Divider()
                     }
+
+                    item {
+                        // bottom app bar spacer
+                        Spacer(modifier = Modifier.height(56.dp))
+                    }
                 }
         }
 
         ReachableAppBar(
-            expandedContent = {
-                val scrollRatioHeaderHeight = getScrollRatioHeaderHeight(listState, headerHeight)
-                val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
-                with(AmbientDensity.current) {
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(headerHeight.toDp())
-                    )
-                    {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .align(Alignment.TopStart)
-                        ) {
-                            WithConstraints {
-                                val bgDominantColor = Color.getColor(viewState.storePage.artwork?.bgColor!!)
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        //.background(Color.Magenta.copy(alpha = 0.9f))
-                                        .background(
-                                            brush = Brush.verticalGradient(
-                                                0.0f to bgDominantColor.copy(alpha = 0.5f),
-                                                0.2f to bgDominantColor.copy(alpha = 0.5f),
-                                                0.6f to Color.Transparent,
-                                                startY = 0.0f,
-                                                endY = Float.POSITIVE_INFINITY
-                                            )
-                                        )
-                                )
-                                {
-                                    Log_D("HEIGHT",
-                                        constraints.maxHeight.toFloat().toString())
-                                }
-
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp, vertical = 56.dp)
-                                .alpha(alphaLargeHeader)
-                        ) {
-                            Card(
-                                backgroundColor = Color.Transparent,
-                                shape = RoundedCornerShape(8.dp),
-                            ) {
-                                CoilImage(
-                                    imageModel = viewState.storePage.getArtworkUrl(),
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .aspectRatio(1f)
-                                )
-                            }
-
-                            Column(modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 16.dp)
-                                .fillMaxHeight()) {
-                                Box(modifier = Modifier
-                                    .weight(1f)
-                                    .background(Color.Yellow)) {
-                                    Text(
-                                        viewState.storePage.name,
-                                        modifier = Modifier
-                                            .align(Alignment.CenterStart),
-                                        style = MaterialTheme.typography.h5,
-                                        maxLines = 2,
-                                        color = Color.getColor(viewState.storePage.artwork?.textColor1!!)
-                                    )
-                                }
-                                Text(
-                                    viewState.storePage.artistName,
-                                    modifier = Modifier
-                                        .padding(bottom = 4.dp),
-                                    style = MaterialTheme.typography.body1,
-                                    maxLines = 2,
-                                    color = Color.getColor(viewState.storePage.artwork?.textColor2!!)
-                                )
-                            }
-                        }
-                    }
-                }
-            },
             collapsedContent = {
-                val collapsedHeaderAlpha = getCollapsedHeaderAlpha(listState, headerHeight)
-                // top app bar
-                val artwork = viewState.storePage.artwork
-                val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
-                val contentColor: Color =
-                    artwork?.textColor1
-                        ?.let {
-                            val contentStartColor = Color.getColor(it)
-                            Color.blendARGB(contentStartColor,
-                                contentEndColor,
-                                collapsedHeaderAlpha)
-                        }
-                        ?: contentEndColor
-
-                TopAppBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomStart),
-                    title = {
-                        Providers(AmbientContentAlpha provides collapsedHeaderAlpha) {
-                            Text(text = viewState.storePage.name)
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = navigateBack) {
-                            Icon(Icons.Filled.ArrowBack)
-                        }
-                    },
-                    backgroundColor = Color.Transparent,
-                    contentColor = contentColor,
-                    elevation = if (listState.firstVisibleItemIndex > 0) 1.dp else 0.dp
-                )
+                StorePodcastCollapsedHeader(
+                    viewState = viewState,
+                    listState = listState,
+                    headerHeight = headerHeight,
+                    navigateUp = navigateBack)
             },
             state = listState,
             headerHeight = headerHeight)

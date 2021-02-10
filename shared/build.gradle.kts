@@ -61,7 +61,6 @@ kotlin {
             dependencies {
                 implementation(Dependencies.AndroidX.coreKtx)
                 implementation(Dependencies.AndroidX.appcompat)
-                implementation(Dependencies.Coroutines.core)
                 implementation(Dependencies.Coroutines.android)
             }
         }

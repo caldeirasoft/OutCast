@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -19,13 +18,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.AmbientAnimationClock
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.skydoves.landscapist.coil.CoilImage
@@ -38,8 +34,8 @@ fun StoreCollectionItemsContent(
 {
     // content
     LazyRow(
-        contentPadding = PaddingValues(start = 8.dp,
-            end = 8.dp,
+        contentPadding = PaddingValues(start = 16.dp,
+            end = 0.dp,
             bottom = 16.dp)
     ) {
         items(items = storeCollection.items) { item ->
@@ -54,13 +50,14 @@ fun StoreCollectionItemsContent(
                         podcast = item)
                 }
                 is StoreEpisode -> {
-                    StoreEpisodeCardItem(
+                    EpisodeCardItemWithArtwork(
                         modifier = Modifier.width(320.dp),
                         onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                         onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
                         storeEpisode = item,
                         //index = index + 1
                     )
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
             }
         }
@@ -315,18 +312,20 @@ fun StoreCollectionTopEpisodesContent(
 ) {
     // content
     LazyRow(
-        contentPadding = PaddingValues(start = 8.dp,
-            end = 8.dp,
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 0.dp,
             bottom = 16.dp)
     ) {
         itemsIndexed(items = storeCollection.items) { index, item ->
-            StoreEpisodeCardItem(
+            EpisodeCardItemWithArtwork(
                 modifier = Modifier.width(320.dp),
                 onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                 onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
                 storeEpisode = item,
                 index = index + 1
             )
+            Spacer(modifier = Modifier.width(16.dp))
         }
     }
 }
