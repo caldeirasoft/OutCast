@@ -9,11 +9,16 @@ import androidx.compose.runtime.Providers
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
+import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
+import com.caldeirasoft.outcast.ui.navigation.Screen
 
 typealias ComposableFn = @Composable () -> Unit
 typealias ComposableRowFn = @Composable RowScope.() -> Unit
 typealias ComposableColumnFn = @Composable ColumnScope.() -> Unit
 typealias TypedComposableFn<T> = @Composable (T) -> Unit
+typealias ScreenFn = (Screen) -> Unit
+typealias DialogFn = (CustomBottomDrawerState, BottomDrawerContentState, Screen) -> Unit
 
 val Int.px: Float @Composable get() = with(AmbientDensity.current) { this@px.dp.toPx()}
 

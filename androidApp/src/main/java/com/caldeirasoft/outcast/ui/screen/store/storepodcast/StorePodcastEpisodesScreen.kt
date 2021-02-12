@@ -27,7 +27,10 @@ import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
+import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*
@@ -59,8 +62,12 @@ fun StorePodcastEpisodesScreen(
 private fun StorePodcastEpisodesScreen(
     viewState: StorePodcastViewModel.State,
     navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navigateBack: () ->
+    Unit,
 ) {
+    val drawerState = AmbientBottomDrawerState.current
+    val drawerContent = AmbientBottomDrawerContent.current
+
     val listState = rememberLazyListState(1)
 
     ReachableScaffold { headerHeight ->
@@ -91,7 +98,7 @@ private fun StorePodcastEpisodesScreen(
                     items(it.episodes) {
                         EpisodeItem(
                             storeEpisode = it,
-                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(it)) })
+                            onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, it) })
 
                         Divider()
                     }

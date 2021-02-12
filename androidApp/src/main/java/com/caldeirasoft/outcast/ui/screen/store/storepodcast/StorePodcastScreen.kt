@@ -37,7 +37,10 @@ import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
+import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -77,6 +80,9 @@ private fun StorePodcastScreen(
     val listState = rememberLazyListState(0)
     val podcastData = viewState.storePage.storeData
     val otherPodcastsLazyPagingItems = otherPodcasts.collectAsLazyPagingItems()
+    val drawerState = AmbientBottomDrawerState.current
+    val drawerContent = AmbientBottomDrawerContent.current
+
 
     ReachableScaffold(headerRatio = 1/3f) { headerHeight ->
         LazyColumn(
@@ -143,15 +149,15 @@ private fun StorePodcastScreen(
                 }
                 .onSuccess<StorePodcastPage> {
                     // trailer
-                    it.storeEpisodeTrailer?.let {
+                    it.storeEpisodeTrailer?.let { trailer ->
                         item {
                             // trailer header
                             StoreHeadingSection(
                                 title = stringResource(id = R.string.store_trailer))
                             // trailer
                             EpisodeTrailerItem(
-                                storeEpisode = it,
-                                onEpisodeClick = { /*TODO*/ })
+                                storeEpisode = trailer,
+                                onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, trailer) })
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
@@ -162,10 +168,10 @@ private fun StorePodcastScreen(
                             title = stringResource(id = R.string.store_episodes),
                             onClick = { navigateTo(Screen.StoreEpisodesScreen(podcastData)) })
                     }
-                    items(it.recentEpisodes) {
+                    items(it.recentEpisodes) { episode ->
                         EpisodeItemWithDesc(
-                            storeEpisode = it,
-                            onEpisodeClick = { /*TODO*/ })
+                            storeEpisode = episode,
+                            onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, episode) })
 
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -235,7 +241,6 @@ fun StorePodcastExpandedHeader(
     listState: LazyListState,
     headerHeight: Int)
 {
-    val scrollRatioHeaderHeight = getScrollRatioHeaderHeight(listState, headerHeight)
     val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
     with(AmbientDensity.current) {
         Box(modifier = Modifier

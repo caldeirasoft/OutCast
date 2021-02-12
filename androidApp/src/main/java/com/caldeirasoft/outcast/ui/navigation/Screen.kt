@@ -21,7 +21,6 @@ enum class ScreenName {
     LIBRARY,
     PROFILE,
     PODCAST,
-    EPISODE,
     STORE_DISCOVER,
     STORE_CATEGORIES,
     STORE_CHARTS,
@@ -39,7 +38,6 @@ sealed class Screen (val id: ScreenName) {
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
     data class PodcastScreen(val podcast: StorePodcast) : Screen(ScreenName.PODCAST)
-    data class EpisodeScreen(val episode: StoreEpisode) : Screen(ScreenName.EPISODE)
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)

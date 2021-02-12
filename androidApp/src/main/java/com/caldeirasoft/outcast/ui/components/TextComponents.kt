@@ -103,7 +103,7 @@ fun OverflowText(
             lineHeight,
             overflow,
             softWrap,
-            maxLines = if (isExpanded) Integer.MAX_VALUE else 3,
+            maxLines = if (isExpanded) Integer.MAX_VALUE else maxLines,
             onTextLayout = { result ->
                 if (wasMeasured.not()) {
                     wasMeasured = true

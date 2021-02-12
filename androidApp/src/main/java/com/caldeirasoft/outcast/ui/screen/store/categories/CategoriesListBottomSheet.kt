@@ -30,7 +30,7 @@ import kotlinx.coroutines.FlowPreview
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
-fun CategoriesListScreen(
+fun CategoriesListBottomSheet(
     selectedGenre: Int?,
     onGenreSelected: (Int?) -> Unit,
 ) {

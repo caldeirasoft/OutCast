@@ -40,7 +40,10 @@ import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Actions
+import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
+import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -83,6 +86,9 @@ private fun StoreRoomScreen(
 ) {
     val listState = rememberLazyListState(0)
     val lazyPagingItems = discover.collectAsLazyPagingItems()
+    val drawerState = AmbientBottomDrawerState.current
+    val drawerContent = AmbientBottomDrawerContent.current
+
 
     ReachableScaffold(
         headerRatioOrientation = Orientation.Vertical,
@@ -193,7 +199,7 @@ private fun StoreRoomScreen(
                                         }
                                         is StoreEpisode -> {
                                             EpisodeItemWithArtwork(
-                                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
+                                                onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, item) },
                                                 onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                                 storeEpisode = item,
                                                 index = index + 1

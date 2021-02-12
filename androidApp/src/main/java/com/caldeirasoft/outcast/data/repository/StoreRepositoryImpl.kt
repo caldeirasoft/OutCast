@@ -500,6 +500,7 @@ class StoreRepositoryImpl (
                         StoreEpisode(
                             id = key.toLong(),
                             name = episodeEntry.name.orEmpty(),
+                            url = episodeEntry.url.orEmpty(),
                             podcastId = episodeEntry.collectionId?.toLong() ?: 0,
                             podcastName = episodeEntry.collectionName.orEmpty(),
                             artistName = episodeEntry.artistName.orEmpty(),
@@ -519,6 +520,7 @@ class StoreRepositoryImpl (
                             podcastEpisodeSeason = episodeEntry.podcastEpisodeSeason,
                             podcastEpisodeType = episodeEntry.podcastEpisodeType.orEmpty(),
                             podcastEpisodeWebsiteUrl = episodeEntry.podcastEpisodeWebsiteUrl,
+                            isComplete = true,
                             podcast = podcastData
                         )
                     },
@@ -582,6 +584,7 @@ class StoreRepositoryImpl (
                 StoreEpisode(
                     id = item.id?.toLong() ?: 0,
                     name = item.name.orEmpty(),
+                    url = item.url.orEmpty(),
                     podcastId = item.collectionId?.toLong() ?: 0,
                     podcastName = item.collectionName.orEmpty(),
                     artistName = item.artistName.orEmpty(),
@@ -600,6 +603,7 @@ class StoreRepositoryImpl (
                     podcastEpisodeType = item.podcastEpisodeType.orEmpty(),
                     podcastEpisodeWebsiteUrl = item.podcastEpisodeWebsiteUrl,
                     storeFront = storeFront,
+                    isComplete = false,
                     podcast = requireNotNull(
                         getStoreItemFromLookupResultItem(item.collection.values.first(), storeFront) as StorePodcast)
                 )

@@ -1,15 +1,11 @@
 package com.caldeirasoft.outcast.ui.navigation
 
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
-import androidx.navigation.compose.KEY_ROUTE
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigate
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
+import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
@@ -52,6 +48,7 @@ class Actions(navController: NavController) {
     val up: () -> Unit = {
         navController.navigateUp()
     }
+
 
     val openUrl: (context: Context, url: String) -> Unit = { context, url ->
         //makeOpenUrl(context, url)

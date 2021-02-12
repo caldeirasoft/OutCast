@@ -27,11 +27,11 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListScreen
+import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
+import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,7 +93,7 @@ fun TopChartsScreen(
             }
 
             item {
-                ScrollableRow(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                ScrollableRow(contentPadding = PaddingValues(start = 16.dp, end = 16.dp)) {
                     ChipRadioSelector(
                         selectedValue = viewState.selectedChartTab,
                         values = StoreItemType.values(),
@@ -111,7 +111,7 @@ fun TopChartsScreen(
                         selected = (selectedGenre != null),
                         onClick = {
                             drawerContent.updateContent {
-                                CategoriesListScreen(
+                                CategoriesListBottomSheet(
                                     selectedGenre = selectedGenre,
                                     onGenreSelected = onChartsGenreSelected
                                 )
@@ -127,7 +127,6 @@ fun TopChartsScreen(
                             }
                         )
                     }
-
                 }
             }
 
@@ -149,7 +148,9 @@ fun TopChartsScreen(
                                 PodcastListItemIndexed(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable(onClick = { navigateTo(Screen.StorePodcastScreen(item)) }),
+                                        .clickable(onClick = {
+                                            navigateTo(Screen.StorePodcastScreen(item))
+                                        }),
                                     storePodcast = item,
                                     index = index + 1
                                 )
@@ -157,7 +158,7 @@ fun TopChartsScreen(
                             }
                             is StoreEpisode -> {
                                 EpisodeItemWithArtwork(
-                                    onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
+                                    onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, item) },
                                     onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                     storeEpisode = item,
                                     index = index + 1
