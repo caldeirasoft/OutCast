@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalMaterialApi::class)
 package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.Canvas
@@ -191,6 +192,7 @@ fun previewPlayButton() {
                 }
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = "play",
                     tint = Color.Blue,
                     modifier = Modifier
                         .preferredSize(16.dp)

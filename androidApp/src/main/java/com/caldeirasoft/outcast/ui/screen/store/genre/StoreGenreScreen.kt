@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -19,7 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -35,6 +36,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
 
+@ExperimentalMaterialApi
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
@@ -61,6 +63,7 @@ fun StoreGenreScreen(
     )
 }
 
+@ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StoreGenreContent(
@@ -148,12 +151,12 @@ private fun StoreGenreContent(
             title = { Text(text = title) },
             navigationIcon = {
                 IconButton(onClick = navigateBack) {
-                    Icon(Icons.Filled.ArrowBack)
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "back")
                 }
             },
             actions = {
                 IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Search)
+                    Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
                 }
             },
             state = listState,

@@ -1,9 +1,11 @@
 package com.caldeirasoft.outcast.ui.components
 
-import androidx.compose.animation.animateAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,23 +18,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.AmbientAnimationClock
+import androidx.compose.ui.platform.LocalAnimationClock
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
-import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.util.DialogFn
 import com.caldeirasoft.outcast.ui.util.ScreenFn
 import com.skydoves.landscapist.coil.CoilImage
 
+@ExperimentalMaterialApi
 @Composable
 fun StoreCollectionItemsContent(
     storeCollection: StoreCollectionItems,
@@ -48,7 +49,7 @@ fun StoreCollectionItemsContent(
             end = 0.dp,
             bottom = 16.dp)
     ) {
-        items(items = storeCollection.items) { item ->
+        items(items = storeCollection.items, key = null) { item ->
             when (item) {
                 is StorePodcast -> {
                     PodcastGridItem(
@@ -114,7 +115,7 @@ fun StoreCollectionRoomsContent(
             end = 8.dp,
             bottom = 16.dp)
     ) {
-        items(items = storeCollection.items) { item ->
+        items(items = storeCollection.items, key = null) { item ->
             when (item) {
                 is StoreRoom -> {
                     StoreRoomItem(room = item, navigateTo = navigateTo)
@@ -178,7 +179,7 @@ fun StoreCollectionFeaturedContent(
     navigateTo: (Screen) -> Unit
 ) {
     val pagerState: PagerState = run {
-        val clock = AmbientAnimationClock.current
+        val clock = LocalAnimationClock.current
         remember(clock) { PagerState(clock, 0, 0, storeCollection.items.size - 1) }
     }
     val selectedPage = remember { mutableStateOf(0) }
@@ -280,7 +281,7 @@ fun StoreCollectionTopPodcastsContent(
         storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
     val chunkedItems = indexedItems.chunked(numRows)
     val pagerState: PagerState = run {
-        val clock = AmbientAnimationClock.current
+        val clock = LocalAnimationClock.current
         remember(clock) { PagerState(clock, 0, 0, chunkedItems.size - 1) }
     }
     val selectedPage = remember { mutableStateOf(0) }
@@ -317,6 +318,7 @@ fun StoreCollectionTopPodcastsContent(
     }
 }
 
+@ExperimentalMaterialApi
 @Composable
 fun StoreCollectionTopEpisodesContent(
     storeCollection: StoreCollectionTopEpisodes,
@@ -331,7 +333,7 @@ fun StoreCollectionTopEpisodesContent(
             end = 0.dp,
             bottom = 16.dp)
     ) {
-        itemsIndexed(items = storeCollection.items) { index, item ->
+        itemsIndexed(items = storeCollection.items, key = null) { index, item ->
             EpisodeCardItemWithArtwork(
                 modifier = Modifier.width(320.dp),
                 onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
@@ -348,6 +350,7 @@ fun StoreCollectionTopEpisodesContent(
 fun CarouselDot(selected: Boolean, color: Color) {
     Icon(
         imageVector = Icons.Filled.Lens,
+        contentDescription = null,
         modifier = Modifier
             .padding(4.dp)
             .preferredSize(12.dp),
@@ -379,8 +382,8 @@ fun ChoiceChipTab(
         {
             OutlinedButton(
                 colors = ButtonDefaults.textButtonColors(
-                    backgroundColor = animateAsState(backgroundColor).value,
-                    contentColor = animateAsState(contentColor).value,
+                    backgroundColor = animateColorAsState(backgroundColor).value,
+                    contentColor = animateColorAsState(contentColor).value,
                     disabledContentColor = MaterialTheme.colors.onSurface
                         .copy(alpha = ContentAlpha.disabled)
                 ),

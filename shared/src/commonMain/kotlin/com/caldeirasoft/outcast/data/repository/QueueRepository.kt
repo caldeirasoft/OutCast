@@ -2,14 +2,13 @@ package com.caldeirasoft.outcast.data.repository
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.domain.models.*
-import com.caldeirasoft.outcast.domain.repository.QueueRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 
-class QueueRepositoryImpl(val database: Database) : QueueRepository {
-    override fun fetchQueue(): Flow<List<EpisodeSummary>> =
+class QueueRepository(val database: Database) {
+    fun fetchQueue(): Flow<List<EpisodeSummary>> =
         database.queueQueries
             .selectAll(mapper = { episodeId: Long,
                                   name: String,
@@ -51,22 +50,22 @@ class QueueRepositoryImpl(val database: Database) : QueueRepository {
             .asFlow()
             .mapToList()
 
-    override fun addToQueue(episode: Episode, queueIndex: Long) {
+    fun addToQueue(episode: Episode, queueIndex: Long) {
         database.queueQueries
             addToQueue(episode = episode, queueIndex = queueIndex)
     }
 
-    override fun addToQueueNext(episode: Episode) {
+    fun addToQueueNext(episode: Episode) {
         database.queueQueries
             addToQueueNext(episode = episode)
     }
 
-    override fun addToQueueLast(episode: Episode) {
+    fun addToQueueLast(episode: Episode) {
         database.queueQueries
             addToQueueLast(episode = episode)
     }
 
-    override fun removeFromQueue(id: Long) {
+    fun removeFromQueue(id: Long) {
         database.queueQueries
             removeFromQueue(id = id)
     }

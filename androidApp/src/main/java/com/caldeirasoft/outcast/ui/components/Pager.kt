@@ -1,7 +1,9 @@
 package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.animation.AnimatedFloatModel
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationClockObservable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.fling
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.Column
@@ -67,9 +69,12 @@ class PagerState(
         selectionState = SelectionState.Selected
     }
 
+    private var _currentPageOffset3 = Animatable(0f, Spring.DefaultDisplacementThreshold)
+
     private var _currentPageOffset = AnimatedFloatModel(0f, clock = clock).apply {
         setBounds(-1f, 1f)
     }
+
     var currentPageOffset: Float
         get() = _currentPageOffset.value
         set(value) {

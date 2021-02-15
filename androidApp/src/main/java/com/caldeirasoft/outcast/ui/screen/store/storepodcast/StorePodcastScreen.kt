@@ -19,7 +19,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +48,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
+@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun StorePodcastScreen(
@@ -69,6 +69,7 @@ fun StorePodcastScreen(
         navigateBack = navigateBack)
 }
 
+@ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StorePodcastScreen(
@@ -107,17 +108,17 @@ private fun StorePodcastScreen(
                     ActionChipButton(
                         selected = true,
                         onClick = { /*TODO*/ },
-                        icon = { Icon(Icons.Default.CheckCircle)}
+                        icon = { Icon(Icons.Default.CheckCircle, contentDescription = stringResource(id = R.string.action_subscribe))}
                     ) {
                         Text(text = stringResource(id = R.string.action_subscribe))
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Public)
+                        Icon(imageVector = Icons.Default.Public, contentDescription = "web")
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Share)
+                        Icon(imageVector = Icons.Default.Share, contentDescription = "share")
                     }
                 }
             }
@@ -253,7 +254,7 @@ fun StorePodcastExpandedHeader(
                     .fillMaxSize()
                     .align(Alignment.TopStart)
             ) {
-                WithConstraints {
+                BoxWithConstraints {
                     val bgDominantColor =
                         Color.getColor(viewState.storePage.artwork?.bgColor!!)
                     Box(
@@ -270,11 +271,6 @@ fun StorePodcastExpandedHeader(
                                 )
                             )
                     )
-                    {
-                        Log_D("HEIGHT",
-                            constraints.maxHeight.toFloat().toString())
-                    }
-
                 }
             }
 
@@ -337,19 +333,6 @@ fun StorePodcastCollapsedHeader(
     navigateUp: () -> Unit)
 {
     val collapsedHeaderAlpha = getCollapsedHeaderAlpha(listState, headerHeight)
-/*    // top app bar
-    val artwork = viewState.storePage.artwork
-    val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
-    val contentColor: Color =
-        artwork?.textColor1
-            ?.let {
-                val contentStartColor = Color.getColor(it)
-                Color.blendARGB(contentStartColor,
-                    contentEndColor,
-                    collapsedHeaderAlpha)
-            }
-            ?: contentEndColor*/
-
     val topAppBarBackgroudColor = Color.blendARGB(
         MaterialTheme.colors.background.copy(alpha = 0f),
         MaterialTheme.colors.background,
@@ -364,7 +347,7 @@ fun StorePodcastCollapsedHeader(
         },
         navigationIcon = {
             IconButton(onClick = navigateUp) {
-                Icon(Icons.Filled.ArrowBack)
+                Icon(Icons.Filled.ArrowBack, contentDescription = "back")
             }
         },
         backgroundColor = topAppBarBackgroudColor,

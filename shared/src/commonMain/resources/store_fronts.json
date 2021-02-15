@@ -1,0 +1,1338 @@
+{
+  "store-version": "1.0",
+  "storefronts": [
+  {
+    "type": "storefront",
+    "country-code": "US",
+    "display-name": "United States",
+    "id": 143441,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143441",
+    "languages": ["en_us", "es_mx"]
+  }, {
+    "type": "storefront",
+    "country-code": "FR",
+    "display-name": "France",
+    "id": 143442,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143442",
+    "languages": ["fr_fr", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "DE",
+    "display-name": "Germany",
+    "id": 143443,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143443",
+    "languages": ["de_de", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GB",
+    "display-name": "United Kingdom",
+    "id": 143444,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143444",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "AT",
+    "display-name": "Austria",
+    "id": 143445,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143445",
+    "languages": ["de_de", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BE",
+    "display-name": "Belgium",
+    "id": 143446,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143446",
+    "languages": ["en_gb", "fr_fr", "nl_nl"]
+  }, {
+    "type": "storefront",
+    "country-code": "FI",
+    "display-name": "Finland",
+    "id": 143447,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143447",
+    "languages": ["en_gb", "fi_fi"]
+  }, {
+    "type": "storefront",
+    "country-code": "GR",
+    "display-name": "Greece",
+    "id": 143448,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143448",
+    "languages": ["en_gb", "el_gr"]
+  }, {
+    "type": "storefront",
+    "country-code": "IE",
+    "display-name": "Ireland",
+    "id": 143449,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143449",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "IT",
+    "display-name": "Italy",
+    "id": 143450,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143450",
+    "languages": ["it_it", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LU",
+    "display-name": "Luxembourg",
+    "id": 143451,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143451",
+    "languages": ["en_gb", "fr_fr", "de_de"]
+  }, {
+    "type": "storefront",
+    "country-code": "NL",
+    "display-name": "Netherlands",
+    "id": 143452,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143452",
+    "languages": ["nl_nl", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "PT",
+    "display-name": "Portugal",
+    "id": 143453,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143453",
+    "languages": ["pt_pt", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "ES",
+    "display-name": "Spain",
+    "id": 143454,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143454",
+    "languages": ["es_es", "en_gb", "ca_es"]
+  }, {
+    "type": "storefront",
+    "country-code": "CA",
+    "display-name": "Canada",
+    "id": 143455,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143455",
+    "languages": ["en_ca", "fr_ca"]
+  }, {
+    "type": "storefront",
+    "country-code": "SE",
+    "display-name": "Sweden",
+    "id": 143456,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143456",
+    "languages": ["sv_se", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "NO",
+    "display-name": "Norway",
+    "id": 143457,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143457",
+    "languages": ["en_gb", "nb_no"]
+  }, {
+    "type": "storefront",
+    "country-code": "DK",
+    "display-name": "Denmark",
+    "id": 143458,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143458",
+    "languages": ["en_gb", "da_dk"]
+  }, {
+    "type": "storefront",
+    "country-code": "CH",
+    "display-name": "Switzerland",
+    "id": 143459,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143459",
+    "languages": ["de_ch", "de_de", "en_gb", "fr_fr", "it_it"]
+  }, {
+    "type": "storefront",
+    "country-code": "AU",
+    "display-name": "Australia",
+    "id": 143460,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143460",
+    "languages": ["en_au", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "NZ",
+    "display-name": "New Zealand",
+    "id": 143461,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143461",
+    "languages": ["en_au", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "JP",
+    "display-name": "Japan",
+    "id": 143462,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143462",
+    "languages": ["ja_jp", "en_us"]
+  }, {
+    "type": "storefront",
+    "country-code": "HK",
+    "display-name": "Hong Kong",
+    "id": 143463,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143463",
+    "languages": ["zh_hk", "en_gb", "zh_tw"]
+  }, {
+    "type": "storefront",
+    "country-code": "SG",
+    "display-name": "Singapore",
+    "id": 143464,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143464",
+    "languages": ["en_gb", "zh_cn"]
+  }, {
+    "type": "storefront",
+    "country-code": "IN",
+    "display-name": "India",
+    "id": 143467,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143467",
+    "languages": ["en_gb", "hi_in"]
+  }, {
+    "type": "storefront",
+    "country-code": "MX",
+    "display-name": "Mexico",
+    "id": 143468,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143468",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "RU",
+    "display-name": "Russia",
+    "id": 143469,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143469",
+    "languages": ["ru_ru", "en_gb", "uk_uk"]
+  }, {
+    "type": "storefront",
+    "country-code": "TW",
+    "display-name": "Taiwan",
+    "id": 143470,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143470",
+    "languages": ["zh_tw", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "VN",
+    "display-name": "Vietnam",
+    "id": 143471,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143471",
+    "languages": ["en_gb", "vi_vi"]
+  }, {
+    "type": "storefront",
+    "country-code": "ZA",
+    "display-name": "South Africa",
+    "id": 143472,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143472",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MY",
+    "display-name": "Malaysia",
+    "id": 143473,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143473",
+    "languages": ["en_gb", "ms_my"]
+  }, {
+    "type": "storefront",
+    "country-code": "PH",
+    "display-name": "Philippines",
+    "id": 143474,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143474",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "TH",
+    "display-name": "Thailand",
+    "id": 143475,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143475",
+    "languages": ["en_gb", "th_th"]
+  }, {
+    "type": "storefront",
+    "country-code": "ID",
+    "display-name": "Indonesia",
+    "id": 143476,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143476",
+    "languages": ["en_gb", "id_id"]
+  }, {
+    "type": "storefront",
+    "country-code": "PL",
+    "display-name": "Poland",
+    "id": 143478,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143478",
+    "languages": ["en_gb", "pl_pl"]
+  }, {
+    "type": "storefront",
+    "country-code": "SA",
+    "display-name": "Saudi Arabia",
+    "id": 143479,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143479",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "TR",
+    "display-name": "Turkey",
+    "id": 143480,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143480",
+    "languages": ["en_gb", "tr_tr"]
+  }, {
+    "type": "storefront",
+    "country-code": "AE",
+    "display-name": "UAE",
+    "id": 143481,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143481",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "HU",
+    "display-name": "Hungary",
+    "id": 143482,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143482",
+    "languages": ["en_gb", "hu_hu"]
+  }, {
+    "type": "storefront",
+    "country-code": "CL",
+    "display-name": "Chile",
+    "id": 143483,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143483",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "NP",
+    "display-name": "Nepal",
+    "id": 143484,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143484",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "PA",
+    "display-name": "Panama",
+    "id": 143485,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143485",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LK",
+    "display-name": "Sri Lanka",
+    "id": 143486,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143486",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "RO",
+    "display-name": "Romania",
+    "id": 143487,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143487",
+    "languages": ["en_gb", "ro_ro"]
+  }, {
+    "type": "storefront",
+    "country-code": "MV",
+    "display-name": "Maldives",
+    "id": 143488,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143488",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "CZ",
+    "display-name": "Czech Republic",
+    "id": 143489,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143489",
+    "languages": ["en_gb", "cs_cz"]
+  }, {
+    "type": "storefront",
+    "country-code": "IL",
+    "display-name": "Israel",
+    "id": 143491,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143491",
+    "languages": ["en_gb", "iw_il"]
+  }, {
+    "type": "storefront",
+    "country-code": "UA",
+    "display-name": "Ukraine",
+    "id": 143492,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143492",
+    "languages": ["en_gb", "uk_uk", "ru_ru"]
+  }, {
+    "type": "storefront",
+    "country-code": "KW",
+    "display-name": "Kuwait",
+    "id": 143493,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143493",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "HR",
+    "display-name": "Croatia",
+    "id": 143494,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143494",
+    "languages": ["en_gb", "hr_hr"]
+  }, {
+    "type": "storefront",
+    "country-code": "CR",
+    "display-name": "Costa Rica",
+    "id": 143495,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143495",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "SK",
+    "display-name": "Slovakia",
+    "id": 143496,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143496",
+    "languages": ["en_gb", "sk_sk"]
+  }, {
+    "type": "storefront",
+    "country-code": "LB",
+    "display-name": "Lebanon",
+    "id": 143497,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143497",
+    "languages": ["en_gb", "fr_fr", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "QA",
+    "display-name": "Qatar",
+    "id": 143498,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143498",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "SI",
+    "display-name": "Slovenia",
+    "id": 143499,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143499",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "RS",
+    "display-name": "Serbia",
+    "id": 143500,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143500",
+    "languages": ["en_gb", "hr_hr"]
+  }, {
+    "type": "storefront",
+    "country-code": "CO",
+    "display-name": "Colombia",
+    "id": 143501,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143501",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "VE",
+    "display-name": "Venezuela",
+    "id": 143502,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143502",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BR",
+    "display-name": "Brazil",
+    "id": 143503,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143503",
+    "languages": ["pt_br", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GT",
+    "display-name": "Guatemala",
+    "id": 143504,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143504",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "AR",
+    "display-name": "Argentina",
+    "id": 143505,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143505",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "SV",
+    "display-name": "El Salvador",
+    "id": 143506,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143506",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "PE",
+    "display-name": "Peru",
+    "id": 143507,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143507",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "DO",
+    "display-name": "Dominican Republic",
+    "id": 143508,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143508",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "EC",
+    "display-name": "Ecuador",
+    "id": 143509,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143509",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "HN",
+    "display-name": "Honduras",
+    "id": 143510,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143510",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "JM",
+    "display-name": "Jamaica",
+    "id": 143511,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143511",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "NI",
+    "display-name": "Nicaragua",
+    "id": 143512,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143512",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "PY",
+    "display-name": "Paraguay",
+    "id": 143513,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143513",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "UY",
+    "display-name": "Uruguay",
+    "id": 143514,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143514",
+    "languages": ["en_gb", "es_mx"]
+  }, {
+    "type": "storefront",
+    "country-code": "MO",
+    "display-name": "Macao",
+    "id": 143515,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143515",
+    "languages": ["zh_hk", "en_gb", "zh_tw"]
+  }, {
+    "type": "storefront",
+    "country-code": "EG",
+    "display-name": "Egypt",
+    "id": 143516,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143516",
+    "languages": ["en_gb", "fr_fr", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "KZ",
+    "display-name": "Kazakhstan",
+    "id": 143517,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143517",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "EE",
+    "display-name": "Estonia",
+    "id": 143518,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143518",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LV",
+    "display-name": "Latvia",
+    "id": 143519,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143519",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LT",
+    "display-name": "Lithuania",
+    "id": 143520,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143520",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MT",
+    "display-name": "Malta",
+    "id": 143521,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143521",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MD",
+    "display-name": "Moldova",
+    "id": 143523,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143523",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "AM",
+    "display-name": "Armenia",
+    "id": 143524,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143524",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BW",
+    "display-name": "Botswana",
+    "id": 143525,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143525",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BG",
+    "display-name": "Bulgaria",
+    "id": 143526,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143526",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "CI",
+    "display-name": "C\u00f4te d'Ivoire",
+    "id": 143527,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143527",
+    "languages": ["fr_fr", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "JO",
+    "display-name": "Jordan",
+    "id": 143528,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143528",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "KE",
+    "display-name": "Kenya",
+    "id": 143529,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143529",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MK",
+    "display-name": "North\u00a0Macedonia",
+    "id": 143530,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143530",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MG",
+    "display-name": "Madagascar",
+    "id": 143531,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143531",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "ML",
+    "display-name": "Mali",
+    "id": 143532,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143532",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "MU",
+    "display-name": "Mauritius",
+    "id": 143533,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143533",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "NE",
+    "display-name": "Niger",
+    "id": 143534,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143534",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "SN",
+    "display-name": "Senegal",
+    "id": 143535,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143535",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "TN",
+    "display-name": "Tunisia",
+    "id": 143536,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143536",
+    "languages": ["en_gb", "fr_fr", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "UG",
+    "display-name": "Uganda",
+    "id": 143537,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143537",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "AI",
+    "display-name": "Anguilla",
+    "id": 143538,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143538",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BS",
+    "display-name": "Bahamas",
+    "id": 143539,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143539",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "AG",
+    "display-name": "Antigua and Barbuda",
+    "id": 143540,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143540",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BB",
+    "display-name": "Barbados",
+    "id": 143541,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143541",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BM",
+    "display-name": "Bermuda",
+    "id": 143542,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143542",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "VG",
+    "display-name": "British Virgin Islands",
+    "id": 143543,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143543",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "KY",
+    "display-name": "Cayman Islands",
+    "id": 143544,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143544",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "DM",
+    "display-name": "Dominica",
+    "id": 143545,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143545",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GD",
+    "display-name": "Grenada",
+    "id": 143546,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143546",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MS",
+    "display-name": "Montserrat",
+    "id": 143547,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143547",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "KN",
+    "display-name": "St. Kitts and Nevis",
+    "id": 143548,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143548",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LC",
+    "display-name": "St. Lucia",
+    "id": 143549,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143549",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "VC",
+    "display-name": "St. Vincent and The Grenadines",
+    "id": 143550,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143550",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "TT",
+    "display-name": "Trinidad and Tobago",
+    "id": 143551,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143551",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "TC",
+    "display-name": "Turks and Caicos",
+    "id": 143552,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143552",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GY",
+    "display-name": "Guyana",
+    "id": 143553,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143553",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "SR",
+    "display-name": "Suriname",
+    "id": 143554,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143554",
+    "languages": ["en_gb", "nl_nl"]
+  }, {
+    "type": "storefront",
+    "country-code": "BZ",
+    "display-name": "Belize",
+    "id": 143555,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143555",
+    "languages": ["en_gb", "es_mx"]
+  }, {
+    "type": "storefront",
+    "country-code": "BO",
+    "display-name": "Bolivia",
+    "id": 143556,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143556",
+    "languages": ["es_mx", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "CY",
+    "display-name": "Cyprus",
+    "id": 143557,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143557",
+    "languages": ["en_gb", "el_gr", "tr_tr"]
+  }, {
+    "type": "storefront",
+    "country-code": "IS",
+    "display-name": "Iceland",
+    "id": 143558,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143558",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BH",
+    "display-name": "Bahrain",
+    "id": 143559,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143559",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "BN",
+    "display-name": "Brunei Darussalam",
+    "id": 143560,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143560",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "NG",
+    "display-name": "Nigeria",
+    "id": 143561,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143561",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "OM",
+    "display-name": "Oman",
+    "id": 143562,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143562",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "DZ",
+    "display-name": "Algeria",
+    "id": 143563,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143563",
+    "languages": ["en_gb", "fr_fr", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "AO",
+    "display-name": "Angola",
+    "id": 143564,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143564",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BY",
+    "display-name": "Belarus",
+    "id": 143565,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143565",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "UZ",
+    "display-name": "Uzbekistan",
+    "id": 143566,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143566",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LY",
+    "display-name": "Libya",
+    "id": 143567,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143567",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "AZ",
+    "display-name": "Azerbaijan",
+    "id": 143568,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143568",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MM",
+    "display-name": "Myanmar",
+    "id": 143570,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143570",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "YE",
+    "display-name": "Yemen",
+    "id": 143571,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143571",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "TZ",
+    "display-name": "Tanzania",
+    "id": 143572,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143572",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GH",
+    "display-name": "Ghana",
+    "id": 143573,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143573",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "CM",
+    "display-name": "Cameroon",
+    "id": 143574,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143574",
+    "languages": ["fr_fr", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BJ",
+    "display-name": "Benin",
+    "id": 143576,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143576",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "BT",
+    "display-name": "Bhutan",
+    "id": 143577,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143577",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "BF",
+    "display-name": "Burkina Faso",
+    "id": 143578,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143578",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "KH",
+    "display-name": "Cambodia",
+    "id": 143579,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143579",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "CV",
+    "display-name": "Cape Verde",
+    "id": 143580,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143580",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "TD",
+    "display-name": "Chad",
+    "id": 143581,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143581",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "CG",
+    "display-name": "Republic of the\u00a0Congo",
+    "id": 143582,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143582",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "FJ",
+    "display-name": "Fiji",
+    "id": 143583,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143583",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GM",
+    "display-name": "Gambia",
+    "id": 143584,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143584",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GW",
+    "display-name": "Guinea-Bissau",
+    "id": 143585,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143585",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "KG",
+    "display-name": "Kyrgyzstan",
+    "id": 143586,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143586",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "LA",
+    "display-name": "Lao People's Democratic Republic",
+    "id": 143587,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143587",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "LR",
+    "display-name": "Liberia",
+    "id": 143588,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143588",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MW",
+    "display-name": "Malawi",
+    "id": 143589,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143589",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MR",
+    "display-name": "Mauritania",
+    "id": 143590,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143590",
+    "languages": ["en_gb", "fr_fr", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "FM",
+    "display-name": "Micronesia, Federated States of",
+    "id": 143591,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143591",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MN",
+    "display-name": "Mongolia",
+    "id": 143592,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143592",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "MZ",
+    "display-name": "Mozambique",
+    "id": 143593,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143593",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "NA",
+    "display-name": "Namibia",
+    "id": 143594,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143594",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "PG",
+    "display-name": "Papua New Guinea",
+    "id": 143597,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143597",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "SC",
+    "display-name": "Seychelles",
+    "id": 143599,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143599",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "SL",
+    "display-name": "Sierra Leone",
+    "id": 143600,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143600",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "SB",
+    "display-name": "Solomon Islands",
+    "id": 143601,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143601",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "SZ",
+    "display-name": "Swaziland",
+    "id": 143602,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143602",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "TJ",
+    "display-name": "Tajikistan",
+    "id": 143603,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143603",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "TM",
+    "display-name": "Turkmenistan",
+    "id": 143604,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143604",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "ZW",
+    "display-name": "Zimbabwe",
+    "id": 143605,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143605",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "TO",
+    "display-name": "Tonga",
+    "id": 143608,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143608",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "VU",
+    "display-name": "Vanuatu",
+    "id": 143609,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143609",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "BA",
+    "display-name": "Bosnia and Herzegovina",
+    "id": 143612,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143612",
+    "languages": ["en_gb", "hr_hr"]
+  }, {
+    "type": "storefront",
+    "country-code": "CD",
+    "display-name": "Democratic Republic of the\u00a0Congo",
+    "id": 143613,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143613",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "GA",
+    "display-name": "Gabon",
+    "id": 143614,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143614",
+    "languages": ["fr_fr", "en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "GE",
+    "display-name": "Georgia",
+    "id": 143615,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143615",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "IQ",
+    "display-name": "Iraq",
+    "id": 143617,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143617",
+    "languages": ["en_gb", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "ME",
+    "display-name": "Montenegro",
+    "id": 143619,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143619",
+    "languages": ["en_gb", "hr_hr"]
+  }, {
+    "type": "storefront",
+    "country-code": "MA",
+    "display-name": "Morocco",
+    "id": 143620,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143620",
+    "languages": ["en_gb", "fr_fr", "ar_sa"]
+  }, {
+    "type": "storefront",
+    "country-code": "RW",
+    "display-name": "Rwanda",
+    "id": 143621,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143621",
+    "languages": ["en_gb", "fr_fr"]
+  }, {
+    "type": "storefront",
+    "country-code": "ZM",
+    "display-name": "Zambia",
+    "id": 143622,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143622",
+    "languages": ["en_gb"]
+  }, {
+    "type": "storefront",
+    "country-code": "XK",
+    "display-name": "Kosovo",
+    "id": 143624,
+    "url": "https:\/\/itunes.apple.com\/WebObjects\/MZStore.woa\/wa\/switchToStoreFront?storeFrontId=143624",
+    "languages": ["en_gb"]
+  }
+  ],
+  "languages": [
+  {
+    "type": "language",
+    "name": "ar_sa",
+    "id": "34"
+  }, {
+    "type": "language",
+    "name": "en_au",
+    "id": "27"
+  }, {
+    "type": "language",
+    "name": "pt_br",
+    "id": "15"
+  }, {
+    "type": "language",
+    "name": "en_ca",
+    "id": "6"
+  }, {
+    "type": "language",
+    "name": "fr_ca",
+    "id": "5"
+  }, {
+    "type": "language",
+    "name": "zh_hk",
+    "id": "45"
+  }, {
+    "type": "language",
+    "name": "ca_es",
+    "id": "42"
+  }, {
+    "type": "language",
+    "name": "hr_hr",
+    "id": "41"
+  }, {
+    "type": "language",
+    "name": "cs_cz",
+    "id": "22"
+  }, {
+    "type": "language",
+    "name": "da_dk",
+    "id": "11"
+  }, {
+    "type": "language",
+    "name": "nl_nl",
+    "id": "10"
+  }, {
+    "type": "language",
+    "name": "en_us",
+    "id": "1"
+  }, {
+    "type": "language",
+    "name": "fi_fi",
+    "id": "12"
+  }, {
+    "type": "language",
+    "name": "fr_fr",
+    "id": "3"
+  }, {
+    "type": "language",
+    "name": "de_de",
+    "id": "4"
+  }, {
+    "type": "language",
+    "name": "de_ch",
+    "id": "57"
+  }, {
+    "type": "language",
+    "name": "el_gr",
+    "id": "23"
+  }, {
+    "type": "language",
+    "name": "iw_il",
+    "id": "36"
+  }, {
+    "type": "language",
+    "name": "hi_in",
+    "id": "50"
+  }, {
+    "type": "language",
+    "name": "hu_hu",
+    "id": "21"
+  }, {
+    "type": "language",
+    "name": "id_id",
+    "id": "37"
+  }, {
+    "type": "language",
+    "name": "it_it",
+    "id": "7"
+  }, {
+    "type": "language",
+    "name": "ja_jp",
+    "id": "9"
+  }, {
+    "type": "language",
+    "name": "ms_my",
+    "id": "38"
+  }, {
+    "type": "language",
+    "name": "es_mx",
+    "id": "28"
+  }, {
+    "type": "language",
+    "name": "nb_no",
+    "id": "14"
+  }, {
+    "type": "language",
+    "name": "pl_pl",
+    "id": "20"
+  }, {
+    "type": "language",
+    "name": "pt_pt",
+    "id": "24"
+  }, {
+    "type": "language",
+    "name": "ro_ro",
+    "id": "39"
+  }, {
+    "type": "language",
+    "name": "ru_ru",
+    "id": "16"
+  }, {
+    "type": "language",
+    "name": "zh_cn",
+    "id": "19"
+  }, {
+    "type": "language",
+    "name": "sk_sk",
+    "id": "40"
+  }, {
+    "type": "language",
+    "name": "es_es",
+    "id": "8"
+  }, {
+    "type": "language",
+    "name": "sv_se",
+    "id": "17"
+  }, {
+    "type": "language",
+    "name": "th_th",
+    "id": "35"
+  }, {
+    "type": "language",
+    "name": "zh_tw",
+    "id": "18"
+  }, {
+    "type": "language",
+    "name": "tr_tr",
+    "id": "25"
+  }, {
+    "type": "language",
+    "name": "en_gb",
+    "id": "2"
+  }, {
+    "type": "language",
+    "name": "uk_uk",
+    "id": "29"
+  }, {
+    "type": "language",
+    "name": "vi_vi",
+    "id": "43"
+  }
+  ]
+}

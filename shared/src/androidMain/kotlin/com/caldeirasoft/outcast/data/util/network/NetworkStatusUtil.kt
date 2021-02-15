@@ -7,11 +7,7 @@ import android.net.NetworkRequest
 
 class NetworkStatusUtil(val context: Context) {
 
-    var connectivityManager: ConnectivityManager
-
-    init {
-        connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    }
+    var connectivityManager: ConnectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     fun withNetConnection(
             onSuccess: (() -> Unit)? = null,

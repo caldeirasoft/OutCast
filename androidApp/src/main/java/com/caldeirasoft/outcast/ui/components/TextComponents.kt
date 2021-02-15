@@ -40,7 +40,7 @@ fun AutoSizedText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
-    style: TextStyle = AmbientTextStyle.current
+    style: TextStyle = LocalTextStyle.current
 ) {
     var fontSize by remember { mutableStateOf(maxFontSize) }
     Text(
@@ -59,8 +59,8 @@ fun AutoSizedText(
         softWrap,
         maxLines,
         onTextLayout = { result ->
-            if (result.didOverflowHeight && fontSize > minFontSize) {
-                fontSize -= 2.sp
+            if (result.didOverflowHeight && fontSize.value > minFontSize.value) {
+                fontSize = fontSize * 0.9f
             }
         },
         style
@@ -83,7 +83,7 @@ fun OverflowText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
-    style: TextStyle = AmbientTextStyle.current
+    style: TextStyle = LocalTextStyle.current
 ) {
     var wasMeasured by remember { mutableStateOf(false) }
     var didOverflowHeight by remember { mutableStateOf(false) }

@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.components
 
-import androidx.compose.animation.transition
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
@@ -13,9 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.VerticalGradient
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.ui.theme.AnimationDefinitions
 
 @Composable
 fun ShimmerStoreCollectionsList() =
@@ -108,7 +107,7 @@ fun ShimmerPodcastListItem(
     list: List<Color>,
     floatAnim: Float = 0f
 ) {
-    val brush = VerticalGradient(list, 0f, floatAnim)
+    val brush = Brush.verticalGradient(list, 0f, floatAnim)
     Row(modifier = Modifier
         .padding(8.dp)
     ) {
@@ -133,26 +132,35 @@ fun ShimmerPodcastListItem(
 
 @Composable
 private fun LoadingListShimmer(innerContent: @Composable (List<Color>, Float) -> Unit) {
-    val dpStartState by remember { mutableStateOf(AnimationDefinitions.AnimationState.START) }
-    val dpEndState by remember { mutableStateOf(AnimationDefinitions.AnimationState.END) }
+    val infiniteTransition = rememberInfiniteTransition()
+    val shimmerTranslate by infiniteTransition.animateFloat(
+        initialValue = 100.dp.value,
+        targetValue = 2000.dp.value,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ))
 
-    val shimmerTranslateAnim = transition(
-        definition = AnimationDefinitions.shimmerTranslateAnimation,
-        initState = dpStartState,
-        toState = dpEndState
+    val shimmerColor: Color by infiniteTransition.animateColor(
+        initialValue = Color.LightGray.copy(alpha = 0.6f),
+        targetValue = Color.LightGray,
+        animationSpec = infiniteRepeatable(
+            animation = KeyframesSpec(
+                KeyframesSpec.KeyframesSpecConfig<Color>().apply {
+                    Color.LightGray.copy(alpha = 0.6f) at 0 //ms
+                    Color.LightGray.copy(alpha = 0.9f) at 200 //ms
+                    Color.LightGray at 400 //ms
+                    Color.LightGray.copy(alpha = 0.6f) at 600 //ms
+                }
+            ),
+            repeatMode = RepeatMode.Restart
+        )
     )
-
-    val shimmerColorAnim = transition(
-        definition = AnimationDefinitions.shimmerColorAnimation,
-        initState = AnimationDefinitions.AnimationState.START,
-        toState = AnimationDefinitions.AnimationState.END
-    )
-
     val list = listOf(
-        shimmerColorAnim[AnimationDefinitions.shimmerColorPropKey],
-        shimmerColorAnim[AnimationDefinitions.shimmerColorPropKey].copy(alpha = 0.5f)
+        shimmerColor,
+        shimmerColor.copy(alpha = 0.5f)
     )
-    val dpValue = shimmerTranslateAnim[AnimationDefinitions.shimmerDpPropKey]
+    val dpValue = shimmerTranslate.dp
 
     innerContent(list, dpValue.value)
 }

@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.data.repository
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.domain.models.*
-import com.caldeirasoft.outcast.domain.repository.PodcastRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -10,9 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Instant
 
-class PodcastRepositoryImpl(val database: Database) : PodcastRepository
+class PodcastRepository(val database: Database)
 {
-    override fun fetchSubscribedPodcasts(): Flow<List<PodcastSummary>> =
+    fun fetchSubscribedPodcasts(): Flow<List<PodcastSummary>> =
         database.podcastQueries
             .selectAll(mapper = { podcastId: Long,
                                   name: String,
@@ -23,7 +22,7 @@ class PodcastRepositoryImpl(val database: Database) : PodcastRepository
             .asFlow()
             .mapToList()
 
-    override fun getPodcast(podcastId: Long): Flow<Podcast> =
+    fun getPodcast(podcastId: Long): Flow<Podcast> =
         database.podcastQueries
             .selectPodcastById(podcastId, mapper = { _podcastId: Long,
                                                      name: String,
@@ -71,7 +70,7 @@ class PodcastRepositoryImpl(val database: Database) : PodcastRepository
             .mapToOneOrNull()
             .mapNotNull { it }
 
-    override fun insertPodcast(podcast: Podcast) {
+    fun insertPodcast(podcast: Podcast) {
         database.podcastQueries
             .insertPodcast(
                 podcastId = podcast.podcastId,
@@ -93,7 +92,7 @@ class PodcastRepositoryImpl(val database: Database) : PodcastRepository
             )
     }
 
-    override fun updatePodcastMetadata(
+    fun updatePodcastMetadata(
         podcastId: Long,
         releaseDateTime: Instant,
         trackCount: Long)
@@ -102,7 +101,7 @@ class PodcastRepositoryImpl(val database: Database) : PodcastRepository
             .updatePodcastMetadata(releaseDateTime, trackCount, podcastId)
     }
 
-    override fun subscribeToPodcast(
+    fun subscribeToPodcast(
         podcastId: Long,
         newEpisodeAction: NewEpisodesAction
     ) {
@@ -110,17 +109,17 @@ class PodcastRepositoryImpl(val database: Database) : PodcastRepository
             .subscribe(newEpisodeAction = newEpisodeAction, podcastId = podcastId)
     }
 
-    override fun unsubscribeFromPodcast(podcastId: Long) {
+    fun unsubscribeFromPodcast(podcastId: Long) {
         database.podcastQueries
             .unsubscribe(podcastId = podcastId)
     }
 
-    override fun deletePodcastById(id: Long) {
+    fun deletePodcastById(id: Long) {
         database.podcastQueries
             .deletePodcastById(id)
     }
 
-    override fun deleteAllPodcasts() {
+    fun deleteAllPodcasts() {
         database.podcastQueries.deleteAllPodcasts()
     }
 

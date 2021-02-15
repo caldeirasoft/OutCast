@@ -1,11 +1,8 @@
-import org.jetbrains.kotlin.config.KotlinCompilerVersion
-
 plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.serialization") version Dependencies.Kotlin.version
-    id("com.squareup.sqldelight")
 }
 group = "com.caldeirasoft.outcast"
 version = "1.0-SNAPSHOT"
@@ -20,17 +17,19 @@ repositories {
     maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
 }
 dependencies {
-    implementation(kotlin("stdlib-jdk8", Dependencies.Kotlin.version))
     implementation(project(":shared"))
     // Android
-    implementation("com.google.android.material:material:1.2.1")
+    implementation("com.google.android.material:material:1.3.0")
     // AndroidX
     implementation(Dependencies.AndroidX.coreKtx)
     implementation(Dependencies.AndroidX.appcompat)
     implementation(Dependencies.AndroidX.palette)
     // LifeCycle
-    implementation(Dependencies.AndroidX.LifeCycle.lifecycle)
-    implementation(Dependencies.AndroidX.LifeCycle.viewModel)
+    implementation(Dependencies.AndroidX.LifeCycle.runtime)
+    implementation(Dependencies.AndroidX.LifeCycle.ViewModel.ktx)
+    //implementation(Dependencies.AndroidX.LifeCycle.ViewModel.compose)
+    // Activity Compose
+    implementation(Dependencies.AndroidX.Activity.compose)
     // Compose
     implementation(Dependencies.AndroidX.Compose.runtime)
     implementation(Dependencies.AndroidX.Compose.foundation)
@@ -44,32 +43,22 @@ dependencies {
     implementation(Dependencies.AndroidX.Navigation.compose)
     // Paging
     implementation(Dependencies.AndroidX.Paging.compose)
-    // DataStore
-    implementation(Dependencies.AndroidX.DataStore.datastore)
-    implementation(Dependencies.AndroidX.DataStore.preferences)
     // Kotlin coroutines
-    implementation(Dependencies.Coroutines.core)
+    implementation(Dependencies.Kotlinx.Coroutines.core)
     // Kotlinx serialization
-    implementation(Dependencies.Kotlinx.serialization)
+    implementation(Dependencies.Kotlinx.Serialization.serialization)
     // Kotlinx datetime
-    implementation(Dependencies.Kotlinx.datetime)
+    implementation(Dependencies.Kotlinx.DateTime.datetime)
     // Koin
     implementation(Dependencies.Koin.android)
-    implementation(Dependencies.Koin.androidScope)
-    implementation(Dependencies.Koin.androidCompose)
-    implementation(Dependencies.Koin.androidViewModel)
+    implementation(Dependencies.Koin.androidExt)
+    //implementation(Dependencies.Koin.androidCompose)
+    implementation(Dependencies.Koin.androidWorkManager)
     //    implementation(Libs.Koin.androidExt)
-    // Chucker
-    debugImplementation(Dependencies.Chucker.library)
-    releaseImplementation(Dependencies.Chucker.libraryNoOp)
-    // OkHttp
-    implementation(Dependencies.SquareUp.OkHttp3.okhttp)
-    implementation(Dependencies.SquareUp.OkHttp3.loggingInterceptor)
-    implementation(Dependencies.SquareUp.OkHttp3.dns)
-    // OkLog3
-    implementation(Dependencies.OkLog3.okLog3)
     // Timber
     implementation(Dependencies.Timber.timber)
+    // OkLog3
+    implementation(Dependencies.OkLog3.okLog3)
     // Accompanist
     //implementation(Dependencies.Accompanist.insets)
     // Landscapist
@@ -77,23 +66,16 @@ dependencies {
     // Retrofit
     implementation(Dependencies.SquareUp.Retrofit.retrofit)
     implementation(Dependencies.SquareUp.Retrofit.KotlinXSerialization.serialization)
-    // SQLDelight
-    implementation(Dependencies.SquareUp.SqlDelight.runtime)
-    implementation(Dependencies.SquareUp.SqlDelight.coroutines)
-    implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
     // Plist
     implementation(Dependencies.Plist.ddPlist)
     // Stetho
     implementation(Dependencies.Stetho.runtime)
     implementation(Dependencies.Stetho.okhttp3)
-    // SQLDelight
-    implementation(Dependencies.SquareUp.SqlDelight.androidDriver)
     // Leak Canary
     debugImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryDebug)
     releaseImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryRelease)
     // Java 8+ API desugaring support
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
-    implementation("androidx.core:core-ktx:+")
 }
 android {
     compileSdkVersion(30)
@@ -124,24 +106,22 @@ android {
         compose = true
     }
     composeOptions {
+        kotlinCompilerVersion = Dependencies.Kotlin.version
         kotlinCompilerExtensionVersion = Dependencies.AndroidX.Compose.version
     }
     buildToolsVersion = "30.0.2"
 }
 
-sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
-        schemaOutputDirectory = file("build/dbs")
-        dialect = "sqlite:3.24"
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        useIR = true
+        freeCompilerArgs += listOf(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=androidx.compose.foundation.lazy.ExperimentalLazyDsl",
+            "-Xskip-prerelease-check",
+            "-Xallow-unstable-dependencies",
+            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        )
     }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs = listOf(
-        *kotlinOptions.freeCompilerArgs.toTypedArray(),
-        "-Xallow-jvm-ir-dependencies",
-        "-Xskip-prerelease-check",
-        "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi")
 }

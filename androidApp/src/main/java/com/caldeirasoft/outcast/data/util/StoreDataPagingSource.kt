@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
@@ -73,4 +74,8 @@ class StoreDataPagingSource(
 
         return LoadResult.Error(throwable = Exception("error loading"))
     }
+
+
+    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
+        state.anchorPosition
 }

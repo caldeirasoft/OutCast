@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.data.util
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
@@ -89,4 +90,8 @@ class StorePodcastPagingSource(
         }
         return itemsSequence.toList()
     }
+
+
+    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
+        state.anchorPosition
 }

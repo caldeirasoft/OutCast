@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 
@@ -28,13 +30,13 @@ fun <T> LazyGridFor(
         .padding(top = 8.dp)) {
         chunkedList.forEachIndexed { index, list ->
             Row {
-                /*list.forEachIndexed { rowIndex, item ->
+                list.forEachIndexed { rowIndex, item ->
                     Box(modifier = Modifier.weight(1F).align(Alignment.Top).padding(8.dp),
                         contentAlignment = Alignment.Center)
                     {
-                        //itemContent(item, index * columns + rowIndex)
+                        itemContent(item, index * columns + rowIndex)
                     }
-                }*/
+                }
                 repeat(columns - list.size) {
                     Box(modifier = Modifier
                         .weight(1F)
@@ -106,13 +108,13 @@ fun <T : Any> LazyListScope.gridItems(
     }
 
     for (row in 0..rows) {
-        if (row == 0) spacerItem(contentPadding.top)
+        if (row == 0) spacerItem(contentPadding.calculateTopPadding())
 
         item {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(start = contentPadding.start, end = contentPadding.end)
+                    .padding(start = contentPadding.calculateStartPadding(LayoutDirection.Ltr), end = contentPadding.calculateEndPadding(LayoutDirection.Ltr))
             ) {
                 for (column in 0 until columns) {
                     Box(modifier = Modifier.weight(1f)) {
@@ -131,7 +133,7 @@ fun <T : Any> LazyListScope.gridItems(
         if (row < rows - 1)
             spacerItem(verticalInnerPadding)
         else
-            spacerItem(contentPadding.bottom)
+            spacerItem(contentPadding.calculateBottomPadding())
     }
 }
 

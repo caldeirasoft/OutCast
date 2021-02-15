@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.domain.usecase
 
+import com.caldeirasoft.outcast.data.repository.InboxRepository
 import com.caldeirasoft.outcast.domain.models.EpisodeSummary
-import com.caldeirasoft.outcast.domain.repository.InboxRepository
 import kotlinx.coroutines.flow.Flow
 
 class FetchInboxUseCase(val inboxRepository: InboxRepository)

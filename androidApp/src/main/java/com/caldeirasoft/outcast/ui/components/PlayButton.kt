@@ -22,7 +22,6 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 
 @Composable
 fun PlayButton(
-    modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
 ) {
     OutlinedButton(
@@ -57,6 +56,7 @@ fun PlayButton(
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
                     tint = Color.Blue,
+                    contentDescription = "Play",
                     modifier = Modifier
                         .preferredSize(16.dp)
                         .align(Alignment.Center)
@@ -78,11 +78,10 @@ fun PlayButton(
 
 @Composable
 fun QueueButton(
-    modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode,
 ) {
     IconButton(onClick = { /*TODO*/ }) {
-        Icon(imageVector = Icons.Default.PlaylistAdd)
+        Icon(imageVector = Icons.Default.PlaylistAdd, contentDescription = "queue")
     }
 }
 

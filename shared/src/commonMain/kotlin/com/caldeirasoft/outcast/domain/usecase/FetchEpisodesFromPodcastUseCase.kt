@@ -1,11 +1,12 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.domain.repository.EpisodeRepository
+import com.caldeirasoft.outcast.data.repository.EpisodeRepository
 import com.caldeirasoft.outcast.domain.enum.PodcastEpisodesFilterType
 import com.caldeirasoft.outcast.domain.models.EpisodeSummary
 
 class FetchEpisodesFromPodcastUseCase(
-    val episodeRepository: EpisodeRepository)
+    val episodeRepository: EpisodeRepository
+)
     : FlowUseCase<FetchEpisodesFromPodcastUseCase.Params, List<EpisodeSummary>> {
     override fun execute(param: Params) =
         when (param.filter) {

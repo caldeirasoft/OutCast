@@ -24,9 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AmbientDensity
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -42,11 +43,13 @@ import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.log10
 
-private val AmbientDominantColor = ambientOf<MutableState<Color>> { error("No dominant color") }
+private val LocalDominantColor =
+    compositionLocalOf<MutableState<Color>> { error("No dominant color") }
 
 enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @DrawableRes val drawableId: Int) {
     Arts(1301, R.string.store_genre_1301, R.drawable.ic_color_palette),
@@ -70,6 +73,7 @@ enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @Drawab
     True_Crime(1488, R.string.store_genre_1488, R.drawable.ic_handcuffs)
 }
 
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -89,6 +93,7 @@ fun StoreDirectoryScreen(
     )
 }
 
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
 private fun StoreDirectoryContent(
@@ -109,7 +114,7 @@ private fun StoreDirectoryContent(
                 .padding(top = 56.dp))
         {
             item {
-                with(AmbientDensity.current) {
+                with(LocalDensity.current) {
                     Spacer(modifier = Modifier.height(spacerHeight.toDp()))
                 }
             }
@@ -200,7 +205,7 @@ private fun StoreDirectoryContent(
             },
             actions = {
                 IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Search)
+                    Icon(Icons.Default.Search, contentDescription = "search")
                 }
             },
             state = listState,
@@ -217,7 +222,7 @@ fun ReachableAppBarWithSearchBar(
     state: LazyListState,
     headerHeight: Int)
 {
-    with(AmbientDensity.current) {
+    with(LocalDensity.current) {
         Box(modifier = Modifier
             .fillMaxWidth()
             .height(headerHeight.toDp()))
@@ -239,7 +244,7 @@ fun ReachableAppBarWithSearchBar(
 
                 // large title
                 Box(modifier = Modifier
-                    .padding(bottom = (56.dp.toIntPx() * scrollRatioLargeHeader).toDp())
+                    .padding(bottom = (56.dp.roundToPx() * scrollRatioLargeHeader).toDp())
                     .align(Alignment.Center)
                     .alpha(alphaLargeHeader)) {
                     ProvideTextStyle(typography.h4, title)
@@ -252,7 +257,7 @@ fun ReachableAppBarWithSearchBar(
                         .align(Alignment.TopStart)
                         .alpha(alphaCollapsedHeader),
                     title = {
-                        Providers(AmbientContentAlpha provides alphaCollapsedHeader) {
+                        Providers(LocalContentAlpha provides alphaCollapsedHeader) {
                             title()
                         }
                     },
@@ -304,17 +309,19 @@ private fun GenreTabs(
                     .forEachIndexed { index, category ->
                         AnimatedVisibility(
                             visible = selectedGenre == null || selectedGenre == category.id,
-                            enter = expandHorizontally(animSpec = tween(durationMillis = 250))
-                                    + fadeIn(animSpec = tween(durationMillis = 250)),
-                            exit = shrinkHorizontally(animSpec = tween(durationMillis = 250))
-                                    + fadeOut(animSpec = tween(durationMillis = 250)),
+                            enter = expandHorizontally(animationSpec = tween(durationMillis = 250))
+                                    + fadeIn(animationSpec = tween(durationMillis = 250)),
+                            exit = shrinkHorizontally(animationSpec = tween(durationMillis = 250))
+                                    + fadeOut(animationSpec = tween(durationMillis = 250)),
                         ) {
                             ChoiceChipContent(
                                 text = category.name,
                                 selected = selectedGenre == category.id,
                                 onGenreClick = {
                                     onGenreSelected(category.id)
-                                    scrollState.smoothScrollTo(0f)
+                                    runBlocking {
+                                        scrollState.smoothScrollTo(0f)
+                                    }
                                 }
                             )
                         }
@@ -348,7 +355,7 @@ private fun SearchBar(modifier: Modifier = Modifier)
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Icon(imageVector = Icons.Filled.Search)
+            Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
             Text("Search", modifier = Modifier.padding(horizontal = 4.dp))
         }
     }
@@ -365,9 +372,9 @@ private fun ChoiceChipContent(
         else -> Color.Transparent
     }
     TextButton(
-        colors = ButtonConstants.defaultTextButtonColors(
-            backgroundColor = animate(backgroundColor),
-            contentColor = animate(contentColorFor(backgroundColor)),
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColorFor(backgroundColor)).value,
             disabledContentColor = MaterialTheme.colors.onSurface
                 .copy(alpha = ContentAlpha.disabled)
         ),
