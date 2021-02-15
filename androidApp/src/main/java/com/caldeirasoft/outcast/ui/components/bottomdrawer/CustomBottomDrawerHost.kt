@@ -43,16 +43,8 @@ fun CustomBottomDrawerHost(content: @Composable () -> Unit)
                 topEnd = 16.dp,
                 bottomStart = 0.dp,
                 bottomEnd = 0.dp),
-        ) {
-            content()
-        }
+            content = { content() })
     }
-}
-
-open class BottomDrawerContent(
-    val content: ComposableFn
-) {
-    object Empty : BottomDrawerContent({ })
 }
 
 class BottomDrawerContentState {
