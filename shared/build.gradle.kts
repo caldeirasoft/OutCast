@@ -36,9 +36,6 @@ kotlin {
         }
     }
     sourceSets {
-        val stethoVersion: String by project
-        val kotlinxDatetimeVersion: String by project
-
         val commonMain by getting {
             dependencies {
                 // Kotlinx coroutines
@@ -46,7 +43,7 @@ kotlin {
                 // Kotlinx serialization
                 implementation(Dependencies.Kotlinx.Serialization.serialization)
                 // Kotlinx datetime
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
+                implementation(Dependencies.Kotlinx.DateTime.datetime)
                 // Koin
                 implementation(Dependencies.Koin.core)
                 implementation(Dependencies.Koin.coreExt)
@@ -98,9 +95,7 @@ kotlin {
                 implementation(Dependencies.SquareUp.OkHttp3.okhttp)
                 implementation(Dependencies.SquareUp.OkHttp3.loggingInterceptor)
                 implementation(Dependencies.SquareUp.OkHttp3.dns)
-                // Stetho
-                implementation("com.facebook.stetho:stetho:$stethoVersion")
-                implementation("com.facebook.stetho:stetho-okhttp3:$stethoVersion")
+
             }
         }
         val androidDebug by getting {

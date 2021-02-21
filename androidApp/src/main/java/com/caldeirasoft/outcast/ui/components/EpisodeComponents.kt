@@ -161,7 +161,7 @@ fun StoreEpisodeSmallListItemIndexed(
 
 @Preview
 @Composable
-fun PreviewPlayButton() {
+fun previewPlayButton() {
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(),
         shape = RoundedCornerShape(50),

@@ -1,16 +1,21 @@
 package com.caldeirasoft.outcast.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.typography
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -23,7 +28,6 @@ import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastEpisode
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
-import kotlinx.coroutines.FlowPreview
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import java.net.URLDecoder
@@ -46,7 +50,6 @@ inline fun <reified T> NavBackStackEntry.getObjectNotNull(key: String): T {
     return requireNotNull(Json.decodeFromString(serializer(), URLDecoder.decode(chartsEncoded, "UTF-8")))
 }
 
-@FlowPreview
 @ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
