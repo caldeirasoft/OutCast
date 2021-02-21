@@ -2,79 +2,10 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    kotlin("plugin.serialization") version Dependencies.Kotlin.version
+    kotlin("plugin.serialization") version Kotlin.version
+    id("com.squareup.sqldelight")
 }
 
-repositories {
-    gradlePluginPortal()
-    google()
-    jcenter()
-    mavenCentral()
-    maven(url = uri("https://dl.bintray.com/ekito/koin/")) // koin
-    maven(url = uri("https://dl.bintray.com/kotlin/kotlin-eap")) //ktor
-    maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
-}
-dependencies {
-    implementation(project(":shared"))
-    // Android
-    implementation("com.google.android.material:material:1.3.0")
-    // AndroidX
-    implementation(Dependencies.AndroidX.coreKtx)
-    implementation(Dependencies.AndroidX.appcompat)
-    implementation(Dependencies.AndroidX.palette)
-    // LifeCycle
-    implementation(Dependencies.AndroidX.LifeCycle.runtime)
-    implementation(Dependencies.AndroidX.LifeCycle.ViewModel.ktx)
-    //implementation(Dependencies.AndroidX.LifeCycle.ViewModel.compose)
-    // Activity Compose
-    implementation(Dependencies.AndroidX.Activity.compose)
-    // Compose
-    implementation(Dependencies.AndroidX.Compose.runtime)
-    implementation(Dependencies.AndroidX.Compose.foundation)
-    implementation(Dependencies.AndroidX.Compose.ui)
-    implementation(Dependencies.AndroidX.Compose.layout)
-    implementation(Dependencies.AndroidX.Compose.animation)
-    implementation(Dependencies.AndroidX.Compose.material)
-    implementation(Dependencies.AndroidX.Compose.iconsExtended)
-    implementation(Dependencies.AndroidX.Compose.tooling)
-    // Navigation
-    implementation(Dependencies.AndroidX.Navigation.compose)
-    // Paging
-    implementation(Dependencies.AndroidX.Paging.compose)
-    // Kotlin coroutines
-    implementation(Dependencies.Kotlinx.Coroutines.core)
-    // Kotlinx serialization
-    implementation(Dependencies.Kotlinx.Serialization.serialization)
-    // Kotlinx datetime
-    implementation(Dependencies.Kotlinx.DateTime.datetime)
-    // Koin
-    implementation(Dependencies.Koin.android)
-    implementation(Dependencies.Koin.androidExt)
-    //implementation(Dependencies.Koin.androidCompose)
-    implementation(Dependencies.Koin.androidWorkManager)
-    //    implementation(Libs.Koin.androidExt)
-    // Timber
-    implementation(Dependencies.Timber.timber)
-    // OkLog3
-    implementation(Dependencies.OkLog3.okLog3)
-    // Accompanist
-    //implementation(Dependencies.Accompanist.insets)
-    // Landscapist
-    implementation(Dependencies.Landscapist.coil)
-    // Retrofit
-    implementation(Dependencies.SquareUp.Retrofit.retrofit)
-    implementation(Dependencies.SquareUp.Retrofit.KotlinXSerialization.serialization)
-    // Plist
-    implementation(Dependencies.Plist.ddPlist)
-    // Stetho
-    implementation(Dependencies.Stetho.runtime)
-    implementation(Dependencies.Stetho.okhttp3)
-    // Leak Canary
-    debugImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryDebug)
-    releaseImplementation(Dependencies.SquareUp.LeakCanary.leakCanaryRelease)
-    // Java 8+ API desugaring support
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
-}
 android {
     compileSdkVersion(Constants.compileSdk)
     defaultConfig {
@@ -111,27 +42,80 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         useIR = true
+        freeCompilerArgs = freeCompilerArgs + listOf(
+            "-Xopt-in=androidx.compose.foundation.lazy.ExperimentalLazyDsl",
+            "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-Xopt-in=androidx.compose.runtime.ExperimentalComposeApi",
+            "-Xopt-in=dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets",
+            "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xopt-in=kotlin.time.ExperimentalTime"
+        )
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerVersion = Dependencies.Kotlin.version
-        kotlinCompilerExtensionVersion = Dependencies.AndroidX.Compose.version
+        val versionsProperties = rootProject.propertiesFromFile("versions.properties")
+        kotlinCompilerExtensionVersion = versionsProperties.getProperty("version.androidx.compose.foundation")
     }
-    buildToolsVersion = "30.0.2"
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        useIR = true
-        freeCompilerArgs += listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.compose.foundation.lazy.ExperimentalLazyDsl",
-            "-Xskip-prerelease-check",
-            "-Xallow-unstable-dependencies",
-            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        )
+sqldelight {
+    database("Database") {
+        packageName = "com.caldeirasoft.outcast"
+        schemaOutputDirectory = file("build/dbs")
+        dialect = "sqlite:3.24"
     }
+}
+
+dependencies {
+    implementation(project(":shared"))
+    // Android
+    implementation("com.google.android.material:material:_")
+    // AndroidX
+    implementation(AndroidX.core.ktx)
+    implementation(AndroidX.appCompat)
+    implementation(AndroidX.paletteKtx)
+    implementation(AndroidX.Lifecycle.runtime)
+    implementation(Libs.AndroidX.Activity.compose)
+    implementation(Libs.AndroidX.Lifecycle.viewModelCompose)
+    implementation(Libs.AndroidX.DataStore.preferences)
+    // Compose
+    implementation(AndroidX.Compose.runtime)
+    implementation(AndroidX.Compose.ui)
+    implementation(AndroidX.Compose.animation)
+    implementation(AndroidX.Compose.foundation)
+    implementation(AndroidX.Compose.material)
+    implementation(Libs.AndroidX.Compose.layout)
+    implementation(Libs.AndroidX.Compose.iconsExtended)
+    implementation(Libs.AndroidX.Compose.tooling)
+    implementation(Libs.AndroidX.Navigation.compose)
+    implementation(Libs.AndroidX.Paging.compose)
+    // Kotlin
+    implementation(KotlinX.coroutines.core)
+    implementation(KotlinX.coroutines.android)
+    implementation(KotlinX.serialization.json)
+    implementation(Libs.Kotlinx.datetime)
+    // Koin
+    implementation(Libs.Koin.androidx)
+    implementation(Libs.Koin.androidExt)
+    implementation(Libs.Koin.androidWorkManager)
+    // Libs
+    implementation(Libs.OkLog3.core)
+    implementation(Square.retrofit2.retrofit)
+    implementation(JakeWharton.retrofit2.converter.kotlinxSerialization)
+    implementation(JakeWharton.timber)
+    implementation(Square.okHttp3.okHttp)
+    implementation(Square.okHttp3.loggingInterceptor)
+    implementation(Libs.okHttp3.dns)
+    implementation(Square.sqlDelight.drivers.android)
+    implementation(Libs.SqlDelight.coroutines)
+    implementation(Libs.Stetho.runtime)
+    implementation(Libs.Stetho.okhttp3)
+    debugImplementation(Libs.Chucker.library)
+    releaseImplementation(Libs.Chucker.libraryNoOp)
+    debugImplementation(Square.LeakCanary.android)
+    implementation(Libs.Landscapist.coil)
+    // Java 8+ API desugaring support
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:_")
 }

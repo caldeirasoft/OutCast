@@ -61,8 +61,8 @@ fun AutoSizedText(
         softWrap,
         maxLines,
         onTextLayout = { result ->
-            if (result.didOverflowHeight && fontSize.value > minFontSize.value) {
-                fontSize = fontSize * 0.9f
+            if (result.didOverflowHeight && fontSize > minFontSize) {
+                fontSize = fontSize * 0.9
             }
         },
         style
