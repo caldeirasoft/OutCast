@@ -1,7 +1,8 @@
 package com.caldeirasoft.outcast.data.db
 
 import com.caldeirasoft.outcast.Database
-import com.caldeirasoft.outcast.db.*
+import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.EnumColumnAdapter
