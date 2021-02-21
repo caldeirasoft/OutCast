@@ -1,5 +1,4 @@
 @file:UseSerializers(InstantStringSerializer::class, LocalDateStringSerializer::class)
-
 package com.caldeirasoft.outcast.domain.dto
 
 import com.caldeirasoft.outcast.domain.models.Artwork
@@ -8,6 +7,7 @@ import com.caldeirasoft.outcast.domain.serializers.InstantStringSerializer
 import com.caldeirasoft.outcast.domain.serializers.LocalDateStringSerializer
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers

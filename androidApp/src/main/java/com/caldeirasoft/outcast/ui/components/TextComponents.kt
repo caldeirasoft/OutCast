@@ -2,7 +2,10 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.AmbientTextStyle
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +23,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.ui.theme.typography
 
 @Composable

@@ -1,24 +1,15 @@
 package com.caldeirasoft.outcast.ui.components
 
-import androidx.compose.animation.animate
-import androidx.compose.animation.animateAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.typography
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 
@@ -38,8 +29,8 @@ fun ChipButton(
     }
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor = animateAsState(backgroundColor).value,
-            contentColor = animateAsState(contentColor).value,
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColor).value,
             disabledContentColor = MaterialTheme.colors.onSurface
                 .copy(alpha = ContentAlpha.disabled)
         ),
@@ -69,8 +60,8 @@ fun ChipButtonBorderless(
     }
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor = animateAsState(backgroundColor).value,
-            contentColor = animateAsState(contentColor).value,
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColor).value,
             disabledContentColor = MaterialTheme.colors.onSurface
                 .copy(alpha = ContentAlpha.disabled)
         ),
@@ -127,8 +118,8 @@ fun ActionChipButton(
     }
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor = animateAsState(backgroundColor).value,
-            contentColor = animateAsState(contentColor).value,
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColor).value,
             disabledContentColor = MaterialTheme.colors.onSurface
                 .copy(alpha = ContentAlpha.disabled)
         ),

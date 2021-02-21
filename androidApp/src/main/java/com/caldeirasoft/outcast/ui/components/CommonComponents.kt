@@ -87,6 +87,7 @@ fun StoreHeadingSectionWithLink(title:String, onClick: () -> Unit) {
             style = MaterialTheme.typography.h6
         )
         Icon(imageVector = Icons.Filled.ArrowForward,
+            contentDescription = "show all",
             modifier = Modifier
                 .constrainAs(icon) {
                     linkTo(top = parent.top, bottom = parent.bottom)

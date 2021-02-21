@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -22,7 +21,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -33,7 +31,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import androidx.paging.compose.itemsIndexed
 import coil.request.ImageRequest
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
@@ -254,7 +251,7 @@ private fun StoreRoomScreen(
                         val artworkUrl =
                             StoreItemWithArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
                         Box(modifier = Modifier.fillMaxSize()) {
-                            WithConstraints() {
+                            BoxWithConstraints() {
                                 val maxHeight = constraints.maxHeight
                                 val maxWidth = constraints.maxWidth
                                 val artworkHeight = maxWidth * 13f/32f
@@ -327,12 +324,14 @@ private fun StoreRoomScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = navigateBack) {
-                            Icon(Icons.Filled.ArrowBack)
+                            Icon(Icons.Filled.ArrowBack,
+                                contentDescription = null,)
                         }
                     },
                     actions = {
                         IconButton(onClick = { }) {
-                            Icon(imageVector = Icons.Filled.Search)
+                            Icon(imageVector = Icons.Filled.Search,
+                                contentDescription = null,)
                         }
                     },
                     backgroundColor = Color.Transparent,

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
@@ -21,6 +22,18 @@ typealias ScreenFn = (Screen) -> Unit
 typealias DialogFn = (CustomBottomDrawerState, BottomDrawerContentState, Screen) -> Unit
 
 val Int.px: Float @Composable get() = with(AmbientDensity.current) { this@px.dp.toPx()}
+
+@Composable
+fun Dp.toPx(): Float = with(AmbientDensity.current) { this@toPx.toPx() }
+
+@Composable
+fun Dp.toIntPx(): Int = this.toPx().roundToInt()
+
+@Composable
+fun Float.toDp(): Dp = with(AmbientDensity.current) { this@toDp.toDp() }
+
+@Composable
+fun Int.toDp(): Dp = this.toFloat().toDp()
 
 fun applyTextStyleCustom(
     textStyle: TextStyle,

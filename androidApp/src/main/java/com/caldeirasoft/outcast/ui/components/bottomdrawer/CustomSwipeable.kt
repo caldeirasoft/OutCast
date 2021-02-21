@@ -11,12 +11,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.gesture.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.gesture.nestedscroll.NestedScrollSource
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.domain.util.Log_D
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -321,7 +319,7 @@ open class CustomSwipeableState<T>(
             clock: AnimationClockObservable,
             animationSpec: AnimationSpec<Float>,
             confirmStateChange: (T) -> Boolean
-        ) = androidx.compose.runtime.savedinstancestate.Saver<CustomSwipeableState<T>, T>(
+        ) = androidx.compose.runtime.saveable.Saver<CustomSwipeableState<T>, T>(
             save = { it.value },
             restore = { CustomSwipeableState(it, clock, animationSpec, confirmStateChange) }
         )
@@ -395,21 +393,11 @@ fun <T> Modifier.swipeable(
     require(anchors.values.distinct().count() == anchors.size) {
         "You cannot have two anchors mapped to the same state."
     }
-    val density = AmbientDensity.current
-    onCommit(anchors) {
-        state.anchors = anchors
-        state.thresholds = { a, b ->
-            val from = anchors.getValue(a)
-            val to = anchors.getValue(b)
-            with(thresholds(from, to)) { density.computeThreshold(a, b) }
-        }
-        with(density) {
-            state.velocityThreshold = velocityThreshold.toPx()
-        }
-    }
+    /*
     onCommit {
         state.resistance = resistance
     }
+     */
 
     Modifier.draggable(
         orientation = orientation,

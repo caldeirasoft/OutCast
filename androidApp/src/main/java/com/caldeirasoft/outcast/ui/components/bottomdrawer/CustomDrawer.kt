@@ -25,15 +25,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.savedinstancestate.Saver
-import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.gesture.nestedscroll.nestedScroll
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.gesture.tapGestureFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientAnimationClock
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.semantics.dismiss
@@ -198,7 +197,7 @@ fun rememberBottomDrawerState(
     confirmStateChange: (CustomBottomDrawerValue) -> Boolean = { true }
 ): CustomBottomDrawerState {
     val clock = AmbientAnimationClock.current.asDisposableClock()
-    return rememberSavedInstanceState(
+    return rememberSaveable(
         clock,
         saver = CustomBottomDrawerState.Saver(clock, confirmStateChange)
     ) {
@@ -250,7 +249,7 @@ fun CustomBottomDrawerLayout(
     scrimColor: Color = DrawerDefaults.scrimColor,
     bodyContent: @Composable () -> Unit
 ) {
-    WithConstraints(modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier.fillMaxSize()) {
         // TODO : think about Infinite max bounds case
         if (!constraints.hasBoundedHeight) {
             throw IllegalStateException("Drawer shouldn't have infinite height")
@@ -309,10 +308,10 @@ fun CustomBottomDrawerLayout(
             Surface(
                 modifier = with(AmbientDensity.current) {
                     Modifier.preferredSizeIn(
-                        minWidth = constraints.minWidth.toDp(),
-                        minHeight = constraints.minHeight.toDp(),
-                        maxWidth = constraints.maxWidth.toDp(),
-                        maxHeight = constraints.maxHeight.toDp()
+                        minWidth = this@BoxWithConstraints.constraints.minWidth.toDp(),
+                        minHeight = this@BoxWithConstraints.constraints.minHeight.toDp(),
+                        maxWidth = this@BoxWithConstraints.constraints.maxWidth.toDp(),
+                        maxHeight = this@BoxWithConstraints.constraints.maxHeight.toDp()
                     )
                 }
                     .semantics {

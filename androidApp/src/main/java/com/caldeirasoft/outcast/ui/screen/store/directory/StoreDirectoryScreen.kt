@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -42,6 +42,7 @@ import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.log10
@@ -200,7 +201,7 @@ private fun StoreDirectoryContent(
             },
             actions = {
                 IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Search)
+                    Icon(Icons.Default.Search, contentDescription = null)
                 }
             },
             state = listState,
@@ -283,6 +284,8 @@ private fun GenreTabs(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val scrollScope = rememberCoroutineScope()
+
     ScrollableRow(
         modifier = modifier,
         scrollState = scrollState
@@ -304,17 +307,19 @@ private fun GenreTabs(
                     .forEachIndexed { index, category ->
                         AnimatedVisibility(
                             visible = selectedGenre == null || selectedGenre == category.id,
-                            enter = expandHorizontally(animSpec = tween(durationMillis = 250))
-                                    + fadeIn(animSpec = tween(durationMillis = 250)),
-                            exit = shrinkHorizontally(animSpec = tween(durationMillis = 250))
-                                    + fadeOut(animSpec = tween(durationMillis = 250)),
+                            enter = expandHorizontally(animationSpec = tween(durationMillis = 250))
+                                    + fadeIn(animationSpec = tween(durationMillis = 250)),
+                            exit = shrinkHorizontally(animationSpec = tween(durationMillis = 250))
+                                    + fadeOut(animationSpec = tween(durationMillis = 250)),
                         ) {
                             ChoiceChipContent(
                                 text = category.name,
                                 selected = selectedGenre == category.id,
                                 onGenreClick = {
                                     onGenreSelected(category.id)
-                                    scrollState.smoothScrollTo(0f)
+                                    scrollScope.launch {
+                                        scrollState.smoothScrollTo(0f)
+                                    }
                                 }
                             )
                         }
@@ -348,7 +353,9 @@ private fun SearchBar(modifier: Modifier = Modifier)
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Icon(imageVector = Icons.Filled.Search)
+            Icon(imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                )
             Text("Search", modifier = Modifier.padding(horizontal = 4.dp))
         }
     }
@@ -365,7 +372,7 @@ private fun ChoiceChipContent(
         else -> Color.Transparent
     }
     TextButton(
-        colors = ButtonConstants.defaultTextButtonColors(
+        colors = ButtonDefaults.textButtonColors(
             backgroundColor = animate(backgroundColor),
             contentColor = animate(contentColorFor(backgroundColor)),
             disabledContentColor = MaterialTheme.colors.onSurface

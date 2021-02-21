@@ -1,9 +1,11 @@
 package com.caldeirasoft.outcast.ui.components
 
-import androidx.compose.animation.animateAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -348,6 +350,7 @@ fun StoreCollectionTopEpisodesContent(
 fun CarouselDot(selected: Boolean, color: Color) {
     Icon(
         imageVector = Icons.Filled.Lens,
+        contentDescription = null,
         modifier = Modifier
             .padding(4.dp)
             .preferredSize(12.dp),
@@ -379,8 +382,8 @@ fun ChoiceChipTab(
         {
             OutlinedButton(
                 colors = ButtonDefaults.textButtonColors(
-                    backgroundColor = animateAsState(backgroundColor).value,
-                    contentColor = animateAsState(contentColor).value,
+                    backgroundColor = animateColorAsState(backgroundColor).value,
+                    contentColor = animateColorAsState(contentColor).value,
                     disabledContentColor = MaterialTheme.colors.onSurface
                         .copy(alpha = ContentAlpha.disabled)
                 ),

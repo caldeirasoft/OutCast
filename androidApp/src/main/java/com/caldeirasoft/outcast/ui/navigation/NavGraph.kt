@@ -1,21 +1,16 @@
 package com.caldeirasoft.outcast.ui.navigation
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.typography
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
-import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -174,7 +169,7 @@ fun SetupBottomNavBar(
         val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
         items.forEach { screen ->
             BottomNavigationItem(
-                icon = { Icon(screen.icon) },
+                icon = { Icon(screen.icon, contentDescription = stringResource(id = screen.resourceId)) },
                 label = {
                     Text(text = stringResource(id = screen.resourceId),
                         style = typography.overline)

@@ -2,8 +2,8 @@ package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -44,4 +44,7 @@ class StoreChartsPagingSource(
             nextKey = nextKey
         )
     }
+
+    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
+        state.anchorPosition
 }

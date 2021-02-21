@@ -2,10 +2,11 @@ package com.caldeirasoft.outcast.ui.screen.store.genre
 
 import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -23,11 +24,11 @@ import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionRooms
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.navigation.Actions
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -148,12 +149,14 @@ private fun StoreGenreContent(
             title = { Text(text = title) },
             navigationIcon = {
                 IconButton(onClick = navigateBack) {
-                    Icon(Icons.Filled.ArrowBack)
+                    Icon(Icons.Filled.ArrowBack,
+                        contentDescription = null,)
                 }
             },
             actions = {
                 IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Search)
+                    Icon(imageVector = Icons.Filled.Search,
+                        contentDescription = null,)
                 }
             },
             state = listState,

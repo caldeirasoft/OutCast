@@ -174,12 +174,14 @@ fun TopChartsScreen(
             title = { Text(text = stringResource(id = R.string.store_tab_charts)) },
             navigationIcon = {
                 IconButton(onClick = navigateBack) {
-                    Icon(Icons.Filled.ArrowBack)
+                    Icon(Icons.Filled.ArrowBack,
+                        contentDescription = null,)
                 }
             },
             actions = {
                 IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Search)
+                    Icon(imageVector = Icons.Filled.Search,
+                        contentDescription = null,)
                 }
             },
             state = listState,

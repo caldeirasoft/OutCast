@@ -1,9 +1,6 @@
 package com.caldeirasoft.outcast.domain.interfaces
 
-import com.caldeirasoft.outcast.domain.models.store.StoreRoom
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
 abstract class StoreFeaturedPage(private val storeData: StoreFeatured)

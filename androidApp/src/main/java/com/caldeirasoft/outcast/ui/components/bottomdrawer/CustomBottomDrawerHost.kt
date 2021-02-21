@@ -1,16 +1,12 @@
 package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.asDisposableClock
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
-import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
-import androidx.compose.ui.platform.AmbientAnimationClock
-import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.util.Log_D
-import com.caldeirasoft.outcast.ui.components.bottomdrawer.*
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerValue
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.rememberBottomDrawerState
 import com.caldeirasoft.outcast.ui.util.ComposableFn
 
 
@@ -39,18 +35,7 @@ fun CustomBottomDrawerHost(content: @Composable () -> Unit)
         AmbientBottomDrawerState provides drawerState)
     {
         Log_D("TAG", "drawerState: ${drawerState.isClosed}")
-        CustomBottomDrawerLayout(
-            drawerContent = { bottomDrawerContent.content.value() },
-            drawerState = drawerState,
-            drawerShape = RoundedCornerShape(
-                topLeft = 16.dp,
-                topRight = 16.dp,
-                bottomLeft = 0.dp,
-                bottomRight = 0.dp),
-            gesturesEnabled = true
-        ) {
-            content()
-        }
+        content()
     }
 }
 

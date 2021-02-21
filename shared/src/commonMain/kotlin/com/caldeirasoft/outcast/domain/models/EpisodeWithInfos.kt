@@ -1,11 +1,5 @@
 package com.caldeirasoft.outcast.domain.models
 
-import com.caldeirasoft.outcast.domain.models.Artwork
-import kotlin.Boolean
-import kotlin.Int
-import kotlin.Long
-import kotlin.String
-import kotlin.collections.List
 import kotlinx.datetime.Instant
 
 data class EpisodeWithInfos(

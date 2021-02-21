@@ -4,8 +4,6 @@ plugins {
     kotlin("kapt")
     kotlin("plugin.serialization") version Dependencies.Kotlin.version
 }
-group = "com.caldeirasoft.outcast"
-version = "1.0-SNAPSHOT"
 
 repositories {
     gradlePluginPortal()
@@ -78,19 +76,31 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
 }
 android {
-    compileSdkVersion(30)
+    compileSdkVersion(Constants.compileSdk)
     defaultConfig {
         applicationId = "com.caldeirasoft.outcast"
         minSdkVersion(24)
-        targetSdkVersion(30)
+        targetSdkVersion(Constants.targetSdk)
         versionCode = 1
         versionName = "1.0"
-        // Required when setting minSdkVersion to 20 or lower
-        multiDexEnabled = true
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig =
+                if (System.getenv("CI") == "true") signingConfigs.getByName("release")
+                else getByName("debug").signingConfig
+        }
+
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            isDebuggable = true
         }
     }
     compileOptions {

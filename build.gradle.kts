@@ -1,10 +1,24 @@
+allprojects {
+    repositories {
+        mavenCentral()
+        google()
+        jcenter()
+        gradlePluginPortal()
+        maven(url = uri("https://dl.bintray.com/ekito/koin/")) // koin
+        maven(url = uri("https://dl.bintray.com/kotlin/kotlin-eap")) //ktor
+        maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
+    }
+}
+
 buildscript {
     repositories {
-        gradlePluginPortal()
-        jcenter()
         google()
         mavenCentral()
+        maven("https://kotlin.bintray.com/kotlinx")
+        maven("https://dl.bintray.com/jetbrains/kotlin-native-dependencies")
+        maven("https://dl.bintray.com/kotlin/kotlin-dev")
     }
+
     dependencies {
         classpath(Dependencies.androidGradlePlugin)
         classpath(Dependencies.SquareUp.SqlDelight.gradlePlugin)
@@ -13,8 +27,6 @@ buildscript {
         classpath(kotlin("gradle-plugin", version = Dependencies.Kotlin.version))
     }
 }
-group = "com.caldeirasoft.outcast"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()

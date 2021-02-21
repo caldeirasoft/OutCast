@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.WithConstraints
-import androidx.compose.ui.layout.WithConstraintsScope
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -26,14 +24,14 @@ import kotlin.math.log10
 fun ReachableScaffold(
     headerRatioOrientation: Orientation = Orientation.Vertical,
     headerRatio: Float = 1/3f,
-    itemContent: @Composable WithConstraintsScope.(Int) -> Unit = {}
+    itemContent: @Composable BoxWithConstraintsScope.(Int) -> Unit = {}
 ) {
     Scaffold {
         Box(modifier = Modifier
             .fillMaxSize()
             .semantics { testTag = "Store Directory screen" })
         {
-            WithConstraints {
+            BoxWithConstraints {
                 val screenHeight = constraints.maxHeight
                 val screenWidth = constraints.maxWidth
                 val headerHeight =

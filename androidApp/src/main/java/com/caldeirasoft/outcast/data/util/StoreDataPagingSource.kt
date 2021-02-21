@@ -2,8 +2,11 @@ package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
 import androidx.paging.PagingSource
-import com.caldeirasoft.outcast.domain.interfaces.*
-import com.caldeirasoft.outcast.domain.models.store.*
+import androidx.paging.PagingState
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.StorePageWithCollection
+import com.caldeirasoft.outcast.domain.models.store.StoreRoomPage
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onError
@@ -73,4 +76,7 @@ class StoreDataPagingSource(
 
         return LoadResult.Error(throwable = Exception("error loading"))
     }
+
+    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
+        state.anchorPosition
 }

@@ -191,6 +191,7 @@ fun previewPlayButton() {
                 }
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = "play",
                     tint = Color.Blue,
                     modifier = Modifier
                         .preferredSize(16.dp)

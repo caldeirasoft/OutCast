@@ -4,7 +4,6 @@ import android.app.Application
 import com.caldeirasoft.outcast.di.appModule
 import com.caldeirasoft.outcast.di.initKoinModules
 import com.facebook.stetho.Stetho
-import com.squareup.leakcanary.LeakCanary
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.koin.android.ext.koin.androidContext
@@ -44,7 +43,7 @@ class App : Application() {
 
     private fun initLeakDetection() {
         if (BuildConfig.DEBUG) {
-            LeakCanary.install(this)
+            //LeakCanary.install(this)
         }
     }
 

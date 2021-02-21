@@ -94,7 +94,8 @@ private fun StoreDirectoryContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            Icon(imageVector = Icons.Filled.Search)
+                            Icon(imageVector = Icons.Filled.Search,
+                                contentDescription = null,)
                             Text("Search", modifier = Modifier.padding(horizontal = 4.dp))
                         }
                     }

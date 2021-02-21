@@ -17,7 +17,7 @@ interface ItunesSearchAPI {
     suspend fun search(
         @Header("X-Apple-Store-Front") storeFront: String,
         @Query("term") term: String,
-    ): Response<ResultIdsResult>
+    ): Response<com.caldeirasoft.outcast.domain.dto.ResultIdsResult>
 
     @GET("/WebObjects/MZSearchHints.woa/wa/hints?clientApplication=Podcasts&f=json")
     @Headers(
@@ -26,5 +26,5 @@ interface ItunesSearchAPI {
     suspend fun searchHints(
         @Header("X-Apple-Store-Front") storeFront: String,
         @Query("term") term: String,
-    ): Response<ResultIdsResult>
+    ): Response<com.caldeirasoft.outcast.domain.dto.ResultIdsResult>
 }

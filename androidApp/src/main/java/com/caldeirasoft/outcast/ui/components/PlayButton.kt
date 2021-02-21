@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -56,6 +55,7 @@ fun PlayButton(
                 }
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
                     tint = Color.Blue,
                     modifier = Modifier
                         .preferredSize(16.dp)
@@ -82,7 +82,8 @@ fun QueueButton(
     storeEpisode: StoreEpisode,
 ) {
     IconButton(onClick = { /*TODO*/ }) {
-        Icon(imageVector = Icons.Default.PlaylistAdd)
+        Icon(imageVector = Icons.Default.PlaylistAdd,
+            contentDescription = null,)
     }
 }
 

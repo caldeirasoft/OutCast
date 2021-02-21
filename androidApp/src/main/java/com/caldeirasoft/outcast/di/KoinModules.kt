@@ -17,7 +17,6 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.domain.repository.*
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
@@ -145,12 +144,13 @@ internal val databaseModule = module {
 }
 
 internal val repositoryModule = module {
-    single<PodcastRepository> { PodcastRepositoryImpl(database = get()) }
-    single<EpisodeRepository> { EpisodeRepositoryImpl(database = get()) }
-    single<StoreRepository> { StoreRepositoryImpl(itunesAPI = get(), searchAPI = get()) }
-    single<InboxRepository> { InboxRepositoryImpl(database = get()) }
-    single<QueueRepository> { QueueRepositoryImpl(database = get()) }
-    single<LocalCacheRepository> { LocalCacheRepositoryImpl(context = get(), json = get()) }
+    single<PodcastRepository> { PodcastRepository(database = get()) }
+    single<EpisodeRepository> { EpisodeRepository(database = get()) }
+    single<StoreRepository> { StoreRepository(itunesAPI = get(), searchAPI = get()) }
+    single<InboxRepository> { InboxRepository(database = get()) }
+    single<QueueRepository> { QueueRepository(database = get()) }
+    single<LocalCacheRepository> { LocalCacheRepository(context = get(), json = get()) }
+    single<DataStoreRepository> { DataStoreRepository(context = get()) }
 }
 
 internal val usecaseModule = module {

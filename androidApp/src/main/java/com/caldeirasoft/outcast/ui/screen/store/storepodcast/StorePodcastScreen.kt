@@ -4,7 +4,10 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -12,14 +15,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Providers
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -32,7 +37,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
@@ -44,7 +51,8 @@ import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.*
+import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -107,17 +115,22 @@ private fun StorePodcastScreen(
                     ActionChipButton(
                         selected = true,
                         onClick = { /*TODO*/ },
-                        icon = { Icon(Icons.Default.CheckCircle)}
+                        icon = {
+                            Icon(Icons.Default.CheckCircle,
+                                contentDescription = null,)
+                        }
                     ) {
                         Text(text = stringResource(id = R.string.action_subscribe))
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Public)
+                        Icon(imageVector = Icons.Default.Public,
+                            contentDescription = null,)
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Share)
+                        Icon(imageVector = Icons.Default.Share,
+                            contentDescription = null,)
                     }
                 }
             }
@@ -253,7 +266,7 @@ fun StorePodcastExpandedHeader(
                     .fillMaxSize()
                     .align(Alignment.TopStart)
             ) {
-                WithConstraints {
+                BoxWithConstraints {
                     val bgDominantColor =
                         Color.getColor(viewState.storePage.artwork?.bgColor!!)
                     Box(
@@ -272,7 +285,7 @@ fun StorePodcastExpandedHeader(
                     )
                     {
                         Log_D("HEIGHT",
-                            constraints.maxHeight.toFloat().toString())
+                            this@BoxWithConstraints.constraints.maxHeight.toFloat().toString())
                     }
 
                 }
@@ -364,7 +377,8 @@ fun StorePodcastCollapsedHeader(
         },
         navigationIcon = {
             IconButton(onClick = navigateUp) {
-                Icon(Icons.Filled.ArrowBack)
+                Icon(Icons.Filled.ArrowBack,
+                    contentDescription = null,)
             }
         },
         backgroundColor = topAppBarBackgroudColor,

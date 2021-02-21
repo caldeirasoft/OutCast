@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.domain.serializers
 
 import kotlinx.datetime.Instant
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
