@@ -20,11 +20,11 @@ buildscript {
     }
 
     dependencies {
-        classpath(Dependencies.androidGradlePlugin)
-        classpath(Dependencies.SquareUp.SqlDelight.gradlePlugin)
-        classpath(Dependencies.Koin.gradlePlugin)
-        classpath("com.android.tools.build:gradle:7.0.0-alpha05")
-        classpath(kotlin("gradle-plugin", version = Dependencies.Kotlin.version))
+        val versionsProperties = rootProject.propertiesFromFile("versions.properties")
+        val kotlinVersion = versionsProperties.getProperty("version.kotlin")
+        classpath(kotlin("gradle-plugin", version = kotlinVersion))
+        classpath(Libs.GradlePlugin.android)
+        classpath(Square.SqlDelight.gradlePlugin)
     }
 }
 
