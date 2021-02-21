@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import kotlin.math.roundToInt
 
 typealias ComposableFn = @Composable () -> Unit
 typealias ComposableRowFn = @Composable RowScope.() -> Unit

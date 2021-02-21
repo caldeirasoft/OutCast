@@ -3,25 +3,18 @@ package com.caldeirasoft.outcast.ui.screen.store.categories
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.*
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +37,7 @@ fun CategoriesListBottomSheet(
             },
             navigationIcon = {
                 IconButton(onClick = { drawerState.close() }) {
-                    Icon(imageVector = Icons.Default.Close)
+                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
             backgroundColor = Color . Transparent,
@@ -102,7 +95,8 @@ fun GenreListItem(
                 }),
             text = { Text(text = name, color = contentColor) },
             icon = {
-                Image(imageVector = vectorResource(id = storeGenreItem.drawableId),
+                Image(painter = painterResource(id = storeGenreItem.drawableId),
+                    contentDescription = null,
                     modifier = Modifier.size(32.dp)
                 )
             }

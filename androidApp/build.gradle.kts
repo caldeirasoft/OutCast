@@ -2,18 +2,22 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    kotlin("plugin.serialization") version Kotlin.version
-    id("com.squareup.sqldelight")
+    kotlin("plugin.serialization") apply true
+    id("com.squareup.sqldelight") apply true
 }
 
+// get compose version in gradle.properties file
+val composeVersion: String by project
+
 android {
-    compileSdkVersion(Constants.compileSdk)
+
+    compileSdkVersion(AndroidConfig.compileSdk)
     defaultConfig {
-        applicationId = "com.caldeirasoft.outcast"
-        minSdkVersion(24)
-        targetSdkVersion(Constants.targetSdk)
-        versionCode = 1
-        versionName = "1.0"
+        applicationId = AndroidConfig.applicationId
+        minSdkVersion(AndroidConfig.minSdk)
+        targetSdkVersion(AndroidConfig.targetSdk)
+        versionCode = AndroidConfig.versionCode
+        versionName = AndroidConfig.versionName
     }
     buildTypes {
         release {
@@ -55,14 +59,13 @@ android {
         compose = true
     }
     composeOptions {
-        val versionsProperties = rootProject.propertiesFromFile("versions.properties")
-        kotlinCompilerExtensionVersion = versionsProperties.getProperty("version.androidx.compose.foundation")
+        kotlinCompilerExtensionVersion = composeVersion
     }
 }
 
 sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
+    database(SqlDelight.databaseName) {
+        packageName = SqlDelight.packageName
         schemaOutputDirectory = file("build/dbs")
         dialect = "sqlite:3.24"
     }
@@ -71,51 +74,29 @@ sqldelight {
 dependencies {
     implementation(project(":shared"))
     // Android
-    implementation("com.google.android.material:material:_")
+    implementation("com.google.android.material:material:1.3.+")
     // AndroidX
-    implementation(AndroidX.core.ktx)
-    implementation(AndroidX.appCompat)
-    implementation(AndroidX.paletteKtx)
-    implementation(AndroidX.Lifecycle.runtime)
-    implementation(Libs.AndroidX.Activity.compose)
-    implementation(Libs.AndroidX.Lifecycle.viewModelCompose)
-    implementation(Libs.AndroidX.DataStore.preferences)
-    // Compose
-    implementation(AndroidX.Compose.runtime)
-    implementation(AndroidX.Compose.ui)
-    implementation(AndroidX.Compose.animation)
-    implementation(AndroidX.Compose.foundation)
-    implementation(AndroidX.Compose.material)
-    implementation(Libs.AndroidX.Compose.layout)
-    implementation(Libs.AndroidX.Compose.iconsExtended)
-    implementation(Libs.AndroidX.Compose.tooling)
-    implementation(Libs.AndroidX.Navigation.compose)
-    implementation(Libs.AndroidX.Paging.compose)
-    // Kotlin
-    implementation(KotlinX.coroutines.core)
-    implementation(KotlinX.coroutines.android)
-    implementation(KotlinX.serialization.json)
-    implementation(Libs.Kotlinx.datetime)
-    // Koin
-    implementation(Libs.Koin.androidx)
-    implementation(Libs.Koin.androidExt)
-    implementation(Libs.Koin.androidWorkManager)
-    // Libs
-    implementation(Libs.OkLog3.core)
-    implementation(Square.retrofit2.retrofit)
-    implementation(JakeWharton.retrofit2.converter.kotlinxSerialization)
-    implementation(JakeWharton.timber)
-    implementation(Square.okHttp3.okHttp)
-    implementation(Square.okHttp3.loggingInterceptor)
-    implementation(Libs.okHttp3.dns)
-    implementation(Square.sqlDelight.drivers.android)
-    implementation(Libs.SqlDelight.coroutines)
-    implementation(Libs.Stetho.runtime)
-    implementation(Libs.Stetho.okhttp3)
-    debugImplementation(Libs.Chucker.library)
-    releaseImplementation(Libs.Chucker.libraryNoOp)
-    debugImplementation(Square.LeakCanary.android)
-    implementation(Libs.Landscapist.coil)
+    api(libs.bundles.kotlin)
+    api(libs.bundles.stetho)
+    api(libs.bundles.retrofit)
+    api(libs.bundles.okhttp)
+    api(libs.bundles.koin)
+    api(libs.bundles.compose)
+    api(libs.bundles.sqldelight)
+    api(libs.core.ktx)
+    api(libs.appcompat)
+    api(libs.palette)
+    api(libs.runtime.ktx)
+    api(libs.datastore.preferences)
+    api(libs.appcompat)
+    api(libs.activity.compose)
+    api(libs.viewmodel.compose)
+    api(libs.navigation.compose)
+    api(libs.paging.compose)
+    api(libs.landscapist.coil)
+    api(libs.timber)
+    releaseImplementation(libs.chucker.release)
+    debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:_")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
 }

@@ -4,11 +4,15 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,15 +23,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
+import com.caldeirasoft.outcast.ui.components.OverflowText
+import com.caldeirasoft.outcast.ui.components.PlayButton
+import com.caldeirasoft.outcast.ui.components.PodcastThumbnail
+import com.caldeirasoft.outcast.ui.components.QueueButton
 import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.util.*
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
+import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Composable
@@ -76,7 +83,7 @@ fun EpisodeDialog(
             },
             navigationIcon = {
                 IconButton(onClick = { drawerState.close() }) {
-                    Icon(imageVector = Icons.Default.Close)
+                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
             backgroundColor = Color . Transparent,

@@ -10,24 +10,6 @@ allprojects {
     }
 }
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://kotlin.bintray.com/kotlinx")
-        maven("https://dl.bintray.com/jetbrains/kotlin-native-dependencies")
-        maven("https://dl.bintray.com/kotlin/kotlin-dev")
-    }
-
-    dependencies {
-        val versionsProperties = rootProject.propertiesFromFile("versions.properties")
-        val kotlinVersion = versionsProperties.getProperty("version.kotlin")
-        classpath(kotlin("gradle-plugin", version = kotlinVersion))
-        classpath(Libs.GradlePlugin.android)
-        classpath(Square.SqlDelight.gradlePlugin)
-    }
-}
-
 repositories {
     mavenCentral()
 }

@@ -25,22 +25,24 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(KotlinX.coroutines.core)
-                implementation(KotlinX.serialization.json)
-                implementation(Libs.Kotlinx.datetime)
+                api(libs.coroutines.core)
+                api(libs.kotlinx.datetime)
+                api(libs.kotlinx.serialization)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation(KotlinX.coroutines.core)
-                implementation(KotlinX.coroutines.test)
+                api(libs.coroutines.core)
+                //implementation(KotlinX.coroutines.core)
+                //implementation(KotlinX.coroutines.test)
             }
         }
         val androidMain by getting {
             dependencies {
-                implementation(KotlinX.coroutines.android)
+                api(libs.coroutines.android)
+                //implementation(KotlinX.coroutines.android)
             }
         }
         val androidTest by getting
@@ -51,7 +53,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation(Testing.junit4)
+                api(libs.junit)
             }
         }
     }

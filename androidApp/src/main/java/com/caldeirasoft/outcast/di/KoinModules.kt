@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.di
 
 import android.app.Application
 import android.content.Context
-import com.caldeirasoft.outcast.BuildConfig
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
@@ -22,7 +21,6 @@ import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.chuckerteam.chucker.api.RetentionManager
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.github.simonpercic.oklog3.OkLogInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -63,11 +61,6 @@ internal val networkModule = module {
             writeTimeout(20, TimeUnit.SECONDS)
             addInterceptor(GzipRequestInterceptor)
             addNetworkInterceptor(StethoInterceptor())
-            if (BuildConfig.DEBUG) {
-                // create an instance of OkLogInterceptor using a builder()
-                val okLogInterceptor = OkLogInterceptor.builder().build()
-                addInterceptor(okLogInterceptor)
-            }
             val customDns = DnsProviders.buildCloudflare(OkHttpClient())
             dns(customDns)
         }
