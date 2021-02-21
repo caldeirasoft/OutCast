@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
 package com.caldeirasoft.outcast.ui.components
 
 import androidx.annotation.DrawableRes
@@ -9,8 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -31,9 +28,7 @@ fun GenreItem(
         modifier = Modifier.clickable(onClick = onGenreClick),
         text = { Text(text = storeGenre.name) },
         icon = {
-            Image(
-                painter = painterResource(id = storeGenre.getIcon()),
-                contentDescription = storeGenre.name,
+            Image(imageVector = vectorResource (id = storeGenre.getIcon()),
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -84,8 +79,7 @@ private object GenreDefaults {
                 .fillMaxSize())
             {
                 Image(
-                    painter = painterResource(id = storeGenre.getIcon()),
-                    contentDescription = storeGenre.name,
+                    imageVector = vectorResource(id = storeGenre.getIcon()),
                     modifier = Modifier
                         .size(24.dp)
                         .weight(2f)

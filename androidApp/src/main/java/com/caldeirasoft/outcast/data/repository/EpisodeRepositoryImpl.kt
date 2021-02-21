@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.data.repository
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.domain.models.*
+import com.caldeirasoft.outcast.domain.repository.EpisodeRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
@@ -10,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Instant
 
-class EpisodeRepository (val database: Database) {
-    fun fetchEpisodesByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
+class EpisodeRepositoryImpl (val database: Database) : EpisodeRepository {
+    override fun fetchEpisodesByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectAllByPodcastId(id,
             mapper = { episodeId: Long,
@@ -38,7 +39,7 @@ class EpisodeRepository (val database: Database) {
             .mapToList()
 
 
-    fun fetchEpisodesFavorites(): Flow<List<EpisodeSummary>> =
+    override fun fetchEpisodesFavorites(): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectAllFavorites(mapper = { episodeId: Long,
                                            name: String,
@@ -63,7 +64,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchEpisodesHistory(): Flow<List<EpisodeSummary>> =
+    override fun fetchEpisodesHistory(): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectAllHistory(mapper = { episodeId: Long,
                                          name: String,
@@ -88,7 +89,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchEpisodesFromQueueByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
+    override fun fetchEpisodesFromQueueByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectEpisodesFromQueueByPodcastId(id,
                 mapper = { episodeId: Long,
@@ -114,7 +115,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchEpisodesFromInboxByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
+    override fun fetchEpisodesFromInboxByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectEpisodesFromInboxByPodcastId(id,
                 mapper = { episodeId: Long,
@@ -140,7 +141,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchEpisodesFavoritesByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
+    override fun fetchEpisodesFavoritesByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectFavoritesByPodcastId(id,
                 mapper = { episodeId: Long,
@@ -166,7 +167,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchEpisodesHistoryByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
+    override fun fetchEpisodesHistoryByPodcastId(id: Long): Flow<List<EpisodeSummary>> =
         database.episodeQueries
             .selectHistoryByPodcastId(id,
                 mapper = { episodeId: Long,
@@ -192,7 +193,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchCountEpisodesFavoritesByPodcast(): Flow<List<EpisodesCountByPodcast>> =
+    override fun fetchCountEpisodesFavoritesByPodcast(): Flow<List<EpisodesCountByPodcast>> =
         database.episodeQueries
             .selectFavoritesEpisodesCount(
                 mapper = { podcastId: Long,
@@ -204,7 +205,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchCountEpisodesPlayedByPodcast(): Flow<List<EpisodesCountByPodcast>> =
+    override fun fetchCountEpisodesPlayedByPodcast(): Flow<List<EpisodesCountByPodcast>> =
         database.episodeQueries
             .selectPlayedEpisodesCount(
                 mapper = { podcastId: Long,
@@ -217,7 +218,7 @@ class EpisodeRepository (val database: Database) {
             .asFlow()
             .mapToList()
 
-    fun fetchCountEpisodesBySection(podcastId: Long): Flow<SectionWithCount> =
+    override fun fetchCountEpisodesBySection(podcastId: Long): Flow<SectionWithCount> =
         database.episodeQueries
             .selectSectionWithCount(podcastId,
             mapper = { _podcastId: Long,
@@ -232,7 +233,7 @@ class EpisodeRepository (val database: Database) {
             .mapToOne()
 
 
-    fun getEpisode(episodeId: Long): Flow<EpisodeWithInfos> =
+    override fun getEpisode(episodeId: Long): Flow<EpisodeWithInfos> =
         database.episodeQueries
             .selectEpisodeById(episodeId = episodeId,
             mapper = { _episodeId: Long,
@@ -291,7 +292,7 @@ class EpisodeRepository (val database: Database) {
             .mapToOneOrNull()
             .mapNotNull { it }
 
-    fun insertEpisode(episode: Episode) {
+    override fun insertEpisode(episode: Episode) {
         database.episodeQueries
             .insertEpisode(
                 episodeId = episode.episodeId,
@@ -315,7 +316,7 @@ class EpisodeRepository (val database: Database) {
             )
     }
 
-    fun insertEpisodes(list: List<Episode>) {
+    override fun insertEpisodes(list: List<Episode>) {
         database.episodeQueries.transaction {
             list.forEach { episode ->
                 insertEpisode(episode = episode)
@@ -323,33 +324,33 @@ class EpisodeRepository (val database: Database) {
         }
     }
 
-    fun markEpisodeAsPlayed(episodeId: Long) {
+    override fun markEpisodeAsPlayed(episodeId: Long) {
         database.episodeQueries
             .markEpisodeAsPlayed(episodeId = episodeId)
     }
 
-    fun markEpisodeAsUnplayed(episodeId: Long) {
+    override fun markEpisodeAsUnplayed(episodeId: Long) {
         database.episodeQueries
             .markEpisodeAsUnplayed(episodeId = episodeId)
     }
 
-    fun updateEpisodeFavoriteStatus(episodeId: Long, isFavorite: Boolean) {
+    override fun updateEpisodeFavoriteStatus(episodeId: Long, isFavorite: Boolean) {
         when(isFavorite) {
             true -> database.episodeQueries.addToFavorites(episodeId)
             else -> database.episodeQueries.removeFromFavorites(episodeId)
         }
     }
 
-    fun updateEpisodePlaybackPosition(episodeId: Long, playbackPosition: Long?) {
+    override fun updateEpisodePlaybackPosition(episodeId: Long, playbackPosition: Long?) {
         database.episodeQueries.addToHistory(playbackPosition = playbackPosition, episodeId = episodeId)
     }
 
-    fun deleteEpisodeById(episodeId: Long) {
+    override fun deleteEpisodeById(episodeId: Long) {
         database.episodeQueries
                 .deleteEpisodeById(episodeId)
     }
 
-    fun deleteAll() {
+    override fun deleteAll() {
         database.episodeQueries
             .deleteAll()
     }

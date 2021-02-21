@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.data.repository
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.domain.models.*
+import com.caldeirasoft.outcast.domain.repository.PodcastRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -9,9 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Instant
 
-class PodcastRepository(val database: Database)
+class PodcastRepositoryImpl(val database: Database) : PodcastRepository
 {
-    fun fetchSubscribedPodcasts(): Flow<List<PodcastSummary>> =
+    override fun fetchSubscribedPodcasts(): Flow<List<PodcastSummary>> =
         database.podcastQueries
             .selectAll(mapper = { podcastId: Long,
                                   name: String,
@@ -22,7 +23,7 @@ class PodcastRepository(val database: Database)
             .asFlow()
             .mapToList()
 
-    fun getPodcast(podcastId: Long): Flow<Podcast> =
+    override fun getPodcast(podcastId: Long): Flow<Podcast> =
         database.podcastQueries
             .selectPodcastById(podcastId, mapper = { _podcastId: Long,
                                                      name: String,
@@ -70,7 +71,7 @@ class PodcastRepository(val database: Database)
             .mapToOneOrNull()
             .mapNotNull { it }
 
-    fun insertPodcast(podcast: Podcast) {
+    override fun insertPodcast(podcast: Podcast) {
         database.podcastQueries
             .insertPodcast(
                 podcastId = podcast.podcastId,
@@ -92,7 +93,7 @@ class PodcastRepository(val database: Database)
             )
     }
 
-    fun updatePodcastMetadata(
+    override fun updatePodcastMetadata(
         podcastId: Long,
         releaseDateTime: Instant,
         trackCount: Long)
@@ -101,7 +102,7 @@ class PodcastRepository(val database: Database)
             .updatePodcastMetadata(releaseDateTime, trackCount, podcastId)
     }
 
-    fun subscribeToPodcast(
+    override fun subscribeToPodcast(
         podcastId: Long,
         newEpisodeAction: NewEpisodesAction
     ) {
@@ -109,17 +110,17 @@ class PodcastRepository(val database: Database)
             .subscribe(newEpisodeAction = newEpisodeAction, podcastId = podcastId)
     }
 
-    fun unsubscribeFromPodcast(podcastId: Long) {
+    override fun unsubscribeFromPodcast(podcastId: Long) {
         database.podcastQueries
             .unsubscribe(podcastId = podcastId)
     }
 
-    fun deletePodcastById(id: Long) {
+    override fun deletePodcastById(id: Long) {
         database.podcastQueries
             .deletePodcastById(id)
     }
 
-    fun deleteAllPodcasts() {
+    override fun deleteAllPodcasts() {
         database.podcastQueries.deleteAllPodcasts()
     }
 

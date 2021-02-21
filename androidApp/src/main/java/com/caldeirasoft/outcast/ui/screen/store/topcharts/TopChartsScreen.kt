@@ -15,7 +15,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AmbientDensity
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
@@ -39,7 +38,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 
-@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun TopChartsScreen(
@@ -62,7 +60,6 @@ fun TopChartsScreen(
     )
 }
 
-@ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @ExperimentalCoroutinesApi
 @Composable
@@ -90,7 +87,7 @@ fun TopChartsScreen(
                 .padding(top = 56.dp)) {
 
             item {
-                with(LocalDensity.current) {
+                with(AmbientDensity.current) {
                     Spacer(modifier = Modifier.height(spacerHeight.toDp()))
                 }
             }
@@ -119,7 +116,7 @@ fun TopChartsScreen(
                                     onGenreSelected = onChartsGenreSelected
                                 )
                             }
-                            drawerState.show()
+                            drawerState.expand()
                         })
                     {
                         Text(
@@ -177,12 +174,12 @@ fun TopChartsScreen(
             title = { Text(text = stringResource(id = R.string.store_tab_charts)) },
             navigationIcon = {
                 IconButton(onClick = navigateBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "back")
+                    Icon(Icons.Filled.ArrowBack)
                 }
             },
             actions = {
                 IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
+                    Icon(imageVector = Icons.Filled.Search)
                 }
             },
             state = listState,

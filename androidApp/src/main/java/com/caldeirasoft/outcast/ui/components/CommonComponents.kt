@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,7 +31,7 @@ fun LoadingScreen()
 
 @Composable
 fun ErrorScreen(t: Throwable) {
-    LocalContext.current.toast("${t.message}")
+    AmbientContext.current.toast("${t.message}")
     Log.e("ERROR", t.message, t)
 
     Row(
@@ -88,7 +87,6 @@ fun StoreHeadingSectionWithLink(title:String, onClick: () -> Unit) {
             style = MaterialTheme.typography.h6
         )
         Icon(imageVector = Icons.Filled.ArrowForward,
-            contentDescription = "show all",
             modifier = Modifier
                 .constrainAs(icon) {
                     linkTo(top = parent.top, bottom = parent.bottom)

@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.data.repository.QueueRepository
 import com.caldeirasoft.outcast.domain.models.EpisodeSummary
+import com.caldeirasoft.outcast.domain.repository.QueueRepository
 import kotlinx.coroutines.flow.Flow
 
 class FetchQueueUseCase(val queueRepository: QueueRepository)

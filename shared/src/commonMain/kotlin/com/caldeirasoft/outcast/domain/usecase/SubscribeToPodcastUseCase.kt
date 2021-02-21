@@ -1,6 +1,6 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.data.repository.PodcastRepository
+import com.caldeirasoft.outcast.domain.repository.PodcastRepository
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

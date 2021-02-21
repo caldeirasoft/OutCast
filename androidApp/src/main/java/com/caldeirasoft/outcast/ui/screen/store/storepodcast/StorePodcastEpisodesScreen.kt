@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
@@ -36,7 +37,6 @@ import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun StorePodcastEpisodesScreen(
@@ -57,7 +57,6 @@ fun StorePodcastEpisodesScreen(
     )
 }
 
-@ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StorePodcastEpisodesScreen(

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AmbientDensity
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
@@ -63,12 +61,12 @@ private fun StoreCategoriesContent(
                 .padding(top = 56.dp)) {
 
             item {
-                with(LocalDensity.current) {
+                with(AmbientDensity.current) {
                     Spacer(modifier = Modifier.height(spacerHeight.toDp()))
                 }
             }
 
-            items(items = storeCollection.genres, key = null) { itemContent ->
+            items(storeCollection.genres) { itemContent ->
                 GenreItem(
                     storeGenre = itemContent,
                     onGenreClick = { navigateTo(Screen.Genre(itemContent.id, itemContent.name)) })
@@ -79,12 +77,12 @@ private fun StoreCategoriesContent(
             title = { Text(text = storeCollection.label) },
             navigationIcon = {
                 IconButton(onClick = navigateBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "back",)
+                    Icon(Icons.Filled.ArrowBack)
                 }
             },
             actions = {
                 IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Search, contentDescription = "search",)
+                    Icon(imageVector = Icons.Filled.Search)
                 }
             },
             state = listState,

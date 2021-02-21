@@ -1,11 +1,10 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.data.repository.EpisodeRepository
 import com.caldeirasoft.outcast.domain.models.EpisodeSummary
+import com.caldeirasoft.outcast.domain.repository.EpisodeRepository
 
 class FetchEpisodesFavoritesUseCase(
-    val episodeRepository: EpisodeRepository
-)
+    val episodeRepository: EpisodeRepository)
     : FlowUseCase<FetchEpisodesFavoritesUseCase.Params, List<EpisodeSummary>> {
     override fun execute(param: Params) =
         when {

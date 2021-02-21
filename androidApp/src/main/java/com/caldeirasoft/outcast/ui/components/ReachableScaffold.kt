@@ -12,8 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.WithConstraints
+import androidx.compose.ui.layout.WithConstraintsScope
 import androidx.compose.ui.platform.AmbientDensity
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
@@ -25,14 +26,14 @@ import kotlin.math.log10
 fun ReachableScaffold(
     headerRatioOrientation: Orientation = Orientation.Vertical,
     headerRatio: Float = 1/3f,
-    itemContent: @Composable BoxWithConstraintsScope.(Int) -> Unit = {}
+    itemContent: @Composable WithConstraintsScope.(Int) -> Unit = {}
 ) {
     Scaffold {
         Box(modifier = Modifier
             .fillMaxSize()
             .semantics { testTag = "Store Directory screen" })
         {
-            BoxWithConstraints {
+            WithConstraints {
                 val screenHeight = constraints.maxHeight
                 val screenWidth = constraints.maxWidth
                 val headerHeight =
@@ -54,9 +55,10 @@ fun ReachableAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     expandedContent: @Composable BoxScope.() -> Unit =
         {
+            val scrollRatioHeaderHeight = getScrollRatioHeaderHeight(state, headerHeight)
             val alphaLargeHeader = getExpandedHeaderAlpha(state, headerHeight)
             // large title
-            with(LocalDensity.current) {
+            with(AmbientDensity.current) {
                 Box(modifier = Modifier
                     .padding(
                         start = 16.dp,
@@ -74,7 +76,7 @@ fun ReachableAppBar(
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
                 title = {
-                    Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
+                    Providers(AmbientContentAlpha provides collapsedHeaderAlpha) {
                         title()
                     }
                 },
@@ -98,7 +100,7 @@ fun ReachableAppBar(
     state: LazyListState,
     headerHeight: Int)
 {
-    with(LocalDensity.current) {
+    with(AmbientDensity.current) {
         Box(modifier = Modifier
             .fillMaxWidth()
             .height(headerHeight.toDp()))
@@ -138,7 +140,7 @@ fun TopHeaderExpanded(
     headerHeight: Int,
     expandedContent: @Composable BoxScope.() -> Unit = {})
 {
-    with(LocalDensity.current) {
+    with(AmbientDensity.current) {
         Box(modifier = Modifier
             .fillMaxWidth()
             .height(headerHeight.toDp()))

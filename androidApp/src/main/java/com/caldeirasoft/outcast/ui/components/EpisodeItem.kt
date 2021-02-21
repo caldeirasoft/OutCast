@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -85,7 +84,7 @@ fun EpisodeItem(
             .clickable(onClick = onEpisodeClick),
         text = { Text(text = storeEpisode.name, maxLines = 2, fontSize = 14.sp) },
         overlineText = {
-            val context = LocalContext.current
+            val context = AmbientContext.current
             Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
         },
         actionButtons = {
@@ -108,7 +107,7 @@ fun EpisodeItemWithDesc(
             .clickable(onClick = onEpisodeClick),
         text = { Text(text = storeEpisode.name, maxLines = 1) },
         overlineText = {
-            val context = LocalContext.current
+            val context = AmbientContext.current
             Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
         },
         descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
@@ -132,7 +131,7 @@ fun EpisodeTrailerItem(
             .clickable(onClick = onEpisodeClick),
         text = { Text(text = storeEpisode.name, maxLines = 1) },
         overlineText = {
-            val context = LocalContext.current
+            val context = AmbientContext.current
             Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
         },
         actionButtons = {
@@ -240,7 +239,7 @@ fun LibraryEpisodeItem(
             .clickable(onClick = onEpisodeClick),
         text = { Text(text = storeEpisode.name, maxLines = 2) },
         overlineText = {
-            val context = LocalContext.current
+            val context = AmbientContext.current
             Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
         },
         actionButtons = {
@@ -277,7 +276,7 @@ private fun EpisodeItemArtworkHeader(
             Text(text = storeEpisode.podcastName, maxLines = 1)
         },
         releasedTimeText = {
-            val context = LocalContext.current
+            val context = AmbientContext.current
             Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context), maxLines = 1)
         },
         text = {
@@ -384,7 +383,8 @@ private object EpisodeDefaults {
 
         val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
         val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.medium, podcastText)
-        val styledReleasedTimeText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, releasedTimeText)
+        val styledReleasedTimeText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, releasedTimeText)!!
+        val styledTrailing = applyTextStyleCustom(typography.caption, ContentAlpha.high, actionButtons)
         val styledDescriptionText = applyTextStyleNullable(typography.subtitle1, ContentAlpha.high, descriptionText)
 
         Column(modifier
@@ -499,6 +499,8 @@ private object EpisodeDefaults {
         val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
         val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.medium, podcastText)
 
+        val semanticsModifier = modifier.semantics(mergeDescendants = true) {}
+
         Column(modifier
             .preferredHeightIn(min = MinHeight)
             .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
@@ -532,7 +534,9 @@ private object EpisodeDefaults {
         val typography = MaterialTheme.typography
 
         val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
-        val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.high, overlineText)
+        val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.high, overlineText)!!
+
+        val semanticsModifier = modifier.semantics(mergeDescendants = true) {}
 
         Column(modifier
             .preferredHeightIn(min = MinHeight)

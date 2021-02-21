@@ -1,48 +1,53 @@
-@file:OptIn(ExperimentalAnimationApi::class)
 package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.asDisposableClock
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
+import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
+import androidx.compose.ui.platform.AmbientAnimationClock
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.util.Log_D
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.*
 import com.caldeirasoft.outcast.ui.util.ComposableFn
 
 
-val AmbientBottomDrawerContent = compositionLocalOf<BottomDrawerContentState>()
-@ExperimentalMaterialApi
-val AmbientBottomDrawerState = compositionLocalOf<ModalBottomSheetState>()
+val AmbientBottomDrawerContent = ambientOf<BottomDrawerContentState>()
+val AmbientBottomDrawerState = ambientOf<CustomBottomDrawerState>()
 
 @ExperimentalMaterialApi
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CustomBottomDrawerHost(content: @Composable () -> Unit)
 {
     val bottomDrawerContent = remember { BottomDrawerContentState() }
-    val sheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden) { newState ->
+    val drawerState =
+        rememberBottomDrawerState(initialValue = CustomBottomDrawerValue.Closed) { newState ->
             when (newState) {
-                ModalBottomSheetValue.Hidden -> Unit
+                CustomBottomDrawerValue.Closed -> Unit
                     //bottomDrawerContent.updateContent(emptyContent())
-                ModalBottomSheetValue.HalfExpanded -> Unit
-                ModalBottomSheetValue.Expanded -> Unit
+                CustomBottomDrawerValue.Open -> Unit
+                CustomBottomDrawerValue.Expanded -> Unit
             }
             true
         }
 
     Providers(
         AmbientBottomDrawerContent provides bottomDrawerContent,
-        AmbientBottomDrawerState provides sheetState)
+        AmbientBottomDrawerState provides drawerState)
     {
-        Log_D("TAG", "drawerState: ${sheetState.isVisible}")
-        ModalBottomSheetLayout(
-            sheetContent = { bottomDrawerContent.content.value() },
-            sheetState = sheetState,
-            sheetShape = RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-                bottomStart = 0.dp,
-                bottomEnd = 0.dp),
+        Log_D("TAG", "drawerState: ${drawerState.isClosed}")
+        CustomBottomDrawerLayout(
+            drawerContent = { bottomDrawerContent.content.value() },
+            drawerState = drawerState,
+            drawerShape = RoundedCornerShape(
+                topLeft = 16.dp,
+                topRight = 16.dp,
+                bottomLeft = 0.dp,
+                bottomRight = 0.dp),
+            gesturesEnabled = true
         ) {
             content()
         }
@@ -52,14 +57,14 @@ fun CustomBottomDrawerHost(content: @Composable () -> Unit)
 open class BottomDrawerContent(
     val content: ComposableFn
 ) {
-    object Empty : BottomDrawerContent({ })
+    object Empty : BottomDrawerContent(emptyContent())
 }
 
 class BottomDrawerContentState {
     /**
      * Bottom Drawer content
      */
-    var content: MutableState<ComposableFn> = mutableStateOf({ })
+    var content: MutableState<ComposableFn> = mutableStateOf(emptyContent())
         private set
 
     /**

@@ -6,9 +6,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath(kotlin("gradle-plugin", version = Dependencies.Kotlin.version))
         classpath(Dependencies.androidGradlePlugin)
         classpath(Dependencies.SquareUp.SqlDelight.gradlePlugin)
+        classpath(Dependencies.Koin.gradlePlugin)
+        classpath("com.android.tools.build:gradle:7.0.0-alpha05")
+        classpath(kotlin("gradle-plugin", version = Dependencies.Kotlin.version))
     }
 }
 group = "com.caldeirasoft.outcast"

@@ -21,6 +21,7 @@ import androidx.compose.ui.viewinterop.viewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
 import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
@@ -29,19 +30,29 @@ import com.caldeirasoft.outcast.ui.util.*
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-
-@ExperimentalMaterialApi
-fun openEpisodeDialog(sheetState: ModalBottomSheetState, drawerContent: BottomDrawerContentState, storeEpisode: StoreEpisode) {
+@Composable
+fun openEpisodeDialog(storeEpisode: StoreEpisode) {
+    val drawerState = AmbientBottomDrawerState.current
+    val drawerContent = AmbientBottomDrawerContent.current
     drawerContent.updateContent {
         EpisodeDialog(
             storeEpisode = storeEpisode,
             navigateTo = { }
         )
     }
-    sheetState.show()
+    drawerState.expand()
 }
 
-@ExperimentalMaterialApi
+fun openEpisodeDialog(drawerState: CustomBottomDrawerState, drawerContent: BottomDrawerContentState, storeEpisode: StoreEpisode) {
+    drawerContent.updateContent {
+        EpisodeDialog(
+            storeEpisode = storeEpisode,
+            navigateTo = { }
+        )
+    }
+    drawerState.open()
+}
+
 @ExperimentalCoroutinesApi
 @Composable
 fun EpisodeDialog(
@@ -49,7 +60,7 @@ fun EpisodeDialog(
     navigateTo: (Screen) -> Unit,
 ) {
     val scrollState = rememberScrollState(0f)
-    val sheetState = AmbientBottomDrawerState.current
+    val drawerState = AmbientBottomDrawerState.current
     val viewModel: EpisodeViewModel = viewModel(
         key = storeEpisode.id.toString(),
         factory = viewModelProviderFactoryOf { EpisodeViewModel(storeEpisode) }
@@ -64,11 +75,11 @@ fun EpisodeDialog(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { sheetState.hide() }) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "close")
+                IconButton(onClick = { drawerState.close() }) {
+                    Icon(imageVector = Icons.Default.Close)
                 }
             },
-            backgroundColor = Color.Transparent,
+            backgroundColor = Color . Transparent,
             elevation = if (scrollState.value > 0) 1.dp else 0.dp,
         )
 
@@ -78,7 +89,7 @@ fun EpisodeDialog(
             // thumbnail + podcast title + release date
             Row(modifier = Modifier
                 .fillMaxWidth()
-            )
+                )
             {
                 // thumbnail
                 Box(modifier = Modifier.preferredSize(64.dp)) {

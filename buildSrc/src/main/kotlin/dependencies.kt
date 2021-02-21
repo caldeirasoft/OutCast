@@ -1,5 +1,6 @@
 object Versions {
     const val jvm = "1.8"
+    const val kotlin = "1.4.30"
     const val coroutines = "1.3.9"
     const val serialization = "1.0.0"
     const val appcompat = "1.2.0"
@@ -16,82 +17,65 @@ object AndroidSdk {
 }
 
 object Dependencies {
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha06"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha05"
     const val junit = "junit:junit:4.13"
 
     object AndroidX {
         const val appcompat = "androidx.appcompat:appcompat:1.2.0"
         const val palette = "androidx.palette:palette:1.0.0"
-        const val coreKtx = "androidx.core:core-ktx:1.5.0-beta01"
+        const val coreKtx = "androidx.core:core-ktx:1.5.0-alpha02"
 
         object LifeCycle {
-            private const val lifecycleVersion = "2.3.0"
-            const val runtime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
-
-            object ViewModel {
-                private const val composeVersion = "1.0.0-alpha01"
-                const val ktx = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-                const val compose = "androidx.lifecycle:lifecycle-viewmodel-compose:$composeVersion"
-            }
+            private const val lifecycleVersion = "2.3.0-beta01"
+            const val lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
+            const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
         }
 
         object Navigation {
-            private const val version = "1.0.0-alpha07"
+            private const val version = "1.0.0-alpha05"
             const val compose = "androidx.navigation:navigation-compose:$version"
         }
 
-        object Activity {
-            const val version = "1.3.0-alpha02"
-            const val compose = "androidx.activity:activity-compose:$version"
-        }
-
         object Compose {
-            const val version = "1.0.0-alpha12"
+            const val version = "1.0.0-alpha10"
 
+            const val ui = "androidx.compose.ui:ui:$version"
             const val runtime = "androidx.compose.runtime:runtime:$version"
             const val foundation = "androidx.compose.foundation:foundation:$version"
             const val layout = "androidx.compose.foundation:foundation-layout:$version"
             const val material = "androidx.compose.material:material:$version"
-            const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
             const val animation = "androidx.compose.animation:animation:$version"
-            const val ui = "androidx.compose.ui:ui:$version"
             const val tooling = "androidx.compose.ui:ui-tooling:$version"
+            const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
         }
 
         object Paging {
-            private const val version = "1.0.0-alpha07"
+            private const val version = "1.0.0-alpha04"
             const val compose = "androidx.paging:paging-compose:$version"
         }
 
         object DataStore {
-            private const val version = "1.0.0-alpha06"
+            private const val version = "1.0.0-alpha04"
             const val datastore = "androidx.datastore:datastore:$version"
             const val preferences = "androidx.datastore:datastore-preferences:$version"
         }
     }
 
     object Kotlin {
-        const val version = "1.4.30"
+        const val version = "1.4.21"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
     }
 
+    object Coroutines {
+        private const val version = "1.4.2"
+        const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
+        const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
+        const val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
+    }
+
     object Kotlinx {
-        object Coroutines {
-            private const val version = "1.4.2"
-            const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
-            const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
-            const val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
-        }
-
-        object Serialization {
-            private const val version = "1.1.0-RC"
-            const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
-        }
-
-        object DateTime {
-            private const val version = "0.1.1"
-            const val datetime = "org.jetbrains.kotlinx:kotlinx-datetime:$version"
-        }
+        const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0"
+        const val datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.1.0"
     }
 
     object Accompanist {
@@ -101,7 +85,7 @@ object Dependencies {
     }
 
     object Landscapist {
-        private const val version = "1.1.4"
+        private const val version = "1.1.2"
         const val coil = "com.github.skydoves:landscapist-coil:$version"
     }
 
@@ -112,43 +96,16 @@ object Dependencies {
     }
 
     object Koin {
-        private const val version = "3.0.1-alpha-3"
+        private const val version = "2.2.1"
         const val core = "org.koin:koin-core:$version"
         const val coreExt = "org.koin:koin-core-ext:$version"
         const val test = "org.koin:koin-test:$version"
-        const val Ktor = "org.koin:koin-ktor:$version"
         const val android = "org.koin:koin-android:$version"
-        const val androidExt = "org.koin:koin-android-ext:$version"
-        const val androidWorkManager = "org.koin:koin-androidx-workmanager:$version"
+        const val androidScope = "org.koin:koin-androidx-scope:$version"
+        const val androidViewModel = "org.koin:koin-androidx-viewmodel:$version"
         const val androidCompose = "org.koin:koin-androidx-compose:$version"
+        const val androidExt = "org.koin:koin-androidx-ext:$version"
         const val gradlePlugin = "org.koin:koin-gradle-plugin:$version"
-    }
-
-    object Ktor {
-        private const val version = "1.5.0"
-        const val clientCore = "io.ktor:ktor-client-core:$version"
-        const val clientAndroid = "io.ktor:ktor-client-android:$version"
-        const val clientOkHttp = "io.ktor:ktor-client-okhttp:$version"
-        const val clientJvm = "io.ktor:ktor-client-core-jvm:$version"
-        const val clientJs = "io.ktor:ktor-client-core-js:$version"
-        const val clientMock = "io.ktor:ktor-client-mock:$version"
-        const val clientLogging = "io.ktor:ktor-client-logging:$version"
-
-        const val serialization = "io.ktor:ktor-client-serialization:$version"
-        const val serializationJvm = "io.ktor:ktor-client-serialization-jvm:$version"
-
-        const val features = "io.ktor:ktor-features:$version"
-        const val encoding = "io.ktor:ktor-client-encoding:$version"
-    }
-
-    object MultiplatformSettings {
-        private const val version = "0.7.2"
-        const val settings = "com.russhwolf:multiplatform-settings:$version"
-        const val settingsNoArg = "com.russhwolf:multiplatform-settings-no-arg:$version"
-        const val test = "com.russhwolf:multiplatform-settings-test:$version"
-        const val serialization = "com.russhwolf:multiplatform-settings-serialization:$version"
-        const val coroutines = "com.russhwolf:multiplatform-settings-coroutines:$version"
-        const val datastore = "com.russhwolf:multiplatform-settings-datastore:$version"
     }
 
     object OkLog3 {

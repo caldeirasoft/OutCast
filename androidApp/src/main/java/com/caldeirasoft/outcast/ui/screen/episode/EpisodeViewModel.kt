@@ -17,11 +17,9 @@ import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomViewModel
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsViewModel
 import com.caldeirasoft.outcast.ui.util.ScreenState
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-@KoinApiExtension
 class EpisodeViewModel(val storeEpisode: StoreEpisode) : ViewModel(), KoinComponent
 {
     private val fetchStoreEpisodeDataUseCase: FetchStoreEpisodeDataUseCase by inject()

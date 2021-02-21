@@ -174,7 +174,7 @@ fun SetupBottomNavBar(
         val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
         items.forEach { screen ->
             BottomNavigationItem(
-                icon = { Icon(imageVector = screen.icon, contentDescription = stringResource(id = screen.resourceId)) },
+                icon = { Icon(screen.icon) },
                 label = {
                     Text(text = stringResource(id = screen.resourceId),
                         style = typography.overline)

@@ -8,13 +8,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
-import kotlinx.coroutines.FlowPreview
+import org.koin.androidx.compose.getViewModel
 
-@FlowPreview
 @Composable
-fun InboxScreen(viewModel: InboxViewModel = viewModel()) {
+fun InboxScreen(viewModel: InboxViewModel = getViewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -23,12 +21,12 @@ fun InboxScreen(viewModel: InboxViewModel = viewModel()) {
                 },
                 actions = {
                     IconButton(onClick = {  }) {
-                        Icon(imageVector = Icons.Filled.Favorite, contentDescription = "Favorite")
+                        Icon(imageVector = Icons.Filled.Favorite)
                     }
                 })
         }
     )
-    { _ ->
+    { innerPadding ->
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Hi there!")
             Text("Thanks for going through the Layouts codelab")

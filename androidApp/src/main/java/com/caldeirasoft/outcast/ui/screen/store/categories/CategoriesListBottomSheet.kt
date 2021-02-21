@@ -17,7 +17,6 @@ import androidx.compose.runtime.Providers
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -28,7 +27,6 @@ import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
-@OptIn(ExperimentalMaterialApi::class)
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
@@ -45,8 +43,8 @@ fun CategoriesListBottomSheet(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { drawerState.hide() }) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Favorite")
+                IconButton(onClick = { drawerState.close() }) {
+                    Icon(imageVector = Icons.Default.Close)
                 }
             },
             backgroundColor = Color . Transparent,
@@ -76,7 +74,6 @@ fun CategoriesListBottomSheet(
     }
 }
 
-@ExperimentalMaterialApi
 @Composable
 fun GenreListItem(
     storeGenreItem: StoreGenreItem?,
@@ -99,15 +96,13 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    drawerState.hide {
+                    drawerState.close {
                         onGenreSelected(storeGenreItem.genreId)
                     }
                 }),
             text = { Text(text = name, color = contentColor) },
             icon = {
-                Image(
-                    painter = painterResource(id = storeGenreItem.drawableId),
-                    contentDescription = storeGenreItem.name,
+                Image(imageVector = vectorResource(id = storeGenreItem.drawableId),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -118,7 +113,7 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    drawerState.hide { onGenreSelected(null) }
+                    drawerState.close { onGenreSelected(null) }
                 }),
             text = { Text(
                 text = stringResource(id = R.string.store_genre_all),

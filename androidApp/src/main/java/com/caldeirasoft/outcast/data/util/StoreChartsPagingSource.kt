@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.data.util
 
 import android.util.Log
 import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
@@ -26,7 +25,6 @@ class StoreChartsPagingSource(
             .stateIn(scope, SharingStarted.Eagerly, null)
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
-        //TODO: handle errors : https://developer.android.com/reference/kotlin/androidx/paging/PagingSource
         val flow = idsFlow
         val flowNotNull = flow.filterNotNull()
         val ids = flowNotNull.first()
@@ -46,7 +44,4 @@ class StoreChartsPagingSource(
             nextKey = nextKey
         )
     }
-
-    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
-        state.anchorPosition
 }

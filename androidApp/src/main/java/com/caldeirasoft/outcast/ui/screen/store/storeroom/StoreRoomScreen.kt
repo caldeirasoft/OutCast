@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.WithConstraints
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -52,7 +53,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.log10
 
-@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun StoreRoomScreen(
@@ -75,7 +75,6 @@ fun StoreRoomScreen(
     )
 }
 
-@ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StoreRoomScreen(
@@ -255,9 +254,9 @@ private fun StoreRoomScreen(
                         val artworkUrl =
                             StoreItemWithArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
                         Box(modifier = Modifier.fillMaxSize()) {
-                            BoxWithConstraints {
-                                val maxHeight = this.constraints.maxHeight
-                                val maxWidth = this.constraints.maxWidth
+                            WithConstraints() {
+                                val maxHeight = constraints.maxHeight
+                                val maxWidth = constraints.maxWidth
                                 val artworkHeight = maxWidth * 13f/32f
                                 val bgColorHeight = (maxHeight - artworkHeight).coerceAtLeast(0f) + 20.dp.toIntPx()
                                 val bgColorAspectRatio = maxWidth.toFloat() / bgColorHeight
@@ -328,12 +327,12 @@ private fun StoreRoomScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = navigateBack) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "back")
+                            Icon(Icons.Filled.ArrowBack)
                         }
                     },
                     actions = {
                         IconButton(onClick = { }) {
-                            Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
+                            Icon(imageVector = Icons.Filled.Search)
                         }
                     },
                     backgroundColor = Color.Transparent,
