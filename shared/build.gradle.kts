@@ -19,7 +19,7 @@ kotlin {
     android()
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = Versions.jvm
+            kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
         }
     }
     sourceSets {
@@ -75,6 +75,6 @@ android {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }

@@ -11,13 +11,13 @@ val composeVersion: String by project
 
 android {
 
-    compileSdkVersion(AndroidConfig.compileSdk)
+    compileSdkVersion(30)
     defaultConfig {
-        applicationId = AndroidConfig.applicationId
-        minSdkVersion(AndroidConfig.minSdk)
-        targetSdkVersion(AndroidConfig.targetSdk)
-        versionCode = AndroidConfig.versionCode
-        versionName = AndroidConfig.versionName
+        applicationId = "com.caldeirasoft.outcast.androidApp"
+        minSdkVersion(24)
+        targetSdkVersion(30)
+        versionCode = 1
+        versionName = "0.1"
     }
     buildTypes {
         release {
@@ -40,11 +40,11 @@ android {
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_11.toString()
         useIR = true
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-Xopt-in=androidx.compose.foundation.lazy.ExperimentalLazyDsl",
@@ -52,7 +52,8 @@ android {
             "-Xopt-in=androidx.compose.runtime.ExperimentalComposeApi",
             "-Xopt-in=dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets",
             "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-Xopt-in=kotlin.time.ExperimentalTime"
+            "-Xopt-in=kotlin.time.ExperimentalTime",
+            "-Xopt-in=kotlin.RequiresOptIn"
         )
     }
     buildFeatures {
@@ -64,8 +65,8 @@ android {
 }
 
 sqldelight {
-    database(SqlDelight.databaseName) {
-        packageName = SqlDelight.packageName
+    database("Database") {
+        packageName = "com.caldeirasoft.outcast"
         schemaOutputDirectory = file("build/dbs")
         dialect = "sqlite:3.24"
     }

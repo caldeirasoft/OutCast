@@ -4,7 +4,6 @@ include(":androidApp")
 include(":js")
 include(":jvm")
 enableFeaturePreview("GRADLE_METADATA")
-include(":shared_module")
 
 pluginManagement {
     val kotlinVersion: String by settings
