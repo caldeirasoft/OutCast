@@ -4,10 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -28,10 +25,9 @@ import com.caldeirasoft.outcast.ui.components.OverflowText
 import com.caldeirasoft.outcast.ui.components.PlayButton
 import com.caldeirasoft.outcast.ui.components.PodcastThumbnail
 import com.caldeirasoft.outcast.ui.components.QueueButton
-import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
-import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetContent
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
@@ -39,25 +35,25 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Composable
 fun openEpisodeDialog(storeEpisode: StoreEpisode) {
-    val drawerState = AmbientBottomDrawerState.current
-    val drawerContent = AmbientBottomDrawerContent.current
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
     drawerContent.updateContent {
         EpisodeDialog(
             storeEpisode = storeEpisode,
             navigateTo = { }
         )
     }
-    drawerState.expand()
+    drawerState.show()
 }
 
-fun openEpisodeDialog(drawerState: CustomBottomDrawerState, drawerContent: BottomDrawerContentState, storeEpisode: StoreEpisode) {
+fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, storeEpisode: StoreEpisode) {
     drawerContent.updateContent {
         EpisodeDialog(
             storeEpisode = storeEpisode,
             navigateTo = { }
         )
     }
-    drawerState.open()
+    drawerState.show()
 }
 
 @ExperimentalCoroutinesApi
@@ -67,7 +63,7 @@ fun EpisodeDialog(
     navigateTo: (Screen) -> Unit,
 ) {
     val scrollState = rememberScrollState(0f)
-    val drawerState = AmbientBottomDrawerState.current
+    val drawerState = LocalBottomSheetState.current
     val viewModel: EpisodeViewModel = viewModel(
         key = storeEpisode.id.toString(),
         factory = viewModelProviderFactoryOf { EpisodeViewModel(storeEpisode) }
@@ -82,7 +78,7 @@ fun EpisodeDialog(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { drawerState.close() }) {
+                IconButton(onClick = { drawerState.hide() }) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },

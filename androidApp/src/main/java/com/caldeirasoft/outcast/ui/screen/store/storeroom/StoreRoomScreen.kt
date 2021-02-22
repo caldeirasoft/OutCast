@@ -36,9 +36,8 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.navigation.Actions
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
@@ -83,8 +82,8 @@ private fun StoreRoomScreen(
 ) {
     val listState = rememberLazyListState(0)
     val lazyPagingItems = discover.collectAsLazyPagingItems()
-    val drawerState = AmbientBottomDrawerState.current
-    val drawerContent = AmbientBottomDrawerContent.current
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
 
 
     ReachableScaffold(

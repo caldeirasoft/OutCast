@@ -44,13 +44,12 @@ import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import com.skydoves.landscapist.coil.CoilImage
@@ -88,8 +87,8 @@ private fun StorePodcastScreen(
     val listState = rememberLazyListState(0)
     val podcastData = viewState.storePage.storeData
     val otherPodcastsLazyPagingItems = otherPodcasts.collectAsLazyPagingItems()
-    val drawerState = AmbientBottomDrawerState.current
-    val drawerContent = AmbientBottomDrawerContent.current
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
 
 
     ReachableScaffold(headerRatio = 1/3f) { headerHeight ->

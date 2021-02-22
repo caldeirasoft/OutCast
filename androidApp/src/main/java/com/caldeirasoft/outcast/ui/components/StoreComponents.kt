@@ -23,15 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
-import com.caldeirasoft.outcast.ui.navigation.BottomDrawerContentState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.util.DialogFn
 import com.caldeirasoft.outcast.ui.util.ScreenFn
 import com.skydoves.landscapist.coil.CoilImage
 
@@ -41,8 +38,8 @@ fun StoreCollectionItemsContent(
     navigateTo: ScreenFn,
 )
 {
-    val drawerState = AmbientBottomDrawerState.current
-    val drawerContent = AmbientBottomDrawerContent.current
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
 
     // content
     LazyRow(
@@ -324,8 +321,8 @@ fun StoreCollectionTopEpisodesContent(
     storeCollection: StoreCollectionTopEpisodes,
     navigateTo: (Screen) -> Unit
 ) {
-    val drawerState = AmbientBottomDrawerState.current
-    val drawerContent = AmbientBottomDrawerContent.current
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
     // content
     LazyRow(
         contentPadding = PaddingValues(

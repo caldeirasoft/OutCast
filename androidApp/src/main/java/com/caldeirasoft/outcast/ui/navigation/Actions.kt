@@ -3,9 +3,7 @@ package com.caldeirasoft.outcast.ui.navigation
 import android.content.Context
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
-import com.caldeirasoft.outcast.ui.components.bottomdrawer.CustomBottomDrawerState
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
-import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->

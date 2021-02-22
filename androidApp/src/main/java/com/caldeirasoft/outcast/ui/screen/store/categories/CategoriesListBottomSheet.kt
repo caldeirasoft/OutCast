@@ -15,7 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -28,7 +28,7 @@ fun CategoriesListBottomSheet(
     onGenreSelected: (Int?) -> Unit,
 ) {
     val scrollState = rememberScrollState(0f)
-    val drawerState = AmbientBottomDrawerState.current
+    val drawerState = LocalBottomSheetState.current
     Column()
     {
         TopAppBar(
@@ -36,7 +36,7 @@ fun CategoriesListBottomSheet(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { drawerState.close() }) {
+                IconButton(onClick = { drawerState.hide() }) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
@@ -73,7 +73,7 @@ fun GenreListItem(
     selected: Boolean = false,
     onGenreSelected: (Int?) -> Unit)
 {
-    val drawerState = AmbientBottomDrawerState.current
+    val drawerState = LocalBottomSheetState.current
     val backgroundColor: Color = when {
         selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
         else -> Color.Transparent
@@ -89,7 +89,7 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    drawerState.close {
+                    drawerState.hide {
                         onGenreSelected(storeGenreItem.genreId)
                     }
                 }),
@@ -107,7 +107,9 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    drawerState.close { onGenreSelected(null) }
+                    drawerState.hide {
+                        onGenreSelected(null)
+                    }
                 }),
             text = { Text(
                 text = stringResource(id = R.string.store_genre_all),

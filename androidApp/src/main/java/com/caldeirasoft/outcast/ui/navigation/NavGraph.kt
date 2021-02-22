@@ -15,6 +15,7 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
+import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.store.categories.StoreCategoriesScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
@@ -52,7 +53,7 @@ fun MainNavHost(startScreen: ScreenName) {
     val navController = rememberNavController()
     val actions = remember(navController) { Actions(navController) }
 
-    CustomBottomDrawerHost() {
+    ModalBottomSheetHost() {
         Scaffold(
             bottomBar = {
                 SetupBottomNavBar(

@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
@@ -27,8 +26,8 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerContent
-import com.caldeirasoft.outcast.ui.navigation.AmbientBottomDrawerState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
@@ -72,8 +71,8 @@ fun TopChartsScreen(
     navigateBack: () -> Unit,
 ) {
     val selectedGenre = viewState.selectedGenre
-    val drawerState = AmbientBottomDrawerState.current
-    val drawerContent = AmbientBottomDrawerContent.current
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = topCharts.collectAsLazyPagingItems()
     val listState = rememberLazyListState(0)
 
@@ -87,9 +86,7 @@ fun TopChartsScreen(
                 .padding(top = 56.dp)) {
 
             item {
-                with(AmbientDensity.current) {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
+                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
             item {
@@ -116,7 +113,7 @@ fun TopChartsScreen(
                                     onGenreSelected = onChartsGenreSelected
                                 )
                             }
-                            drawerState.expand()
+                            drawerState.show()
                         })
                     {
                         Text(
