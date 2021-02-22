@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.AmbientAnimationClock
+import androidx.compose.ui.platform.LocalAnimationClock
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -177,7 +177,7 @@ fun StoreCollectionFeaturedContent(
     navigateTo: (Screen) -> Unit
 ) {
     val pagerState: PagerState = run {
-        val clock = AmbientAnimationClock.current
+        val clock = LocalAnimationClock.current
         remember(clock) { PagerState(clock, 0, 0, storeCollection.items.size - 1) }
     }
     val selectedPage = remember { mutableStateOf(0) }
@@ -279,7 +279,7 @@ fun StoreCollectionTopPodcastsContent(
         storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
     val chunkedItems = indexedItems.chunked(numRows)
     val pagerState: PagerState = run {
-        val clock = AmbientAnimationClock.current
+        val clock = LocalAnimationClock.current
         remember(clock) { PagerState(clock, 0, 0, chunkedItems.size - 1) }
     }
     val selectedPage = remember { mutableStateOf(0) }

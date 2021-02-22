@@ -6,7 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.AmbientContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.drawable.toBitmap
 import androidx.palette.graphics.Palette
 import coil.ImageLoader
@@ -52,7 +52,7 @@ fun FetchDominantColorFromPoster(
     colorState: MutableState<Color>,
     defaultColor: Color = Color.randomColor()
 ) {
-    val context = AmbientContext.current
+    val context = LocalContext.current
     LaunchedEffect(posterUrl) {
         val loader = ImageLoader(context)
         val request = ImageRequest.Builder(context)

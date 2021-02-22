@@ -12,11 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.util.toDp
 import kotlin.math.log10
 
 @ExperimentalAnimationApi
@@ -56,15 +56,13 @@ fun ReachableAppBar(
             val scrollRatioHeaderHeight = getScrollRatioHeaderHeight(state, headerHeight)
             val alphaLargeHeader = getExpandedHeaderAlpha(state, headerHeight)
             // large title
-            with(AmbientDensity.current) {
-                Box(modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        end = 16.dp)
-                    .align(Alignment.Center)
-                    .alpha(alphaLargeHeader)) {
-                    ProvideTextStyle(typography.h4, title)
-                }
+            Box(modifier = Modifier
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp)
+                .align(Alignment.Center)
+                .alpha(alphaLargeHeader)) {
+                ProvideTextStyle(typography.h4, title)
             }
         },
     collapsedContent: @Composable BoxScope.() -> Unit =
@@ -74,7 +72,7 @@ fun ReachableAppBar(
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
                 title = {
-                    Providers(AmbientContentAlpha provides collapsedHeaderAlpha) {
+                    Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
                         title()
                     }
                 },
@@ -98,36 +96,34 @@ fun ReachableAppBar(
     state: LazyListState,
     headerHeight: Int)
 {
-    with(AmbientDensity.current) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(headerHeight.toDp()))
+    {
+        val scrollRatioHeaderHeight =
+            if (headerHeight != 0)
+                ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
+                    .coerceAtLeast(0f)
+            else 1f
+        val minimumHeight = 56.dp
+        val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
         Box(modifier = Modifier
             .fillMaxWidth()
-            .height(headerHeight.toDp()))
-        {
-            val scrollRatioHeaderHeight =
-                if (headerHeight != 0)
-                    ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
-                        .coerceAtLeast(0f)
-                else 1f
-            val minimumHeight = 56.dp
-            val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
+            .preferredHeightIn(max = computedHeight)
+            .height(computedHeight)) {
+
+            // expanded content
+            this.expandedContent()
+
+            // collapsed content
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .preferredHeightIn(max = computedHeight)
-                .height(computedHeight)) {
-
-                // expanded content
-                this.expandedContent()
-
-                // collapsed content
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopStart))
-                {
-                    this.collapsedContent()
-                }
+                .align(Alignment.TopStart))
+            {
+                this.collapsedContent()
             }
-
         }
+
     }
 }
 
@@ -138,27 +134,25 @@ fun TopHeaderExpanded(
     headerHeight: Int,
     expandedContent: @Composable BoxScope.() -> Unit = {})
 {
-    with(AmbientDensity.current) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(headerHeight.toDp()))
+    {
+        val scrollRatioHeaderHeight =
+            if (headerHeight != 0)
+                ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
+                    .coerceAtLeast(0f)
+            else 1f
+        val minimumHeight = 56.dp
+        val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
         Box(modifier = Modifier
             .fillMaxWidth()
-            .height(headerHeight.toDp()))
-        {
-            val scrollRatioHeaderHeight =
-                if (headerHeight != 0)
-                    ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
-                        .coerceAtLeast(0f)
-                else 1f
-            val minimumHeight = 56.dp
-            val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .preferredHeightIn(max = computedHeight)
-                .height(computedHeight)
-                .background(MaterialTheme.colors.background)) {
+            .preferredHeightIn(max = computedHeight)
+            .height(computedHeight)
+            .background(MaterialTheme.colors.background)) {
 
-                // expanded content
-                this.expandedContent()
-            }
+            // expanded content
+            this.expandedContent()
         }
     }
 }

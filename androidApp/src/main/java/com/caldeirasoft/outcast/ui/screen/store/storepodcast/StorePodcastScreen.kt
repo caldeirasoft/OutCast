@@ -25,7 +25,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,6 +50,7 @@ import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -254,88 +254,86 @@ fun StorePodcastExpandedHeader(
     headerHeight: Int)
 {
     val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
-    with(AmbientDensity.current) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(headerHeight.toDp())
-        )
-        {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.TopStart)
-            ) {
-                BoxWithConstraints {
-                    val bgDominantColor =
-                        Color.getColor(viewState.storePage.artwork?.bgColor!!)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            //.background(Color.Magenta.copy(alpha = 0.9f))
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    0.0f to bgDominantColor.copy(alpha = 0.5f),
-                                    0.2f to bgDominantColor.copy(alpha = 0.5f),
-                                    0.6f to Color.Transparent,
-                                    startY = 0.0f,
-                                    endY = Float.POSITIVE_INFINITY
-                                )
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(headerHeight.toDp())
+    )
+    {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .align(Alignment.TopStart)
+        ) {
+            BoxWithConstraints {
+                val bgDominantColor =
+                    Color.getColor(viewState.storePage.artwork?.bgColor!!)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        //.background(Color.Magenta.copy(alpha = 0.9f))
+                        .background(
+                            brush = Brush.verticalGradient(
+                                0.0f to bgDominantColor.copy(alpha = 0.5f),
+                                0.2f to bgDominantColor.copy(alpha = 0.5f),
+                                0.6f to Color.Transparent,
+                                startY = 0.0f,
+                                endY = Float.POSITIVE_INFINITY
                             )
-                    )
-                    {
-                        Log_D("HEIGHT",
-                            this@BoxWithConstraints.constraints.maxHeight.toFloat().toString())
-                    }
-
+                        )
+                )
+                {
+                    Log_D("HEIGHT",
+                        this@BoxWithConstraints.constraints.maxHeight.toFloat().toString())
                 }
+
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .padding(top = 84.dp, bottom = 8.dp)
+                .alpha(alphaLargeHeader)
+        ) {
+            Card(
+                backgroundColor = Color.Transparent,
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                CoilImage(
+                    imageModel = viewState.storePage.getArtworkUrl(),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f)
+                )
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 84.dp, bottom = 8.dp)
-                    .alpha(alphaLargeHeader)
-            ) {
-                Card(
-                    backgroundColor = Color.Transparent,
-                    shape = RoundedCornerShape(8.dp),
-                ) {
-                    CoilImage(
-                        imageModel = viewState.storePage.getArtworkUrl(),
-                        contentScale = ContentScale.Crop,
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(start = 16.dp)
+                .fillMaxHeight()) {
+                Box(modifier = Modifier
+                    .weight(1f)) {
+                    AutoSizedText(
+                        text = viewState.storePage.name,
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .aspectRatio(1f)
+                            .align(Alignment.CenterStart)
+                            .fillMaxHeight(),
+                        style = MaterialTheme.typography.h5,
+                        maxFontSize = 35.sp,
+                        minFontSize = 20.sp,
+                        //color = Color.getColor(viewState.storePage.artwork?.textColor1!!)
                     )
                 }
-
-                Column(modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp)
-                    .fillMaxHeight()) {
-                    Box(modifier = Modifier
-                        .weight(1f)) {
-                        AutoSizedText(
-                            text = viewState.storePage.name,
-                            modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .fillMaxHeight(),
-                            style = MaterialTheme.typography.h5,
-                            maxFontSize = 35.sp,
-                            minFontSize = 20.sp,
-                            //color = Color.getColor(viewState.storePage.artwork?.textColor1!!)
-                        )
-                    }
-                    Text(
-                        viewState.storePage.artistName,
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        style = MaterialTheme.typography.body1,
-                        maxLines = 2,
-                        //color = Color.getColor(viewState.storePage.artwork?.textColor2!!)
-                    )
-                }
+                Text(
+                    viewState.storePage.artistName,
+                    modifier = Modifier
+                        .padding(bottom = 4.dp),
+                    style = MaterialTheme.typography.body1,
+                    maxLines = 2,
+                    //color = Color.getColor(viewState.storePage.artwork?.textColor2!!)
+                )
             }
         }
     }
@@ -370,7 +368,7 @@ fun StorePodcastCollapsedHeader(
         modifier = Modifier
             .fillMaxWidth(),
         title = {
-            Providers(AmbientContentAlpha provides collapsedHeaderAlpha) {
+            Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
                 Text(text = viewState.storePage.name)
             }
         },

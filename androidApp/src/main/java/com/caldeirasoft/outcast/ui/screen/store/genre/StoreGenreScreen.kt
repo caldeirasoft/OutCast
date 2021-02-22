@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
@@ -84,9 +83,7 @@ private fun StoreGenreContent(
                 .padding(top = 56.dp)) {
 
             item {
-                with(AmbientDensity.current) {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
+                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
             lazyPagingItems

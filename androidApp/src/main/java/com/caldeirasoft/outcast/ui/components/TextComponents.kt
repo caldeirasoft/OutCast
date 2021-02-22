@@ -2,7 +2,7 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.AmbientTextStyle
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -42,7 +42,7 @@ fun AutoSizedText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
-    style: TextStyle = AmbientTextStyle.current
+    style: TextStyle = LocalTextStyle.current
 ) {
     var fontSize by remember { mutableStateOf(maxFontSize) }
     Text(
@@ -85,7 +85,7 @@ fun OverflowText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
-    style: TextStyle = AmbientTextStyle.current
+    style: TextStyle = LocalTextStyle.current
 ) {
     var wasMeasured by remember { mutableStateOf(false) }
     var didOverflowHeight by remember { mutableStateOf(false) }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -21,8 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.platform.AmbientDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
@@ -33,7 +31,6 @@ import androidx.paging.compose.itemsIndexed
 import coil.request.ImageRequest
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
@@ -47,7 +44,6 @@ import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlin.math.log10
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -101,9 +97,7 @@ private fun StoreRoomScreen(
                 .fillMaxSize()
                 .padding(top = 56.dp)) {
             item {
-                with(AmbientDensity.current) {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
+                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
             lazyPagingItems
@@ -242,57 +236,55 @@ private fun StoreRoomScreen(
             expandedContent = {
                 val scrollRatioHeaderHeight = getScrollRatioHeaderHeight(listState, headerHeight)
                 val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
-                with(AmbientDensity.current) {
-                    val minimumHeight = 56.dp
-                    val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
-                    val artwork = viewState.storePage.artwork
-                    if (artwork != null) {
-                        val artworkUrl =
-                            StoreItemWithArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            BoxWithConstraints() {
-                                val maxHeight = constraints.maxHeight
-                                val maxWidth = constraints.maxWidth
-                                val artworkHeight = maxWidth * 13f/32f
-                                val bgColorHeight = (maxHeight - artworkHeight).coerceAtLeast(0f) + 20.dp.toIntPx()
-                                val bgColorAspectRatio = maxWidth.toFloat() / bgColorHeight
+                val minimumHeight = 56.dp
+                val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
+                val artwork = viewState.storePage.artwork
+                if (artwork != null) {
+                    val artworkUrl =
+                        StoreItemWithArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        BoxWithConstraints() {
+                            val maxHeight = constraints.maxHeight
+                            val maxWidth = constraints.maxWidth
+                            val artworkHeight = maxWidth * 13f/32f
+                            val bgColorHeight = (maxHeight - artworkHeight).coerceAtLeast(0f) + 20.dp.toIntPx()
+                            val bgColorAspectRatio = maxWidth.toFloat() / bgColorHeight
 
-                                Box(modifier = Modifier
-                                    .fillMaxSize())
-                                {
-                                    CoilImage(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .preferredHeight(computedHeight)
-                                            .alpha(alphaLargeHeader),
-                                        imageRequest = ImageRequest.Builder(AmbientContext.current)
-                                            .data(artworkUrl)
-                                            .crossfade(true)
-                                            .build(),
-                                        circularRevealedEnabled = true,
-                                        contentScale = ContentScale.Crop,
-                                        loading = {
-                                            Box(modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color.DarkGray))
-                                        }
-                                    )
-                                }
-
-
+                            Box(modifier = Modifier
+                                .fillMaxSize())
+                            {
+                                CoilImage(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .preferredHeight(computedHeight)
+                                        .alpha(alphaLargeHeader),
+                                    imageRequest = ImageRequest.Builder(LocalContext.current)
+                                        .data(artworkUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    circularRevealedEnabled = true,
+                                    contentScale = ContentScale.Crop,
+                                    loading = {
+                                        Box(modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.DarkGray))
+                                    }
+                                )
                             }
+
+
                         }
-                    } else {
-                        // large title
-                        Box(modifier = Modifier
-                            .padding(
-                                start = 16.dp,
-                                end = 16.dp)
-                            .align(Alignment.Center)
-                            .alpha(alphaLargeHeader)) {
-                            ProvideTextStyle(typography.h4) {
-                                Text(text = title, textAlign = TextAlign.Center)
-                            }
+                    }
+                } else {
+                    // large title
+                    Box(modifier = Modifier
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp)
+                        .align(Alignment.Center)
+                        .alpha(alphaLargeHeader)) {
+                        ProvideTextStyle(typography.h4) {
+                            Text(text = title, textAlign = TextAlign.Center)
                         }
                     }
                 }
@@ -317,7 +309,7 @@ private fun StoreRoomScreen(
                         .fillMaxWidth()
                         .align(Alignment.BottomStart),
                     title = {
-                        Providers(AmbientContentAlpha provides collapsedHeaderAlpha) {
+                        Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
                             Text(text = title)
                         }
                     },
@@ -342,94 +334,3 @@ private fun StoreRoomScreen(
             headerHeight = headerHeight)
     }
 }
-
-@ExperimentalAnimationApi
-@Composable
-private fun ReachableAppBarWithBackground(
-    title: @Composable () -> Unit,
-    navigationIcon: @Composable (() -> Unit)? = null,
-    actions: @Composable RowScope.() -> Unit = {},
-    artwork: Artwork?,
-    state: LazyListState,
-    headerHeight: Int,
-) {
-    with(AmbientDensity.current) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(headerHeight.toDp()))
-        {
-            val scrollRatioLargeHeader =
-                if (headerHeight != 0)
-                    ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
-                        .coerceAtLeast(0f)
-                else 1f
-            val minimumHeight = 56.dp
-            val computedHeight = (scrollRatioLargeHeader * headerHeight).toDp().coerceAtLeast(minimumHeight)
-            val alphaLargeHeader = (3 * log10(scrollRatioLargeHeader.toDouble()) + 1).toFloat().coerceIn(0f, 1f)
-            val alphaCollapsedHeader = (3 * log10((1-scrollRatioLargeHeader).toDouble()) + 1).toFloat().coerceIn(0f, 1f)
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .preferredHeightIn(max = computedHeight)
-                .height(computedHeight)
-                .background(MaterialTheme.colors.background)) {
-
-                if (artwork != null) {
-                    val artworkUrl = StoreItemWithArtwork.artworkUrl(artwork, 400, 196, crop = "fa")
-                    CoilImage(
-                        imageRequest = ImageRequest.Builder(AmbientContext.current)
-                            .data(artworkUrl)
-                            .crossfade(true)
-                            .build(),
-                        circularRevealedEnabled = true,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .preferredHeight(headerHeight.toDp())
-                            .alpha(alphaLargeHeader),
-                        loading = {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.DarkGray))
-                        }
-                    )
-                } else {
-                    // large title
-                    Box(modifier = Modifier
-                        .padding(bottom = (56.dp.toIntPx() * scrollRatioLargeHeader).toDp())
-                        .align(Alignment.Center)
-                        .alpha(alphaLargeHeader)) {
-                        ProvideTextStyle(typography.h4, title)
-                    }
-                }
-
-                // top app bar
-                val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
-                val contentColor: Color =
-                    artwork?.textColor1
-                        ?.let {
-                            val contentStartColor = Color.getColor(it)
-                            Color.blendARGB(contentStartColor, contentEndColor, alphaCollapsedHeader)
-                        }
-                        ?: contentEndColor
-
-                TopAppBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomStart),
-                    title = {
-                        Providers(AmbientContentAlpha provides alphaCollapsedHeader) {
-                            title()
-                        }
-                    },
-                    navigationIcon = navigationIcon,
-                    actions = actions,
-                    backgroundColor = Color.Transparent,
-                    contentColor = contentColor,
-                    elevation = if (state.firstVisibleItemIndex > 0) 1.dp else 0.dp
-                )
-            }
-        }
-    }
-}
-
-

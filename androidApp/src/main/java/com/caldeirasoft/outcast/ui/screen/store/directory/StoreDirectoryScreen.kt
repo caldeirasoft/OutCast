@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,8 +45,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.log10
-
-private val AmbientDominantColor = ambientOf<MutableState<Color>> { error("No dominant color") }
 
 enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @DrawableRes val drawableId: Int) {
     Arts(1301, R.string.store_genre_1301, R.drawable.ic_color_palette),
@@ -110,9 +107,7 @@ private fun StoreDirectoryContent(
                 .padding(top = 56.dp))
         {
             item {
-                with(AmbientDensity.current) {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
+                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
             lazyPagingItems
@@ -218,59 +213,57 @@ fun ReachableAppBarWithSearchBar(
     state: LazyListState,
     headerHeight: Int)
 {
-    with(AmbientDensity.current) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(headerHeight.toDp()))
+    {
+        val scrollRatioLargeHeader =
+            if (headerHeight != 0)
+                ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
+                    .coerceAtLeast(0f)
+            else 1f
+        val minimumHeight = 56.dp
+        val computedHeight = (scrollRatioLargeHeader * headerHeight).toDp().coerceAtLeast(minimumHeight)
+        val alphaLargeHeader = (3 * log10(scrollRatioLargeHeader.toDouble()) + 1).toFloat().coerceIn(0f, 1f)
+        val alphaCollapsedHeader = (3 * log10((1-scrollRatioLargeHeader).toDouble()) + 1).toFloat().coerceIn(0f, 1f)
         Box(modifier = Modifier
             .fillMaxWidth()
-            .height(headerHeight.toDp()))
-        {
-            val scrollRatioLargeHeader =
-                if (headerHeight != 0)
-                    ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
-                        .coerceAtLeast(0f)
-                else 1f
-            val minimumHeight = 56.dp
-            val computedHeight = (scrollRatioLargeHeader * headerHeight).toDp().coerceAtLeast(minimumHeight)
-            val alphaLargeHeader = (3 * log10(scrollRatioLargeHeader.toDouble()) + 1).toFloat().coerceIn(0f, 1f)
-            val alphaCollapsedHeader = (3 * log10((1-scrollRatioLargeHeader).toDouble()) + 1).toFloat().coerceIn(0f, 1f)
+            .preferredHeightIn(max = computedHeight)
+            .height(computedHeight)
+            .background(MaterialTheme.colors.background)) {
+
+            // large title
             Box(modifier = Modifier
-                .fillMaxWidth()
-                .preferredHeightIn(max = computedHeight)
-                .height(computedHeight)
-                .background(MaterialTheme.colors.background)) {
-
-                // large title
-                Box(modifier = Modifier
-                    .padding(bottom = (56.dp.toIntPx() * scrollRatioLargeHeader).toDp())
-                    .align(Alignment.Center)
-                    .alpha(alphaLargeHeader)) {
-                    ProvideTextStyle(typography.h4, title)
-                }
-
-                // top app bar
-                TopAppBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopStart)
-                        .alpha(alphaCollapsedHeader),
-                    title = {
-                        Providers(AmbientContentAlpha provides alphaCollapsedHeader) {
-                            title()
-                        }
-                    },
-                    navigationIcon = navigationIcon,
-                    actions = actions,
-                    backgroundColor = Color.Transparent,
-                    elevation = if (state.firstVisibleItemIndex > 0) 1.dp else 0.dp
-                )
-
-                // search bar
-                SearchBar(modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomStart)
-                    .alpha(alphaLargeHeader))
+                .padding(bottom = (56.dp.toIntPx() * scrollRatioLargeHeader).toDp())
+                .align(Alignment.Center)
+                .alpha(alphaLargeHeader)) {
+                ProvideTextStyle(typography.h4, title)
             }
 
+            // top app bar
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopStart)
+                    .alpha(alphaCollapsedHeader),
+                title = {
+                    Providers(LocalContentAlpha provides alphaCollapsedHeader) {
+                        title()
+                    }
+                },
+                navigationIcon = navigationIcon,
+                actions = actions,
+                backgroundColor = Color.Transparent,
+                elevation = if (state.firstVisibleItemIndex > 0) 1.dp else 0.dp
+            )
+
+            // search bar
+            SearchBar(modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomStart)
+                .alpha(alphaLargeHeader))
         }
+
     }
 }
 

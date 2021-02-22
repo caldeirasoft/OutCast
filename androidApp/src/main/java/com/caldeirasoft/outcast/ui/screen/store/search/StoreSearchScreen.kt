@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.AmbientAnimationClock
+import androidx.compose.ui.platform.LocalAnimationClock
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.paging.PagingData
@@ -30,8 +30,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
-
-private val AmbientDominantColor = ambientOf<MutableState<Color>> { error("No dominant color") }
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -163,7 +161,7 @@ private fun LazyItemScope.StoreCollectionChartsContent(
 ) {
     val chunkedItems = storeList.chunked(4)
     val pagerState: PagerState = run {
-        val clock = AmbientAnimationClock.current
+        val clock = LocalAnimationClock.current
         remember(clock) { PagerState(clock, 0, 0, chunkedItems.size - 1) }
     }
     val selectedPage = remember { mutableStateOf(0) }

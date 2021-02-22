@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AmbientDensity
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.ui.components.GenreItem
@@ -24,6 +23,7 @@ import com.caldeirasoft.outcast.ui.components.ReachableAppBar
 import com.caldeirasoft.outcast.ui.components.ReachableScaffold
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.px
+import com.caldeirasoft.outcast.ui.util.toDp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -61,9 +61,7 @@ private fun StoreCategoriesContent(
                 .padding(top = 56.dp)) {
 
             item {
-                with(AmbientDensity.current) {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
+                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
             items(items = storeCollection.genres) { itemContent ->
