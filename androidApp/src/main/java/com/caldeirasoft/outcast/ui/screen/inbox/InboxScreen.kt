@@ -8,9 +8,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
+import kotlinx.coroutines.FlowPreview
 
+@FlowPreview
 @Composable
 fun InboxScreen(viewModel: InboxViewModel = viewModel()) {
     Scaffold(
@@ -27,7 +29,7 @@ fun InboxScreen(viewModel: InboxViewModel = viewModel()) {
                 })
         }
     )
-    { innerPadding ->
+    {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Hi there!")
             Text("Thanks for going through the Layouts codelab")

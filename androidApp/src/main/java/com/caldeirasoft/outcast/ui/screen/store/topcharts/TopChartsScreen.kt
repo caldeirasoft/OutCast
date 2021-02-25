@@ -1,12 +1,15 @@
 package com.caldeirasoft.outcast.ui.screen.store.topcharts
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -16,7 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
@@ -34,9 +37,11 @@ import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomS
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
 fun TopChartsScreen(
@@ -59,6 +64,7 @@ fun TopChartsScreen(
     )
 }
 
+@FlowPreview
 @OptIn(ExperimentalAnimationApi::class)
 @ExperimentalCoroutinesApi
 @Composable
@@ -90,39 +96,45 @@ fun TopChartsScreen(
             }
 
             item {
-                ScrollableRow(contentPadding = PaddingValues(start = 16.dp, end = 16.dp)) {
-                    ChipRadioSelector(
-                        selectedValue = viewState.selectedChartTab,
-                        values = StoreItemType.values(),
-                        onClick = onChartTabSelected,
-                        text = {
-                            Text(text = stringResource(id = when (it) {
-                                StoreItemType.PODCAST -> R.string.store_podcasts
-                                StoreItemType.EPISODE -> R.string.store_episodes
-                            }))
-                        })
+                LazyRow(contentPadding = PaddingValues(start = 16.dp, end = 16.dp)) {
+                    item {
+                        ChipRadioSelector(
+                            selectedValue = viewState.selectedChartTab,
+                            values = StoreItemType.values(),
+                            onClick = onChartTabSelected,
+                            text = {
+                                Text(text = stringResource(id = when (it) {
+                                    StoreItemType.PODCAST -> R.string.store_podcasts
+                                    StoreItemType.EPISODE -> R.string.store_episodes
+                                }))
+                            })
+                    }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    item {
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
 
-                    ChipButton(
-                        selected = (selectedGenre != null),
-                        onClick = {
-                            drawerContent.updateContent {
-                                CategoriesListBottomSheet(
-                                    selectedGenre = selectedGenre,
-                                    onGenreSelected = onChartsGenreSelected
-                                )
-                            }
-                            drawerState.show()
-                        })
-                    {
-                        Text(
-                            text = when (selectedGenre) {
-                                null -> stringResource(id = R.string.store_tab_categories)
-                                else -> stringResource(id = StoreGenreItem.values()
-                                    .first { it.genreId == selectedGenre }.titleId)
-                            }
-                        )
+                    item {
+                        ChipButton(
+                            selected = (selectedGenre != null),
+                            onClick = {
+                                drawerContent.updateContent {
+                                    CategoriesListBottomSheet(
+                                        selectedGenre = selectedGenre,
+                                        onGenreSelected = onChartsGenreSelected
+                                    )
+                                }
+                                drawerState.show()
+                            })
+                        {
+                            Text(
+                                text = when (selectedGenre) {
+                                    null -> stringResource(id = R.string.store_tab_categories)
+                                    else -> stringResource(id = StoreGenreItem.values()
+                                        .first { it.genreId == selectedGenre }.titleId)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -186,4 +198,4 @@ fun TopChartsScreen(
     }
 }
 
-private val emptyTabIndicator: @Composable (List<TabPosition>) -> Unit = {}
+//private val emptyTabIndicator: @Composable (List<TabPosition>) -> Unit = {}

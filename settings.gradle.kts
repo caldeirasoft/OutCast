@@ -12,7 +12,7 @@ pluginManagement {
 
     repositories {
         google()
-        jcenter()
+        //jcenter()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -78,7 +78,7 @@ dependencyResolutionManagement {
             ))
 
             alias("activity-compose").to("androidx.activity:activity-compose:1.3.0-alpha02")
-            alias("viewmodel-compose").to("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.+")
+            alias("viewmodel-compose").to("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha01")
             alias("navigation-compose").to("androidx.navigation:navigation-compose:1.0.0-alpha07")
             alias("paging-compose").to("androidx.paging:paging-compose:1.0.0-alpha07")
 

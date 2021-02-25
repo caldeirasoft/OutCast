@@ -1,6 +1,5 @@
 package com.caldeirasoft.outcast.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyItemScope
@@ -14,36 +13,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-
-@Composable
-fun <T> LazyGridFor(
-    items: List<T> = listOf(),
-    columns: Int = 3,
-    hPadding: Int = 8,
-    itemContent: @Composable BoxScope.(T, Int) -> Unit
-) {
-    val chunkedList = items.chunked(columns)
-    Column(modifier = Modifier
-        .padding(horizontal = hPadding.dp)
-        .padding(top = 8.dp)) {
-        chunkedList.forEachIndexed { index, list ->
-            Row {
-                /*list.forEachIndexed { rowIndex, item ->
-                    Box(modifier = Modifier.weight(1F).align(Alignment.Top).padding(8.dp),
-                        contentAlignment = Alignment.Center)
-                    {
-                        //itemContent(item, index * columns + rowIndex)
-                    }
-                }*/
-                repeat(columns - list.size) {
-                    Box(modifier = Modifier
-                        .weight(1F)
-                        .padding(8.dp)) {}
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun <T> ColumnScope.Grid(
@@ -99,7 +68,6 @@ fun <T : Any> LazyListScope.gridItems(
     horizontalInnerPadding: Dp = 0.dp,
     itemContent: @Composable LazyItemScope.(value: T?) -> Unit
 ) {
-    Log.d("itemCount", lazyPagingItems.itemCount.toString())
     val rows = when {
         lazyPagingItems.itemCount % columns == 0 -> lazyPagingItems.itemCount / columns
         else -> (lazyPagingItems.itemCount / columns) + 1
@@ -141,18 +109,6 @@ fun LazyListScope.spacerItem(height: Dp) {
             .preferredHeight(height)
             .fillParentMaxWidth())
     }
-}
-
-private fun shortestColumn(colHeights: IntArray): Int {
-    var minHeight = Int.MAX_VALUE
-    var column = 0
-    colHeights.forEachIndexed { index, height ->
-        if (height < minHeight) {
-            minHeight = height
-            column = index
-        }
-    }
-    return column
 }
 
 @Composable

@@ -44,9 +44,9 @@ fun CategoriesListBottomSheet(
             elevation = if (scrollState.value > 0) 1.dp else 0.dp
         )
 
-        ScrollableColumn(
-            scrollState = scrollState,
-            modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+                .verticalScroll(scrollState)) {
             Surface(
                 border = ButtonDefaults.outlinedBorder,
                 shape = RoundedCornerShape(8.dp)) {

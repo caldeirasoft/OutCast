@@ -23,7 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -247,8 +247,6 @@ private fun StoreRoomScreen(
                             val maxHeight = constraints.maxHeight
                             val maxWidth = constraints.maxWidth
                             val artworkHeight = maxWidth * 13f/32f
-                            val bgColorHeight = (maxHeight - artworkHeight).coerceAtLeast(0f) + 20.dp.toIntPx()
-                            val bgColorAspectRatio = maxWidth.toFloat() / bgColorHeight
 
                             Box(modifier = Modifier
                                 .fillMaxSize())

@@ -18,8 +18,6 @@ class Actions(navController: NavController) {
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.genres)}")
             is Room ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.room)}")
-            is Room ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.room)}")
             is Charts ->
                 navController.navigate("${screen.id.name}/${screen.itemType}")
             is Genre ->
@@ -48,7 +46,7 @@ class Actions(navController: NavController) {
     }
 
 
-    val openUrl: (context: Context, url: String) -> Unit = { context, url ->
+    val openUrl: (context: Context, url: String) -> Unit = { _, _ ->
         //makeOpenUrl(context, url)
     }
 }

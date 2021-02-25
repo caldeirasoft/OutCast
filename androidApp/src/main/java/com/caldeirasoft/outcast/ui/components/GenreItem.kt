@@ -10,7 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,7 +30,8 @@ fun GenreItem(
         modifier = Modifier.clickable(onClick = onGenreClick),
         text = { Text(text = storeGenre.name) },
         icon = {
-            Image(imageVector = vectorResource (id = storeGenre.getIcon()),
+            Image(
+                painter = painterResource(id = storeGenre.getIcon()),
                 contentDescription = storeGenre.name,
                 modifier = Modifier.size(32.dp)
             )
@@ -55,17 +56,7 @@ fun GenreGridItemMore(
 
 private object GenreDefaults {
     // content padding
-    val ContentHorizontalPadding = 16.dp
-    // content padding
     val ContentVerticalPadding = 8.dp
-    // content padding
-    val ContentHorizontalInnerPadding = 24.dp
-    // content padding
-    val ContentVerticalInnerPadding = 8.dp
-    // min height
-    val MinHeight = 64.dp
-    // min height
-    val GridItemHeight = 80.dp
 
     @Composable
     fun GridItem(
@@ -82,7 +73,7 @@ private object GenreDefaults {
                 .fillMaxSize())
             {
                 Image(
-                    imageVector = vectorResource(id = storeGenre.getIcon()),
+                    painter = painterResource(id = storeGenre.getIcon()),
                     contentDescription = storeGenre.name,
                     modifier = Modifier
                         .size(24.dp)

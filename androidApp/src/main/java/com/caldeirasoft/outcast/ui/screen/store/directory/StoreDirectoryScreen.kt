@@ -7,8 +7,8 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -279,9 +279,8 @@ private fun GenreTabs(
     val scrollState = rememberScrollState()
     val scrollScope = rememberCoroutineScope()
 
-    ScrollableRow(
-        modifier = modifier,
-        scrollState = scrollState
+    Row(
+        modifier = modifier.horizontalScroll(scrollState),
     ) {
         Surface(
             //color = MaterialTheme.colors.onSurface.copy(alpha = 0.48f),
@@ -297,7 +296,7 @@ private fun GenreTabs(
             Row {
                 genres
                     //.sortedBy { stringResource(id = it.titleId) }
-                    .forEachIndexed { index, category ->
+                    .forEachIndexed { _, category ->
                         AnimatedVisibility(
                             visible = selectedGenre == null || selectedGenre == category.id,
                             enter = expandHorizontally(animationSpec = tween(durationMillis = 250))
@@ -366,8 +365,8 @@ private fun ChoiceChipContent(
     }
     TextButton(
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor = animate(backgroundColor),
-            contentColor = animate(contentColorFor(backgroundColor)),
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColorFor(backgroundColor)).value,
             disabledContentColor = MaterialTheme.colors.onSurface
                 .copy(alpha = ContentAlpha.disabled)
         ),

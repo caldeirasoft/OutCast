@@ -53,7 +53,6 @@ fun ReachableAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     expandedContent: @Composable BoxScope.() -> Unit =
         {
-            val scrollRatioHeaderHeight = getScrollRatioHeaderHeight(state, headerHeight)
             val alphaLargeHeader = getExpandedHeaderAlpha(state, headerHeight)
             // large title
             Box(modifier = Modifier

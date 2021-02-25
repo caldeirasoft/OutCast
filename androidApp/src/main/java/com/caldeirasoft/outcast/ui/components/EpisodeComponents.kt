@@ -103,7 +103,7 @@ fun StoreEpisodeSmallListItemIndexed(
         icon = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = CenterVertically,
                 modifier = Modifier.preferredWidth(60.dp)
             ) {
                 Card(
@@ -135,7 +135,7 @@ fun StoreEpisodeSmallListItemIndexed(
         icon = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = CenterVertically,
                 modifier = Modifier.preferredWidth(60.dp)
             ) {
                 Card(
@@ -160,7 +160,7 @@ fun StoreEpisodeSmallListItemIndexed(
 
 @Preview
 @Composable
-fun previewPlayButton() {
+fun PreviewPlayButton() {
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(),
         shape = RoundedCornerShape(50),

@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -229,36 +228,6 @@ fun EpisodeItemWithArtwork(
 }
 
 @Composable
-fun LibraryEpisodeItem(
-    storeEpisode: StoreEpisode,
-    onEpisodeClick: () -> Unit,
-    onPodcastClick: () -> Unit,
-) {
-    EpisodeDefaults.LibraryEpisodeItem(
-        modifier = Modifier
-            .clickable(onClick = onEpisodeClick),
-        text = { Text(text = storeEpisode.name, maxLines = 2) },
-        overlineText = {
-            val context = LocalContext.current
-            Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
-        },
-        actionButtons = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
-            }
-        },
-        icon = {
-            PodcastThumbnail(
-                imageModel = storeEpisode.getArtworkUrl(),
-                modifier = Modifier
-                    .preferredSize(EpisodeDefaults.ThumbnailSize)
-            )
-        }
-    )
-}
-
-@Composable
 private fun EpisodeItemArtworkHeader(
     modifier: Modifier = Modifier,
     storeEpisode: StoreEpisode)
@@ -289,69 +258,14 @@ private object EpisodeDefaults {
     // List item related defaults.
     private val MinHeight = 88.dp
 
-    // Icon related defaults.
-    private val IconMinPaddedWidth = 40.dp
-    private val IconLeftPadding = 16.dp
-    private val IconThreeLineVerticalPadding = 16.dp
-
     // Default thumbnail size
     val ThumbnailSize = 56.dp
-
-    // Small thumbnail size
-    val ThumbnailSizeSmall = 40.dp
 
     // Content related defaults.
     private val ContentLeftPadding = 16.dp
     private val ContentRightPadding = 16.dp
     private val ContentInnerPadding = 8.dp
     private val ContentTopPadding = 16.dp
-    private val ContentBottomPadding = 8.dp
-    private val ActionsPadding = 4.dp
-
-    @Composable
-    private fun StoreItem(
-        modifier: Modifier,
-        storeEpisode: StoreEpisode,
-        iconModifier: Modifier,
-        index: Int? = null
-    ) {
-        StoreEpisodeItem(
-            modifier = modifier.fillMaxWidth(),
-            text = {
-                if (index != null) {
-                    Text(text = AnnotatedString.Builder()
-                        .apply {
-                            withStyle(SpanStyle(color = Color.Red)) {
-                                append("${index}. ")
-                            }
-                            append(storeEpisode.name)
-                        }.toAnnotatedString(),
-                        maxLines = 2)
-                } else {
-                    Text(text = storeEpisode.name, maxLines = 2)
-                }
-            },
-            podcastText = {
-                Text(storeEpisode.podcastName, maxLines = 1)
-            },
-            icon = {
-                PodcastThumbnail(
-                    imageModel = storeEpisode.getArtworkUrl(),
-                    modifier = iconModifier
-                )
-            },
-            actionButtons = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    PlayButton(
-                        storeEpisode = storeEpisode,
-                    )
-                    QueueButton(
-                        storeEpisode = storeEpisode
-                    )
-                }
-            }
-        )
-    }
 
     @Composable
     fun CardItem(
@@ -365,54 +279,6 @@ private object EpisodeDefaults {
             modifier = modifier.fillMaxWidth()
         ) {
             itemContent()
-        }
-    }
-
-    @Composable
-    fun PodcastEpisodeItem(
-        modifier: Modifier = Modifier,
-        icon: @Composable () -> Unit,
-        podcastText: @Composable () -> Unit,
-        releasedTimeText: @Composable () -> Unit,
-        descriptionText: @Composable (() -> Unit)? = null,
-        actionButtons: @Composable (() -> Unit),
-        text: @Composable () -> Unit)
-    {
-
-        val typography = MaterialTheme.typography
-
-        val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
-        val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.medium, podcastText)
-        val styledReleasedTimeText = applyTextStyleCustom(typography.caption, ContentAlpha.medium, releasedTimeText)!!
-        val styledTrailing = applyTextStyleCustom(typography.caption, ContentAlpha.high, actionButtons)
-        val styledDescriptionText = applyTextStyleNullable(typography.subtitle1, ContentAlpha.high, descriptionText)
-
-        Column(modifier
-            .preferredHeightIn(min = MinHeight)
-            .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
-        {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = ContentInnerPadding))
-            {
-                Box(modifier = Modifier.preferredSize(32.dp)) {
-                    icon()
-                }
-
-                Column(modifier = Modifier
-                    .weight(1f)
-                    .padding(start = ContentInnerPadding))
-                {
-                    styledPodcastText()
-                    styledReleasedTimeText()
-                }
-            }
-
-            styledText()
-            if (styledDescriptionText != null)
-                styledDescriptionText()
-
-            actionButtons()
         }
     }
 
@@ -486,42 +352,6 @@ private object EpisodeDefaults {
         }
     }
 
-    @Composable
-    private fun StoreEpisodeItem(
-        modifier: Modifier = Modifier,
-        icon: @Composable () -> Unit,
-        podcastText: @Composable () -> Unit,
-        actionButtons: @Composable (() -> Unit),
-        text: @Composable () -> Unit) {
-
-        val typography = MaterialTheme.typography
-
-        val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
-        val styledPodcastText = applyTextStyleCustom(typography.body2, ContentAlpha.medium, podcastText)
-
-        val semanticsModifier = modifier.semantics(mergeDescendants = true) {}
-
-        Column(modifier
-            .preferredHeightIn(min = MinHeight)
-            .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
-        {
-            Row(modifier = Modifier
-                .fillMaxWidth())
-            {
-                icon()
-
-                Column(modifier = Modifier
-                    .weight(1f)
-                    .padding(start = ContentInnerPadding))
-                {
-                    styledText()
-                    styledPodcastText()
-                }
-            }
-
-            actionButtons()
-        }
-    }
 
     @Composable
     fun LibraryEpisodeItem(
@@ -534,9 +364,7 @@ private object EpisodeDefaults {
         val typography = MaterialTheme.typography
 
         val styledText = applyTextStyleCustom(typography.subtitle1, ContentAlpha.high, text)
-        val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.high, overlineText)!!
-
-        val semanticsModifier = modifier.semantics(mergeDescendants = true) {}
+        val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.high, overlineText)
 
         Column(modifier
             .preferredHeightIn(min = MinHeight)

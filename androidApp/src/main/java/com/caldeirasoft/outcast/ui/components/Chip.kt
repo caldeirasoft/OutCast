@@ -138,7 +138,7 @@ fun ActionChipButton(
 
 @Preview
 @Composable
-fun previewChipButton() {
+fun PreviewChipButton() {
     Column(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 16.dp)
@@ -155,7 +155,7 @@ fun previewChipButton() {
 
 @Preview
 @Composable
-fun previewChipRadio() {
+fun PreviewChipRadio() {
     Column(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 16.dp)

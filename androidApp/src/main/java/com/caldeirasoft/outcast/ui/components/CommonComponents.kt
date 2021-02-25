@@ -1,6 +1,5 @@
 package com.caldeirasoft.outcast.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.ui.util.toast
+import timber.log.Timber
 
 @Composable
 fun LoadingScreen()
@@ -32,7 +32,7 @@ fun LoadingScreen()
 @Composable
 fun ErrorScreen(t: Throwable) {
     LocalContext.current.toast("${t.message}")
-    Log.e("ERROR", t.message, t)
+    Timber.e(t)
 
     Row(
         modifier = Modifier
@@ -68,38 +68,31 @@ fun StoreHeadingSection(title:String) {
 
 @Composable
 fun StoreHeadingSectionWithLink(title:String, onClick: () -> Unit) {
-    ConstraintLayout(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .preferredHeight(48.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
     ) {
-        val (text, icon) = createRefs()
         Text(
             title,
             modifier = Modifier
-                .constrainAs(text) {
-                    linkTo(top = parent.top, bottom = parent.bottom)
-                    linkTo(start = parent.start, end = icon.start)
-                    width = Dimension.fillToConstraints
-                },
+                .weight(1f)
+                .align(Alignment.CenterVertically),
             style = MaterialTheme.typography.h6
         )
         Icon(imageVector = Icons.Filled.ArrowForward,
             contentDescription = "show all",
             modifier = Modifier
-                .constrainAs(icon) {
-                    linkTo(top = parent.top, bottom = parent.bottom)
-                    linkTo(start = text.end, end = parent.end)
-                })
+                .align(Alignment.CenterVertically))
     }
 }
 
 
 @Preview
 @Composable
-fun previewStoreHeadingSection() {
+fun PreviewStoreHeadingSection() {
     Column(
         modifier = Modifier
             .padding(vertical = 16.dp)
@@ -111,7 +104,7 @@ fun previewStoreHeadingSection() {
 
 @Preview
 @Composable
-fun previewStoreHeadingSectionWithLink() {
+fun PreviewStoreHeadingSectionWithLink() {
     Column(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 16.dp)

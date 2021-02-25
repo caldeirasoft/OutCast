@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalAnimationClock
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -152,7 +151,7 @@ fun StoreCollectionGenresContent(
                     items = genresToDisplay,
                     columns = columns,
                     rowHeight = 96.dp
-                ) { item, innerPadding ->
+                ) { item, _ ->
                     when (item.id) {
                         -1 ->
                             GenreGridItemMore(
@@ -176,10 +175,7 @@ fun StoreCollectionFeaturedContent(
     storeCollection: StoreCollectionFeatured,
     navigateTo: (Screen) -> Unit
 ) {
-    val pagerState: PagerState = run {
-        val clock = LocalAnimationClock.current
-        remember(clock) { PagerState(clock, 0, 0, storeCollection.items.size - 1) }
-    }
+    val pagerState: PagerState = remember { PagerState(pages = storeCollection.items.size - 1)}
     val selectedPage = remember { mutableStateOf(0) }
 
     Column {
@@ -189,7 +185,7 @@ fun StoreCollectionFeaturedContent(
                 .aspectRatio(2.03f)
         )
         {
-            val item = storeCollection.items[page]
+            val item = storeCollection.items[this.currentPage]
             selectedPage.value = pagerState.currentPage
             val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
             Card(
@@ -278,21 +274,17 @@ fun StoreCollectionTopPodcastsContent(
     val indexedItems =
         storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
     val chunkedItems = indexedItems.chunked(numRows)
-    val pagerState: PagerState = run {
-        val clock = LocalAnimationClock.current
-        remember(clock) { PagerState(clock, 0, 0, chunkedItems.size - 1) }
-    }
+    val pagerState: PagerState = remember { PagerState(pages = chunkedItems.size - 1)}
     val selectedPage = remember { mutableStateOf(0) }
 
     Pager(
         state = pagerState,
-        offscreenLimit = 2,
-        contentAlignment = Alignment.Start,
+        //contentAlignment = Alignment.Start,
         modifier = Modifier
             .fillMaxWidth()
     )
     {
-        val chartItems = chunkedItems[page]
+        val chartItems = chunkedItems[this.currentPage]
         selectedPage.value = pagerState.currentPage
 
         Column(

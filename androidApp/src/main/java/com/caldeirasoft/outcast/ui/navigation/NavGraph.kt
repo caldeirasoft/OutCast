@@ -24,6 +24,7 @@ import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastEpisode
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
+import kotlinx.coroutines.FlowPreview
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import java.net.URLDecoder
@@ -46,6 +47,7 @@ inline fun <reified T> NavBackStackEntry.getObjectNotNull(key: String): T {
     return requireNotNull(Json.decodeFromString(serializer(), URLDecoder.decode(chartsEncoded, "UTF-8")))
 }
 
+@FlowPreview
 @ExperimentalMaterialApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

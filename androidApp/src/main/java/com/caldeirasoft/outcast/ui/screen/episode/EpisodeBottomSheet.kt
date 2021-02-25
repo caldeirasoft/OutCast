@@ -1,9 +1,9 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.OverflowText
@@ -39,7 +39,7 @@ fun openEpisodeDialog(storeEpisode: StoreEpisode) {
     val drawerContent = LocalBottomSheetContent.current
     drawerContent.updateContent {
         EpisodeDialog(
-            storeEpisode = storeEpisode,
+            episode = storeEpisode,
             navigateTo = { }
         )
     }
@@ -49,7 +49,7 @@ fun openEpisodeDialog(storeEpisode: StoreEpisode) {
 fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, storeEpisode: StoreEpisode) {
     drawerContent.updateContent {
         EpisodeDialog(
-            storeEpisode = storeEpisode,
+            episode = storeEpisode,
             navigateTo = { }
         )
     }
@@ -59,14 +59,14 @@ fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBo
 @ExperimentalCoroutinesApi
 @Composable
 fun EpisodeDialog(
-    storeEpisode: StoreEpisode,
+    episode: StoreEpisode,
     navigateTo: (Screen) -> Unit,
 ) {
     val scrollState = rememberScrollState(0f)
     val drawerState = LocalBottomSheetState.current
     val viewModel: EpisodeViewModel = viewModel(
-        key = storeEpisode.id.toString(),
-        factory = viewModelProviderFactoryOf { EpisodeViewModel(storeEpisode) }
+        key = episode.id.toString(),
+        factory = viewModelProviderFactoryOf { EpisodeViewModel(episode) }
     )
     val viewState by viewModel.state.collectAsState()
     val storeEpisode = viewState.storeEpisode
@@ -86,9 +86,9 @@ fun EpisodeDialog(
             elevation = if (scrollState.value > 0) 1.dp else 0.dp,
         )
 
-        ScrollableColumn(
-            scrollState = scrollState,
-            modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+                .verticalScroll(scrollState)) {
             // thumbnail + podcast title + release date
             Row(modifier = Modifier
                 .fillMaxWidth()
