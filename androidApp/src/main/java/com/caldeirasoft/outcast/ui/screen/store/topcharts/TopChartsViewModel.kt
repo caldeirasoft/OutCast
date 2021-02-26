@@ -11,19 +11,19 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
+import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 @FlowPreview
-@OptIn(KoinApiExtension::class)
 @ExperimentalCoroutinesApi
-class TopChartsViewModel(storeItemType: StoreItemType) : ViewModel(), KoinComponent {
-    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
+class TopChartsViewModel(
+    storeItemType: StoreItemType,
+    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase,
+    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    private val getStoreItemsUseCase: GetStoreItemsUseCase,
+) : ViewModel() {
 
     // storefront
     private val storeFront = fetchStoreFrontUseCase.getStoreFront()
@@ -64,7 +64,9 @@ class TopChartsViewModel(storeItemType: StoreItemType) : ViewModel(), KoinCompon
         ) {
             StoreChartsPagingSource(
                 storeFront = storeFront,
-                scope = viewModelScope) {
+                scope = viewModelScope,
+                getStoreItemsUseCase = getStoreItemsUseCase
+            ) {
                 fetchStoreTopChartsIdsUseCase.execute(storeGenre = genreId, storeItemType = type, storeFront = storeFront)
             }
         }.flow

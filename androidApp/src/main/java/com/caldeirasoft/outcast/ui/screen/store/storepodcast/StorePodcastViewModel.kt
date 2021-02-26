@@ -2,27 +2,26 @@ package com.caldeirasoft.outcast.ui.screen.store.storepodcast
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.*
-import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.data.util.StorePodcastPagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStorePodcastDataUseCase
+import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomViewModel
-import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsViewModel
-import com.caldeirasoft.outcast.ui.util.ScreenState
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-class StorePodcastViewModel(val storePodcast: StorePodcast) : ViewModel(), KoinComponent {
-
-    private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase by inject()
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
-
+class StorePodcastViewModel(
+    val storePodcast: StorePodcast,
+    val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
+    val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    val getStoreItemsUseCase: GetStoreItemsUseCase
+) : ViewModel() {
     // storefront
     private val storeFront: Flow<String> = fetchStoreFrontUseCase.getStoreFront()
 
@@ -71,7 +70,8 @@ class StorePodcastViewModel(val storePodcast: StorePodcast) : ViewModel(), KoinC
         ) {
             StorePodcastPagingSource(
                 scope = viewModelScope,
-                storePodcast = storePodcastPage
+                storePodcast = storePodcastPage,
+                getStoreItemsUseCase = getStoreItemsUseCase
             )
         }.flow
 

@@ -3,17 +3,26 @@ package com.caldeirasoft.outcast.ui.screen.store.directory
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreGroupingUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@KoinApiExtension
+@FlowPreview
 @ExperimentalCoroutinesApi
-class StoreDirectoryViewModel : StoreCollectionsViewModel<StoreGroupingPage>(), KoinComponent {
-    private val fetchStoreDirectoryUseCase: FetchStoreDirectoryUseCase by inject()
+class StoreDirectoryViewModel(
+    private val fetchStoreDirectoryUseCase: FetchStoreDirectoryUseCase,
+    fetchStoreGroupingUseCase: FetchStoreGroupingUseCase,
+    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase
+) : StoreCollectionsViewModel<StoreGroupingPage>(
+    fetchStoreFrontUseCase = fetchStoreFrontUseCase,
+    fetchStoreGroupingUseCase = fetchStoreGroupingUseCase,
+    fetchStoreTopChartsIdsUseCase = fetchStoreTopChartsIdsUseCase
+) {
     // state
     val state = MutableStateFlow(State())
 

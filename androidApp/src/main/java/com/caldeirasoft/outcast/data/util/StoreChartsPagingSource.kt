@@ -7,18 +7,13 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@KoinApiExtension
 class StoreChartsPagingSource(
     val storeFront: String,
     override val scope: CoroutineScope,
-    inline val dataFlow: () -> Flow<List<Long>>
-) : PagingSource<Int, StoreItem>(), StorePagingSource, KoinComponent {
-
-    override val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
+    override val getStoreItemsUseCase: GetStoreItemsUseCase,
+    inline val dataFlow: () -> Flow<List<Long>>,
+) : PagingSource<Int, StoreItem>(), StorePagingSource {
 
     private val idsFlow: StateFlow<List<Long>?> =
         dataFlow()

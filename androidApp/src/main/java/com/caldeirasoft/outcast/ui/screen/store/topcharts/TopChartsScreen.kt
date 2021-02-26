@@ -20,7 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
@@ -41,6 +40,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 
 
 @FlowPreview
@@ -51,10 +51,7 @@ fun TopChartsScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: TopChartsViewModel = viewModel(
-        key = "store_chart",
-        factory = viewModelProviderFactoryOf { TopChartsViewModel(storeItemType) }
-    )
+    val viewModel: TopChartsViewModel = getViewModel(parameters = { parametersOf(storeItemType) } )
     val viewState by viewModel.state.collectAsState()
     TopChartsScreen(
         viewState = viewState,

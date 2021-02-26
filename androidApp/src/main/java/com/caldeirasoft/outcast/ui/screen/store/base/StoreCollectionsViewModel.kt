@@ -12,16 +12,13 @@ import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@KoinApiExtension
 @ExperimentalCoroutinesApi
-abstract class StoreCollectionsViewModel<T : StorePage> : ViewModel(), KoinComponent {
-    private val fetchStoreGroupingUseCase: FetchStoreGroupingUseCase by inject()
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
-    private val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase by inject()
+abstract class StoreCollectionsViewModel<T : StorePage>(
+    protected val fetchStoreGroupingUseCase: FetchStoreGroupingUseCase,
+    protected val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    protected val fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase
+) : ViewModel() {
     // paging source
     protected var pagingSource: PagingSource<Int, StoreItem>? = null
     // storefront

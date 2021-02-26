@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryViewModel
+import com.caldeirasoft.outcast.ui.util.getViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -38,7 +38,7 @@ fun StoreSearchScreen(
     navigateToPodcast: (String) -> Unit,
     navigateUp: () -> Unit,
 ) {
-    val viewModel: StoreDirectoryViewModel = viewModel()
+    val viewModel: StoreDirectoryViewModel by getViewModel()
     val viewState by viewModel.state.collectAsState()
 
     //Log.d("Compose", "Compose StoreDirectoryScreen : ${Clock.System.now()}")

@@ -1,7 +1,6 @@
 @file:OptIn(KoinApiExtension::class)
 package com.caldeirasoft.outcast.ui.screen.store.directory
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.*
@@ -25,7 +24,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -42,7 +40,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.log10
 
@@ -75,10 +72,8 @@ enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @Drawab
 fun StoreDirectoryScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: StoreDirectoryViewModel = viewModel()
+    val viewModel : StoreDirectoryViewModel = getViewModel()
     val viewState by viewModel.state.collectAsState()
-
-    Log.d("Compose", "Compose StoreDirectoryScreen : ${Clock.System.now()}")
 
     StoreDirectoryContent(
         viewState = viewState,

@@ -20,7 +20,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -42,6 +41,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -51,10 +51,7 @@ fun StoreRoomScreen(
     navigateBack: () -> Unit,
 )
 {
-    val viewModel: StoreRoomViewModel = viewModel(
-        key = "store_room_${storeRoom.id}",
-        factory = viewModelProviderFactoryOf { StoreRoomViewModel(storeRoom) }
-    )
+    val viewModel: StoreRoomViewModel = getViewModel(parameters = { parametersOf(storeRoom) } )
     val viewState by viewModel.state.collectAsState()
     StoreRoomScreen(
         title = storeRoom.label,

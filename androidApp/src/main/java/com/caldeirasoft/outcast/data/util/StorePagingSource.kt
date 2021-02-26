@@ -1,23 +1,13 @@
 package com.caldeirasoft.outcast.data.util
 
-import android.util.Log
-import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onError
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@KoinApiExtension
 interface StorePagingSource
 {
     val scope: CoroutineScope

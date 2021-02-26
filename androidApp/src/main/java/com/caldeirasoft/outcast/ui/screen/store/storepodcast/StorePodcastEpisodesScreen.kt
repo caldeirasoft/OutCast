@@ -13,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
@@ -22,8 +21,9 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
+import com.caldeirasoft.outcast.ui.util.getViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -32,10 +32,7 @@ fun StorePodcastEpisodesScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: StorePodcastViewModel = viewModel(
-        key = storePodcast.url,
-        factory = viewModelProviderFactoryOf { StorePodcastViewModel(storePodcast) }
-    )
+    val viewModel: StorePodcastViewModel = getViewModel(parameters = { parametersOf(storePodcast) } )
     val viewState by viewModel.state.collectAsState()
 
     StorePodcastEpisodesScreen(

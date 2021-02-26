@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -32,9 +31,8 @@ import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import org.koin.core.component.KoinApiExtension
+import org.koin.core.parameter.parametersOf
 
-@KoinApiExtension
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
@@ -44,10 +42,7 @@ fun StoreGenreScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: StoreGenreViewModel = viewModel(
-        key = genreId.toString(),
-        factory = viewModelProviderFactoryOf { StoreGenreViewModel(genreId) }
-    )
+    val viewModel: StoreGenreViewModel = getViewModel(parameters = { parametersOf(genreId) } )
     val viewState by viewModel.state.collectAsState()
 
     StoreGenreContent(
@@ -59,7 +54,6 @@ fun StoreGenreScreen(
     )
 }
 
-@KoinApiExtension
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StoreGenreContent(

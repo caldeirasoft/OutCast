@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -47,12 +46,13 @@ import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.util.getViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
-import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -61,10 +61,7 @@ fun StorePodcastScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: StorePodcastViewModel = viewModel(
-        key = storePodcast.url,
-        factory = viewModelProviderFactoryOf { StorePodcastViewModel(storePodcast) }
-    )
+    val viewModel: StorePodcastViewModel = getViewModel(parameters = { parametersOf(storePodcast) } )
     val viewState by viewModel.state.collectAsState()
 
     StorePodcastScreen(

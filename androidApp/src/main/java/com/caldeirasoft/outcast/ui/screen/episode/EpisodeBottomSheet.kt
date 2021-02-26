@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.OverflowText
@@ -31,9 +30,10 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetContent
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
-import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
+import com.caldeirasoft.outcast.ui.util.getViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun openEpisodeDialog(storeEpisode: StoreEpisode) {
@@ -70,10 +70,7 @@ fun EpisodeDialog(
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState(0)
     val drawerState = LocalBottomSheetState.current
-    val viewModel: EpisodeViewModel = viewModel(
-        key = episode.id.toString(),
-        factory = viewModelProviderFactoryOf { EpisodeViewModel(episode) }
-    )
+    val viewModel: EpisodeViewModel = getViewModel(parameters = { parametersOf(episode) } )
     val viewState by viewModel.state.collectAsState()
     val storeEpisode = viewState.storeEpisode
 

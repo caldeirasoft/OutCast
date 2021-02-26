@@ -12,17 +12,13 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@KoinApiExtension
 class StorePodcastPagingSource(
     override val scope: CoroutineScope,
     val storePodcast: StorePodcastPage,
-) : PagingSource<Int, StoreItem>(), StorePagingSource, KoinComponent
+    override val getStoreItemsUseCase: GetStoreItemsUseCase
+) : PagingSource<Int, StoreItem>(), StorePagingSource
 {
-    override val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()

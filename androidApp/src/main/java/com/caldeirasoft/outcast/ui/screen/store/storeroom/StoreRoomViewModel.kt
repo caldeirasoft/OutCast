@@ -1,24 +1,30 @@
 package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.domain.interfaces.StoreFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreFeaturedPage
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreGroupingUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreCollectionsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 @ExperimentalCoroutinesApi
 class StoreRoomViewModel(
     private val room: StoreRoom,
-) : StoreCollectionsViewModel<StoreFeaturedPage>(), KoinComponent {
-    private val fetchStoreDataUseCase: FetchStoreDataUseCase by inject()
-
+    val fetchStoreDataUseCase: FetchStoreDataUseCase,
+    fetchStoreGroupingUseCase: FetchStoreGroupingUseCase,
+    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase
+) : StoreCollectionsViewModel<StoreFeaturedPage>(
+    fetchStoreFrontUseCase = fetchStoreFrontUseCase,
+    fetchStoreGroupingUseCase = fetchStoreGroupingUseCase,
+    fetchStoreTopChartsIdsUseCase = fetchStoreTopChartsIdsUseCase
+) {
     // state
     val state: StateFlow<State> =
         storeData
@@ -35,4 +41,8 @@ class StoreRoomViewModel(
     data class State(
         val storePage: StoreFeaturedPage
     )
+
+    companion object {
+        private const val ROOM_SAVED_STATE_KEY = "ROOM_SAVED_STATE_KEY"
+    }
 }
