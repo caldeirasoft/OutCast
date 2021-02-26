@@ -9,6 +9,7 @@ import kotlinx.coroutines.FlowPreview
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import timber.log.Timber
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -26,6 +27,7 @@ class App : Application() {
             initErrorHandler()
             initStetho()
             initLeakDetection()
+            Timber.plant(Timber.DebugTree());
         }
         setupTheme()
     }
