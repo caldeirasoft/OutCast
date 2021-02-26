@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,21 +33,25 @@ import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 @Composable
 fun openEpisodeDialog(storeEpisode: StoreEpisode) {
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
+    val coroutineScope = rememberCoroutineScope()
     drawerContent.updateContent {
         EpisodeDialog(
             episode = storeEpisode,
             navigateTo = { }
         )
     }
-    drawerState.show()
+    coroutineScope.launch {
+        drawerState.show()
+    }
 }
 
-fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, storeEpisode: StoreEpisode) {
+suspend fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, storeEpisode: StoreEpisode) {
     drawerContent.updateContent {
         EpisodeDialog(
             episode = storeEpisode,
@@ -62,7 +67,8 @@ fun EpisodeDialog(
     episode: StoreEpisode,
     navigateTo: (Screen) -> Unit,
 ) {
-    val scrollState = rememberScrollState(0f)
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState(0)
     val drawerState = LocalBottomSheetState.current
     val viewModel: EpisodeViewModel = viewModel(
         key = episode.id.toString(),
@@ -78,7 +84,11 @@ fun EpisodeDialog(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { drawerState.hide() }) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        drawerState.hide()
+                    }
+                }) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
@@ -87,7 +97,8 @@ fun EpisodeDialog(
         )
 
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
                 .verticalScroll(scrollState)) {
             // thumbnail + podcast title + release date
             Row(modifier = Modifier
@@ -95,11 +106,11 @@ fun EpisodeDialog(
                 )
             {
                 // thumbnail
-                Box(modifier = Modifier.preferredSize(64.dp)) {
+                Box(modifier = Modifier.size(64.dp)) {
                     PodcastThumbnail(
                         imageModel = storeEpisode.getArtworkUrl(),
                         modifier = Modifier
-                            .preferredSize(64.dp)
+                            .size(64.dp)
                     )
                 }
 

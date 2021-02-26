@@ -31,7 +31,7 @@ fun <T> ColumnScope.Grid(
     rows.forEachIndexed { index, rowList ->
         Row(modifier = Modifier
             .fillMaxWidth()
-            .preferredHeight(rowHeight)
+            .height(rowHeight)
             .padding(mainAxisPadding)) {
             rowList.forEachIndexed { rowIndex, it ->
                 Box(modifier = Modifier
@@ -90,7 +90,7 @@ fun <T : Any> LazyListScope.gridItems(
                         }
                     }
                     if (column < columns - 1) {
-                        Spacer(modifier = Modifier.preferredWidth(horizontalInnerPadding))
+                        Spacer(modifier = Modifier.width(horizontalInnerPadding))
                     }
                 }
             }
@@ -106,7 +106,7 @@ fun <T : Any> LazyListScope.gridItems(
 fun LazyListScope.spacerItem(height: Dp) {
     item {
         Spacer(Modifier
-            .preferredHeight(height)
+            .height(height)
             .fillParentMaxWidth())
     }
 }
@@ -126,7 +126,7 @@ fun VerticalDivider(
     Box(
         modifier.then(indentMod)
             .fillMaxHeight()
-            .preferredWidth(thickness)
+            .width(thickness)
             .background(color = color)
     )
 }

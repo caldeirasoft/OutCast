@@ -53,7 +53,7 @@ fun StoreHeadingSection(title:String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .preferredHeight(48.dp)
+            .height(48.dp)
             .padding(horizontal = 16.dp)
     ) {
         Text(
@@ -71,7 +71,7 @@ fun StoreHeadingSectionWithLink(title:String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .preferredHeight(48.dp)
+            .height(48.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
     ) {

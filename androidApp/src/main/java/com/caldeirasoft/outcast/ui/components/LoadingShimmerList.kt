@@ -46,7 +46,7 @@ fun ShimmerCollectionPodcastContent(
         .padding(8.dp)) {
         Surface {
             Spacer(modifier = Modifier
-                .preferredSize(width = 250.dp, height = 30.dp)
+                .size(width = 250.dp, height = 30.dp)
                 .padding(horizontal = 8.dp)
                 .background(brush = brush))
         }
@@ -76,25 +76,25 @@ fun ShimmerPodcastGridItem(
     val brush = Brush.verticalGradient(list, 0f, floatAnim)
     Column(modifier = Modifier
         .padding(8.dp)
-        .preferredWidth(100.dp)
+        .width(100.dp)
         ) {
         Surface(shape = MaterialTheme.shapes.medium) {
             Spacer(modifier = Modifier
-                .preferredSize(100.dp)
+                .size(100.dp)
                 .background(brush = brush))
         }
         Spacer(modifier = Modifier.height(8.dp))
         Surface {
             Spacer(modifier = Modifier
                 .fillMaxWidth()
-                .preferredHeight(15.dp)
+                .height(15.dp)
                 .background(brush = brush))
         }
         Spacer(modifier = Modifier.height(8.dp))
         Surface {
             Spacer(modifier = Modifier
                 .fillMaxWidth()
-                .preferredHeight(12.dp)
+                .height(12.dp)
                 .background(brush = brush))
         }
     }
@@ -111,18 +111,18 @@ fun ShimmerPodcastListItem(
     ) {
         Surface(shape = MaterialTheme.shapes.medium) {
             Spacer(modifier = Modifier
-                .preferredSize(56.dp)
+                .size(56.dp)
                 .background(brush = brush))
         }
         Column(modifier = Modifier.weight(1f)) {
             Spacer(modifier = Modifier
                 .fillMaxWidth()
-                .preferredHeight(25.dp)
+                .height(25.dp)
                 .background(brush = brush))
             Spacer(modifier = Modifier.height(8.dp))
             Spacer(modifier = Modifier
                 .fillMaxWidth()
-                .preferredHeight(15.dp)
+                .height(15.dp)
                 .background(brush = brush))
         }
     }

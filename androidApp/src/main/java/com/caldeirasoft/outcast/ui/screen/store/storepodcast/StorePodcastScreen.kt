@@ -15,10 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -55,6 +52,7 @@ import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -85,6 +83,7 @@ private fun StorePodcastScreen(
     navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
+    val coroutineScope = rememberCoroutineScope()
     val podcastData = viewState.storePage.storeData
     val otherPodcastsLazyPagingItems = otherPodcasts.collectAsLazyPagingItems()
     val drawerState = LocalBottomSheetState.current
@@ -169,7 +168,11 @@ private fun StorePodcastScreen(
                             // trailer
                             EpisodeTrailerItem(
                                 storeEpisode = trailer,
-                                onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, trailer) })
+                                onEpisodeClick = {
+                                    coroutineScope.launch {
+                                        openEpisodeDialog(drawerState, drawerContent, trailer)
+                                    }
+                                })
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
@@ -183,8 +186,12 @@ private fun StorePodcastScreen(
                     items(it.recentEpisodes) { episode ->
                         EpisodeItemWithDesc(
                             storeEpisode = episode,
-                            onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, episode) })
-
+                            onEpisodeClick = {
+                                coroutineScope.launch {
+                                    openEpisodeDialog(drawerState, drawerContent, episode)
+                                }
+                            }
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     // button show all episodes
@@ -368,7 +375,7 @@ fun StorePodcastCollapsedHeader(
         modifier = Modifier
             .fillMaxWidth(),
         title = {
-            Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
+            CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
                 Text(text = viewState.storePage.name)
             }
         },

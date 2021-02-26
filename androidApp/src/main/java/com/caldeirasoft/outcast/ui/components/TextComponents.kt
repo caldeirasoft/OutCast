@@ -119,7 +119,7 @@ fun OverflowText(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .preferredHeight(60.dp)
+                    .height(60.dp)
                     .align(Alignment.BottomStart)
                     .background(
                         brush = Brush.verticalGradient(

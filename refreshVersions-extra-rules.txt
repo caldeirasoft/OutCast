@@ -1,5 +1,0 @@
-org.koin:koin(-*)
-    ^^^^
-
-androidx.compose.*
-         ^^^^^^^

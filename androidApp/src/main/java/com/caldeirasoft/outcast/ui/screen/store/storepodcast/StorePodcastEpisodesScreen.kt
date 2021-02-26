@@ -22,7 +22,6 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -87,7 +86,7 @@ private fun StorePodcastEpisodesScreen(
                     items(it.episodes) {
                         EpisodeItem(
                             storeEpisode = it,
-                            onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, it) })
+                            onEpisodeClick = {  })
 
                         Divider()
                     }

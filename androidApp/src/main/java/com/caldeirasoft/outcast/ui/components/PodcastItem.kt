@@ -26,7 +26,7 @@ fun PodcastListItemIndexed(
     storePodcast: StorePodcast,
     index: Int,
     nameMaxLines: Int = 2,
-    iconModifier: Modifier = Modifier.preferredSize(PodcastDefaults.ThumbnailSize)
+    iconModifier: Modifier = Modifier.size(PodcastDefaults.ThumbnailSize)
 ) {
     ListItem(
         modifier = modifier.fillMaxWidth(),
@@ -61,7 +61,7 @@ fun SmallPodcastListItemIndexed(
     storePodcast = storePodcast,
     index = index,
     nameMaxLines = 1,
-    iconModifier = Modifier.preferredSize(PodcastDefaults.SmallThumbnailSize))
+    iconModifier = Modifier.size(PodcastDefaults.SmallThumbnailSize))
 
 
 @Composable

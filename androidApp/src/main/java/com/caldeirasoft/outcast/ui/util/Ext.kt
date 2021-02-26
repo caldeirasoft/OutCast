@@ -6,7 +6,7 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
@@ -42,7 +42,7 @@ fun applyTextStyleCustom(
     content: ComposableFn
 ): @Composable (() -> Unit) {
     return {
-        Providers(LocalContentAlpha provides contentAlpha) {
+        CompositionLocalProvider(LocalContentAlpha provides contentAlpha) {
             ProvideTextStyle(textStyle, content)
         }
     }
@@ -55,7 +55,7 @@ fun applyTextStyleNullable(
 ): @Composable (() -> Unit)? {
     if (content == null) return null
     return {
-        Providers(LocalContentAlpha provides contentAlpha) {
+        CompositionLocalProvider(LocalContentAlpha provides contentAlpha) {
             ProvideTextStyle(textStyle, content)
         }
     }

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -39,6 +40,7 @@ import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 
 @FlowPreview
@@ -76,11 +78,12 @@ fun TopChartsScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
+    val listState = rememberLazyListState(0)
+    val coroutineScope = rememberCoroutineScope()
     val selectedGenre = viewState.selectedGenre
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = topCharts.collectAsLazyPagingItems()
-    val listState = rememberLazyListState(0)
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 56.px
@@ -124,7 +127,9 @@ fun TopChartsScreen(
                                         onGenreSelected = onChartsGenreSelected
                                     )
                                 }
-                                drawerState.show()
+                                coroutineScope.launch {
+                                    drawerState.show()
+                                }
                             })
                         {
                             Text(
@@ -167,7 +172,11 @@ fun TopChartsScreen(
                             }
                             is StoreEpisode -> {
                                 EpisodeItemWithArtwork(
-                                    onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, item) },
+                                    onEpisodeClick = {
+                                        coroutineScope.launch {
+                                            openEpisodeDialog(drawerState, drawerContent, item)
+                                        }
+                                    },
                                     onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                     storeEpisode = item,
                                     index = index + 1

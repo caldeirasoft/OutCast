@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -19,6 +20,7 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.launch
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -27,7 +29,8 @@ fun CategoriesListBottomSheet(
     selectedGenre: Int?,
     onGenreSelected: (Int?) -> Unit,
 ) {
-    val scrollState = rememberScrollState(0f)
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState(0)
     val drawerState = LocalBottomSheetState.current
     Column()
     {
@@ -36,7 +39,11 @@ fun CategoriesListBottomSheet(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { drawerState.hide() }) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        drawerState.hide()
+                    }
+                }) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
@@ -73,6 +80,7 @@ fun GenreListItem(
     selected: Boolean = false,
     onGenreSelected: (Int?) -> Unit)
 {
+    val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
     val backgroundColor: Color = when {
         selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
@@ -89,8 +97,9 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    drawerState.hide {
-                        onGenreSelected(storeGenreItem.genreId)
+                    onGenreSelected(storeGenreItem.genreId)
+                    coroutineScope.launch {
+                        drawerState.hide()
                     }
                 }),
             text = { Text(text = name, color = contentColor) },
@@ -107,8 +116,9 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    drawerState.hide {
-                        onGenreSelected(null)
+                    onGenreSelected(null)
+                    coroutineScope.launch {
+                        drawerState.hide()
                     }
                 }),
             text = { Text(
@@ -117,8 +127,3 @@ fun GenreListItem(
         )
     }
 }
-
-class CategoriesListScreenArgs (
-    val selectedGenre: Int?,
-    val onGenreSelected: (Int?) -> Unit,
-)

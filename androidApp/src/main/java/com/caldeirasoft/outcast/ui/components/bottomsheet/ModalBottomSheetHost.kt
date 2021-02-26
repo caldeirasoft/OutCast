@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -13,9 +13,9 @@ import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.util.Log_D
 
 
-val LocalBottomSheetContent = compositionLocalOf<ModalBottomSheetContent>()
+val LocalBottomSheetContent = compositionLocalOf<ModalBottomSheetContent> { error("Not provider ModalBottomSheetContent") }
 @ExperimentalMaterialApi
-val LocalBottomSheetState = compositionLocalOf<ModalBottomSheetState>()
+val LocalBottomSheetState = compositionLocalOf<ModalBottomSheetState> { error("Not provider ModalBottomSheetState") }
 
 @ExperimentalMaterialApi
 @Composable
@@ -37,7 +37,7 @@ fun ModalBottomSheetHost(content: @Composable () -> Unit)
             true
         }
 
-    Providers(
+    CompositionLocalProvider(
         LocalBottomSheetContent provides bottomSheetContent,
         LocalBottomSheetState provides sheetState)
     {

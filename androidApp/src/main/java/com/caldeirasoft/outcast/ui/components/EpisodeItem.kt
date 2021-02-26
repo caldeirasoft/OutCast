@@ -39,7 +39,7 @@ fun EpisodeCardItemWithArtwork(
                         PodcastThumbnail(
                             imageModel = storeEpisode.getArtworkUrl(),
                             modifier = Modifier
-                                .preferredSize(EpisodeDefaults.ThumbnailSize)
+                                .size(EpisodeDefaults.ThumbnailSize)
                                 .clickable(onClick = onPodcastClick)
                         )
                     },
@@ -158,7 +158,7 @@ fun EpisodeItemWithDescAndArtwork(
                     PodcastThumbnail(
                         imageModel = storeEpisode.getArtworkUrl(),
                         modifier = Modifier
-                            .preferredSize(EpisodeDefaults.ThumbnailSize)
+                            .size(EpisodeDefaults.ThumbnailSize)
                             .clickable(onClick = onPodcastClick)
                     )
                 },
@@ -197,7 +197,7 @@ fun EpisodeItemWithArtwork(
                     PodcastThumbnail(
                         imageModel = storeEpisode.getArtworkUrl(),
                         modifier = Modifier
-                            .preferredSize(EpisodeDefaults.ThumbnailSize)
+                            .size(EpisodeDefaults.ThumbnailSize)
                             .clickable(onClick = onPodcastClick)
                     )
                 },
@@ -238,7 +238,7 @@ private fun EpisodeItemArtworkHeader(
             PodcastThumbnail(
                 imageModel = storeEpisode.getArtworkUrl(),
                 modifier = Modifier
-                    .preferredSize(EpisodeDefaults.ThumbnailSize)
+                    .size(EpisodeDefaults.ThumbnailSize)
             )
         },
         podcastText = {
@@ -299,7 +299,7 @@ private object EpisodeDefaults {
 
         Column(modifier
             .fillMaxWidth()
-            .preferredHeightIn(min = MinHeight)
+            .heightIn(min = MinHeight)
             .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
         {
             styledOverlineText()
@@ -333,7 +333,7 @@ private object EpisodeDefaults {
             .fillMaxWidth()
             .padding(bottom = ContentInnerPadding))
         {
-            Box(modifier = Modifier.preferredSize(64.dp)) {
+            Box(modifier = Modifier.size(64.dp)) {
                 icon()
             }
 
@@ -367,7 +367,7 @@ private object EpisodeDefaults {
         val styledOverlineText = applyTextStyleCustom(typography.caption, ContentAlpha.high, overlineText)
 
         Column(modifier
-            .preferredHeightIn(min = MinHeight)
+            .heightIn(min = MinHeight)
             .padding(start = ContentLeftPadding, end = ContentRightPadding, top = ContentTopPadding))
         {
             Row(modifier = Modifier

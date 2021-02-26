@@ -59,7 +59,7 @@ dependencyResolutionManagement {
             alias("runtime-ktx").to("androidx.lifecycle:lifecycle-runtime-ktx:2.3.+")
             alias("datastore-preferences").to("androidx.datastore:datastore-preferences:1.0.0-alpha06")
 
-            version("compose", "1.0.0-alpha12")
+            version("compose", "1.0.0-beta01")
             alias("compose-runtime").to("androidx.compose.runtime", "runtime").versionRef("compose")
             alias("compose-foundation").to("androidx.compose.foundation", "foundation").versionRef("compose")
             alias("compose-layout").to("androidx.compose.foundation", "foundation-layout").versionRef("compose")
@@ -77,10 +77,10 @@ dependencyResolutionManagement {
                 "compose-iconsExtended",
             ))
 
-            alias("activity-compose").to("androidx.activity:activity-compose:1.3.0-alpha02")
-            alias("viewmodel-compose").to("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha01")
-            alias("navigation-compose").to("androidx.navigation:navigation-compose:1.0.0-alpha07")
-            alias("paging-compose").to("androidx.paging:paging-compose:1.0.0-alpha07")
+            alias("activity-compose").to("androidx.activity:activity-compose:1.3.0-alpha03")
+            alias("viewmodel-compose").to("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha02")
+            alias("navigation-compose").to("androidx.navigation:navigation-compose:1.0.0-alpha08")
+            alias("paging-compose").to("androidx.paging:paging-compose:1.0.0-alpha08")
 
             version("koin", "2+")
             alias("koin-androidx").to("org.koin", "koin-androidx-scope").versionRef("koin")
@@ -121,7 +121,7 @@ dependencyResolutionManagement {
             bundle("stetho", listOf("stetho-core", "stetho-okhttp3"))
 
             alias("timber").to("com.jakewharton.timber:timber:4.+")
-            alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.5")
+            alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.6")
             alias("junit").to("junit:junit:4.+")
         }
     }

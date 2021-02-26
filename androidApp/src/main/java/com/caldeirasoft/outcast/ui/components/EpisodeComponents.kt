@@ -43,7 +43,7 @@ fun StoreEpisodeListItem(episode: StoreEpisode)
                         imageModel = episode.getArtworkUrl(),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .preferredSize(56.dp)
+                            .size(56.dp)
                     )
                 }
             },
@@ -59,7 +59,7 @@ fun StoreEpisodeListItem(episode: StoreEpisode)
                     modifier = Modifier.height(32.dp)
                 ) {
                     Row {
-                        Box(modifier = Modifier.preferredSize(24.dp).padding(end = 4.dp)) {
+                        Box(modifier = Modifier.size(24.dp).padding(end = 4.dp)) {
                             Canvas(modifier = Modifier.fillMaxSize()) {
                                 drawCircle(
                                     color = Color.Blue,
@@ -104,7 +104,7 @@ fun StoreEpisodeSmallListItemIndexed(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = CenterVertically,
-                modifier = Modifier.preferredWidth(60.dp)
+                modifier = Modifier.width(60.dp)
             ) {
                 Card(
                     backgroundColor = colors[1],
@@ -114,7 +114,7 @@ fun StoreEpisodeSmallListItemIndexed(
                         imageModel = episode.getArtworkUrl(),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .preferredSize(40.dp)
+                            .size(40.dp)
                     )
                 }
                 Text(
@@ -136,7 +136,7 @@ fun StoreEpisodeSmallListItemIndexed(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = CenterVertically,
-                modifier = Modifier.preferredWidth(60.dp)
+                modifier = Modifier.width(60.dp)
             ) {
                 Card(
                     backgroundColor = colors[1],
@@ -146,7 +146,7 @@ fun StoreEpisodeSmallListItemIndexed(
                         imageModel = episode.getArtworkUrl(),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .preferredSize(40.dp)
+                            .size(40.dp)
                     )
                 }
                 Text(
@@ -173,7 +173,7 @@ fun PreviewPlayButton() {
     ) {
         Row {
             Box(modifier = Modifier.padding(end = 4.dp)) {
-                Box(modifier = Modifier.preferredSize(24.dp)) {
+                Box(modifier = Modifier.size(24.dp)) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         drawCircle(
                             color = Color.Blue,
@@ -194,7 +194,7 @@ fun PreviewPlayButton() {
                     contentDescription = "play",
                     tint = Color.Blue,
                     modifier = Modifier
-                        .preferredSize(16.dp)
+                        .size(16.dp)
                         .align(Alignment.Center)
                 )
             }

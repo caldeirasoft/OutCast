@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Lens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +31,7 @@ import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
 import com.skydoves.landscapist.coil.CoilImage
+import kotlinx.coroutines.launch
 
 @Composable
 fun StoreCollectionItemsContent(
@@ -37,6 +39,7 @@ fun StoreCollectionItemsContent(
     navigateTo: ScreenFn,
 )
 {
+    val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
 
@@ -51,7 +54,7 @@ fun StoreCollectionItemsContent(
                 is StorePodcast -> {
                     PodcastGridItem(
                         modifier = Modifier
-                            .preferredWidth(100.dp)
+                            .width(100.dp)
                             .clickable(onClick = {
                                 navigateTo(Screen.StorePodcastScreen(item))
                             }),
@@ -62,7 +65,9 @@ fun StoreCollectionItemsContent(
                         modifier = Modifier.width(320.dp),
                         onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                         onEpisodeClick = {
-                            openEpisodeDialog(drawerState, drawerContent, item)
+                            coroutineScope.launch {
+                                openEpisodeDialog(drawerState, drawerContent, item)
+                            }
                         },
                         storeEpisode = item,
                         //index = index + 1
@@ -84,7 +89,7 @@ fun StoreRoomItem(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .padding(horizontal = 8.dp)
-            .preferredWidth(200.dp)
+            .width(200.dp)
             .clickable(onClick = {
                 navigateTo(Screen.Room(room))
             })
@@ -209,7 +214,7 @@ fun StoreCollectionFeaturedContent(
                         ConstraintLayout(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .preferredHeight(100.dp)
+                                .height(100.dp)
                                 .padding(horizontal = 24.dp, vertical = 16.dp)
                                 .align(Alignment.BottomCenter)
                         ) {
@@ -313,6 +318,7 @@ fun StoreCollectionTopEpisodesContent(
     storeCollection: StoreCollectionTopEpisodes,
     navigateTo: (Screen) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
     // content
@@ -326,7 +332,11 @@ fun StoreCollectionTopEpisodesContent(
             EpisodeCardItemWithArtwork(
                 modifier = Modifier.width(320.dp),
                 onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
-                onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, item) },
+                onEpisodeClick = {
+                    coroutineScope.launch {
+                        openEpisodeDialog(drawerState, drawerContent, item)
+                    }
+                },
                 storeEpisode = item,
                 index = index + 1
             )
@@ -342,7 +352,7 @@ fun CarouselDot(selected: Boolean, color: Color) {
         contentDescription = null,
         modifier = Modifier
             .padding(4.dp)
-            .preferredSize(12.dp),
+            .size(12.dp),
         tint = if (selected) color else Color.Gray
     )
 }

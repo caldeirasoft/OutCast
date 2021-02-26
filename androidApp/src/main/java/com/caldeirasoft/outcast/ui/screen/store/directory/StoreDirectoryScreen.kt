@@ -228,7 +228,7 @@ fun ReachableAppBarWithSearchBar(
         val alphaCollapsedHeader = (3 * log10((1-scrollRatioLargeHeader).toDouble()) + 1).toFloat().coerceIn(0f, 1f)
         Box(modifier = Modifier
             .fillMaxWidth()
-            .preferredHeightIn(max = computedHeight)
+            .heightIn(max = computedHeight)
             .height(computedHeight)
             .background(MaterialTheme.colors.background)) {
 
@@ -247,7 +247,7 @@ fun ReachableAppBarWithSearchBar(
                     .align(Alignment.TopStart)
                     .alpha(alphaCollapsedHeader),
                 title = {
-                    Providers(LocalContentAlpha provides alphaCollapsedHeader) {
+                    CompositionLocalProvider(LocalContentAlpha provides alphaCollapsedHeader) {
                         title()
                     }
                 },
@@ -310,7 +310,7 @@ private fun GenreTabs(
                                 onGenreClick = {
                                     onGenreSelected(category.id)
                                     scrollScope.launch {
-                                        scrollState.smoothScrollTo(0f)
+                                        scrollState.animateScrollTo(0)
                                     }
                                 }
                             )

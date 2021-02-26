@@ -37,7 +37,7 @@ fun PlayButton(
     ) {
         Row {
             Box(modifier = Modifier.padding(end = 4.dp)) {
-                Box(modifier = Modifier.preferredSize(24.dp)) {
+                Box(modifier = Modifier.size(24.dp)) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         drawCircle(
                             color = Color.Blue,
@@ -58,7 +58,7 @@ fun PlayButton(
                     contentDescription = null,
                     tint = Color.Blue,
                     modifier = Modifier
-                        .preferredSize(16.dp)
+                        .size(16.dp)
                         .align(Alignment.Center)
                 )
             }

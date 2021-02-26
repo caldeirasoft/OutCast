@@ -2,15 +2,15 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -71,7 +71,7 @@ fun ReachableAppBar(
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
                 title = {
-                    Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
+                    CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
                         title()
                     }
                 },
@@ -108,7 +108,7 @@ fun ReachableAppBar(
         val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
         Box(modifier = Modifier
             .fillMaxWidth()
-            .preferredHeightIn(max = computedHeight)
+            .heightIn(max = computedHeight)
             .height(computedHeight)) {
 
             // expanded content
@@ -146,7 +146,7 @@ fun TopHeaderExpanded(
         val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
         Box(modifier = Modifier
             .fillMaxWidth()
-            .preferredHeightIn(max = computedHeight)
+            .heightIn(max = computedHeight)
             .height(computedHeight)
             .background(MaterialTheme.colors.background)) {
 

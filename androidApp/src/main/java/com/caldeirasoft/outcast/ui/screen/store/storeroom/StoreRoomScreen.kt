@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.store.storeroom
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -10,14 +11,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +41,7 @@ import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -76,20 +74,17 @@ private fun StoreRoomScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState(0)
     val lazyPagingItems = discover.collectAsLazyPagingItems()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
-
 
     ReachableScaffold(
         headerRatioOrientation = Orientation.Vertical,
         headerRatio = 1/3f
     ) { headerHeight ->
         val spacerHeight = headerHeight - 56.px
-
-        // headerRatioOrientation = Orientation.Horizontal,
-        // headerRatio = 13/32f
 
         LazyColumn(
             state = listState,
@@ -189,7 +184,13 @@ private fun StoreRoomScreen(
                                         }
                                         is StoreEpisode -> {
                                             EpisodeItemWithArtwork(
-                                                onEpisodeClick = { openEpisodeDialog(drawerState, drawerContent, item) },
+                                                onEpisodeClick = {
+                                                    coroutineScope.launch {
+                                                        openEpisodeDialog(drawerState,
+                                                            drawerContent,
+                                                            item)
+                                                    }
+                                                },
                                                 onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                                 storeEpisode = item,
                                                 index = index + 1
@@ -254,7 +255,7 @@ private fun StoreRoomScreen(
                                 CoilImage(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .preferredHeight(computedHeight)
+                                        .height(computedHeight)
                                         .alpha(alphaLargeHeader),
                                     imageRequest = ImageRequest.Builder(LocalContext.current)
                                         .data(artworkUrl)
@@ -307,7 +308,7 @@ private fun StoreRoomScreen(
                         .fillMaxWidth()
                         .align(Alignment.BottomStart),
                     title = {
-                        Providers(LocalContentAlpha provides collapsedHeaderAlpha) {
+                        CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
                             Text(text = title)
                         }
                     },
