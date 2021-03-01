@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.*
 
 class StoreChartsPagingSource(
     val storeFront: String,
-    val scope: CoroutineScope,
+    override val scope: CoroutineScope,
     val getStoreItemsUseCase: GetStoreItemsUseCase,
     inline val dataFlow: () -> Flow<List<Long>>,
 ) : PagingSource<Int, StoreItem>(), StorePagingSource {

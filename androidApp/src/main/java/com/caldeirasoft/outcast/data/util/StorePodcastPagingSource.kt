@@ -10,7 +10,7 @@ import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 
 class StorePodcastPagingSource(
-    val scope: CoroutineScope,
+    override val scope: CoroutineScope,
     val storePodcast: StorePodcastPage,
     val getStoreItemsUseCase: GetStoreItemsUseCase
 ) : PagingSource<Int, StoreItem>(), StorePagingSource

@@ -33,6 +33,7 @@ class StoreRoomViewModel(
 
     private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
         fetchStoreRoomPagingDataUseCase.executeAsync(
+            scope = viewModelScope,
             storeRoom = room,
             dataLoadedCallback = {
                 it.tryCast<StoreFeaturedPage> {

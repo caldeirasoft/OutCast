@@ -139,7 +139,7 @@ internal val databaseModule = module {
 internal val repositoryModule = module {
     single<PodcastRepository> { PodcastRepository(database = get()) }
     single<EpisodeRepository> { EpisodeRepository(database = get()) }
-    single<StoreRepository> { StoreRepository(itunesAPI = get(), searchAPI = get()) }
+    single<StoreRepository> { StoreRepository(itunesAPI = get(), searchAPI = get(), context = get(), json = get()) }
     single<InboxRepository> { InboxRepository(database = get()) }
     single<QueueRepository> { QueueRepository(database = get()) }
     single<LocalCacheRepository> { LocalCacheRepository(context = get(), json = get()) }
@@ -161,6 +161,7 @@ internal val usecaseModule = module {
     single { FetchPodcastUseCase(podcastRepository = get()) }
     single { FetchEpisodeUseCase(episodeRepository = get()) }
     single { FetchStoreDirectoryUseCase(storeRepository = get(), localCacheRepository = get()) }
+    single { FetchStoreDirectoryPagingDataUseCase(storeRepository = get()) }
     single { FetchStoreGroupingPagingDataUseCase(storeRepository = get(), localCacheRepository = get())}
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     single { FetchStoreDataUseCase(storeRepository = get()) }

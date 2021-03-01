@@ -2,13 +2,14 @@ package com.caldeirasoft.outcast.data.util
 
 import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
 interface StorePagingSource
 {
+    val scope: CoroutineScope
     suspend fun getStoreItems(lookupIds: List<Long>, storeFront: String, storePage: StorePage?): List<StoreItem>
 
     suspend fun getItemsFromIds(
@@ -23,7 +24,7 @@ interface StorePagingSource
     ): List<StoreItem> {
         val idsSplit = ids.chunked(20)
         val deferredList = idsSplit.map {
-            GlobalScope.async(Dispatchers.IO) { getStoreItems(it, storeFront, storePage) }
+            scope.async(Dispatchers.IO) { getStoreItems(it, storeFront, storePage) }
         }
         val lstOfReturnData = deferredList.awaitAll()
         return lstOfReturnData.flatten()

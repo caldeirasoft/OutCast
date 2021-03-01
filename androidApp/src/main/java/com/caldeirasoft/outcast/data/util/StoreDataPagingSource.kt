@@ -6,8 +6,11 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.interfaces.StorePageWithCollection
 import com.caldeirasoft.outcast.domain.models.store.StoreRoomPage
+import kotlinx.coroutines.CoroutineScope
+import timber.log.Timber
 
 class StoreDataPagingSource(
+    override val scope: CoroutineScope,
     private val storeRepository: StoreRepository,
     private val loadDataFromNetwork: suspend () -> StorePage,
     private val dataLoadedCallback: ((StorePage) -> Unit)?
@@ -20,8 +23,9 @@ class StoreDataPagingSource(
     ): List<StoreItem> =
         storeRepository.getListStoreItemDataAsync(lookupIds, storeFront, storePage)
 
-    override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem>? {
+    override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {
         val storePage = loadDataFromNetwork()
+        Timber.d("DBG - got new Grouping data : use it to Paging")
         dataLoadedCallback?.invoke(storePage)
         val items = mutableListOf<StoreItem>()
         when (storePage) {
@@ -43,6 +47,7 @@ class StoreDataPagingSource(
                 items += getItemsFromIds(subset, storePage)
             }
         }
+        Timber.d("DBG - return items to Paging")
         return items
     }
 

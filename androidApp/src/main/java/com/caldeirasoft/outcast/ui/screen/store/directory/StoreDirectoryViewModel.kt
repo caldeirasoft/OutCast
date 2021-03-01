@@ -6,16 +6,17 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryUseCase
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryPagingDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import timber.log.Timber
 
 @FlowPreview
 @ExperimentalCoroutinesApi
 class StoreDirectoryViewModel(
-    private val fetchStoreDirectoryUseCase: FetchStoreDirectoryUseCase,
+    private val fetchStoreDirectoryPagingDataUseCase: FetchStoreDirectoryPagingDataUseCase,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,
 ) : ViewModel() {
     // storefront
@@ -35,9 +36,12 @@ class StoreDirectoryViewModel(
     private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
         storeFront
             .flatMapConcat {
-                fetchStoreDirectoryUseCase.executeAsync(
+                fetchStoreDirectoryPagingDataUseCase.executeAsync(
+                    scope = viewModelScope,
                     storeFront = it,
-                    dataLoadedCallback = null
+                    newVersionAvailable = {
+                        Timber.d("New version available")
+                    }
                 )
             }
 

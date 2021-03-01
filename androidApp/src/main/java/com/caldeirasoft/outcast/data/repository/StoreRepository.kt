@@ -1,8 +1,16 @@
 package com.caldeirasoft.outcast.data.repository
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.createDataStore
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
@@ -13,20 +21,48 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import retrofit2.HttpException
 import timber.log.Timber
+import java.io.IOException
+import kotlin.time.hours
 
 class StoreRepository (
     val itunesAPI: ItunesAPI,
-    val searchAPI: ItunesSearchAPI
+    val searchAPI: ItunesSearchAPI,
+    val context: Context,
+    val json: Json
 ) {
 
     companion object {
         const val DEFAULT_GENRE = 26
+        const val CACHE_STORE_FILE_NAME = "storeCache.db"
     }
+
+    private object PreferenceKeys {
+        val DIRECTORY = stringPreferencesKey("storeDirectory")
+        val GENRES = stringPreferencesKey("storeGenres")
+    }
+
+    // Build the DataStore
+    private val cacheDataStore: DataStore<Preferences> =
+        context.createDataStore(name = CACHE_STORE_FILE_NAME)
+
+    private val preferencesFlow = cacheDataStore.data
+        .catch { exception ->
+            if (exception is IOException)
+                emit(emptyPreferences())
+            else throw exception
+        }
 
     /**
      * getStoreDataAsync{
@@ -46,7 +82,7 @@ class StoreRepository (
     /**
      * getGroupingDataAsync
      */
-    suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
+    private suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
         val storeResponse = itunesAPI.groupingData(storeFront = storeFront, genre =  genre ?: DEFAULT_GENRE)
         if (storeResponse.isSuccessful.not())
             throw HttpException(storeResponse)
@@ -60,7 +96,7 @@ class StoreRepository (
     /**
      * getStorePagingData
      */
-    fun getStoreRoomPagingData(storeRoom: StoreRoom, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
+    fun getStoreRoomPagingData(scope: CoroutineScope, storeRoom: StoreRoom, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
         Pager(
             config = PagingConfig(
                 pageSize = 5,
@@ -70,6 +106,7 @@ class StoreRepository (
             ),
             pagingSourceFactory = {
                 StoreDataPagingSource(
+                    scope = scope,
                     storeRepository = this,
                     loadDataFromNetwork = {
                         if (storeRoom.url.isEmpty()) storeRoom.getPage()
@@ -79,11 +116,12 @@ class StoreRepository (
                 )
             }
         ).flow
+            .cachedIn(scope)
 
     /**
      * getGroupingDataPagingSource
      */
-    fun getGroupingPagingData(genre: Int?, storeFront: String, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
+    fun getGroupingPagingData(scope: CoroutineScope, genre: Int?, storeFront: String, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
         Pager(
             config = PagingConfig(
                 pageSize = 5,
@@ -93,17 +131,19 @@ class StoreRepository (
             ),
             pagingSourceFactory = {
                 StoreDataPagingSource(
+                    scope = scope,
                     storeRepository = this,
                     loadDataFromNetwork = { getGroupingDataAsync(genre, storeFront) },
                     dataLoadedCallback = dataLoadedCallback
                 )
             }
         ).flow
+            .cachedIn(scope)
 
     /**
      * getDirectoryPagingData
      */
-    fun getDirectoryPagingData(storeFront: String, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
+    fun getDirectoryPagingData(scope: CoroutineScope, storeFront: String, newVersionAvailable: () -> Unit): Flow<PagingData<StoreItem>> =
         Pager(
             config = PagingConfig(
                 pageSize = 5,
@@ -113,15 +153,90 @@ class StoreRepository (
             ),
             pagingSourceFactory = {
                 StoreDataPagingSource(
+                    scope = scope,
                     storeRepository = this,
-                    loadDataFromNetwork = { getGroupingDataAsync(null, storeFront) },
-                    dataLoadedCallback = dataLoadedCallback
+                    loadDataFromNetwork = {
+                        getGroupingDataFromNetworkOrLocalStorage(scope,
+                            storeFront,
+                            newVersionAvailable)
+                    },
+                    dataLoadedCallback = null
                 )
             }
         ).flow
+            .cachedIn(scope)
 
     /**
-     * getStoreDataAsync{
+     * getGroupingDataFromLocalStorage
+     */
+    suspend fun getGroupingDataFromNetworkOrLocalStorage(scope: CoroutineScope, storeFront: String, newVersionAvailable: (() -> Unit)?): StoreGroupingPage {
+        //val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val now = Clock.System.now()
+        val groupingPageCache = getGroupingDataFromLocalStorage()
+        // no cache -> get data from network
+        return if (groupingPageCache == null) {
+            Timber.d("DBG - load GroupingData from network")
+            getGroupingDataAsync(null, storeFront).also {
+                scope.launch {
+                    Timber.d("DBG - save GroupingData to storage")
+                    saveDirectoryToLocalStorage(it)
+                }
+            }
+        }
+        else {
+            // cache is old (>24h) or storeFront match -> get new version
+            newVersionAvailable?.let {
+                if ((groupingPageCache.storeFront != storeFront) ||
+                    (now - groupingPageCache.fetchedAt > 24.hours)
+                ) {
+                    Timber.d("DBG - cached GroupingData is too old")
+                    scope.launch {
+                        Timber.d("DBG - get new GroupingData from network")
+                        val newGroupingPage = getGroupingDataAsync(null, storeFront)
+                        // if network version is newer/different than cached version -> notify
+                        if ((newGroupingPage.storeFront != groupingPageCache.storeFront) ||
+                            (newGroupingPage.timestamp != groupingPageCache.timestamp)
+                        ) {
+                            saveDirectoryToLocalStorage(newGroupingPage)
+                            newVersionAvailable.invoke()
+                        } else {
+                            Timber.d("DBG - new Grouping data is the same")
+                            //groupingPageCache.fetchedAt = now
+                            saveDirectoryToLocalStorage(groupingPageCache)
+                        }
+                    }
+                }
+            }
+            // -> get from cache
+            groupingPageCache
+        }
+    }
+
+    /**
+     * getGroupingDataFromLocalStorage
+     */
+    private suspend fun getGroupingDataFromLocalStorage(): StoreGroupingPage? {
+        return preferencesFlow
+            .map { preferences -> preferences[PreferenceKeys.DIRECTORY] }
+            .map {
+                it?.let {
+                    Timber.d("DBG - load GroupingData from local storage")
+                    val storeData: StoreGroupingPage = json.decodeFromString(serializer(), it)
+                    storeData
+                }
+            }
+            .firstOrNull()
+    }
+
+    suspend fun saveDirectoryToLocalStorage(storeData: StoreGroupingPage) {
+        cacheDataStore.edit { preferences ->
+            Timber.d("DBG - save new Grouping data to local storage")
+            preferences[PreferenceKeys.DIRECTORY] = json.encodeToString(serializer(), storeData)
+        }
+    }
+
+    /**
+     * getStoreData
      */
     private fun getStoreData(storePageDto: StorePageDto): StorePage {
         val pageData = storePageDto.pageData
@@ -347,6 +462,7 @@ class StoreRepository (
             storeFront = storeFront,
             lookup = storeLookup,
             timestamp = timestamp,
+            fetchedAt = Clock.System.now()
         )
     }
 

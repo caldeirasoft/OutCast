@@ -22,7 +22,7 @@ internal val appModule = module {
     //viewModel { InboxViewModel(get()) }
     viewModel {
         StoreDirectoryViewModel(
-            fetchStoreDirectoryUseCase = get(),
+            fetchStoreDirectoryPagingDataUseCase = get(),
             fetchStoreFrontUseCase = get()
         )
     }

@@ -5,7 +5,7 @@ import androidx.paging.PagingState
 import okio.IOException
 import retrofit2.HttpException
 
-abstract class BasePagingSource<T: Any> : PagingSource<Int, T>()
+abstract class BasePagingSource<T: Any>: PagingSource<Int, T>()
 {
     var position = STARTING_PAGE_INDEX
 

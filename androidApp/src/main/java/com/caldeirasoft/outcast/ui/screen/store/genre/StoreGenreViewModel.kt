@@ -32,6 +32,7 @@ class StoreGenreViewModel(
         storeFront
             .flatMapConcat {
                 fetchStoreGroupingPagingDataUseCase.executeAsync(
+                    scope = viewModelScope,
                     genre = genreId,
                     storeFront = it,
                     dataLoadedCallback = null
