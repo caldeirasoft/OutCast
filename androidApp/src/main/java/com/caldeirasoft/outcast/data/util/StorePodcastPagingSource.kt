@@ -3,22 +3,25 @@ package com.caldeirasoft.outcast.data.util
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.interfaces.StorePageWithCollection
+import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
 import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
-import org.koin.core.component.KoinApiExtension
 
 class StorePodcastPagingSource(
-    override val scope: CoroutineScope,
+    val scope: CoroutineScope,
     val storePodcast: StorePodcastPage,
-    override val getStoreItemsUseCase: GetStoreItemsUseCase
+    val getStoreItemsUseCase: GetStoreItemsUseCase
 ) : PagingSource<Int, StoreItem>(), StorePagingSource
 {
+    override suspend fun getStoreItems(
+        lookupIds: List<Long>,
+        storeFront: String,
+        storePage: StorePage?
+    ): List<StoreItem> =
+        getStoreItemsUseCase.execute(lookupIds, storeFront, storePage)
+
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
         val startPosition = params.key ?: 0
         val items = mutableListOf<StoreItem>()

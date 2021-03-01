@@ -4,16 +4,24 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
 class StoreChartsPagingSource(
     val storeFront: String,
-    override val scope: CoroutineScope,
-    override val getStoreItemsUseCase: GetStoreItemsUseCase,
+    val scope: CoroutineScope,
+    val getStoreItemsUseCase: GetStoreItemsUseCase,
     inline val dataFlow: () -> Flow<List<Long>>,
 ) : PagingSource<Int, StoreItem>(), StorePagingSource {
+
+    override suspend fun getStoreItems(
+        lookupIds: List<Long>,
+        storeFront: String,
+        storePage: StorePage?
+    ): List<StoreItem> =
+        getStoreItemsUseCase.execute(lookupIds, storeFront, storePage)
 
     private val idsFlow: StateFlow<List<Long>?> =
         dataFlow()

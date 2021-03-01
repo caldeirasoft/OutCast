@@ -1,42 +1,45 @@
 package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.domain.interfaces.StoreFeaturedPage
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreDataUseCase
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreGroupingUseCase
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.ui.screen.store.directory.StoreCollectionsViewModel
+import com.caldeirasoft.outcast.domain.usecase.FetchStoreRoomPagingDataUseCase
+import com.caldeirasoft.outcast.domain.util.tryCast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 
 @ExperimentalCoroutinesApi
 class StoreRoomViewModel(
     private val room: StoreRoom,
-    val fetchStoreDataUseCase: FetchStoreDataUseCase,
-    fetchStoreGroupingUseCase: FetchStoreGroupingUseCase,
-    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase
-) : StoreCollectionsViewModel<StoreFeaturedPage>(
-    fetchStoreFrontUseCase = fetchStoreFrontUseCase,
-    fetchStoreGroupingUseCase = fetchStoreGroupingUseCase,
-    fetchStoreTopChartsIdsUseCase = fetchStoreTopChartsIdsUseCase
-) {
+    private val fetchStoreRoomPagingDataUseCase: FetchStoreRoomPagingDataUseCase
+) : ViewModel() {
+
+    // store data
+    protected val storeData = MutableStateFlow<StoreFeaturedPage>(room.getPage())
+
     // state
     val state: StateFlow<State> =
-        storeData
-            .filterNotNull()
-            .map { State(storePage = it)}
+        storeData.map { State(storePage = it)}
             .stateIn(viewModelScope, SharingStarted.Eagerly, State(room.getPage()))
 
-    override fun getStoreDataFlow(): Flow<Resource> =
-        run {
-            if (room.url.isEmpty()) flowOf(Resource.Success(room.getPage()))
-            else fetchStoreDataUseCase.executeAsync(room.url, room.storeFront)
-        }
+    // paged list
+    val discover: Flow<PagingData<StoreItem>> =
+        getStoreDataPagedList()
+            .cachedIn(viewModelScope)
+
+    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
+        fetchStoreRoomPagingDataUseCase.executeAsync(
+            storeRoom = room,
+            dataLoadedCallback = {
+                it.tryCast<StoreFeaturedPage> {
+                    storeData.tryEmit(this)
+                }
+            }
+        )
 
     data class State(
         val storePage: StoreFeaturedPage

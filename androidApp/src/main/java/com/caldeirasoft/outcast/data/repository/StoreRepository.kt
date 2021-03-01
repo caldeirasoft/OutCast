@@ -1,15 +1,23 @@
 package com.caldeirasoft.outcast.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
+import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
+import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.store.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import retrofit2.HttpException
+import timber.log.Timber
 
 class StoreRepository (
     val itunesAPI: ItunesAPI,
@@ -50,9 +58,72 @@ class StoreRepository (
     }
 
     /**
+     * getStorePagingData
+     */
+    fun getStoreRoomPagingData(storeRoom: StoreRoom, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 5,
+                enablePlaceholders = false,
+                maxSize = 100,
+                prefetchDistance = 2
+            ),
+            pagingSourceFactory = {
+                StoreDataPagingSource(
+                    storeRepository = this,
+                    loadDataFromNetwork = {
+                        if (storeRoom.url.isEmpty()) storeRoom.getPage()
+                        else getStoreDataAsync(storeRoom.url, storeRoom.storeFront)
+                    },
+                    dataLoadedCallback = dataLoadedCallback
+                )
+            }
+        ).flow
+
+    /**
+     * getGroupingDataPagingSource
+     */
+    fun getGroupingPagingData(genre: Int?, storeFront: String, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 5,
+                enablePlaceholders = false,
+                maxSize = 100,
+                prefetchDistance = 2
+            ),
+            pagingSourceFactory = {
+                StoreDataPagingSource(
+                    storeRepository = this,
+                    loadDataFromNetwork = { getGroupingDataAsync(genre, storeFront) },
+                    dataLoadedCallback = dataLoadedCallback
+                )
+            }
+        ).flow
+
+    /**
+     * getDirectoryPagingData
+     */
+    fun getDirectoryPagingData(storeFront: String, dataLoadedCallback: ((StorePage) -> Unit)?): Flow<PagingData<StoreItem>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 5,
+                enablePlaceholders = false,
+                maxSize = 100,
+                prefetchDistance = 2
+            ),
+            pagingSourceFactory = {
+                StoreDataPagingSource(
+                    storeRepository = this,
+                    loadDataFromNetwork = { getGroupingDataAsync(null, storeFront) },
+                    dataLoadedCallback = dataLoadedCallback
+                )
+            }
+        ).flow
+
+    /**
      * getStoreDataAsync{
      */
-    private fun getStoreData(storePageDto: com.caldeirasoft.outcast.domain.dto.StorePageDto): StorePage {
+    private fun getStoreData(storePageDto: StorePageDto): StorePage {
         val pageData = storePageDto.pageData
         // retrieve data
         return when (pageData?.componentName) {
@@ -82,7 +153,7 @@ class StoreRepository (
     /**
      * getGroupingDataAsync
      */
-    private fun getGroupingDataAsync(storePageDto: com.caldeirasoft.outcast.domain.dto.StorePageDto): StoreGroupingPage {
+    private fun getGroupingDataAsync(storePageDto: StorePageDto): StoreGroupingPage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
@@ -160,6 +231,7 @@ class StoreRepository (
                                 elementChild.content.map { content -> content.contentId }
                             when (elementChild.type) {
                                 "popularity" -> { // top podcasts // top episodes
+                                    /*
                                     when (elementChild.fcKind) {
                                         // podcast
                                         16 -> yield(
@@ -186,6 +258,7 @@ class StoreRepository (
                                         else -> {
                                         }
                                     }
+                                     */
                                 }
                                 "normal" -> {
                                     yield(
@@ -281,7 +354,7 @@ class StoreRepository (
     /**
      * getArtistPodcastDataAsync
      */
-    private fun getArtistPodcastDataAsync(storePageDto: com.caldeirasoft.outcast.domain.dto.StorePageDto): StoreRoomPage {
+    private fun getArtistPodcastDataAsync(storePageDto: StorePageDto): StoreRoomPage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
@@ -308,7 +381,7 @@ class StoreRepository (
     /**
      * getArtistProviderDataAsync
      */
-    private fun getArtistProviderDataAsync(storePageDto: com.caldeirasoft.outcast.domain.dto.StorePageDto): StoreMultiRoomPage {
+    private fun getArtistProviderDataAsync(storePageDto: StorePageDto): StoreMultiRoomPage {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val collectionSequence: Sequence<StoreCollection> = sequence {
@@ -374,12 +447,13 @@ class StoreRepository (
     /**
      * getRoomPodcastDataAsync
      */
-    private fun getRoomPodcastDataAsync(storePageDto: com.caldeirasoft.outcast.domain.dto.StorePageDto): StoreRoomPage {
+    private fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StoreRoomPage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val ids = storePageDto.pageData?.adamIds?.map { id -> id.toLong() } ?: emptyList()
         val isIndexed = (storePageDto.pageData?.defaultSort == 18)
+        Timber.d("defaultSort: ${storePageDto.pageData?.defaultSort}")
 
         val storeData = StoreRoom(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
@@ -402,7 +476,7 @@ class StoreRepository (
     /**
      * getMultiRoomDataAsync
      */
-    private fun getMultiRoomDataAsync(storePageDto: com.caldeirasoft.outcast.domain.dto.StorePageDto): StoreMultiRoomPage {
+    private fun getMultiRoomDataAsync(storePageDto: StorePageDto): StoreMultiRoomPage {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val collectionSequence: Sequence<StoreCollection> = sequence {
@@ -552,6 +626,27 @@ class StoreRepository (
         val resultIdsResult = storeResponse.body() ?: throw HttpException(storeResponse)
         return resultIdsResult.resultIds
     }
+
+    /*
+    fun getTopChartPagingData(genreId: Int?, type: StoreItemType, storeFront: String): Flow<PagingData<StoreItem>> =
+        Pager(
+            PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                maxSize = 200,
+                prefetchDistance = 5
+            )
+        ) {
+            StoreChartsPagingSource(
+                storeFront = storeFront,
+                scope = viewModelScope,
+                getStoreItemsUseCase = getStoreItemsUseCase
+            ) {
+                fetchStoreTopChartsIdsUseCase.execute(storeGenre = genreId, storeItemType = type, storeFront = storeFront)
+            }
+        }.flow
+
+     */
 
     /**
      * getStoreItemFromLookupResultItem

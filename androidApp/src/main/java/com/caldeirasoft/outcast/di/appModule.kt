@@ -23,26 +23,20 @@ internal val appModule = module {
     viewModel {
         StoreDirectoryViewModel(
             fetchStoreDirectoryUseCase = get(),
-            fetchStoreTopChartsIdsUseCase = get(),
-            fetchStoreGroupingUseCase = get(),
             fetchStoreFrontUseCase = get()
         )
     }
     viewModel { (genreId: Int) ->
         StoreGenreViewModel(
             genreId = genreId,
-            fetchStoreTopChartsIdsUseCase = get(),
-            fetchStoreGroupingUseCase = get(),
+            fetchStoreGroupingPagingDataUseCase = get(),
             fetchStoreFrontUseCase = get()
         )
     }
     viewModel { (room: StoreRoom) ->
         StoreRoomViewModel(
             room = room,
-            fetchStoreDataUseCase = get(),
-            fetchStoreTopChartsIdsUseCase = get(),
-            fetchStoreGroupingUseCase = get(),
-            fetchStoreFrontUseCase = get()
+            fetchStoreRoomPagingDataUseCase = get(),
         )
     }
     viewModel { (storeItemType: StoreItemType) ->

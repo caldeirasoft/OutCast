@@ -14,8 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
@@ -43,11 +41,9 @@ fun StoreGenreScreen(
     navigateBack: () -> Unit,
 ) {
     val viewModel: StoreGenreViewModel = getViewModel(parameters = { parametersOf(genreId) } )
-    val viewState by viewModel.state.collectAsState()
 
     StoreGenreContent(
         title = title,
-        viewState = viewState,
         discover = viewModel.discover,
         navigateTo = navigateTo,
         navigateBack = navigateBack
@@ -58,7 +54,6 @@ fun StoreGenreScreen(
 @Composable
 private fun StoreGenreContent(
     title: String,
-    viewState: StoreGenreViewModel.State,
     discover: Flow<PagingData<StoreItem>>,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,

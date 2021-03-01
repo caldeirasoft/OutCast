@@ -1,12 +1,13 @@
 package com.caldeirasoft.outcast.ui.screen.store.directory
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreDirectoryUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreGroupingUseCase
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreTopChartsIdsUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -15,31 +16,30 @@ import kotlinx.coroutines.flow.*
 @ExperimentalCoroutinesApi
 class StoreDirectoryViewModel(
     private val fetchStoreDirectoryUseCase: FetchStoreDirectoryUseCase,
-    fetchStoreGroupingUseCase: FetchStoreGroupingUseCase,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    fetchStoreTopChartsIdsUseCase: FetchStoreTopChartsIdsUseCase
-) : StoreCollectionsViewModel<StoreGroupingPage>(
-    fetchStoreFrontUseCase = fetchStoreFrontUseCase,
-    fetchStoreGroupingUseCase = fetchStoreGroupingUseCase,
-    fetchStoreTopChartsIdsUseCase = fetchStoreTopChartsIdsUseCase
-) {
+) : ViewModel() {
+    // storefront
+    private val storeFront = fetchStoreFrontUseCase.getStoreFront()
+
+    // paged list
+    val discover: Flow<PagingData<StoreItem>> =
+        getStoreDataPagedList()
+            .cachedIn(viewModelScope)
+
     // state
-    val state = MutableStateFlow(State())
-
-    init {
-        combine(
-            storeData, storeFront)
-        { storeData, storeFront ->
-            State(storeData, storeFront)
-        }
-            .onEach { state.emit(it) }
-            .launchIn(viewModelScope)
-    }
-
-    override fun getStoreDataFlow(): Flow<Resource> =
+    val state: StateFlow<State> =
         storeFront
-            .flatMapConcat { fetchStoreDirectoryUseCase.executeAsync(storeFront = it) }
+            .map { State(storeFront = it) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, State())
 
+    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
+        storeFront
+            .flatMapConcat {
+                fetchStoreDirectoryUseCase.executeAsync(
+                    storeFront = it,
+                    dataLoadedCallback = null
+                )
+            }
 
     data class State(
         val storeData: StoreGroupingPage? = null,

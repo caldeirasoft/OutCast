@@ -1,27 +1,20 @@
 package com.caldeirasoft.outcast.domain.usecase
 
+import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.repository.LocalCacheRepository
 import com.caldeirasoft.outcast.data.repository.StoreRepository
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.domain.util.networkCall
-import com.caldeirasoft.outcast.domain.util.stopwatch
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import kotlinx.coroutines.flow.Flow
 
 class FetchStoreDirectoryUseCase(
     val storeRepository: StoreRepository,
     val localCacheRepository: LocalCacheRepository
 ) {
-    fun executeAsync(storeFront: String): Flow<Resource> =
-        networkCall {
-            val groupingData = stopwatch("FetchStoreGroupingUseCase - fetchGroupingData") {
-                storeRepository.getGroupingDataAsync(null, storeFront)
-            }.also { groupingData ->
-                groupingData.genres?.let { genres ->
-                    groupingData.storeList.add(2, genres)
-                }
-            }
-            groupingData
-        }
+    fun executeAsync(
+        storeFront: String, dataLoadedCallback: ((StorePage) -> Unit)?
+    ): Flow<PagingData<StoreItem>> =
+        storeRepository.getDirectoryPagingData(storeFront, dataLoadedCallback)
 
     /*
         networkBoundResource(
