@@ -35,6 +35,7 @@ import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 import kotlin.time.hours
+import kotlin.time.seconds
 
 class StoreRepository (
     val itunesAPI: ItunesAPI,
@@ -172,6 +173,7 @@ class StoreRepository (
     suspend fun getGroupingDataFromNetworkOrLocalStorage(scope: CoroutineScope, storeFront: String, newVersionAvailable: (() -> Unit)?): StoreGroupingPage {
         //val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val now = Clock.System.now()
+        Timber.d("DBG - load GroupingData")
         val groupingPageCache = getGroupingDataFromLocalStorage()
         // no cache -> get data from network
         return if (groupingPageCache == null) {
