@@ -29,7 +29,7 @@ internal val appModule = module {
     }
     viewModel {
         StoreSearchViewModel(
-            loadStoreGenreDataUseCase = get(),
+            fetchStoreDirectoryUseCase = get(),
             fetchStoreFrontUseCase = get()
         )
     }

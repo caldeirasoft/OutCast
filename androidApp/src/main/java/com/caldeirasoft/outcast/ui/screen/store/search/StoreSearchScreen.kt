@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.store.search
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -11,10 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -22,10 +20,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.domain.models.store.StoreGenre
+import com.caldeirasoft.outcast.ui.components.GenreItem
+import com.caldeirasoft.outcast.ui.components.ReachableScaffold
+import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.*
+import com.caldeirasoft.outcast.ui.util.getViewModel
+import com.caldeirasoft.outcast.ui.util.px
+import com.caldeirasoft.outcast.ui.util.toDp
+import com.caldeirasoft.outcast.ui.util.toIntPx
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.koin.core.component.KoinApiExtension
@@ -53,7 +58,7 @@ private fun StoreSearchContent(
     navigateTo: (Screen) -> Unit,
 ) {
     val listState = rememberLazyListState(0)
-    val genreItems = viewState.storeGenreData?.genres ?: emptyList()
+    val genreItems = viewState.storeData?.genres?.genres ?: emptyList()
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 56.px
@@ -68,32 +73,18 @@ private fun StoreSearchContent(
                 Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
-
-            viewState.screenState
-                .onLoading {
-                    item {
-                        ShimmerStoreCollectionsList()
-                    }
-                }
-                .onSuccess {
-                    item {
-                        // header
-                        StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
-                    }
-                    gridItems(
-                        items = genreItems,
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalInnerPadding = 8.dp,
-                        verticalInnerPadding = 8.dp,
-                        columns = 2
-                    ) { storeGenre ->
-                        GenreCardItem(
-                            genre = storeGenre,
-                            navigateToGenre = { navigateTo(Screen.Genre(storeGenre.id, storeGenre.name)) }
-                        )
-                    }
-                }
-
+            gridItems(
+                items = genreItems,
+                contentPadding = PaddingValues(16.dp),
+                horizontalInnerPadding = 8.dp,
+                verticalInnerPadding = 8.dp,
+                columns = 2
+            ) { storeGenre ->
+                CardGenreItem(
+                    genre = storeGenre,
+                    navigateToGenre = { navigateTo(Screen.Genre(storeGenre.id, storeGenre.name)) }
+                )
+            }
         }
 
 
@@ -206,3 +197,29 @@ private fun SearchBar(modifier: Modifier = Modifier)
     }
 }
 
+
+@Composable
+private fun CardGenreItem(
+    genre: StoreGenre,
+    navigateToGenre: (StoreGenre) -> Unit,
+) {
+    val primaryColor = colors[1]
+    val dominantColor = remember(genre) { mutableStateOf(primaryColor) }
+    /*FetchDominantColorFromPoster(
+        posterUrl = requireNotNull(genre.artwork?.url),
+        colorState = dominantColor)*/
+    Card(
+        border = ButtonDefaults.outlinedBorder,
+        shape = RoundedCornerShape(16.dp),
+        elevation = 0.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(24 / 9f)
+            .clickable(onClick = {
+                navigateToGenre(genre)
+            })
+    )
+    {
+        GenreItem(storeGenre = genre, onGenreClick = {  })
+    }
+}
