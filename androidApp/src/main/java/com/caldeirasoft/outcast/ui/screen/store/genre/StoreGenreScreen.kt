@@ -12,7 +12,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -138,12 +137,7 @@ private fun StoreGenreContent(
                         contentDescription = null,)
                 }
             },
-            actions = {
-                IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Search,
-                        contentDescription = null,)
-                }
-            },
+            actions = {},
             state = listState,
             headerHeight = headerHeight)
     }

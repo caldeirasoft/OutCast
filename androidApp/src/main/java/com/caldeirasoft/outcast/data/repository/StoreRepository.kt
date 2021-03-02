@@ -26,6 +26,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 import timber.log.Timber
+import kotlin.time.days
 
 class StoreRepository (
     val itunesAPI: ItunesAPI,
@@ -127,9 +128,9 @@ class StoreRepository (
         ).flow
 
     /**
-     * getDirectoryPagingData
+     * loadDirectoryPagingData
      */
-    fun getDirectoryPagingData(
+    fun loadDirectoryPagingData(
         scope: CoroutineScope,
         storeFront: String,
         newVersionAvailable: () -> Unit,
@@ -148,7 +149,7 @@ class StoreRepository (
                     scope = scope,
                     storeRepository = this,
                     loadDataFromNetwork = {
-                        getGroupingDataFromNetworkOrLocalStorage(scope,
+                        loadStoreDirectoryData(scope,
                             storeFront,
                             newVersionAvailable)
                             .also {
@@ -161,15 +162,15 @@ class StoreRepository (
         ).flow
 
     /**
-     * getGroupingDataFromLocalStorage
+     * loadGroupingData
      */
-    suspend fun getGroupingDataFromNetworkOrLocalStorage(
+    private suspend fun loadStoreDirectoryData(
         scope: CoroutineScope,
         storeFront: String,
         newVersionAvailable: (() -> Unit)?
     ): StoreGroupingPage {
         Timber.d("DBG - load GroupingData")
-        val groupingPageCacheEntry = cache.getEntry("storeDirectory", useEntryEvenIfExpired = true) {
+        val groupingPageCacheEntry = cache.getEntry("storeDirectory", useEntryEvenIfExpired = true, timeLimit = 1.days) {
             getGroupingDataAsync(null, storeFront)
         }
 
