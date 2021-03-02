@@ -9,6 +9,7 @@ import kotlinx.serialization.serializerOrNull
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
+import kotlin.time.Duration
 
 /**
  * Naive caching implementation for the JVM that uses WeakReference
@@ -18,7 +19,6 @@ class DiskCache(
     //val config: GitrestConfig,
     val jsonConfig: Json,
     appCacheDir: File,
-    val cacheDuration: Long = 86400000 // cache for ~1 day by default
 ) : Cache {
 
     val cacheDir = File(appCacheDir, "http")
@@ -37,14 +37,14 @@ class DiskCache(
         }
     }
 
-    override suspend fun <T : Any> getEntry(key: String, useEntryEvenIfExpired: Boolean): Entry<T>? {
+    override suspend fun <T : Any> getEntry(key: String, timeLimit: Duration, useEntryEvenIfExpired: Boolean): Entry<T>? {
         return try {
             // check contents; destructure file parts if safe
             val fileContents = key.cacheFile().readText().split("#", limit = 3)
             if (fileContents.size != 3) return null
             val (className, lastModified, json) = fileContents
 
-            val isExpired = hasExpired(lastModified.toLong(), cacheDuration)
+            val isExpired = hasExpired(lastModified.toLong(), timeLimit)
             if (!isExpired || useEntryEvenIfExpired)
             {
                 decodeFromString<T>(className, json)?.let {
@@ -88,8 +88,8 @@ class DiskCache(
         return (jsonConfig.decodeFromString(serializer, json) as? T)
     }
 
-    override suspend fun <T : Any> getEntry(key: String, useEntryEvenIfExpired: Boolean, defaultValue: suspend () -> T): Entry<T> {
-        val entry = getEntry<T>(key, useEntryEvenIfExpired)
+    override suspend fun <T : Any> getEntry(key: String, timeLimit: Duration, useEntryEvenIfExpired: Boolean, defaultValue: suspend () -> T): Entry<T> {
+        val entry = getEntry<T>(key, timeLimit, useEntryEvenIfExpired)
         return entry ?: Entry(defaultValue(), System.currentTimeMillis(), Source.ORIGIN).also {
             set(key, it.data)
         }

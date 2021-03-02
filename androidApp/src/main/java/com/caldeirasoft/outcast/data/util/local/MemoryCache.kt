@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.data.util.local
 
 import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
+import kotlin.time.Duration
 
 /**
  * Naive caching implementation for the JVM that uses WeakReference
@@ -9,7 +10,6 @@ import java.lang.ref.WeakReference
  */
 class MemoryCache(
     val underlyingCache: Cache,
-    val cacheDuration: Long = 86400000 // cache for ~1 day by default
 ) : Cache {
 
     private class WeakEntry internal constructor(
@@ -34,11 +34,11 @@ class MemoryCache(
         underlyingCache.set(key, value)
     }
 
-    override suspend fun <T : Any> getEntry(key: String, useEntryEvenIfExpired: Boolean): Entry<T>? {
+    override suspend fun <T : Any> getEntry(key: String, timeLimit: Duration, useEntryEvenIfExpired: Boolean): Entry<T>? {
         val weakEntry = map[key]
 
         return weakEntry?.let {
-            val expired = hasExpired(weakEntry.timestamp, cacheDuration)
+            val expired = hasExpired(weakEntry.timestamp, timeLimit)
             if (expired && !useEntryEvenIfExpired) {
                 // has expired -> remove entry from cache
                 map.remove(key)
@@ -50,7 +50,7 @@ class MemoryCache(
                     Entry(it, weakEntry.timestamp, Source.MEM, expired) as Entry<T>
                 }
 
-                underlyingCache.getEntry<T>(key, useEntryEvenIfExpired)?.let {
+                underlyingCache.getEntry<T>(key, timeLimit, useEntryEvenIfExpired)?.let {
                     map[key] = WeakEntry(key, it as Any, it.timestamp, referenceQueue)
                     it
                 }
