@@ -4,9 +4,8 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +26,7 @@ fun GenreItem(
     onGenreClick: () -> Unit,
 ) {
     ListItem(
-        modifier = Modifier.clickable(onClick = onGenreClick),
+        modifier = Modifier,
         text = { Text(text = storeGenre.name) },
         icon = {
             Image(
@@ -37,6 +36,37 @@ fun GenreItem(
             )
         }
     )
+}
+
+@Composable
+fun GenreCardItem(
+    genre: StoreGenre,
+    navigateToGenre: (StoreGenre) -> Unit,
+) {
+    Card(
+        border = ButtonDefaults.outlinedBorder,
+        shape = RoundedCornerShape(16.dp),
+        elevation = 0.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(24 / 9f)
+            .clickable(onClick = {
+                navigateToGenre(genre)
+            })
+    )
+    {
+        ListItem(
+            modifier = Modifier,
+            text = { Text(text = genre.name) },
+            icon = {
+                Image(
+                    painter = painterResource(id = genre.getIcon()),
+                    contentDescription = genre.name,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        )
+    }
 }
 
 @Composable
