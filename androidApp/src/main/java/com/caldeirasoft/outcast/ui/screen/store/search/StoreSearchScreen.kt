@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.store.search
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -22,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -56,7 +59,7 @@ private fun StoreSearchContent(
     val genreItems = viewState.storeGenreData?.genres ?: emptyList()
 
     ReachableScaffold { headerHeight ->
-        val spacerHeight = headerHeight - 56.px
+        val spacerHeight = headerHeight - 36.px
 
         LazyColumn(
             state = listState,
@@ -76,6 +79,22 @@ private fun StoreSearchContent(
                     }
                 }
                 .onSuccess {
+                    item {
+                        // header
+                        StoreHeadingSection(title = stringResource(id = R.string.store_tab_charts))
+                    }
+                    gridItems(
+                        items = StoreItemType.values().toList(),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalInnerPadding = 8.dp,
+                        verticalInnerPadding = 8.dp,
+                        columns = 2
+                    ) { itemType ->
+                        TopChartCardItem(
+                            itemType = itemType,
+                            navigateToTopChart = { navigateTo(Screen.Charts(itemType)) }
+                        )
+                    }
                     item {
                         // header
                         StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
@@ -206,3 +225,36 @@ private fun SearchBar(modifier: Modifier = Modifier)
     }
 }
 
+@Composable
+fun TopChartCardItem(
+    itemType: StoreItemType,
+    navigateToTopChart: (StoreItemType) -> Unit,
+) {
+    Card(
+        border = ButtonDefaults.outlinedBorder,
+        shape = RoundedCornerShape(16.dp),
+        elevation = 0.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(24 / 9f)
+            .clickable(onClick = {
+                navigateToTopChart(itemType)
+            })
+    )
+    {
+        ListItem(
+            modifier = Modifier,
+            text = { Text(text = stringResource(id = when (itemType) {
+                StoreItemType.PODCAST -> R.string.store_tab_chart_podcasts
+                StoreItemType.EPISODE -> R.string.store_tab_chart_episodes
+            })) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.TrendingUp,
+                    contentDescription = itemType.name,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        )
+    }
+}
