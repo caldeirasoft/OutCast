@@ -14,8 +14,6 @@ class Actions(navController: NavController) {
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
             is StoreEpisodesScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
-            is StoreCategories ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.genres)}")
             is Room ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.room)}")
             is Charts ->

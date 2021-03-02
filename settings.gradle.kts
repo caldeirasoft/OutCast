@@ -122,6 +122,7 @@ dependencyResolutionManagement {
 
             alias("timber").to("com.jakewharton.timber:timber:4.+")
             alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.6")
+            alias("accompanist-coil").to("dev.chrisbanes.accompanist:accompanist-coil:0.6.1")
             alias("junit").to("junit:junit:4.+")
         }
     }

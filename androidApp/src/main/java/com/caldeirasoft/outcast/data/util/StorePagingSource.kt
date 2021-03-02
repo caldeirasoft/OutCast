@@ -66,8 +66,7 @@ interface StorePagingSource
                 when (val collection = storePage.storeList[i])
                 {
                     is StoreCollectionFeatured,
-                    is StoreCollectionRooms,
-                    is StoreCollectionGenres ->
+                    is StoreCollectionRooms ->
                         yield(collection)
                     is StoreCollectionItems -> {
                         collection.itemsIds

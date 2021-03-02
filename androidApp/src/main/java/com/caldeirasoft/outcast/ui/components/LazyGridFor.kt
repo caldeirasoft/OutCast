@@ -103,6 +103,50 @@ fun <T : Any> LazyListScope.gridItems(
     }
 }
 
+fun <T : Any> LazyListScope.gridItems(
+    items: List<T>,
+    columns: Int = 3,
+    contentPadding: PaddingValues = PaddingValues(),
+    verticalInnerPadding: Dp = 0.dp,
+    horizontalInnerPadding: Dp = 0.dp,
+    itemContent: @Composable LazyItemScope.(value: T) -> Unit
+) {
+    val rows = when {
+        items.size % columns == 0 -> items.size / columns
+        else -> (items.size / columns) + 1
+    }
+
+    for (row in 0..rows) {
+        if (row == 0) spacerItem(contentPadding.calculateTopPadding())
+
+        item {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = contentPadding.calculateStartPadding(LayoutDirection.Ltr), end = contentPadding.calculateEndPadding(LayoutDirection.Ltr))
+            ) {
+                for (column in 0 until columns) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        val index = (row * columns) + column
+                        if (index < items.size) {
+                            itemContent(items[index])
+                        }
+                    }
+                    if (column < columns - 1) {
+                        Spacer(modifier = Modifier.width(horizontalInnerPadding))
+                    }
+                }
+            }
+        }
+
+        if (row < rows - 1)
+            spacerItem(verticalInnerPadding)
+        else
+            spacerItem(contentPadding.calculateBottomPadding())
+    }
+}
+
+
 fun LazyListScope.spacerItem(height: Dp) {
     item {
         Spacer(Modifier

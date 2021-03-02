@@ -135,10 +135,10 @@ fun StoreCollectionGenresContent(
 {
     val columns = 4
     val maxLines = 2
-    val genreMore = StoreGenre(-1, "More", "", "")
+    //val genreMore = StoreGenre(-1, "More", "", "")
     val genresToDisplay =
         storeCollection.genres.let {
-            if (it.size > columns * maxLines) it.take(columns * maxLines - 1).plus(genreMore)
+            if (it.size > columns * maxLines) it.take(columns * maxLines - 1)
             else it
         }
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -158,11 +158,10 @@ fun StoreCollectionGenresContent(
                     rowHeight = 96.dp
                 ) { item, _ ->
                     when (item.id) {
-                        -1 ->
-                            GenreGridItemMore(
+                            /*GenreGridItemMore(
                                 storeGenre = item,
                                 howManyMore = storeCollection.genres.size - (columns * maxLines - 1),
-                                onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })
+                                onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })*/
                         else ->
                             GenreGridItem(
                                 storeGenre = item,

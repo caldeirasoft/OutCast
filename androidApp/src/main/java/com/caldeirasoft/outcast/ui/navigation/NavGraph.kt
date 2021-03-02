@@ -12,14 +12,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
-import com.caldeirasoft.outcast.ui.screen.store.categories.StoreCategoriesScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
+import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
@@ -62,9 +61,9 @@ fun MainNavHost(startScreen: ScreenName) {
                     navController = navController,
                     items = listOf(
                         BottomNavigationScreen.Queue,
-                        BottomNavigationScreen.Inbox,
                         BottomNavigationScreen.Library,
                         BottomNavigationScreen.Discover,
+                        BottomNavigationScreen.Search,
                         BottomNavigationScreen.Profile
                     ),
                     navigateTo = actions.selectBottomNav
@@ -84,6 +83,10 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select
                     )
                 }
+                composable(ScreenName.STORE_SEARCH.name) {
+                    StoreSearchScreen(
+                        navigateTo = actions.select)
+                }
                 composable(
                     "${ScreenName.STORE_GENRE.name}/{${NavArgs.Genre}}/{${NavArgs.Title}}",
                     arguments = listOf(
@@ -99,18 +102,6 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )
-                }
-                composable(
-                    "${ScreenName.STORE_CATEGORIES.name}/{${NavArgs.Categories}}",
-                    arguments = listOf(navArgument(NavArgs.Categories) {
-                        type = NavType.StringType
-                    })
-                ) { backStackEntry ->
-                    val storeCategories = backStackEntry.getObjectNotNull<StoreCollectionGenres>("categories")
-                    StoreCategoriesScreen(
-                        storeCollection = storeCategories,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up)
                 }
                 composable(
                     "${ScreenName.STORE_CHARTS.name}/{${NavArgs.ItemType}}",

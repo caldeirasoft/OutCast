@@ -28,10 +28,11 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.Genre
-import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionRooms
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -145,29 +146,6 @@ private fun StoreDirectoryContent(
                                     navigateTo = navigateTo
                                 )
                             }
-                            is StoreCollectionGenres -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.StoreCategories(collection)) }
-                                )
-                                // genres
-                                StoreCollectionGenresContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo
-                                )
-                            }
-                            is StoreCollectionTopPodcasts -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.Charts(StoreItemType.PODCAST)) }
-                                )
-                                StoreCollectionTopPodcastsContent(
-                                    storeCollection = collection,
-                                    numRows = 4,
-                                    navigateTo = navigateTo)
-                            }
                         }
                     }
                 }
@@ -201,7 +179,7 @@ private fun StoreDirectoryContent(
 
 @ExperimentalAnimationApi
 @Composable
-fun ReachableAppBarWithSearchBar(
+private fun ReachableAppBarWithSearchBar(
     title: @Composable () -> Unit,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
