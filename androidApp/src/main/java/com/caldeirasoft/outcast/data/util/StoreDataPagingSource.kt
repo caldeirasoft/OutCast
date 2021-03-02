@@ -24,8 +24,9 @@ class StoreDataPagingSource(
         storeRepository.getListStoreItemDataAsync(lookupIds, storeFront, storePage)
 
     override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {
-        val storePage = loadDataFromNetwork()
         Timber.d("DBG - got new Grouping data : use it to Paging")
+        val storePage = loadDataFromNetwork()
+        Timber.d("DBG - got new Grouping data : use it to Paging (2)")
         dataLoadedCallback?.invoke(storePage)
         val items = mutableListOf<StoreItem>()
         when (storePage) {

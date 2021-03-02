@@ -7,7 +7,6 @@ import com.caldeirasoft.outcast.domain.serializers.InstantStringSerializer
 import com.caldeirasoft.outcast.domain.serializers.LocalDateStringSerializer
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -346,6 +345,7 @@ class GenreResult (
     val chartUrls: GenreChartUrlsResult? = null,
     val subgenres: Map<Int, GenreResult> = hashMapOf()
 ) {
+    /*
     fun toStoreGenre(storeFront: String): StoreGenre =
         StoreGenre(
             id = this.id,
@@ -354,7 +354,7 @@ class GenreResult (
             url = this.url,
             //topChartPodcastsUrl = this.chartUrls?.podcasts.orEmpty(),
             //topChartEpisodesUrl = this.chartUrls?.podcastEpisodes.orEmpty()
-        )
+        )*/
 }
 
 @Serializable

@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.domain.usecase
 import com.caldeirasoft.outcast.data.repository.DataStoreRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 
 class FetchStoreFrontUseCase(
     val dataStoreRepository: DataStoreRepository
@@ -13,5 +14,8 @@ class FetchStoreFrontUseCase(
 
     fun getStoreFront(): Flow<String> =
         getCountry()
-            .map { dataStoreRepository.getCurrentStoreFront(it) }
+            .map {
+                Timber.d("DBG - getStoreFront")
+                dataStoreRepository.getCurrentStoreFront(it)
+            }
 }

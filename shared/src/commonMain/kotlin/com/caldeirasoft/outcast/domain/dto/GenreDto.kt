@@ -10,9 +10,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class GenreDto (
-    var genreId: Int,
-    var name: String = "",
-    var url: String = "") {
+    val genreId: Int,
+    val name: String = "",
+    val url: String = "",
+) {
 
     fun toGenre() =
         Genre(
@@ -26,6 +27,6 @@ class GenreDto (
             id = genreId,
             name = name,
             url = url,
-            storeFront = storeFront
+            storeFront = storeFront,
         )
 }

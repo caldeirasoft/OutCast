@@ -95,6 +95,7 @@ dependencies {
     api(libs.navigation.compose)
     api(libs.paging.compose)
     api(libs.landscapist.coil)
+    api(libs.accompanist.coil)
     api(libs.timber)
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)

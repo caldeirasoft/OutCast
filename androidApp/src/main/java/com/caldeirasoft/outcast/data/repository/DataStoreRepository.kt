@@ -7,11 +7,11 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.createDataStore
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import java.io.IOException
 import java.security.InvalidKeyException
 import java.util.*
@@ -39,6 +39,7 @@ class DataStoreRepository(val context: Context) {
     val storeCountry: Flow<String>
             = preferencesFlow
         .map { preferences ->
+            Timber.d("DBG - storeCountry")
             preferences[PreferenceKeys.STOREFRONT_REGION] ?: "FR"
             //context.resources.configuration.locales.get(0).country
         }

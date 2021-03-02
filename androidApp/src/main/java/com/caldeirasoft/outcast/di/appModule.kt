@@ -7,6 +7,7 @@ import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeViewModel
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryViewModel
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreViewModel
+import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomViewModel
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsViewModel
@@ -23,6 +24,12 @@ internal val appModule = module {
     viewModel {
         StoreDirectoryViewModel(
             fetchStoreDirectoryPagingDataUseCase = get(),
+            fetchStoreFrontUseCase = get()
+        )
+    }
+    viewModel {
+        StoreSearchViewModel(
+            fetchStoreDirectoryUseCase = get(),
             fetchStoreFrontUseCase = get()
         )
     }

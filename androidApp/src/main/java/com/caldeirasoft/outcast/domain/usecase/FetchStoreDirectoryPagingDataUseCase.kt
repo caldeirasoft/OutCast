@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.domain.usecase
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -11,30 +12,8 @@ class FetchStoreDirectoryPagingDataUseCase(
 ) {
     fun executeAsync(
         scope: CoroutineScope,
-        storeFront: String, newVersionAvailable: () -> Unit
+        storeFront: String, newVersionAvailable: () -> Unit, dataLoadedCallback: ((StorePage) -> Unit)?
     ): Flow<PagingData<StoreItem>> =
-        storeRepository.getDirectoryPagingData(scope, storeFront, newVersionAvailable)
+        storeRepository.getDirectoryPagingData(scope, storeFront, newVersionAvailable, dataLoadedCallback)
 
-    /*
-        networkBoundResource(
-            fetchFromLocal = { localCacheRepository.storeDirectory },
-            fetchFromRemote = {
-                stopwatch("FetchStoreDirectoryUseCase - getDirectoryDataAsync") {
-                    storeRepository.getDirectoryDataAsync(storeFront)
-                }
-            },
-            shouldFetchFromRemote = {
-                true
-                /*it?.let {
-                    !(it.storeFront == storeFront &&
-                            it.timestamp.toLocalDateTime(TimeZone.UTC).date >= Clock.System.todayAt(TimeZone.UTC))
-                } ?: true*/
-            },
-            saveRemoteData = {
-                stopwatch("FetchStoreDirectoryUseCase - saveDirectory") {
-                    localCacheRepository.saveDirectory(it)
-                }
-            }
-        )
-     */
 }
