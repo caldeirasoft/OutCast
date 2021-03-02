@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.data.api
 
+import com.caldeirasoft.outcast.domain.dto.GenreResult
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.ResultIdsResult
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
@@ -15,13 +16,22 @@ interface ItunesAPI {
     @Headers(
         "Content-Type: application/json;charset=utf-8",
         "Accept: application/json")
-    suspend fun groupingData(@Header("X-Apple-Store-Front") storeFront: String, @Path("genre") genre: Int = 26): Response<com.caldeirasoft.outcast.domain.dto.StorePageDto>
+    suspend fun groupingData(@Header("X-Apple-Store-Front") storeFront: String, @Path("genre") genre: Int = 26): Response<StorePageDto>
 
     @GET()
     @Headers(
         "Content-Type: application/json;charset=utf-8",
         "Accept: application/json")
-    suspend fun storeData(@Header("X-Apple-Store-Front") storeFront: String, @Url url: String): Response<com.caldeirasoft.outcast.domain.dto.StorePageDto>
+    suspend fun storeData(@Header("X-Apple-Store-Front") storeFront: String, @Url url: String): Response<StorePageDto>
+
+    @GET("/WebObjects/MZStoreServices.woa/ws/genres")
+    @Headers(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json")
+    suspend fun genres(
+        @Header("X-Apple-Store-Front") storeFront: String,
+        @Query("id") genre: Int = 26,
+    ): Response<Map<Int, GenreResult>>
 
     @GET("/WebObjects/MZStoreServices.woa/ws/charts")
     @Headers(
@@ -32,7 +42,7 @@ interface ItunesAPI {
         @Query("name") name: String,
         @Query("limit") limit: Int,
         @Query("g") genre: Int = 26,
-    ): Response<com.caldeirasoft.outcast.domain.dto.ResultIdsResult>
+    ): Response<ResultIdsResult>
 
     @GET("https://uclient-api.itunes.apple.com/WebObjects/MZStorePlatform.woa/wa/lookup?version=2&p=lockup&caller=DI6")
     @Headers(
@@ -41,6 +51,6 @@ interface ItunesAPI {
     suspend fun lookup(
         @Header("X-Apple-Store-Front") storeFront: String,
         @Query("id") ids: String,
-    ): Response<com.caldeirasoft.outcast.domain.dto.LockupResult>
+    ): Response<LockupResult>
 
 }

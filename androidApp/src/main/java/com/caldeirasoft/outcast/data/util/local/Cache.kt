@@ -13,8 +13,8 @@ interface Cache {
         return entry?.data
     }
 
-    suspend fun <T : Any> get(key: String, timeLimit: Duration = DEFAULT_DURATION, useEntryEvenIfExpired: Boolean = false, defaultValue: suspend () -> T): T? {
-        val entry = getEntry<T>(key, timeLimit, useEntryEvenIfExpired, defaultValue)
+    suspend fun <T : Any> get(key: String, timeLimit: Duration = DEFAULT_DURATION, useEntryEvenIfExpired: Boolean = false, defaultValue: suspend () -> T): T {
+        val entry = getEntry(key, timeLimit, useEntryEvenIfExpired, defaultValue)
         return entry.data
     }
 

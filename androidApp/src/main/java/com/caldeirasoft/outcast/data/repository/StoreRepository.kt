@@ -10,6 +10,7 @@ import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.data.util.local.DiskCache
 import com.caldeirasoft.outcast.data.util.local.MemoryCache
 import com.caldeirasoft.outcast.data.util.local.Source
+import com.caldeirasoft.outcast.domain.dto.GenreResult
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
@@ -850,5 +851,34 @@ class StoreRepository (
         return lookupIds
             .filter { id -> newLookup.containsKey(id) }
             .mapNotNull { id -> newLookup.get(id) }
+    }
+
+    /**
+     * getGenresDataAsync
+     */
+    suspend fun getStoreGenreDataAsync(storeFront: String): StoreGenreData {
+        val storeResponse = itunesAPI.genres(storeFront)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val map: Map<Int, GenreResult> = storeResponse.body() ?: throw HttpException(storeResponse)
+
+        val rootEntry = map.values.first()
+        return StoreGenreData(
+            root = rootEntry.toStoreGenre(storeFront),
+            genres = rootEntry.subgenres.values.map { it.toStoreGenre(storeFront) }
+        )
+    }
+
+    /**
+     * getGenresDataAsync
+     */
+    suspend fun loadStoreGenreData(storeFront: String): StoreGenreData {
+        val storeDataCache = cache.get("genres") { getStoreGenreDataAsync(storeFront) }
+        if (storeDataCache.root.storeFront != storeFront) {
+            return getStoreGenreDataAsync(storeFront).also {
+                cache.set("genres", storeFront)
+            }
+        }
+        return storeDataCache
     }
 }
