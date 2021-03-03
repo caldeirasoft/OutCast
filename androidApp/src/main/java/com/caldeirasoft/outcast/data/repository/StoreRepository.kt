@@ -10,9 +10,11 @@ import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.data.util.local.DiskCache
 import com.caldeirasoft.outcast.data.util.local.MemoryCache
 import com.caldeirasoft.outcast.data.util.local.Source
-import com.caldeirasoft.outcast.domain.dto.GenreResult
-import com.caldeirasoft.outcast.domain.dto.StorePageDto
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.data.dto.GenreResult
+import com.caldeirasoft.outcast.data.dto.LockupResult
+import com.caldeirasoft.outcast.data.dto.LookupResultItem
+import com.caldeirasoft.outcast.data.dto.StorePageDto
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
@@ -747,7 +749,7 @@ class StoreRepository (
      * getStoreItemFromLookupResultItem
      */
     private fun getStoreItemFromLookupResultItem(
-        item: com.caldeirasoft.outcast.domain.dto.LookupResultItem,
+        item: LookupResultItem,
         storeFront: String
     ): StoreItemWithArtwork? =
         when (item.kind) {
@@ -809,7 +811,7 @@ class StoreRepository (
      * getStoreLookupFromLookupResult
      */
     private fun getStoreLookupFromLookupResult(
-        lockupResult: com.caldeirasoft.outcast.domain.dto.LockupResult?,
+        lockupResult: LockupResult?,
         storeFront: String
     ): Map<Long, StoreItemWithArtwork> {
         val resultMap: HashMap<Long, StoreItemWithArtwork> = hashMapOf()

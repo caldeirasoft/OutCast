@@ -1,14 +1,12 @@
-package com.caldeirasoft.outcast.domain.dto
+package com.caldeirasoft.outcast.data.dto
 
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
-import kotlinx.serialization.Serializable
 
 
 /**
  * Created by Edmond on 12/02/2018.
  */
-@Serializable
 class GenreDto (
     val genreId: Int,
     val name: String = "",

@@ -104,7 +104,14 @@ dependencyResolutionManagement {
             version("retrofit", "2.+")
             alias("retrofit-core").to("com.squareup.retrofit2", "retrofit").versionRef("retrofit")
             alias("retrofit-kotlinx-serialization").to("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
-            bundle("retrofit", listOf("retrofit-core", "retrofit-kotlinx-serialization"))
+            alias("retrofit-moshi").to("com.squareup.retrofit2", "converter-moshi").versionRef("retrofit")
+            bundle("retrofit", listOf("retrofit-core", "retrofit-kotlinx-serialization", "retrofit-moshi"))
+
+            version("moshi", "1.11.0")
+            alias("moshi-core").to("com.squareup.moshi", "moshi").versionRef("moshi")
+            alias("moshi-kotlin").to("com.squareup.moshi", "moshi-kotlin").versionRef("moshi")
+            alias("moshi-kotlincodegen").to("com.squareup.moshi", "moshi-kotlin-codegen").versionRef("moshi")
+            bundle("moshi", listOf("moshi-core", "moshi-kotlin"))
 
             version("sqldelight", sqldelightVersion)
             alias("sqldelight-android").to("com.squareup.sqldelight", "android-driver").versionRef("sqldelight")

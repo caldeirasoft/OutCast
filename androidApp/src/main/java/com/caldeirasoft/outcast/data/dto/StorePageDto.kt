@@ -1,41 +1,31 @@
-@file:UseSerializers(InstantStringSerializer::class, LocalDateStringSerializer::class)
-package com.caldeirasoft.outcast.domain.dto
+package com.caldeirasoft.outcast.data.dto
 
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
-import com.caldeirasoft.outcast.domain.serializers.InstantStringSerializer
-import com.caldeirasoft.outcast.domain.serializers.LocalDateStringSerializer
+import com.squareup.moshi.Json
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.UseSerializers
 
-@Serializable
 class StorePageDto(
     val storePlatformData: StorePlatformDataResult? = null,
     val pageData: PageDataResult? = null,
     val properties: PropertiesResult? = null
 )
 
-@Serializable
 class StorePlatformDataResult(
     var lockup: LockupResult? = null,
-    @SerialName("product-dv") val producDv: LockupResult? = null,
+    @Json(name = "product-dv") val producDv: LockupResult? = null,
 )
 
-@Serializable
 class LockupResult (
-    val results: HashMap<Long, LookupResultItem> = hashMapOf()
+    val results: Map<Long, LookupResultItem> = hashMapOf()
 )
 
-@Serializable
 class PropertiesResult(
     val revNum: String = "",
     val timestamp: Instant? = null,
 )
 
-@Serializable
 class PageDataResult(
     val componentName: String = "",
     val id: String = "",
@@ -66,7 +56,6 @@ class PageDataResult(
     val topCharts: List<TopChartResult> = arrayListOf()
 )
 
-@Serializable
 class CategoryListResult(
     val name: String = "",
     val url: String? = null,
@@ -76,12 +65,10 @@ class CategoryListResult(
     val children: List<GenreDto> = arrayListOf()
 )
 
-@Serializable
 class PageDataStructureResult(
     val version: Int = 0,
     val model: PageDataModelResult? = null)
 
-@Serializable
 class PageDataModelResult(
     val fcKind: Int = 0,
     val name: String = "",
@@ -102,20 +89,17 @@ class PageDataModelResult(
     val showOrdinals: Boolean? = null,
     val content: List<ContentResult> = arrayListOf())
 
-@Serializable
 class SegmentControlResult(
     val segments: List<SegmentControlItemResult> = arrayListOf(),
     val selectedIndex: Int = 0
 )
 
-@Serializable
 class SegmentControlItemResult(
     val title: String = "",
     val url: String = "",
     val pageData: PageDataResult? = null,
 )
 
-@Serializable
 class Link(
     val type: String = "",
     val label: String = "",
@@ -123,14 +107,12 @@ class Link(
     val url: String = "",
     val kindIds: List<Int> = arrayListOf())
 
-@Serializable
 class ContentResult(
     val type: String = "",
     val contentId: Long = 0,
     val kindIds: List<Int> = arrayListOf(),
     val target: String = "")
 
-@Serializable
 class ArtistResult(
     val artistId: String = "",
     val adamId: String = "",
@@ -142,7 +124,6 @@ class ArtistResult(
     val editorialArtwork: EditorialArtworkArtistResult? = null
 )
 
-@Serializable
 class SegmentResult(
     val adamId: String = "",
     val title: String = "",
@@ -151,7 +132,6 @@ class SegmentResult(
     val fcKind: String? = null,
 )
 
-@Serializable
 class TopChartResult(
     val id: Long = 0,
     val shortTitle: String = "",
@@ -161,13 +141,11 @@ class TopChartResult(
     val kinds: TopChartKindResult? = null,
 )
 
-@Serializable
 class TopChartKindResult(
     val podcast: Boolean = false,
     val podcastEpisode: Boolean = false,
 )
 
-@Serializable
 class ContentDataResult(
     val title: String = "",
     val adamIds: List<String> = arrayListOf(),
@@ -176,18 +154,15 @@ class ContentDataResult(
     val dkEternalId: String? = null,
 )
 
-@Serializable
 class SeeAllUrlResult(
     val label: String = "",
     val url: String = "",
 )
 
-@Serializable
 class PopularityMapResult(
     val podcastEpisode: Map<String, Double> = hashMapOf(),
 )
 
-@Serializable
 class UberResult(
     val name: String? = null,
     val backgroundColor: String? = null,
@@ -200,7 +175,6 @@ class UberResult(
     val masterArt: ArtworkDto? = null,
 )
 
-@Serializable
 class UberListResult(
     val name: String? = null,
     val backgroundColor: String? = null,
@@ -227,16 +201,13 @@ class UberListResult(
         else null
 }
 
-@Serializable
 class EditorialArtworkResult(
     val storeFlowcase: ArtworkDto? = null
 )
-@Serializable
 class EditorialArtworkArtistResult(
     val storeFlowcase: List<ArtworkDto> = arrayListOf()
 )
 
-@Serializable
 class LookupResultItem(
     val artwork: ArtworkDto? = null,
     val artistName: String? = null,
@@ -276,7 +247,6 @@ class LookupResultItem(
     val podcastEpisodeWebsiteUrl: String? = null,
 )
 
-@Serializable
 class UserRatingResult(
     val value: Double = 0.0,
     val ratingCount: Int = 0,
@@ -284,37 +254,31 @@ class UserRatingResult(
     val ratingCountList: List<Int> = arrayListOf(),
 )
 
-@Serializable
 class ContentRatingBySystemResult(
     val riaa: RiaaResult = RiaaResult()
 )
 
-@Serializable
 class RiaaResult(
     val name: String = "",
     val value: Int = 0,
     val rank: Int = 0,
 )
 
-@Serializable
 class DescriptionResult(
     val standard: String = "",
     val short: String = "",
 )
 
-@Serializable
 class OfferResult(
     val download: DownloadResult? = null,
     val assets: List<AssetResult> = arrayListOf(),
 )
 
-@Serializable
 class DownloadResult(
     val url: String = "",
     val type: String = "",
 )
 
-@Serializable
 class AssetResult(
     val fileExtension: String = "",
     val flavor: String? = null,
@@ -322,7 +286,6 @@ class AssetResult(
     val duration: Int? = null,
 )
 
-@Serializable
 class MetricsBaseResult(
     val pageType: String = "",
     val pageId: String? = null,
@@ -332,12 +295,10 @@ class MetricsBaseResult(
     val storeFront: String = "",
 )
 
-@Serializable
 class ResultIdsResult (
     val resultIds: List<Long> = mutableListOf()
 )
 
-@Serializable
 class GenreResult (
     val id: Int,
     val name: String = "",
@@ -356,7 +317,6 @@ class GenreResult (
         )
 }
 
-@Serializable
 class GenreChartUrlsResult (
     val podcasts: String = "",
     val podcastEpisodes: String = "",

@@ -1,5 +1,7 @@
 package com.caldeirasoft.outcast.data.util.local
 
+import com.caldeirasoft.outcast.data.dto.StoreFrontDto
+import com.squareup.moshi.Moshi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -27,6 +29,7 @@ class DiskCache(
 
     override suspend fun set(key: String, value: Any) {
         // obtain a serializer + type for the value (this is all just a ridiculous hack)
+        return
         val string: String = encodeToString(value)
 
         try {
@@ -45,6 +48,8 @@ class DiskCache(
             val (className, lastModified, json) = fileContents
 
             val isExpired = hasExpired(lastModified.toLong(), timeLimit)
+            return null
+
             if (!isExpired || useEntryEvenIfExpired)
             {
                 decodeFromString<T>(className, json)?.let {
@@ -60,6 +65,8 @@ class DiskCache(
 
     @OptIn(InternalSerializationApi::class)
     private fun encodeToString(value: Any): String {
+        val moshi = Moshi.Builder().build()
+        val adapter = moshi.adapter(StoreFrontDto::class.java)
         val serializer: KSerializer<Any>
         val typeName: String
         if (value is List<*>) {
@@ -80,12 +87,11 @@ class DiskCache(
     @OptIn(InternalSerializationApi::class)
     private fun <T : Any> decodeFromString(className: String, json: String): T? {
         // obtain the correct serializer for {className}
-        val serializer = if (className.startsWith("list:"))
-            ListSerializer(Class.forName(className.substring(5)).kotlin.serializer()) as KSerializer<Any>
-        else Class.forName(className).kotlin.serializer() as KSerializer<Any>
+        val moshi = Moshi.Builder().build()
+        val adapter = moshi.adapter<T>(javaClass)
 
         // parse JSON if before expiry date; else return null for default behavior (fetch the actual request)
-        return (jsonConfig.decodeFromString(serializer, json) as? T)
+        return (adapter.fromJson(json) as? T)
     }
 
     override suspend fun <T : Any> getEntry(key: String, timeLimit: Duration, useEntryEvenIfExpired: Boolean, defaultValue: suspend () -> T): Entry<T> {

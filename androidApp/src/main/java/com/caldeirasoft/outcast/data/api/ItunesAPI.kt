@@ -1,9 +1,9 @@
 package com.caldeirasoft.outcast.data.api
 
-import com.caldeirasoft.outcast.domain.dto.GenreResult
-import com.caldeirasoft.outcast.domain.dto.LockupResult
-import com.caldeirasoft.outcast.domain.dto.ResultIdsResult
-import com.caldeirasoft.outcast.domain.dto.StorePageDto
+import com.caldeirasoft.outcast.data.dto.GenreResult
+import com.caldeirasoft.outcast.data.dto.LockupResult
+import com.caldeirasoft.outcast.data.dto.ResultIdsResult
+import com.caldeirasoft.outcast.data.dto.StorePageDto
 import retrofit2.Response
 import retrofit2.http.*
 

@@ -2,7 +2,7 @@ package com.caldeirasoft.outcast.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.domain.enum.PodcastEpisodesFilterType
+import com.caldeirasoft.outcast.domain.enums.PodcastEpisodesFilterType
 import com.caldeirasoft.outcast.domain.models.*
 import com.caldeirasoft.outcast.domain.usecase.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi

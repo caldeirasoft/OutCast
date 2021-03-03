@@ -80,6 +80,7 @@ dependencies {
     api(libs.bundles.kotlin)
     api(libs.bundles.stetho)
     api(libs.bundles.retrofit)
+    api(libs.bundles.moshi)
     api(libs.bundles.okhttp)
     api(libs.bundles.koin)
     api(libs.bundles.compose)
@@ -99,6 +100,7 @@ dependencies {
     api(libs.timber)
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)
+    kapt(libs.moshi.kotlincodegen)
     // Java 8+ API desugaring support
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
 }
