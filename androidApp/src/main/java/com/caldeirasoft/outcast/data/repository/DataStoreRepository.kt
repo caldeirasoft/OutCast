@@ -7,19 +7,14 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.createDataStore
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.data.dto.StoreFrontDto
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.IOException
 import java.security.InvalidKeyException
 import java.util.*
-
-
-
 
 class DataStoreRepository(val context: Context) {
     companion object {
@@ -108,17 +103,13 @@ class DataStoreRepository(val context: Context) {
     /**
      * getStoreFront
      */
-    private fun getStoreFronts(): StoreFrontDto {
+    private fun getStoreFronts(): com.caldeirasoft.outcast.domain.dto.StoreFrontDto {
         val text = context.resources
             .openRawResource(R.raw.store_fronts)
             .bufferedReader()
             .use { it.readText() }
 
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory()) // To read field names using reflection
-            .build()
-        val adapter = moshi.adapter(StoreFrontDto::class.java)
-        //val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
-        return adapter.fromJson(text)!!
+        val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
+        return nonStrictJson.decodeFromString(com.caldeirasoft.outcast.domain.dto.StoreFrontDto.serializer(), text)
     }
 }

@@ -1,6 +1,7 @@
 @file:UseSerializers(InstantSerializer::class)
-package com.caldeirasoft.outcast.domain.enums
+package com.caldeirasoft.outcast.domain.enum
 
+import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers

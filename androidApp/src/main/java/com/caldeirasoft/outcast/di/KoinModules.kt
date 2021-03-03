@@ -11,8 +11,6 @@ import com.caldeirasoft.outcast.data.util.network.DnsProviders
 import com.caldeirasoft.outcast.data.util.network.GzipRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteResponseInterceptor
-import com.caldeirasoft.outcast.di.adapters.InstantStringJsonAdapter
-import com.caldeirasoft.outcast.di.adapters.LocalDateJsonAdapter
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
@@ -23,20 +21,18 @@ import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.chuckerteam.chucker.api.RetentionManager
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import okhttp3.Cache
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.KoinApplication
@@ -44,7 +40,6 @@ import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 fun KoinApplication.initKoinModules(appModule: Module) {
@@ -133,9 +128,8 @@ internal val networkModule = module {
             .withCacheControl(context = androidContext())
             .build()
     }
-    single { providesMoshi() }
-    single<ItunesAPI> { provideRetrofit(client = get(named("cacheControl")), moshi = get()) }
-    single<ItunesSearchAPI> { provideRetrofit(client = get(named("cacheControl")), moshi = get()) }
+    single<ItunesAPI> { provideRetrofit(client = get(named("cacheControl"))) }
+    single<ItunesSearchAPI> { provideRetrofit(client = get(named("cacheControl"))) }
 }
 
 internal val databaseModule = module {
@@ -144,13 +138,13 @@ internal val databaseModule = module {
 }
 
 internal val repositoryModule = module {
-    single { PodcastRepository(database = get()) }
-    single { EpisodeRepository(database = get()) }
-    single { StoreRepository(itunesAPI = get(), searchAPI = get(), context = get(), json = get()) }
-    single { InboxRepository(database = get()) }
-    single { QueueRepository(database = get()) }
-    single { LocalCacheRepository(context = get(), json = get()) }
-    single { DataStoreRepository(context = get()) }
+    single<PodcastRepository> { PodcastRepository(database = get()) }
+    single<EpisodeRepository> { EpisodeRepository(database = get()) }
+    single<StoreRepository> { StoreRepository(itunesAPI = get(), searchAPI = get(), context = get(), json = get()) }
+    single<InboxRepository> { InboxRepository(database = get()) }
+    single<QueueRepository> { QueueRepository(database = get()) }
+    single<LocalCacheRepository> { LocalCacheRepository(context = get(), json = get()) }
+    single<DataStoreRepository> { DataStoreRepository(context = get()) }
 }
 
 internal val usecaseModule = module {
@@ -180,19 +174,15 @@ internal val usecaseModule = module {
     single { GetStoreItemsUseCase(storeRepository = get()) }
 }
 
-fun providesMoshi(): Moshi = Moshi.Builder()
-    .add(Instant::class.java, InstantStringJsonAdapter())
-    .add(LocalDate::class.java, LocalDateJsonAdapter())
-    .add(KotlinJsonAdapterFactory()) // To read field names using reflection
-    .build()
-
 @OptIn(ExperimentalSerializationApi::class)
-inline fun <reified T> provideRetrofit(client: OkHttpClient, moshi: Moshi): T {
+inline fun <reified T> provideRetrofit(client: OkHttpClient): T {
     val baseURL = T::class.java.getField("baseUrl").get(null) as String
+    val contentType = "application/json".toMediaType()
+    val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
     val retrofit = Retrofit.Builder()
         .baseUrl(baseURL)
         .client(client)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addConverterFactory(nonStrictJson.asConverterFactory(contentType = contentType))
         .build()
 
     return retrofit.create(T::class.java)

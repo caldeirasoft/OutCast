@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.domain.enums.StoreItemType
+import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 
 @Composable

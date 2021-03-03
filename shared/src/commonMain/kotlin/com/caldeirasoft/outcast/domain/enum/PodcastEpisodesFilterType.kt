@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.domain.enums
+package com.caldeirasoft.outcast.domain.enum
 
 enum class PodcastEpisodesFilterType {
     QUEUE,

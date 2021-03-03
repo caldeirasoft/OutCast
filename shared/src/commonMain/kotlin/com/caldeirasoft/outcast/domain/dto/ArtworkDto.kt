@@ -1,8 +1,9 @@
-package com.caldeirasoft.outcast.data.dto
+package com.caldeirasoft.outcast.domain.dto
 
 import com.caldeirasoft.outcast.domain.models.Artwork
 import kotlinx.serialization.Serializable
 
+@Serializable
 class ArtworkDto (
     val url: String = "",
     val width: Int = 0,
