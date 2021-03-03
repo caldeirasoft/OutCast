@@ -62,14 +62,18 @@ class StoreRepository (
      * getGroupingDataAsync
      */
     private suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
+        Timber.d("DBG - getGroupingData")
         val storeResponse =
             itunesAPI.groupingData(storeFront = storeFront, genre = genre ?: DEFAULT_GENRE)
         if (storeResponse.isSuccessful.not())
             throw HttpException(storeResponse)
+        Timber.d("DBG - getGroupingData body")
         val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
+        Timber.d("DBG - getStoreData")
         val storePage = getStoreData(storePageDto)
         if (storePage !is StoreGroupingPage)
-            throw NullPointerException("Invalid cast to StoreGroupingPage")
+            throw NullPointerException("DBG - Invalid cast to StoreGroupingPage")
+        Timber.d("DBG - return StoreData")
         return storePage
     }
 
@@ -91,12 +95,12 @@ class StoreRepository (
             pagingSourceFactory = {
                 StoreDataPagingSource(
                     scope = scope,
-                    storeRepository = this,
                     loadDataFromNetwork = {
                         if (storeRoom.url.isEmpty()) storeRoom.getPage()
                         else getStoreDataAsync(storeRoom.url, storeRoom.storeFront)
                     },
-                    dataLoadedCallback = dataLoadedCallback
+                    dataLoadedCallback = dataLoadedCallback,
+                    getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
                 )
             }
         ).flow
@@ -120,9 +124,9 @@ class StoreRepository (
             pagingSourceFactory = {
                 StoreDataPagingSource(
                     scope = scope,
-                    storeRepository = this,
                     loadDataFromNetwork = { getGroupingDataAsync(genre, storeFront) },
-                    dataLoadedCallback = dataLoadedCallback
+                    dataLoadedCallback = dataLoadedCallback,
+                    getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
                 )
             }
         ).flow
@@ -147,7 +151,6 @@ class StoreRepository (
                 Timber.d("DBG - create pagingSourceFactory")
                 StoreDataPagingSource(
                     scope = scope,
-                    storeRepository = this,
                     loadDataFromNetwork = {
                         loadStoreDirectoryData(scope,
                             storeFront,
@@ -156,7 +159,8 @@ class StoreRepository (
                                 dataLoadedCallback?.invoke(it)
                             }
                     },
-                    dataLoadedCallback = null
+                    dataLoadedCallback = null,
+                    getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
                 )
             }
         ).flow
@@ -164,15 +168,17 @@ class StoreRepository (
     /**
      * loadGroupingData
      */
-    private suspend fun loadStoreDirectoryData(
+    suspend fun loadStoreDirectoryData(
         scope: CoroutineScope,
         storeFront: String,
         newVersionAvailable: (() -> Unit)?
     ): StoreGroupingPage {
-        Timber.d("DBG - load GroupingData")
+        Timber.d("DBG - load GroupingData from cache")
         val groupingPageCacheEntry = cache.getEntry("storeDirectory", useEntryEvenIfExpired = true, timeLimit = 1.days) {
+            Timber.d("DBG - load GroupingData from network")
             getGroupingDataAsync(null, storeFront)
         }
+        Timber.d("DBG - load GroupingData done")
 
         return newVersionAvailable?.let {
             val groupingPageCache = groupingPageCacheEntry.data

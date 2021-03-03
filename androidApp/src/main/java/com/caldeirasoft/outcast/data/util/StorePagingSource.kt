@@ -10,7 +10,7 @@ import kotlinx.coroutines.awaitAll
 interface StorePagingSource
 {
     val scope: CoroutineScope
-    suspend fun getStoreItems(lookupIds: List<Long>, storeFront: String, storePage: StorePage?): List<StoreItem>
+    val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem>
 
     suspend fun getItemsFromIds(
         ids: List<Long>,

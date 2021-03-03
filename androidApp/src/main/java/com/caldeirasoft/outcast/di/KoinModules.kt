@@ -115,6 +115,7 @@ internal val networkModule = module {
         }
         Json {
             serializersModule = serializer
+            coerceInputValues = false
         }
     }
     single { provideHttpClientBuilder()
@@ -161,6 +162,7 @@ internal val usecaseModule = module {
     single { FetchPodcastUseCase(podcastRepository = get()) }
     single { FetchEpisodeUseCase(episodeRepository = get()) }
     single { LoadStoreGenreDataUseCase(storeRepository = get()) }
+    single { LoadStoreDirectoryUseCase(storeRepository = get())}
     single { LoadStoreDirectoryPagingDataUseCase(storeRepository = get()) }
     single { FetchStoreGroupingPagingDataUseCase(storeRepository = get(), localCacheRepository = get())}
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }

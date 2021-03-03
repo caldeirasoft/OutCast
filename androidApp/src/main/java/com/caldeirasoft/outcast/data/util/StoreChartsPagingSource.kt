@@ -16,12 +16,8 @@ class StoreChartsPagingSource(
     inline val dataFlow: () -> Flow<List<Long>>,
 ) : PagingSource<Int, StoreItem>(), StorePagingSource {
 
-    override suspend fun getStoreItems(
-        lookupIds: List<Long>,
-        storeFront: String,
-        storePage: StorePage?
-    ): List<StoreItem> =
-        getStoreItemsUseCase.execute(lookupIds, storeFront, storePage)
+    override val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem> =
+        getStoreItemsUseCase::execute
 
     private val idsFlow: StateFlow<List<Long>?> =
         dataFlow()
