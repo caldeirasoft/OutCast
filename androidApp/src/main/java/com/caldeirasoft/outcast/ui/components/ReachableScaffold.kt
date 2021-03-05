@@ -19,7 +19,6 @@ import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.toDp
 import kotlin.math.log10
 
-@ExperimentalAnimationApi
 @Composable
 fun ReachableScaffold(
     headerRatioOrientation: Orientation = Orientation.Vertical,

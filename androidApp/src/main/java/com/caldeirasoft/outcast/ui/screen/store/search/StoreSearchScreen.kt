@@ -1,7 +1,6 @@
 @file:OptIn(KoinApiExtension::class)
 package com.caldeirasoft.outcast.ui.screen.store.search
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,7 +14,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,40 +22,34 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Loading
+import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.Uninitialized
+import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.caldeirasoft.outcast.ui.util.px
+import com.caldeirasoft.outcast.ui.util.toDp
+import com.caldeirasoft.outcast.ui.util.toIntPx
 import org.koin.core.component.KoinApiExtension
 import kotlin.math.log10
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 @Composable
 fun StoreSearchScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: StoreSearchViewModel = getViewModel()
-    val viewState by viewModel.state.collectAsState()
-
-    StoreSearchContent(
-        viewState = viewState,
-        navigateTo = navigateTo,
-    )
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-private fun StoreSearchContent(
-    viewState: StoreSearchViewModel.State,
-    navigateTo: (Screen) -> Unit,
-) {
+    val viewModel: StoreSearchViewModel = mavericksViewModel()
+    val state by viewModel.collectAsState()
     val listState = rememberLazyListState(0)
-    val genreItems = viewState.storeGenreData?.genres ?: emptyList()
+
+    LaunchedEffect(state)  {
+        if (state.storeGenreData is Uninitialized)
+            viewModel.getGenres()
+    }
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 36.px
@@ -71,14 +64,14 @@ private fun StoreSearchContent(
                 Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
-
-            viewState.screenState
-                .onLoading {
+            when (val storeGenre = state.storeGenreData)
+            {
+                is Loading ->
                     item {
                         ShimmerStoreCollectionsList()
                     }
-                }
-                .onSuccess {
+                is Success -> {
+                    val genreItems = storeGenre.invoke().genres
                     item {
                         // header
                         StoreHeadingSection(title = stringResource(id = R.string.store_tab_charts))
@@ -105,14 +98,18 @@ private fun StoreSearchContent(
                         horizontalInnerPadding = 8.dp,
                         verticalInnerPadding = 8.dp,
                         columns = 2
-                    ) { storeGenre ->
+                    ) { genre ->
                         GenreCardItem(
-                            genre = storeGenre,
-                            navigateToGenre = { navigateTo(Screen.Genre(storeGenre.id, storeGenre.name)) }
+                            genre = genre,
+                            navigateToGenre = {
+                                navigateTo(Screen.Genre(genre.id,
+                                    genre.name))
+                            }
                         )
                     }
                 }
-
+                else -> {}
+            }
         }
 
 
@@ -130,7 +127,6 @@ private fun StoreSearchContent(
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
 private fun ReachableAppBarWithSearchBar(
     title: @Composable () -> Unit,
