@@ -97,6 +97,7 @@ dependencies {
     api(libs.landscapist.coil)
     api(libs.accompanist.coil)
     api(libs.timber)
+    api(libs.mavericks)
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support

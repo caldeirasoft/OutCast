@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast
 
 import android.app.Application
+import com.airbnb.mvrx.Mavericks
 import com.caldeirasoft.outcast.di.appModule
 import com.caldeirasoft.outcast.di.initKoinModules
 import com.facebook.stetho.Stetho
@@ -17,6 +18,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        Mavericks.initialize(this@App)
         startKoin {
             androidLogger()
             androidContext(this@App)
