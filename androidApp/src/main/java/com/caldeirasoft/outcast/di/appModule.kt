@@ -5,7 +5,6 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeViewModel
-import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryViewModel
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreViewModel
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewModel
@@ -21,12 +20,7 @@ import org.koin.dsl.module
 @FlowPreview
 internal val appModule = module {
     //viewModel { InboxViewModel(get()) }
-    viewModel {
-        StoreDirectoryViewModel(
-            loadStoreDirectoryPagingDataUseCase = get(),
-            fetchStoreFrontUseCase = get()
-        )
-    }
+
     viewModel {
         StoreSearchViewModel(
             loadStoreGenreDataUseCase = get(),

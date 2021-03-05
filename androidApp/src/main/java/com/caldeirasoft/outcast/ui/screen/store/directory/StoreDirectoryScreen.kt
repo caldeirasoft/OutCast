@@ -12,16 +12,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionRooms
@@ -30,7 +30,7 @@ import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.koin.core.component.KoinApiExtension
 
 enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @DrawableRes val drawableId: Int) {
@@ -62,12 +62,15 @@ enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @Drawab
 fun StoreDirectoryScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel : StoreDirectoryViewModel = getViewModel()
-    val viewState by viewModel.state.collectAsState()
+    val viewModel : StoreDirectoryViewModel = mavericksViewModel()
+    val state by viewModel.collectAsState()
 
+    LaunchedEffect(state)  {
+        if (state.storeFront == null)
+            viewModel.getDiscover()
+    }
     StoreDirectoryContent(
-        viewState = viewState,
-        discover = viewModel.discover,
+        state = state,
         navigateTo = navigateTo
     )
 }
@@ -75,12 +78,11 @@ fun StoreDirectoryScreen(
 @ExperimentalAnimationApi
 @Composable
 private fun StoreDirectoryContent(
-    viewState: StoreDirectoryViewModel.State,
-    discover: Flow<PagingData<StoreItem>>,
+    state: StoreDirectoryViewState,
     navigateTo: (Screen) -> Unit,
 ) {
     val listState = rememberLazyListState(0)
-    val lazyPagingItems = discover.collectAsLazyPagingItems()
+    val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 56.px
