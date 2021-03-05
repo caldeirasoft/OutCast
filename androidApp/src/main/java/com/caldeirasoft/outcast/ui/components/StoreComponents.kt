@@ -165,7 +165,7 @@ fun StoreCollectionGenresContent(
                         else ->
                             GenreGridItem(
                                 storeGenre = item,
-                                onGenreClick = { navigateTo(Screen.Genre(item.id, item.name)) })
+                                onGenreClick = { navigateTo(Screen.Genre(item)) })
                     }
                 }
             }

@@ -283,7 +283,7 @@ class StoreRepository (
                                                         userRating = it.userRating?.value?.toFloat()
                                                             ?: 0f,
                                                         genre = it.genres.firstOrNull()
-                                                            ?.toGenre(),
+                                                            ?.toStoreGenre(storeFront),
                                                         storeFront = storeFront
                                                     )
                                                 )
@@ -769,7 +769,7 @@ class StoreRepository (
                     copyright = item.copyright,
                     contentAdvisoryRating = item.contentRatingsBySystem?.riaa?.name,
                     userRating = item.userRating?.value?.toFloat() ?: 0f,
-                    genre = item.genres.firstOrNull()?.toGenre(),
+                    genre = item.genres.firstOrNull()?.toStoreGenre(storeFront),
                     storeFront = storeFront
                 )
             }

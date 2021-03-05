@@ -1,42 +1,46 @@
 package com.caldeirasoft.outcast.ui.screen.store.genre
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
+import com.airbnb.mvrx.MavericksViewModel
+import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.ViewModelContext
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreGroupingPagingDataUseCase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
+@OptIn(KoinApiExtension::class)
 class StoreGenreViewModel(
-    val genreId: Int,
-    val fetchStoreGroupingPagingDataUseCase: FetchStoreGroupingPagingDataUseCase,
-    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-) : ViewModel() {
+    initialState: StoreGenreViewState,
+) : MavericksViewModel<StoreGenreViewState>(initialState), KoinComponent {
 
-    // storefront
-    protected val storeFront = fetchStoreFrontUseCase.getStoreFront()
+    private val fetchStoreGroupingPagingDataUseCase: FetchStoreGroupingPagingDataUseCase by inject()
 
-    // paged list
-    val discover: Flow<PagingData<StoreItem>> =
-        getStoreDataPagedList()
-            .cachedIn(viewModelScope)
+    init {
+        viewModelScope.launch {
+            getGenrePagedList()
+        }
+    }
 
-    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
-        storeFront
-            .flatMapConcat {
-                fetchStoreGroupingPagingDataUseCase.executeAsync(
-                    scope = viewModelScope,
-                    genre = genreId,
-                    storeFront = it,
-                    dataLoadedCallback = null
-                )
-            }
+    // get paged list
+    @OptIn(FlowPreview::class)
+    private fun getGenrePagedList() {
+        withState { state ->
+            fetchStoreGroupingPagingDataUseCase.executeAsync(
+                scope = viewModelScope,
+                genre = state.genreId,
+                storeFront = state.storeFront,
+                dataLoadedCallback = {})
+                .cachedIn(viewModelScope)
+                .setOnEach {
+                    copy(discover = it)
+                }
+        }
+    }
 
+    companion object : MavericksViewModelFactory<StoreGenreViewModel, StoreGenreViewState> {
+        override fun create(viewModelContext: ViewModelContext, state: StoreGenreViewState) = StoreGenreViewModel(state)
+    }
 }

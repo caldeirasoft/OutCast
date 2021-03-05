@@ -3,7 +3,6 @@ package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -29,7 +28,7 @@ data class StorePodcast(
     val copyright: String? = null,
     val contentAdvisoryRating: String? = null,
     val userRating: Float,
-    val genre: Genre?,
+    val genre: StoreGenre?,
     override val storeFront: String,
     val episodes: List<StoreEpisode> = listOf(),
 ) : StoreItemWithArtwork {

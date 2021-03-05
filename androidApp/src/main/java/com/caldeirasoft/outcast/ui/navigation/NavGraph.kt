@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
@@ -88,17 +89,14 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select)
                 }
                 composable(
-                    "${ScreenName.STORE_GENRE.name}/{${NavArgs.Genre}}/{${NavArgs.Title}}",
+                    "${ScreenName.STORE_GENRE.name}/{${NavArgs.Genre}}",
                     arguments = listOf(
-                        navArgument(NavArgs.Genre) { type = NavType.IntType },
-                        navArgument(NavArgs.Title) { type = NavType.StringType },
+                        navArgument(NavArgs.Genre) { type = NavType.StringType },
                     )
                 ) { backStackEntry ->
-                    val genreId = requireNotNull(backStackEntry.arguments?.getInt(NavArgs.Genre))
-                    val title = backStackEntry.arguments?.getString(NavArgs.Title).orEmpty()
+                    val storeGenre = backStackEntry.getObjectNotNull<StoreGenre>(NavArgs.Genre)
                     StoreGenreScreen(
-                        genreId = genreId,
-                        title = title,
+                        storeGenre = storeGenre,
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )

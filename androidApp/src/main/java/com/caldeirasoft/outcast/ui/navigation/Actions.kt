@@ -19,7 +19,7 @@ class Actions(navController: NavController) {
             is Charts ->
                 navController.navigate("${screen.id.name}/${screen.itemType}")
             is Genre ->
-                navController.navigate("${screen.id.name}/${screen.genreId}/${screen.title}")
+                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.storeGenre)}")
             else ->
                 navController.navigate(screen.id.name)
         }

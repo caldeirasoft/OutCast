@@ -102,8 +102,7 @@ fun StoreSearchScreen(
                         GenreCardItem(
                             genre = genre,
                             navigateToGenre = {
-                                navigateTo(Screen.Genre(genre.id,
-                                    genre.name))
+                                navigateTo(Screen.Genre(genre))
                             }
                         )
                     }

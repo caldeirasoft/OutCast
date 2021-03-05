@@ -5,7 +5,6 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeViewModel
-import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomViewModel
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsViewModel
@@ -20,13 +19,6 @@ import org.koin.dsl.module
 internal val appModule = module {
     //viewModel { InboxViewModel(get()) }
 
-    viewModel { (genreId: Int) ->
-        StoreGenreViewModel(
-            genreId = genreId,
-            fetchStoreGroupingPagingDataUseCase = get(),
-            fetchStoreFrontUseCase = get()
-        )
-    }
     viewModel { (room: StoreRoom) ->
         StoreRoomViewModel(
             room = room,

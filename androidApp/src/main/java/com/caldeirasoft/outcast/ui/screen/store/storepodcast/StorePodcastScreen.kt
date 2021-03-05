@@ -138,7 +138,7 @@ private fun StorePodcastScreen(
                     podcastData.genre?.let { genre ->
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                             ChipButton(selected = false,
-                                onClick = { navigateTo(Screen.Genre(genre.id, genre.name)) }) {
+                                onClick = { navigateTo(Screen.Genre(genre)) }) {
                                 Text(text = genre.name)
                             }
                         }
