@@ -1,52 +1,46 @@
 package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.domain.interfaces.StoreFeaturedPage
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreRoomPagingDataUseCase
 import com.caldeirasoft.outcast.domain.util.tryCast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
+@OptIn(KoinApiExtension::class)
 @ExperimentalCoroutinesApi
 class StoreRoomViewModel(
-    private val room: StoreRoom,
-    private val fetchStoreRoomPagingDataUseCase: FetchStoreRoomPagingDataUseCase
-) : ViewModel() {
+    initialState: StoreRoomViewState,
+) : MavericksViewModel<StoreRoomViewState>(initialState), KoinComponent {
 
-    // store data
-    protected val storeData = MutableStateFlow<StoreFeaturedPage>(room.getPage())
+    private val fetchStoreRoomPagingDataUseCase: FetchStoreRoomPagingDataUseCase by inject()
 
-    // state
-    val state: StateFlow<State> =
-        storeData.map { State(storePage = it)}
-            .stateIn(viewModelScope, SharingStarted.Eagerly, State(room.getPage()))
+    init {
+        viewModelScope.launch {
+            getRoomPagedList()
+        }
+    }
 
-    // paged list
-    val discover: Flow<PagingData<StoreItem>> =
-        getStoreDataPagedList()
-            .cachedIn(viewModelScope)
-
-    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
-        fetchStoreRoomPagingDataUseCase.executeAsync(
-            scope = viewModelScope,
-            storeRoom = room,
-            dataLoadedCallback = {
-                it.tryCast<StoreFeaturedPage> {
-                    storeData.tryEmit(this)
-                }
-            }
-        )
-
-    data class State(
-        val storePage: StoreFeaturedPage
-    )
-
-    companion object {
-        private const val ROOM_SAVED_STATE_KEY = "ROOM_SAVED_STATE_KEY"
+    // get paged list
+    @OptIn(FlowPreview::class)
+    private fun getRoomPagedList() {
+        withState { state ->
+            fetchStoreRoomPagingDataUseCase.executeAsync(
+                scope = viewModelScope,
+                storeRoom = state.room,
+                dataLoadedCallback = { page ->
+                    page.tryCast<StoreFeaturedPage> {
+                        setState { copy(storePage = this@tryCast) }
+                    }
+                })
+                .cachedIn(viewModelScope)
+                .setOnEach { copy(discover = it) }
+        }
     }
 }

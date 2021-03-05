@@ -11,7 +11,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,12 +23,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import androidx.paging.compose.itemsIndexed
 import coil.request.ImageRequest
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
@@ -39,9 +41,8 @@ import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -51,12 +52,11 @@ fun StoreRoomScreen(
     navigateBack: () -> Unit,
 )
 {
-    val viewModel: StoreRoomViewModel = getViewModel(parameters = { parametersOf(storeRoom) } )
-    val viewState by viewModel.state.collectAsState()
+    val viewModel: StoreRoomViewModel = mavericksViewModel(initialArgument = storeRoom)
+    val state by viewModel.collectAsState()
     StoreRoomScreen(
         title = storeRoom.label,
-        viewState = viewState,
-        discover = viewModel.discover,
+        state = state,
         navigateTo = navigateTo,
         navigateBack = navigateBack
     )
@@ -66,14 +66,13 @@ fun StoreRoomScreen(
 @Composable
 private fun StoreRoomScreen(
     title: String,
-    viewState: StoreRoomViewModel.State,
-    discover: Flow<PagingData<StoreItem>>,
+    state: StoreRoomViewState,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState(0)
-    val lazyPagingItems = discover.collectAsLazyPagingItems()
+    val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
 
@@ -104,7 +103,7 @@ private fun StoreRoomScreen(
                     }
                 }
                 .ifNotLoading {
-                    viewState.storePage.description?.let { description ->
+                    state.storePage.description?.let { description ->
                         item {
                             Text(text = description,
                                 textAlign = TextAlign.Justify,
@@ -116,7 +115,7 @@ private fun StoreRoomScreen(
                         }
                     }
 
-                    when (val storePage = viewState.storePage) {
+                    when (val storePage = state.storePage) {
                         is StoreMultiRoomPage ->
                             items(lazyPagingItems = lazyPagingItems) { collection ->
 
@@ -173,7 +172,9 @@ private fun StoreRoomScreen(
                                             PodcastListItemIndexed(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clickable(onClick = { navigateTo(Screen.StorePodcastScreen(item)) }),
+                                                    .clickable(onClick = {
+                                                        navigateTo(Screen.StorePodcastScreen(item))
+                                                    }),
                                                 storePodcast = item,
                                                 index = index + 1
                                             )
@@ -209,7 +210,9 @@ private fun StoreRoomScreen(
                                         PodcastGridItem(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable(onClick = { navigateTo(Screen.StorePodcastScreen(item)) }),
+                                                .clickable(onClick = {
+                                                    navigateTo(Screen.StorePodcastScreen(item))
+                                                }),
                                             podcast = item
                                         )
                                     }
@@ -236,40 +239,28 @@ private fun StoreRoomScreen(
                 val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
                 val minimumHeight = 56.dp
                 val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
-                val artwork = viewState.storePage.artwork
+                val artwork = state.storePage.artwork
                 if (artwork != null) {
                     val artworkUrl =
                         StoreItemWithArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
                     Box(modifier = Modifier.fillMaxSize()) {
-                        BoxWithConstraints() {
-                            val maxHeight = constraints.maxHeight
-                            val maxWidth = constraints.maxWidth
-                            val artworkHeight = maxWidth * 13f/32f
-
-                            Box(modifier = Modifier
-                                .fillMaxSize())
-                            {
-                                CoilImage(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(computedHeight)
-                                        .alpha(alphaLargeHeader),
-                                    imageRequest = ImageRequest.Builder(LocalContext.current)
-                                        .data(artworkUrl)
-                                        .crossfade(true)
-                                        .build(),
-                                    circularRevealedEnabled = true,
-                                    contentScale = ContentScale.Crop,
-                                    loading = {
-                                        Box(modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.DarkGray))
-                                    }
-                                )
+                        CoilImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(computedHeight)
+                                .alpha(alphaLargeHeader),
+                            imageRequest = ImageRequest.Builder(LocalContext.current)
+                                .data(artworkUrl)
+                                .crossfade(true)
+                                .build(),
+                            circularRevealedEnabled = true,
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                Box(modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.DarkGray))
                             }
-
-
-                        }
+                        )
                     }
                 } else {
                     // large title
@@ -288,7 +279,7 @@ private fun StoreRoomScreen(
             collapsedContent = {
                 val collapsedHeaderAlpha = getCollapsedHeaderAlpha(listState, headerHeight)
                 // top app bar
-                val artwork = viewState.storePage.artwork
+                val artwork = state.storePage.artwork
                 val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
                 val contentColor: Color =
                     artwork?.textColor1

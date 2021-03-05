@@ -2,8 +2,6 @@ package com.caldeirasoft.outcast.ui.screen.store.genre
 
 import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.ViewModelContext
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreGroupingPagingDataUseCase
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
@@ -38,9 +36,5 @@ class StoreGenreViewModel(
                     copy(discover = it)
                 }
         }
-    }
-
-    companion object : MavericksViewModelFactory<StoreGenreViewModel, StoreGenreViewState> {
-        override fun create(viewModelContext: ViewModelContext, state: StoreGenreViewState) = StoreGenreViewModel(state)
     }
 }
