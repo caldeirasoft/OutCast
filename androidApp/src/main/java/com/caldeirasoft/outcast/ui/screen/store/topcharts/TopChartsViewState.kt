@@ -13,7 +13,7 @@ data class TopChartsViewState(
     val discover: PagingData<StoreItem> = PagingData.empty(),
 ) : MavericksState {
     constructor(itemType: StoreItemType) :
-    this(selectedChartTab = itemType)
+            this(selectedChartTab = itemType)
 }
 
 

@@ -1,65 +1,50 @@
 package com.caldeirasoft.outcast.ui.screen.store.storepodcast
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
+import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.data.util.StorePodcastPagingSource
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStorePodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
+@OptIn(KoinApiExtension::class)
 class StorePodcastViewModel(
-    val storePodcast: StorePodcast,
-    val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
-    val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    val getStoreItemsUseCase: GetStoreItemsUseCase
-) : ViewModel() {
-    // storefront
-    private val storeFront: Flow<String> = fetchStoreFrontUseCase.getStoreFront()
-
-    // store resource data
-    protected val storeResourceData: StateFlow<Resource> =
-        storeFront.flatMapLatest {
-            fetchStorePodcastDataUseCase.execute(storePodcast.url, it)
-        }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, Resource.Loading)
-
-    // genre map
-    private val storePage: Flow<StorePodcastPage> =
-        storeResourceData
-            .filterIsInstance<Resource.Success<StorePodcastPage>>()
-            .map { it.data }
-
-    // paged list
-    val otherPodcasts: Flow<PagingData<StoreItem>> =
-        storePage
-            .map { getStoreDataPagedList(it) }
-            .flattenMerge()
-            .cachedIn(viewModelScope)
-
-    // state
-    val state = MutableStateFlow(State(
-        storeResourceData = Resource.Loading,
-        storePage = storePodcast.page))
+    initialState: StorePodcastViewState
+) : MavericksViewModel<StorePodcastViewState>(initialState), KoinComponent {
+    val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase by inject()
+    val getStoreItemsUseCase: GetStoreItemsUseCase by inject()
 
     init {
-        combine(storeResourceData, storePage)
-        { storeResourceData, storePage ->
-            State(storeResourceData, storePage)
+        viewModelScope.launch {
+            getPodcastPage()
         }
-            .onEach { state.tryEmit(it) }
-            .launchIn(viewModelScope)
     }
 
-    private fun getStoreDataPagedList(storePodcastPage: StorePodcastPage): Flow<PagingData<StoreItem>> =
+    // get paged list
+    @OptIn(FlowPreview::class)
+    private suspend fun getPodcastPage() {
+        withState { state ->
+            suspend {
+                fetchStorePodcastDataUseCase.execute(
+                    state.storePodcast.url,
+                    state.storePodcast.storeFront)
+            }.execute {
+                copy(storePodcastPage = it)
+            }
+        }
+
+        onAsync(StorePodcastViewState::storePodcastPage,
+            onSuccess = { page -> getStoreDataPagedList(page) }
+        )
+    }
+
+    private fun getStoreDataPagedList(storePodcastPage: StorePodcastPage) {
         Pager(
             PagingConfig(
                 pageSize = 5,
@@ -74,10 +59,6 @@ class StorePodcastViewModel(
                 getStoreItemsUseCase = getStoreItemsUseCase
             )
         }.flow
-
-
-    data class State(
-        val storeResourceData: Resource,
-        val storePage: StorePodcastPage,
-    )
+            .setOnEach { copy(otherPodcasts = it) }
+    }
 }

@@ -5,8 +5,6 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.interfaces.StorePageWithCollection
-import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -25,6 +23,8 @@ class StorePodcastPage(
     val name = storeData.name
     val artistName = storeData.artistName
     val artwork = storeData.artwork
+    val description = storeData.description
+    val genre = storeData.genre
     override val storeList: MutableList<StoreCollection> = otherPodcasts
 
     fun getArtworkUrl() = storeData.getArtworkUrl()

@@ -1,16 +1,11 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.data.repository.StoreRepository
-import com.caldeirasoft.outcast.domain.util.Resource
-import com.caldeirasoft.outcast.domain.util.networkCall
-import kotlinx.coroutines.flow.*
+import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 
 class FetchStorePodcastDataUseCase constructor(
     val storeRepository: StoreRepository,
 ) {
-    fun execute(url: String, storeFront: String) : Flow<Resource> = networkCall {
+    suspend fun execute(url: String, storeFront: String) : StorePodcastPage =
         storeRepository.getPodcastDataAsync(url, storeFront)
-    }
 }

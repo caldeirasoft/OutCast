@@ -27,17 +27,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import com.airbnb.mvrx.Loading
+import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
 import com.caldeirasoft.outcast.domain.util.Log_D
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onLoading
-import com.caldeirasoft.outcast.domain.util.Resource.Companion.onSuccess
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
@@ -46,13 +44,12 @@ import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.getViewModel
+import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.parameter.parametersOf
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -61,12 +58,11 @@ fun StorePodcastScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: StorePodcastViewModel = getViewModel(parameters = { parametersOf(storePodcast) } )
-    val viewState by viewModel.state.collectAsState()
+    val viewModel: StorePodcastViewModel = mavericksViewModel(initialArgument = storePodcast)
+    val state by viewModel.collectAsState()
 
     StorePodcastScreen(
-        viewState = viewState,
-        otherPodcasts = viewModel.otherPodcasts,
+        state = state,
         navigateTo = navigateTo,
         navigateBack = navigateBack)
 }
@@ -74,15 +70,14 @@ fun StorePodcastScreen(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun StorePodcastScreen(
-    viewState: StorePodcastViewModel.State,
-    otherPodcasts: Flow<PagingData<StoreItem>>,
+    state: StorePodcastViewState,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
-    val podcastData = viewState.storePage.storeData
-    val otherPodcastsLazyPagingItems = otherPodcasts.collectAsLazyPagingItems()
+    val podcastData = state.storePodcastPage
+    val otherPodcastsLazyPagingItems = flowOf(state.otherPodcasts).collectAsLazyPagingItems()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
 
@@ -95,7 +90,7 @@ private fun StorePodcastScreen(
 
             item {
                 StorePodcastExpandedHeader(
-                    viewState = viewState,
+                    state = state,
                     listState = listState,
                     headerHeight = headerHeight
                 )
@@ -111,53 +106,59 @@ private fun StorePodcastScreen(
                         selected = true,
                         onClick = { /*TODO*/ },
                         icon = {
-                            Icon(Icons.Default.CheckCircle,
-                                contentDescription = null,)
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                            )
                         }
                     ) {
                         Text(text = stringResource(id = R.string.action_subscribe))
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Public,
-                            contentDescription = null,)
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = null,
+                        )
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Default.Share,
-                            contentDescription = null,)
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null,
+                        )
                     }
                 }
             }
 
-            // description if present
-            podcastData.description?.let { description ->
-                item {
-                    StorePodcastDescriptionContent(description = description)
-
-                    podcastData.genre?.let { genre ->
-                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                            ChipButton(selected = false,
-                                onClick = { navigateTo(Screen.Genre(genre)) }) {
-                                Text(text = genre.name)
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            // episodes + trailer + related podcasts
-            viewState.storeResourceData
-                .onLoading {
+            when (val storePageAsync = state.storePodcastPage) {
+                is Loading ->
                     item {
                         ShimmerStoreCollectionsList()
                     }
-                }
-                .onSuccess<StorePodcastPage> {
+                is Success -> {
+
+                    // description if present
+                    val storePodcastPage = storePageAsync.invoke()
+                    storePodcastPage.description?.let { description ->
+                        item {
+                            StorePodcastDescriptionContent(description = description)
+
+                            storePodcastPage.genre?.let { genre ->
+                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    ChipButton(selected = false,
+                                        onClick = { navigateTo(Screen.Genre(genre)) }) {
+                                        Text(text = genre.name)
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+
                     // trailer
-                    it.storeEpisodeTrailer?.let { trailer ->
+                    storePodcastPage.storeEpisodeTrailer?.let { trailer ->
                         item {
                             // trailer header
                             StoreHeadingSection(
@@ -178,9 +179,9 @@ private fun StorePodcastScreen(
                     item {
                         StoreHeadingSectionWithLink(
                             title = stringResource(id = R.string.store_episodes),
-                            onClick = { navigateTo(Screen.StoreEpisodesScreen(podcastData)) })
+                            onClick = { navigateTo(Screen.StoreEpisodesScreen(state.storePodcast)) })
                     }
-                    items(it.recentEpisodes) { episode ->
+                    items(storePodcastPage.recentEpisodes) { episode ->
                         EpisodeItemWithDesc(
                             storeEpisode = episode,
                             onEpisodeClick = {
@@ -192,11 +193,11 @@ private fun StorePodcastScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     // button show all episodes
-                    if (it.episodes.size > it.recentEpisodes.size) {
+                    if (storePodcastPage.episodes.size > storePodcastPage.recentEpisodes.size) {
                         item {
                             TextButton(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                onClick = { navigateTo(Screen.StoreEpisodesScreen(podcastData)) }) {
+                                onClick = { navigateTo(Screen.StoreEpisodesScreen(state.storePodcast)) }) {
                                 Text(text = stringResource(id = R.string.action_show_all_episodes),
                                     style = typography.button.copy(letterSpacing = 0.25.sp))
                             }
@@ -211,10 +212,10 @@ private fun StorePodcastScreen(
                                 val collectionWithTitle = collection.copy(
                                     label = when (collection.label) {
                                         "podcastsByArtist" -> stringResource(id = R.string.podcast_podcastsByArtist,
-                                            podcastData.artistName)
+                                            storePodcastPage.artistName)
                                         "podcastsListenersAlsoFollow" -> stringResource(id = R.string.podcast_podcastsListenersAlsoFollow)
                                         "topPodcastsInGenre" -> stringResource(id = R.string.podcast_topPodcastsInGenre,
-                                            podcastData.genre?.name.orEmpty())
+                                            storePodcastPage.genre?.name.orEmpty())
                                         else -> "-"
                                     },
                                 )
@@ -236,12 +237,13 @@ private fun StorePodcastScreen(
                         Spacer(modifier = Modifier.height(56.dp))
                     }
                 }
+            }
         }
 
         ReachableAppBar(
             collapsedContent = {
                 StorePodcastCollapsedHeader(
-                    viewState = viewState,
+                    state = state,
                     listState = listState,
                     headerHeight = headerHeight,
                     navigateUp = navigateBack)
@@ -253,7 +255,7 @@ private fun StorePodcastScreen(
 
 @Composable
 fun StorePodcastExpandedHeader(
-    viewState: StorePodcastViewModel.State,
+    state: StorePodcastViewState,
     listState: LazyListState,
     headerHeight: Int)
 {
@@ -270,7 +272,7 @@ fun StorePodcastExpandedHeader(
         ) {
             BoxWithConstraints {
                 val bgDominantColor =
-                    Color.getColor(viewState.storePage.artwork?.bgColor!!)
+                    Color.getColor(state.storePodcast.artwork?.bgColor!!)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -305,7 +307,7 @@ fun StorePodcastExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 CoilImage(
-                    imageModel = viewState.storePage.getArtworkUrl(),
+                    imageModel = state.storePodcast.getArtworkUrl(),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxHeight()
@@ -320,7 +322,7 @@ fun StorePodcastExpandedHeader(
                 Box(modifier = Modifier
                     .weight(1f)) {
                     AutoSizedText(
-                        text = viewState.storePage.name,
+                        text = state.storePodcast.name,
                         modifier = Modifier
                             .align(Alignment.CenterStart)
                             .fillMaxHeight(),
@@ -331,7 +333,7 @@ fun StorePodcastExpandedHeader(
                     )
                 }
                 Text(
-                    viewState.storePage.artistName,
+                    state.storePodcast.artistName,
                     modifier = Modifier
                         .padding(bottom = 4.dp),
                     style = MaterialTheme.typography.body1,
@@ -345,7 +347,7 @@ fun StorePodcastExpandedHeader(
 
 @Composable
 fun StorePodcastCollapsedHeader(
-    viewState: StorePodcastViewModel.State,
+    state: StorePodcastViewState,
     listState: LazyListState,
     headerHeight: Int,
     navigateUp: () -> Unit)
@@ -373,7 +375,7 @@ fun StorePodcastCollapsedHeader(
             .fillMaxWidth(),
         title = {
             CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
-                Text(text = viewState.storePage.name)
+                Text(text = state.storePodcast.name)
             }
         },
         navigationIcon = {
