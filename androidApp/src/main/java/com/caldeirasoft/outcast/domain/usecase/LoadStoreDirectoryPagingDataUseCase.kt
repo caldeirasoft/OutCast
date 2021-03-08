@@ -12,7 +12,9 @@ class LoadStoreDirectoryPagingDataUseCase(
 ) {
     fun executeAsync(
         scope: CoroutineScope,
-        storeFront: String, newVersionAvailable: () -> Unit, dataLoadedCallback: ((StorePage) -> Unit)?
+        storeFront: String,
+        newVersionAvailable: () -> Unit,
+        dataLoadedCallback: ((StorePage) -> Unit)?
     ): Flow<PagingData<StoreItem>> =
         storeRepository.loadDirectoryPagingData(scope, storeFront, newVersionAvailable, dataLoadedCallback)
 

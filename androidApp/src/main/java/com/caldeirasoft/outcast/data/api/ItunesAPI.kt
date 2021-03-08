@@ -37,12 +37,21 @@ interface ItunesAPI {
     @Headers(
         "Content-Type: application/json;charset=utf-8",
         "Accept: application/json")
-    suspend fun topCharts(
+    suspend fun topChartsIds(
         @Header("X-Apple-Store-Front") storeFront: String,
         @Query("name") name: String,
         @Query("limit") limit: Int,
         @Query("g") genre: Int = 26,
     ): Response<ResultIdsResult>
+
+    @GET("/WebObjects/MZStore.woa/wa/viewTop")
+    @Headers(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json")
+    suspend fun topCharts(
+        @Header("X-Apple-Store-Front") storeFront: String,
+        @Query("genreId") genre: Int = 26,
+    ): Response<StorePageDto>
 
     @GET("https://uclient-api.itunes.apple.com/WebObjects/MZStorePlatform.woa/wa/lookup?version=2&p=lockup&caller=DI6")
     @Headers(

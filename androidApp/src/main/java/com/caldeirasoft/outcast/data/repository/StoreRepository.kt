@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
+import com.caldeirasoft.outcast.data.util.StoreChartsPagingSource
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.data.util.local.DiskCache
 import com.caldeirasoft.outcast.data.util.local.MemoryCache
@@ -699,6 +700,46 @@ class StoreRepository (
     }
 
     /**
+     * getTopChartsAsync
+     */
+    suspend fun getTopChartsAsync(storeFront: String, genreId: Int?): StoreTopCharts
+    {
+        val podcastIds: MutableList<Long> = mutableListOf();
+        val episodeIds: MutableList<Long> = mutableListOf();
+
+        // get top charts data
+        val storeResponse = itunesAPI.topCharts(storeFront, genreId ?: DEFAULT_GENRE)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        Timber.d("DBG - getTopChartsAsync body")
+        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
+        val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
+        storePageDto.pageData
+            ?.segmentedControl?.segments
+            ?.firstOrNull()
+            ?.pageData?.topCharts?.forEach {
+                if(it.kinds?.podcast == true) {
+                    podcastIds += it.adamIds
+                }
+                else if (it.kinds?.podcastEpisode == true) {
+                    episodeIds += it.adamIds
+                }
+            }
+
+        return StoreTopCharts(
+            id = 0,
+            label = storePageDto.pageData
+                ?.segmentedControl?.segments
+                ?.firstOrNull()?.title.orEmpty(),
+            storeFront = storeFront,
+            storeEpisodesIds = episodeIds,
+            storePodcastsIds = podcastIds,
+            lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront),
+            timestamp = timestamp
+        )
+    }
+
+    /**
      * getTopChartsPodcastsIdsAsync
      */
     suspend fun getTopChartsIdsAsync(
@@ -712,7 +753,7 @@ class StoreRepository (
             StoreItemType.PODCAST -> "Podcasts"
             StoreItemType.EPISODE -> "PodcastEpisodes"
         }
-        val storeResponse = itunesAPI.topCharts(storeFront = storeFront,
+        val storeResponse = itunesAPI.topChartsIds(storeFront = storeFront,
             genre = genre ?: DEFAULT_GENRE,
             limit = limit,
             name = type)
@@ -723,7 +764,14 @@ class StoreRepository (
     }
 
     /*
-    fun getTopChartPagingData(genreId: Int?, type: StoreItemType, storeFront: String): Flow<PagingData<StoreItem>> =
+     * getTopChartPagingData
+     */
+    fun getTopChartPagingData(
+        scope: CoroutineScope,
+        genreId: Int?,
+        type: StoreItemType,
+        storeFront: String,
+        dataLoadedCallback: ((StoreTopCharts) -> Unit)?): Flow<PagingData<StoreItem>> =
         Pager(
             PagingConfig(
                 pageSize = 10,
@@ -733,15 +781,13 @@ class StoreRepository (
             )
         ) {
             StoreChartsPagingSource(
-                storeFront = storeFront,
-                scope = viewModelScope,
-                getStoreItemsUseCase = getStoreItemsUseCase
-            ) {
-                fetchStoreTopChartsIdsUseCase.execute(storeGenre = genreId, storeItemType = type, storeFront = storeFront)
-            }
+                scope = scope,
+                itemType = type,
+                loadDataFromNetwork = { getTopChartsAsync(storeFront, genreId) },
+                getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) },
+                dataLoadedCallback = dataLoadedCallback
+            )
         }.flow
-
-     */
 
     /**
      * getStoreItemFromLookupResultItem

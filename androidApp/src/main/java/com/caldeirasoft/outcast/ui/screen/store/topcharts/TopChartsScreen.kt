@@ -14,18 +14,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
@@ -38,9 +36,8 @@ import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.parameter.parametersOf
 
 
 @FlowPreview
@@ -51,11 +48,10 @@ fun TopChartsScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: TopChartsViewModel = getViewModel(parameters = { parametersOf(storeItemType) } )
-    val viewState by viewModel.state.collectAsState()
+    val viewModel: TopChartsViewModel = mavericksViewModel(initialArgument = storeItemType)
+    val state by viewModel.collectAsState()
     TopChartsScreen(
-        viewState = viewState,
-        topCharts = viewModel.topCharts,
+        state = state,
         onChartTabSelected = viewModel::onTabSelected,
         onChartsGenreSelected = viewModel::onGenreSelected,
         navigateTo = navigateTo,
@@ -68,8 +64,7 @@ fun TopChartsScreen(
 @ExperimentalCoroutinesApi
 @Composable
 fun TopChartsScreen(
-    viewState: TopChartsViewModel.State,
-    topCharts: Flow<PagingData<StoreItem>>,
+    state: TopChartsViewState,
     onChartTabSelected: (StoreItemType) -> Unit,
     onChartsGenreSelected: (Int?) -> Unit,
     navigateTo: (Screen) -> Unit,
@@ -77,10 +72,10 @@ fun TopChartsScreen(
 ) {
     val listState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
-    val selectedGenre = viewState.selectedGenre
+    val selectedGenre = state.selectedGenre
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
-    val lazyPagingItems = topCharts.collectAsLazyPagingItems()
+    val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 56.px
@@ -99,7 +94,7 @@ fun TopChartsScreen(
                 LazyRow(contentPadding = PaddingValues(start = 16.dp, end = 16.dp)) {
                     item {
                         ChipRadioSelector(
-                            selectedValue = viewState.selectedChartTab,
+                            selectedValue = state.selectedChartTab,
                             values = StoreItemType.values(),
                             onClick = onChartTabSelected,
                             text = {
