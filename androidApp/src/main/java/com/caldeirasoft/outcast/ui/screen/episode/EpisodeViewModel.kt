@@ -1,51 +1,45 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
+import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreEpisodeDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.util.Resource
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
+@OptIn(KoinApiExtension::class)
 class EpisodeViewModel(
-    val storeEpisode: StoreEpisode,
-    private val fetchStoreEpisodeDataUseCase: FetchStoreEpisodeDataUseCase,
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-) : ViewModel()
+    initialState: EpisodeViewState
+) : MavericksViewModel<EpisodeViewState>(initialState), KoinComponent
 {
-    // storefront
-    private val storeFront: Flow<String> = fetchStoreFrontUseCase.getStoreFront()
-
-    // store resource data
-    protected val storeResourceData: StateFlow<Resource> =
-        storeFront.flatMapLatest {
-            fetchStoreEpisodeDataUseCase.execute(storeEpisode, it)
-        }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, Resource.Loading)
-
-    // genre map
-    private val storeData: Flow<StoreEpisode> =
-        storeResourceData
-            .filterIsInstance<Resource.Success<StoreEpisode>>()
-            .map { it.data }
-
-    // state
-    val state = MutableStateFlow(State(
-        storeResourceData = Resource.Loading,
-        storeEpisode = storeEpisode))
+    private val fetchStoreEpisodeDataUseCase: FetchStoreEpisodeDataUseCase by inject()
+    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
 
     init {
-        combine(storeResourceData, storeData)
-        { storeResourceData, storeData ->
-            State(storeResourceData, storeData)
+        viewModelScope.launch {
+            getEpisodeInfo()
         }
-            .onEach { state.tryEmit(it) }
-            .launchIn(viewModelScope)
     }
 
-    data class State(
-        val storeResourceData: Resource,
-        val storeEpisode: StoreEpisode,
-    )
+    // get paged list
+    @OptIn(FlowPreview::class)
+    private suspend fun getEpisodeInfo() {
+        val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
+        withState { state ->
+            val episode = state.storeEpisode.invoke()
+            if (episode != null && !episode.isComplete) {
+                suspend {
+                    fetchStoreEpisodeDataUseCase.execute(
+                        storeEpisode = episode,
+                        storeFront = storeFront
+                    )
+                }.execute(retainValue = EpisodeViewState::storeEpisode) {
+                    copy(storeEpisode = it)
+                }
+            }
+        }
+    }
 }

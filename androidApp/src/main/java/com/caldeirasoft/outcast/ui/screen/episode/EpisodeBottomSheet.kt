@@ -8,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -19,37 +18,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.OverflowText
 import com.caldeirasoft.outcast.ui.components.PlayButton
 import com.caldeirasoft.outcast.ui.components.PodcastThumbnail
 import com.caldeirasoft.outcast.ui.components.QueueButton
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetContent
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
-import com.caldeirasoft.outcast.ui.util.getViewModel
+import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.koin.core.parameter.parametersOf
-
-@Composable
-fun openEpisodeDialog(storeEpisode: StoreEpisode) {
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-    val coroutineScope = rememberCoroutineScope()
-    drawerContent.updateContent {
-        EpisodeDialog(
-            episode = storeEpisode,
-            navigateTo = { }
-        )
-    }
-    coroutineScope.launch {
-        drawerState.show()
-    }
-}
 
 suspend fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, storeEpisode: StoreEpisode) {
     drawerContent.updateContent {
@@ -70,9 +52,9 @@ fun EpisodeDialog(
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState(0)
     val drawerState = LocalBottomSheetState.current
-    val viewModel: EpisodeViewModel = getViewModel(parameters = { parametersOf(episode) } )
-    val viewState by viewModel.state.collectAsState()
-    val storeEpisode = viewState.storeEpisode
+    val viewModel: EpisodeViewModel = mavericksViewModel(initialArgument = episode )
+    val state by viewModel.collectAsState()
+    val storeEpisode = requireNotNull(state.storeEpisode.invoke())
 
     Column()
     {
