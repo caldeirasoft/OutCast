@@ -1,11 +1,11 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.data.repository.PodcastRepository
-import com.caldeirasoft.outcast.domain.models.PodcastSummary
+import com.caldeirasoft.outcast.data.repository.LibraryRepository
+import com.caldeirasoft.outcast.db.PodcastSummary
 import kotlinx.coroutines.flow.Flow
 
-class FetchPodcastsSubscribedUseCase(val podcastRepository: PodcastRepository)
+class FetchPodcastsSubscribedUseCase(val libraryRepository: LibraryRepository)
     : FlowUseCaseWithoutParams<List<PodcastSummary>> {
     override fun execute(): Flow<List<PodcastSummary>> =
-        podcastRepository.fetchSubscribedPodcasts()
+        libraryRepository.loadAllPodcasts()
 }

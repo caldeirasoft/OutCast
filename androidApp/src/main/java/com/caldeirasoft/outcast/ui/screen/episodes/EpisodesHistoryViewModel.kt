@@ -1,11 +1,15 @@
 package com.caldeirasoft.outcast.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.caldeirasoft.outcast.domain.models.*
+import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.usecase.FetchEpisodesHistoryUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapMerge
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -17,7 +21,6 @@ class EpisodesHistoryViewModel(
 
     val podcastEpisodes: Flow<List<EpisodeSummary>> =
         filter.flatMapMerge {
-            fetchEpisodesHistoryUseCase
-                .invoke(FetchEpisodesHistoryUseCase.Params(it?.podcastId))
+            fetchEpisodesHistoryUseCase.invoke()
         }
 }

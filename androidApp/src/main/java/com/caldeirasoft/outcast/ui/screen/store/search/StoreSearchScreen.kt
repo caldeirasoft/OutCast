@@ -29,7 +29,10 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.components.ReachableScaffold
+import com.caldeirasoft.outcast.ui.components.ShimmerStoreCollectionsList
+import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
+import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.px
@@ -99,12 +102,14 @@ fun StoreSearchScreen(
                         verticalInnerPadding = 8.dp,
                         columns = 2
                     ) { genre ->
+                        /*
                         GenreCardItem(
                             genre = genre,
                             navigateToGenre = {
-                                navigateTo(Screen.Genre(genre))
+                                navigateTo(Screen.GenreScreen(genre))
                             }
                         )
+                         */
                     }
                 }
                 else -> {}

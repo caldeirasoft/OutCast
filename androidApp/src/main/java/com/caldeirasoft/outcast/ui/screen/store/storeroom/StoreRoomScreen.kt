@@ -173,7 +173,7 @@ private fun StoreRoomScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable(onClick = {
-                                                        navigateTo(Screen.StorePodcastScreen(item))
+                                                        navigateTo(Screen.PodcastScreen(item))
                                                     }),
                                                 storePodcast = item,
                                                 index = index + 1
@@ -186,11 +186,11 @@ private fun StoreRoomScreen(
                                                     coroutineScope.launch {
                                                         openEpisodeDialog(drawerState,
                                                             drawerContent,
-                                                            item)
+                                                            item.episode)
                                                     }
                                                 },
-                                                onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
-                                                storeEpisode = item,
+                                                onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
+                                                episode = item.episode,
                                                 index = index + 1
                                             )
                                             Divider()
@@ -211,7 +211,7 @@ private fun StoreRoomScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
-                                                    navigateTo(Screen.StorePodcastScreen(item))
+                                                    navigateTo(Screen.PodcastScreen(item))
                                                 }),
                                             podcast = item
                                         )

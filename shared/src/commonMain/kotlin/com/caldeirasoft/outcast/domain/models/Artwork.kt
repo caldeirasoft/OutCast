@@ -9,6 +9,9 @@ data class Artwork(val url: String,
                    val textColor1: String? = null,
                    val textColor2: String? = null,
                    val bgColor: String? = null) {
+
+    fun getArtworkPodcast() = getArtwork(200, 200, "bb")
+
     fun getArtwork(desiredWidth: Int): String {
         return url.replace("{w}", desiredWidth.toString())
             .replace("{h}", (height * desiredWidth * 1f / width).toInt().toString())

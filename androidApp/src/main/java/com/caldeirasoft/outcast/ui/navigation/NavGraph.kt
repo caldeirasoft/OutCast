@@ -17,11 +17,11 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastEpisodesScreen
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import kotlinx.coroutines.FlowPreview
@@ -126,11 +126,11 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.STORE_PODCAST.name}/{${NavArgs.Podcast}}",
+                    "${ScreenName.PODCAST.name}/{${NavArgs.Podcast}}",
                     arguments = listOf(navArgument(NavArgs.Podcast) { type = NavType.StringType })
                 ) { backStackEntry ->
                     val podcast = backStackEntry.getObjectNotNull<StorePodcast>(NavArgs.Podcast)
-                    StorePodcastScreen(
+                    PodcastScreen(
                         storePodcast = podcast,
                         navigateTo = actions.select,
                         navigateBack = actions.up)

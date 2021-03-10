@@ -1,16 +1,22 @@
 package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
+import com.caldeirasoft.outcast.data.util.PodcastRemoteMediator
 import com.caldeirasoft.outcast.data.util.StoreChartsPagingSource
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.data.util.local.DiskCache
 import com.caldeirasoft.outcast.data.util.local.MemoryCache
 import com.caldeirasoft.outcast.data.util.local.Source
+import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.dto.GenreResult
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
@@ -18,7 +24,9 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.*
+import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -33,7 +41,8 @@ class StoreRepository (
     val itunesAPI: ItunesAPI,
     val searchAPI: ItunesSearchAPI,
     val context: Context,
-    val json: Json
+    val json: Json,
+    val database: Database,
 ) {
 
     companion object {
@@ -284,7 +293,7 @@ class StoreRepository (
                                                         userRating = it.userRating?.value?.toFloat()
                                                             ?: 0f,
                                                         genre = it.genres.firstOrNull()
-                                                            ?.toStoreGenre(storeFront),
+                                                            ?.toGenre(),
                                                         storeFront = storeFront
                                                     )
                                                 )
@@ -418,7 +427,7 @@ class StoreRepository (
             storePageDto.pageData?.categoryList?.let { categoryList ->
                 StoreCollectionGenres(
                     label = categoryList.parentCategoryLabel.orEmpty(),
-                    genres = categoryList.children.map { child -> child.toStoreGenre(storeFront) },
+                    genres = categoryList.children.map { child -> child.toGenre() },
                     storeFront = storeFront
                 )
             }
@@ -606,7 +615,7 @@ class StoreRepository (
     /**
      * getPodcastDataAsync
      */
-    suspend fun getPodcastDataAsync(url: String, storeFront: String): StorePodcastPage {
+    suspend fun getPodcastDataAsync(url: String, storeFront: String): PodcastPage {
         // get grouping data
         val storeResponse = itunesAPI.storeData(storeFront = storeFront, url = url)
         if (storeResponse.isSuccessful.not())
@@ -628,8 +637,8 @@ class StoreRepository (
             ?.let { (_, podcastEntry) ->
                 val podcastData =
                     getStoreItemFromLookupResultItem(podcastEntry, storeFront) as StorePodcast
-                val podcastPage = StorePodcastPage(
-                    storeData = podcastData,
+                val podcastPage = PodcastPage(
+                    podcast = podcastData.podcast,
                     storeFront = storeFront,
                     otherPodcasts = sequence<StoreCollection> {
                         if (moreByArtist.isEmpty().not()) {
@@ -664,8 +673,8 @@ class StoreRepository (
                         }
                     }.toMutableList(),
                     episodes = podcastEntry.children.map { (key, episodeEntry) ->
-                        StoreEpisode(
-                            id = key.toLong(),
+                        Episode(
+                            episodeId = key.toLong(),
                             name = episodeEntry.name.orEmpty(),
                             url = episodeEntry.url.orEmpty(),
                             podcastId = episodeEntry.collectionId?.toLong() ?: 0,
@@ -673,7 +682,7 @@ class StoreRepository (
                             artistName = episodeEntry.artistName.orEmpty(),
                             artistId = episodeEntry.artistId?.toLong(),
                             description = episodeEntry.description?.standard,
-                            genres = episodeEntry.genres.map { it.toGenre() },
+                            genre = emptyList(),//episodeEntry.genres.map { it.toGenre() }.first(),
                             feedUrl = episodeEntry.feedUrl.orEmpty(),
                             releaseDateTime = episodeEntry.releaseDateTime
                                 ?: Clock.System.now(),
@@ -681,14 +690,13 @@ class StoreRepository (
                             contentAdvisoryRating = episodeEntry.contentRatingsBySystem?.riaa?.name,
                             mediaUrl = episodeEntry.offers.firstOrNull()?.download?.url.orEmpty(),
                             mediaType = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.fileExtension.orEmpty(),
-                            duration = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.duration
-                                ?: 0,
-                            podcastEpisodeNumber = episodeEntry.podcastEpisodeNumber,
-                            podcastEpisodeSeason = episodeEntry.podcastEpisodeSeason,
+                            duration = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.duration?.toLong()
+                                ?: 0L,
+                            podcastEpisodeNumber = episodeEntry.podcastEpisodeNumber?.toLong(),
+                            podcastEpisodeSeason = episodeEntry.podcastEpisodeSeason?.toLong(),
                             podcastEpisodeType = episodeEntry.podcastEpisodeType.orEmpty(),
                             podcastEpisodeWebsiteUrl = episodeEntry.podcastEpisodeWebsiteUrl,
-                            isComplete = true,
-                            podcast = podcastData
+                            updatedAt = Clock.System.now()
                         )
                     },
                     timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
@@ -698,6 +706,36 @@ class StoreRepository (
             }
             ?: throw Exception("missing podcast entry")
     }
+
+    /**
+     * loadDirectoryPagingData
+     */
+    @OptIn(ExperimentalPagingApi::class)
+    fun loadPodcastEpisodesPagingData(
+        podcast: Podcast,
+        storeFront: String,
+    ): Flow<PagingData<EpisodeSummary>> {
+        val mediator = PodcastRemoteMediator(
+            podcast = podcast, storeFront = storeFront, storeRepository = this,
+            database = database
+        )
+        val pagingSourceFactory =
+            QueryDataSourceFactory(
+                queryProvider = { limit, offset ->
+                    database.episodeQueries.getAllPagedByPodcastId(podcastId = podcast.podcastId,
+                        limit = limit,
+                        offset = offset)
+                },
+                countQuery = database.episodeQueries.countAllByPodcastId(podcastId = podcast.podcastId),
+            ).asPagingSourceFactory()
+
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            remoteMediator = mediator,
+            pagingSourceFactory = { pagingSourceFactory.invoke() }
+        ).flow
+    }
+
 
     /**
      * getTopChartsAsync
@@ -815,7 +853,7 @@ class StoreRepository (
                     copyright = item.copyright,
                     contentAdvisoryRating = item.contentRatingsBySystem?.riaa?.name,
                     userRating = item.userRating?.value?.toFloat() ?: 0f,
-                    genre = item.genres.firstOrNull()?.toStoreGenre(storeFront),
+                    genre = item.genres.firstOrNull()?.toGenre(),
                     storeFront = storeFront
                 )
             }

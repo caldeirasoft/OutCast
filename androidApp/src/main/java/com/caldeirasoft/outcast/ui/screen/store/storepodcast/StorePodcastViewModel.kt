@@ -3,8 +3,8 @@ package com.caldeirasoft.outcast.ui.screen.store.storepodcast
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.airbnb.mvrx.MavericksViewModel
-import com.caldeirasoft.outcast.data.util.StorePodcastPagingSource
-import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
+import com.caldeirasoft.outcast.data.util.PodcastRelatedPagingSource
+import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStorePodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.FlowPreview
@@ -44,18 +44,16 @@ class StorePodcastViewModel(
         )
     }
 
-    private fun getStoreDataPagedList(storePodcastPage: StorePodcastPage) {
+    private fun getStoreDataPagedList(storePodcastPage: PodcastPage) {
         Pager(
             PagingConfig(
-                pageSize = 5,
-                enablePlaceholders = false,
+                pageSize = 20,
                 maxSize = 100,
-                prefetchDistance = 2
             )
         ) {
-            StorePodcastPagingSource(
+            PodcastRelatedPagingSource(
                 scope = viewModelScope,
-                storePodcast = storePodcastPage,
+                otherPodcasts = storePodcastPage,
                 getStoreItemsUseCase = getStoreItemsUseCase
             )
         }.flow

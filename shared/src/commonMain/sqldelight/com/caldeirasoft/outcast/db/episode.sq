@@ -1,0 +1,181 @@
+import com.caldeirasoft.outcast.domain.models.Artwork;
+import com.caldeirasoft.outcast.domain.models.Genre;
+import java.lang.Integer;
+import kotlin.collections.List;
+import kotlinx.datetime.Instant;
+
+CREATE TABLE episode (
+    episodeId INTEGER NOT NULL UNIQUE PRIMARY KEY ASC,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    podcastId INTEGER NOT NULL,
+    podcastName TEXT NOT NULL,
+    artistName TEXT NOT NULL,
+    artistId INTEGER,
+    releaseDateTime TEXT as Instant NOT NULL,
+    genre TEXT AS List<Integer> NOT NULL,
+    feedUrl TEXT NOT NULL,
+    description TEXT,
+    contentAdvisoryRating TEXT,
+    artwork TEXT AS Artwork,
+    mediaUrl TEXT NOT NULL,
+    mediaType TEXT NOT NULL,
+    duration INTEGER NOT NULL,
+    podcastEpisodeSeason INTEGER,
+    podcastEpisodeNumber INTEGER,
+    podcastEpisodeWebsiteUrl TEXT,
+    podcastEpisodeType TEXT,
+    updatedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    FOREIGN KEY (`podcastId`) REFERENCES `podcast` (`podcastId`)
+);
+
+CREATE TABLE history (
+    episodeId INTEGER NOT NULL UNIQUE PRIMARY KEY,
+    playbackPosition INTEGER,
+    isPlayed INTEGER NOT NULL DEFAULT 0,
+    playedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    FOREIGN KEY (`episodeId`) REFERENCES `episode` (`episodeId`) ON DELETE CASCADE
+);
+
+CREATE TABLE favorites (
+    episodeId INTEGER NOT NULL UNIQUE PRIMARY KEY,
+    updatedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    FOREIGN KEY (`episodeId`) REFERENCES `episode` (`episodeId`) ON DELETE CASCADE
+);
+
+CREATE VIEW episodeSummary AS
+    SELECT e.episodeId,
+        name,
+        url,
+        podcastId,
+        podcastName,
+        releaseDateTime,
+        description,
+        contentAdvisoryRating,
+        artwork,
+        duration,
+        podcastEpisodeSeason,
+        podcastEpisodeNumber,
+        podcastEpisodeType,
+        CASE WHEN q.episodeId IS NOT NULL THEN 1 ELSE 0 END AS isInQueue,
+        CASE WHEN i.episodeId IS NOT NULL THEN 1 ELSE 0 END AS isInInbox,
+        CASE WHEN f.episodeId IS NOT NULL THEN 1 ELSE 0 END AS isFavorite,
+        CASE WHEN h.playbackPosition IS NOT NULL OR h.isPlayed = 1 THEN 1 ELSE 0 END AS isInHistory,
+        h.isPlayed,
+        h.playbackPosition,
+        e.updatedAt
+    FROM episode e
+    LEFT JOIN inbox i ON (e.episodeId = i.episodeId)
+    LEFT JOIN queue q ON (e.episodeId = q.episodeId)
+    LEFT JOIN favorites f ON (e.episodeId = f.episodeId)
+    LEFT JOIN history h ON (e.episodeId = h.episodeId)
+    ;
+
+CREATE VIEW episodeWithInfos AS
+    SELECT e.episodeId, e.name, e.url, e.podcastId, e.podcastName, e.artistName, e.artistId,
+        e.releaseDateTime, e.genre, e.feedUrl, e.description, e.contentAdvisoryRating, e.artwork,
+        e.mediaUrl, e.mediaType, e.duration,
+        e.podcastEpisodeSeason, e.podcastEpisodeNumber, e.podcastEpisodeWebsiteUrl,
+        e.podcastEpisodeType,
+       CASE WHEN q.episodeId IS NOT NULL THEN 1 ELSE 0 END AS isInQueue,
+       CASE WHEN i.episodeId IS NOT NULL THEN 1 ELSE 0 END AS isInInbox,
+       CASE WHEN f.episodeId IS NOT NULL THEN 1 ELSE 0 END AS isFavorite,
+       CASE WHEN h.playbackPosition IS NOT NULL OR h.isPlayed = 1 THEN 1 ELSE 0 END AS isInHistory,
+       h.isPlayed,
+       h.playbackPosition,
+       e.updatedAt
+    FROM episode e
+    LEFT JOIN inbox i ON (e.episodeId = i.episodeId)
+    LEFT JOIN queue q ON (e.episodeId = q.episodeId)
+    LEFT JOIN favorites f ON (e.episodeId = f.episodeId)
+    LEFT JOIN history h ON (e.episodeId = h.episodeId)
+    ;
+
+getById:
+SELECT e.*
+FROM episodeWithInfos e
+WHERE episodeId = ?;
+
+getAllByPodcastId:
+SELECT *
+FROM episodeSummary
+WHERE podcastId = ?
+;
+
+getAllPagedByPodcastId:
+SELECT *
+FROM episodeSummary
+WHERE podcastId = ?
+LIMIT :limit OFFSET :offset;
+
+countAllByPodcastId:
+SELECT COUNT(*)
+FROM episodeSummary
+WHERE podcastId = ?
+;
+
+getFavorites:
+SELECT e.*
+FROM episodeSummary AS e
+WHERE isFavorite = 1;
+
+getHistory:
+SELECT e.*
+FROM episodeSummary AS e
+WHERE isInHistory = 1;
+
+insert:
+INSERT INTO episode
+(episodeId, name, url, podcastId, podcastName, artistName, artistId,
+ releaseDateTime, genre, feedUrl, description, contentAdvisoryRating, artwork,
+  mediaUrl, mediaType, duration, podcastEpisodeSeason, podcastEpisodeNumber, podcastEpisodeWebsiteUrl)
+VALUES
+?
+ON CONFLICT(episodeId)
+DO UPDATE SET
+    name = excluded.name,
+    url = excluded.url,
+    podcastId = excluded.podcastId,
+    podcastName = excluded.podcastName,
+    artistName = excluded.artistName,
+    artistId = excluded.artistId,
+    releaseDateTime = excluded.releaseDateTime,
+    genre = excluded.genre,
+    feedUrl = excluded.feedUrl,
+    description = excluded.description,
+    contentAdvisoryRating = excluded.contentAdvisoryRating,
+    artwork = excluded.artwork,
+    mediaUrl = excluded.mediaUrl,
+    mediaType = excluded.mediaType,
+    duration = excluded.duration,
+    podcastEpisodeSeason = excluded.podcastEpisodeSeason,
+    podcastEpisodeNumber = excluded.podcastEpisodeNumber,
+    podcastEpisodeWebsiteUrl = excluded.podcastEpisodeWebsiteUrl,
+    updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+WHERE episodeId = excluded.episodeId;
+
+
+addToFavorites:
+INSERT INTO favorites (episodeId, updatedAt)
+VALUES (?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+
+removeFromFavorites:
+DELETE FROM favorites WHERE episodeId = ?;
+
+addToHistory:
+INSERT OR REPLACE INTO history (episodeId, playbackPosition, playedAt, isPlayed)
+VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), 0);
+
+markEpisodeAsPlayed:
+UPDATE history
+ SET isPlayed = 1,
+ playbackPosition = NULL,
+ playedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+WHERE episodeId = ?;
+
+deleteById:
+DELETE FROM episode
+WHERE episodeId = ?;
+
+deleteAll:
+DELETE FROM episode;

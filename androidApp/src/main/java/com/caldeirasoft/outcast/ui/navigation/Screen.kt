@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.models.store.StoreGenre
+import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import kotlinx.serialization.encodeToString
@@ -41,9 +41,8 @@ sealed class Screen (val id: ScreenName) {
     object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
-    data class Genre(val storeGenre: StoreGenre) : Screen(ScreenName.STORE_GENRE)
+    data class GenreScreen(val genre: Genre) : Screen(ScreenName.STORE_GENRE)
     data class Room(val room: StoreRoom) : Screen(ScreenName.STORE_ROOM)
-    data class StorePodcastScreen(val podcast: StorePodcast) : Screen(ScreenName.STORE_PODCAST)
     data class StoreEpisodesScreen(val podcast: StorePodcast) : Screen(ScreenName.STORE_EPISODES)
 
     companion object {

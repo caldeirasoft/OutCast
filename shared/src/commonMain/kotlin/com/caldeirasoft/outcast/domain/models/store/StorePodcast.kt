@@ -1,8 +1,11 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -28,17 +31,40 @@ data class StorePodcast(
     val copyright: String? = null,
     val contentAdvisoryRating: String? = null,
     val userRating: Float,
-    val genre: StoreGenre?,
+    val genre: Genre?,
     override val storeFront: String,
-    val episodes: List<StoreEpisode> = listOf(),
 ) : StoreItemWithArtwork {
+
     @Transient
-    val page: StorePodcastPage =
-        StorePodcastPage(
-            storeData = this,
+    val podcast: Podcast =
+        Podcast(
+            podcastId = id,
+            name = name,
+            artistName = artistName,
+            url = url,
+            genreId = genre?.id,
+            genre = genre,
+            artwork = artwork,
+            artistId = artistId,
+            artistUrl = artistUrl,
+            contentAdvisoryRating = contentAdvisoryRating,
+            copyright = copyright,
+            description = description,
+            feedUrl = feedUrl,
+            podcastWebsiteURL = podcastWebsiteUrl,
+            releaseDateTime = releaseDateTime,
+            trackCount = trackCount.toLong(),
+            updatedAt = releaseDateTime,
+            userRating = userRating.toDouble()
+        )
+
+    @Transient
+    val page: PodcastPage =
+        PodcastPage(
+            podcast = this.podcast,
             storeFront = this.storeFront,
             timestamp = Clock.System.now(),
-            episodes = this.episodes,
+            episodes = listOf(),
         )
 
     override fun getArtworkUrl():String =

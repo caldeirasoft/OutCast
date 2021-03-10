@@ -14,16 +14,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
+import kotlinx.datetime.toInstant
 
 
 @Composable
 fun EpisodeCardItemWithArtwork(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
     index: Int? = null,
     onEpisodeClick: () -> Unit,
     onPodcastClick: () -> Unit,
@@ -37,14 +41,14 @@ fun EpisodeCardItemWithArtwork(
                 EpisodeDefaults.EpisodeItemArtworkHeader(
                     icon = {
                         PodcastThumbnail(
-                            imageModel = storeEpisode.getArtworkUrl(),
+                            imageModel = episode.getArtworkUrl(),
                             modifier = Modifier
                                 .size(EpisodeDefaults.ThumbnailSize)
                                 .clickable(onClick = onPodcastClick)
                         )
                     },
                     podcastText = {
-                        Text(text = storeEpisode.podcastName, maxLines = 1)
+                        Text(text = episode.podcastName, maxLines = 1)
                     },
                     text = {
                         Text(text = AnnotatedString.Builder()
@@ -54,7 +58,7 @@ fun EpisodeCardItemWithArtwork(
                                         append("${index}. ")
                                     }
                                 }
-                                append(storeEpisode.name)
+                                append(episode.name)
                             }.toAnnotatedString(),
                             maxLines = 2,
                             modifier = Modifier.height(45.dp)
@@ -64,8 +68,8 @@ fun EpisodeCardItemWithArtwork(
             },
             actionButtons = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    PlayButton(storeEpisode = storeEpisode)
-                    QueueButton(storeEpisode = storeEpisode)
+                    PlayButton(episode = episode)
+                    QueueButton(episode = episode)
                 }
             }
         )
@@ -75,21 +79,21 @@ fun EpisodeCardItemWithArtwork(
 @Composable
 fun EpisodeItem(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
     onEpisodeClick: () -> Unit,
 ) {
     EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .clickable(onClick = onEpisodeClick),
-        text = { Text(text = storeEpisode.name, maxLines = 2, fontSize = 14.sp) },
+        text = { Text(text = episode.name, maxLines = 2, fontSize = 14.sp) },
         overlineText = {
             val context = LocalContext.current
-            Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
+            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
         },
         actionButtons = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
             }
         }
     )
@@ -98,22 +102,71 @@ fun EpisodeItem(
 @Composable
 fun EpisodeItemWithDesc(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
     onEpisodeClick: () -> Unit,
 ) {
     EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .clickable(onClick = onEpisodeClick),
-        text = { Text(text = storeEpisode.name, maxLines = 1) },
+        text = { Text(text = episode.name, maxLines = 1) },
         overlineText = {
             val context = LocalContext.current
-            Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
+            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
         },
-        descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
+        descriptionText = { Text(text = episode.description.orEmpty(), maxLines = 2) },
         actionButtons = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
+            }
+        }
+    )
+}
+
+@Composable
+fun EpisodeItemWithDesc(
+    modifier: Modifier = Modifier,
+    episode: EpisodeSummary,
+    onEpisodeClick: () -> Unit,
+) {
+    EpisodeDefaults.EpisodeItem(
+        modifier = modifier
+            .clickable(onClick = onEpisodeClick),
+        text = { Text(text = episode.name, maxLines = 1) },
+        overlineText = {
+            val context = LocalContext.current
+            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+        },
+        descriptionText = { Text(text = episode.description.orEmpty(), maxLines = 2) },
+        actionButtons = {
+            /*
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    PlayButton(episode = episode)
+                    QueueButton(episode = episode)
+                }
+             */
+        }
+    )
+}
+
+@Composable
+fun EpisodeTrailerItem(
+    modifier: Modifier = Modifier,
+    episode: Episode,
+    onEpisodeClick: () -> Unit,
+) {
+    EpisodeDefaults.EpisodeItem(
+        modifier = modifier
+            .clickable(onClick = onEpisodeClick),
+        text = { Text(text = episode.name, maxLines = 1) },
+        overlineText = {
+            val context = LocalContext.current
+            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+        },
+        actionButtons = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
             }
         }
     )
@@ -122,22 +175,24 @@ fun EpisodeItemWithDesc(
 @Composable
 fun EpisodeTrailerItem(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: EpisodeSummary,
     onEpisodeClick: () -> Unit,
 ) {
     EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .clickable(onClick = onEpisodeClick),
-        text = { Text(text = storeEpisode.name, maxLines = 1) },
+        text = { Text(text = episode.name, maxLines = 1) },
         overlineText = {
             val context = LocalContext.current
-            Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
+            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
         },
         actionButtons = {
+            /*
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
             }
+            */
         }
     )
 }
@@ -145,7 +200,7 @@ fun EpisodeTrailerItem(
 @Composable
 fun EpisodeItemWithDescAndArtwork(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
     onEpisodeClick: () -> Unit,
     onPodcastClick: () -> Unit,
 ) {
@@ -156,25 +211,25 @@ fun EpisodeItemWithDescAndArtwork(
             EpisodeDefaults.EpisodeItemArtworkHeader(
                 icon = {
                     PodcastThumbnail(
-                        imageModel = storeEpisode.getArtworkUrl(),
+                        imageModel = episode.getArtworkUrl(),
                         modifier = Modifier
                             .size(EpisodeDefaults.ThumbnailSize)
                             .clickable(onClick = onPodcastClick)
                     )
                 },
                 podcastText = {
-                    Text(text = storeEpisode.podcastName, maxLines = 1)
+                    Text(text = episode.podcastName, maxLines = 1)
                 },
                 text = {
-                    Text(text = storeEpisode.name, maxLines = 2)
+                    Text(text = episode.name, maxLines = 2)
                 }
             )
         },
-        descriptionText = { Text(text = storeEpisode.description.orEmpty(), maxLines = 2) },
+        descriptionText = { Text(text = episode.description.orEmpty(), maxLines = 2) },
         actionButtons = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
             }
         }
     )
@@ -183,7 +238,7 @@ fun EpisodeItemWithDescAndArtwork(
 @Composable
 fun EpisodeItemWithArtwork(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
     index: Int? = null,
     onEpisodeClick: () -> Unit,
     onPodcastClick: () -> Unit,
@@ -195,14 +250,14 @@ fun EpisodeItemWithArtwork(
             EpisodeDefaults.EpisodeItemArtworkHeader(
                 icon = {
                     PodcastThumbnail(
-                        imageModel = storeEpisode.getArtworkUrl(),
+                        imageModel = episode.getArtworkUrl(),
                         modifier = Modifier
                             .size(EpisodeDefaults.ThumbnailSize)
                             .clickable(onClick = onPodcastClick)
                     )
                 },
                 podcastText = {
-                    Text(text = storeEpisode.podcastName, maxLines = 1)
+                    Text(text = episode.podcastName, maxLines = 1)
                 },
                 text = {
                     Text(text = AnnotatedString.Builder()
@@ -212,7 +267,7 @@ fun EpisodeItemWithArtwork(
                                     append("${index}. ")
                                 }
                             }
-                            append(storeEpisode.name)
+                            append(episode.name)
                         }.toAnnotatedString(),
                         maxLines = 2)
                 }
@@ -220,8 +275,8 @@ fun EpisodeItemWithArtwork(
         },
         actionButtons = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
             }
         }
     )

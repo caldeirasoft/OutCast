@@ -10,16 +10,14 @@ class Actions(navController: NavController) {
         when (screen) {
             is PodcastScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
-            is StorePodcastScreen ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
             is StoreEpisodesScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
             is Room ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.room)}")
             is Charts ->
                 navController.navigate("${screen.id.name}/${screen.itemType}")
-            is Genre ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.storeGenre)}")
+            is GenreScreen ->
+                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.genre)}")
             else ->
                 navController.navigate(screen.id.name)
         }

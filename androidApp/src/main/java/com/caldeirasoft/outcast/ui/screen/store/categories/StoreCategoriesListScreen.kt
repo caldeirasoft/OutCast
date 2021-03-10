@@ -66,8 +66,8 @@ private fun StoreCategoriesContent(
 
             items(items = storeCollection.genres) { itemContent ->
                 GenreItem(
-                    storeGenre = itemContent,
-                    onGenreClick = { navigateTo(Screen.Genre(itemContent)) })
+                    genre = itemContent,
+                    onGenreClick = { navigateTo(Screen.GenreScreen(itemContent)) })
             }
         }
 

@@ -5,6 +5,7 @@ import android.content.Context
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
+import com.caldeirasoft.outcast.data.db.InboxDataSource
 import com.caldeirasoft.outcast.data.db.createDatabase
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.data.util.network.DnsProviders
@@ -95,7 +96,6 @@ internal val networkModule = module {
             }
             polymorphic(StorePage::class) {
                 subclass(StoreGroupingPage::class)
-                subclass(StorePodcastPage::class)
                 subclass(StoreRoomPage::class)
                 subclass(StoreMultiRoomPage::class)
             }
@@ -138,32 +138,35 @@ internal val databaseModule = module {
 }
 
 internal val repositoryModule = module {
-    single<PodcastRepository> { PodcastRepository(database = get()) }
-    single<EpisodeRepository> { EpisodeRepository(database = get()) }
-    single<StoreRepository> { StoreRepository(itunesAPI = get(), searchAPI = get(), context = get(), json = get()) }
-    single<InboxRepository> { InboxRepository(database = get()) }
+    single<LibraryRepository> { LibraryRepository(database = get()) }
+    single<StoreRepository> {
+        StoreRepository(itunesAPI = get(),
+            searchAPI = get(),
+            context = get(),
+            json = get(),
+            database = get()
+        )
+    }
+    single<InboxDataSource> { InboxDataSource(database = get()) }
     single<QueueRepository> { QueueRepository(database = get()) }
     single<LocalCacheRepository> { LocalCacheRepository(context = get(), json = get()) }
     single<DataStoreRepository> { DataStoreRepository(context = get()) }
 }
 
 internal val usecaseModule = module {
-    single { FetchPodcastsSubscribedUseCase(podcastRepository = get()) }
-    single { FetchEpisodesFromPodcastUseCase(episodeRepository = get()) }
-    single { FetchEpisodesFavoritesUseCase(episodeRepository = get()) }
-    single { FetchEpisodesHistoryUseCase(episodeRepository = get()) }
-    single { FetchFavoriteEpisodesCountUseCase(episodeRepository = get()) }
-    single { FetchPlayedEpisodesCountUseCase(episodeRepository = get()) }
-    single { FetchCountEpisodesBySectionUseCase(episodeRepository = get()) }
+    single { FetchPodcastsSubscribedUseCase(libraryRepository = get()) }
+    single { FetchEpisodesFavoritesUseCase(libraryRepository = get()) }
+    single { FetchEpisodesHistoryUseCase(libraryRepository = get()) }
     single { FetchInboxUseCase(inboxRepository = get()) }
     single { FetchQueueUseCase(queueRepository = get()) }
     single { SubscribeToPodcastUseCase(podcastRepository = get()) }
     single { UnsubscribeFromPodcastUseCase(podcastRepository = get()) }
-    single { FetchPodcastUseCase(podcastRepository = get()) }
-    single { FetchEpisodeUseCase(episodeRepository = get()) }
+    single { LoadPodcastUseCase(podcastRepository = get()) }
+    single { LoadEpisodeUseCase(libraryRepository = get()) }
     single { LoadStoreGenreDataUseCase(storeRepository = get()) }
     single { LoadStoreDirectoryUseCase(storeRepository = get())}
     single { LoadStoreDirectoryPagingDataUseCase(storeRepository = get()) }
+    single { LoadPodcastEpisodesPagingDataUseCase(storeRepository = get()) }
     single { FetchStoreGroupingPagingDataUseCase(storeRepository = get(), localCacheRepository = get())}
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     single { FetchStoreDataUseCase(storeRepository = get()) }

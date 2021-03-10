@@ -2,12 +2,15 @@
 
 package com.caldeirasoft.outcast.domain.models.store
 
+import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 @Serializable
@@ -38,4 +41,30 @@ class StoreEpisode(override val id: Long,
 ) : StoreItemWithArtwork {
     override fun getArtworkUrl(): String =
         StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
+
+    @Transient
+    val episode: Episode =
+        Episode(
+            episodeId = this.id,
+            name = this.name,
+            url = this.url,
+            podcastId = this.podcastId,
+            podcastName = this.podcastName,
+            artistName = this.artistName,
+            artistId = this.artistId,
+            description = this.description,
+            genre = this.genres.map { it.id },
+            feedUrl = this.feedUrl.orEmpty(),
+            releaseDateTime = this.releaseDateTime ?: Clock.System.now(),
+            artwork = this.artwork,
+            contentAdvisoryRating = this.contentAdvisoryRating,
+            mediaUrl = this.mediaUrl,
+            mediaType = this.mediaType,
+            duration = this.duration.toLong(),
+            podcastEpisodeNumber = this.podcastEpisodeNumber?.toLong(),
+            podcastEpisodeSeason = this.podcastEpisodeSeason?.toLong(),
+            podcastEpisodeType = this.podcastEpisodeType,
+            podcastEpisodeWebsiteUrl = this.podcastEpisodeWebsiteUrl,
+            updatedAt = Clock.System.now()
+        )
 }

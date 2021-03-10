@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") apply true
     id("com.android.library")
+    id("com.squareup.sqldelight") apply true
 }
 
 android {
@@ -28,6 +29,8 @@ kotlin {
                 api(libs.coroutines.core)
                 api(libs.kotlinx.datetime)
                 api(libs.kotlinx.serialization)
+                api(libs.sqldelight.runtime)
+                api(libs.sqldelight.coroutines)
             }
         }
         val commonTest by getting {
@@ -42,6 +45,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api(libs.coroutines.android)
+                api(libs.sqldelight.android)
                 //implementation(KotlinX.coroutines.android)
             }
         }
@@ -58,6 +62,7 @@ kotlin {
         }
     }
 }
+
 android {
     compileSdkVersion(30)
     defaultConfig {
@@ -70,6 +75,14 @@ android {
         getByName("release") {
             isMinifyEnabled = false
         }
+    }
+}
+
+sqldelight {
+    database("Database") {
+        packageName = "com.caldeirasoft.outcast"
+        schemaOutputDirectory = file("build/dbs")
+        dialect = "sqlite:3.24"
     }
 }
 

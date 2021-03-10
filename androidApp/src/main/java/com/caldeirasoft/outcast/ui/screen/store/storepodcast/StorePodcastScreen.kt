@@ -147,7 +147,7 @@ private fun StorePodcastScreen(
                             storePodcastPage.genre?.let { genre ->
                                 Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     ChipButton(selected = false,
-                                        onClick = { navigateTo(Screen.Genre(genre)) }) {
+                                        onClick = { navigateTo(Screen.GenreScreen(genre)) }) {
                                         Text(text = genre.name)
                                     }
                                 }
@@ -165,7 +165,7 @@ private fun StorePodcastScreen(
                                 title = stringResource(id = R.string.store_trailer))
                             // trailer
                             EpisodeTrailerItem(
-                                storeEpisode = trailer,
+                                episode = trailer,
                                 onEpisodeClick = {
                                     coroutineScope.launch {
                                         openEpisodeDialog(drawerState, drawerContent, trailer)
@@ -183,7 +183,7 @@ private fun StorePodcastScreen(
                     }
                     items(storePodcastPage.recentEpisodes) { episode ->
                         EpisodeItemWithDesc(
-                            storeEpisode = episode,
+                            episode = episode,
                             onEpisodeClick = {
                                 coroutineScope.launch {
                                     openEpisodeDialog(drawerState, drawerContent, episode)

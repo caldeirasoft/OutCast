@@ -107,9 +107,11 @@ dependencyResolutionManagement {
             bundle("retrofit", listOf("retrofit-core", "retrofit-kotlinx-serialization"))
 
             version("sqldelight", sqldelightVersion)
+            alias("sqldelight-runtime").to("com.squareup.sqldelight", "runtime").versionRef("sqldelight")
             alias("sqldelight-android").to("com.squareup.sqldelight", "android-driver").versionRef("sqldelight")
             alias("sqldelight-coroutines").to("com.squareup.sqldelight", "coroutines-extensions").versionRef("sqldelight")
-            bundle("sqldelight", listOf("sqldelight-android", "sqldelight-coroutines"))
+            alias("sqldelight-paging").to("com.squareup.sqldelight:android-paging-extensions:1.2.1")
+            bundle("sqldelight", listOf("sqldelight-android", "sqldelight-coroutines", "sqldelight-paging"))
 
             version("chucker", "3.4.+")
             alias("chucker-debug").to("com.github.chuckerteam.chucker", "library").versionRef("chucker")

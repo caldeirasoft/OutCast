@@ -20,7 +20,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
+import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.ui.components.OverflowText
 import com.caldeirasoft.outcast.ui.components.PlayButton
 import com.caldeirasoft.outcast.ui.components.PodcastThumbnail
@@ -33,10 +35,16 @@ import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
-suspend fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, storeEpisode: StoreEpisode) {
+suspend fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, episode: Episode) {
+    drawerContent.updateContent {
+    }
+    drawerState.show()
+}
+
+suspend fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent: ModalBottomSheetContent, episode: EpisodeSummary) {
     drawerContent.updateContent {
         EpisodeDialog(
-            episode = storeEpisode,
+            episode = episode,
             navigateTo = { }
         )
     }
@@ -46,7 +54,7 @@ suspend fun openEpisodeDialog(drawerState: ModalBottomSheetState, drawerContent:
 @ExperimentalCoroutinesApi
 @Composable
 fun EpisodeDialog(
-    episode: StoreEpisode,
+    episode: EpisodeSummary,
     navigateTo: (Screen) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -54,7 +62,7 @@ fun EpisodeDialog(
     val drawerState = LocalBottomSheetState.current
     val viewModel: EpisodeViewModel = mavericksViewModel(initialArgument = episode )
     val state by viewModel.collectAsState()
-    val storeEpisode = requireNotNull(state.storeEpisode.invoke())
+    val stateEpisode = requireNotNull(state.storeEpisode.invoke())
 
     Column()
     {
@@ -87,7 +95,7 @@ fun EpisodeDialog(
                 // thumbnail
                 Box(modifier = Modifier.size(64.dp)) {
                     PodcastThumbnail(
-                        imageModel = storeEpisode.getArtworkUrl(),
+                        imageModel = stateEpisode.getArtworkUrl(),
                         modifier = Modifier
                             .size(64.dp)
                     )
@@ -98,23 +106,23 @@ fun EpisodeDialog(
                     .weight(1f)
                     .padding(start = 16.dp))
                 {
-                    Text(text = storeEpisode.podcastName, maxLines = 2)
+                    Text(text = stateEpisode.podcastName, maxLines = 2)
                     val context = LocalContext.current
-                    Text(text = storeEpisode.releaseDateTime.formatRelativeDisplay(context))
+                    Text(text = stateEpisode.releaseDateTime.formatRelativeDisplay(context))
                 }
             }
             // episode title
-            Text(text = storeEpisode.name)
+            Text(text = stateEpisode.name)
 
             // actions buttons
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(storeEpisode = storeEpisode)
-                QueueButton(storeEpisode = storeEpisode)
+                PlayButton(episode = stateEpisode)
+                QueueButton(episode = stateEpisode)
             }
 
             // description
             // description if present
-            storeEpisode.description?.let { description ->
+            stateEpisode.description?.let { description ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

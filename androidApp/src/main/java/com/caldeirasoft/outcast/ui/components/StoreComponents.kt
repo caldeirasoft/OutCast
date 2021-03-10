@@ -56,20 +56,20 @@ fun StoreCollectionItemsContent(
                         modifier = Modifier
                             .width(100.dp)
                             .clickable(onClick = {
-                                navigateTo(Screen.StorePodcastScreen(item))
+                                navigateTo(Screen.PodcastScreen(item))
                             }),
                         podcast = item)
                 }
                 is StoreEpisode -> {
                     EpisodeCardItemWithArtwork(
                         modifier = Modifier.width(320.dp),
-                        onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
+                        onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
                         onEpisodeClick = {
                             coroutineScope.launch {
-                                openEpisodeDialog(drawerState, drawerContent, item)
+                                openEpisodeDialog(drawerState, drawerContent, item.episode)
                             }
                         },
-                        storeEpisode = item,
+                        episode = item.episode,
                         //index = index + 1
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -164,8 +164,8 @@ fun StoreCollectionGenresContent(
                                 onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })*/
                         else ->
                             GenreGridItem(
-                                storeGenre = item,
-                                onGenreClick = { navigateTo(Screen.Genre(item)) })
+                                genre = item,
+                                onGenreClick = { navigateTo(Screen.GenreScreen(item)) })
                     }
                 }
             }
@@ -302,7 +302,7 @@ fun StoreCollectionTopPodcastsContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = {
-                            navigateTo(Screen.StorePodcastScreen(storeItem))
+                            navigateTo(Screen.PodcastScreen(storeItem))
                         }),
                     storePodcast = storeItem,
                     index = index + 1
@@ -330,13 +330,13 @@ fun StoreCollectionTopEpisodesContent(
         itemsIndexed(items = storeCollection.items) { index, item ->
             EpisodeCardItemWithArtwork(
                 modifier = Modifier.width(320.dp),
-                onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
+                onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
                 onEpisodeClick = {
                     coroutineScope.launch {
-                        openEpisodeDialog(drawerState, drawerContent, item)
+                        openEpisodeDialog(drawerState, drawerContent, item.episode)
                     }
                 },
-                storeEpisode = item,
+                episode = item.episode,
                 index = index + 1
             )
             Spacer(modifier = Modifier.width(16.dp))

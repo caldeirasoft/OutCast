@@ -16,22 +16,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.store.StoreGenre
+import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.ui.components.GenreDefaults.getIcon
 
 
 @Composable
 fun GenreItem(
-    storeGenre: StoreGenre,
+    genre: Genre,
     onGenreClick: () -> Unit,
 ) {
     ListItem(
         modifier = Modifier,
-        text = { Text(text = storeGenre.name) },
+        text = { Text(text = genre.name) },
         icon = {
             Image(
-                painter = painterResource(id = storeGenre.getIcon()),
-                contentDescription = storeGenre.name,
+                painter = painterResource(id = genre.getIcon()),
+                contentDescription = genre.name,
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -40,8 +40,8 @@ fun GenreItem(
 
 @Composable
 fun GenreCardItem(
-    genre: StoreGenre,
-    navigateToGenre: (StoreGenre) -> Unit,
+    genre: Genre,
+    navigateToGenre: (Genre) -> Unit,
 ) {
     Card(
         border = ButtonDefaults.outlinedBorder,
@@ -71,17 +71,17 @@ fun GenreCardItem(
 
 @Composable
 fun GenreGridItem(
-    storeGenre: StoreGenre,
+    genre: Genre,
     onGenreClick: () -> Unit,
-) = GenreDefaults.GridItem(storeGenre, onGenreClick)
+) = GenreDefaults.GridItem(genre, onGenreClick)
 
 
 @Composable
 fun GenreGridItemMore(
-    storeGenre: StoreGenre,
+    genre: Genre,
     howManyMore: Int,
     onGenreClick: () -> Unit,
-) = GenreDefaults.GridItemMore(storeGenre, howManyMore, onGenreClick)
+) = GenreDefaults.GridItemMore(genre, howManyMore, onGenreClick)
 
 
 private object GenreDefaults {
@@ -90,7 +90,7 @@ private object GenreDefaults {
 
     @Composable
     fun GridItem(
-        storeGenre: StoreGenre,
+        genre: Genre,
         onGenreClick: () -> Unit,
     ) {
         Box(modifier = Modifier
@@ -103,15 +103,15 @@ private object GenreDefaults {
                 .fillMaxSize())
             {
                 Image(
-                    painter = painterResource(id = storeGenre.getIcon()),
-                    contentDescription = storeGenre.name,
+                    painter = painterResource(id = genre.getIcon()),
+                    contentDescription = genre.name,
                     modifier = Modifier
                         .size(24.dp)
                         .weight(2f)
                         .align(Alignment.CenterHorizontally)
                 )
 
-                Text(text = storeGenre.name,
+                Text(text = genre.name,
                     style = MaterialTheme.typography.caption.copy(fontSize = 11.sp),
                     maxLines = 2,
                     textAlign = TextAlign.Center,
@@ -125,7 +125,7 @@ private object GenreDefaults {
 
     @Composable
     fun GridItemMore(
-        storeGenre: StoreGenre,
+        genre: Genre,
         howManyMore: Int,
         onGenreClick: () -> Unit,
     ) {
@@ -147,7 +147,7 @@ private object GenreDefaults {
                         .weight(2f)
                         .align(Alignment.CenterHorizontally))
 
-                Text(text = storeGenre.name,
+                Text(text = genre.name,
                     style = MaterialTheme.typography.caption,
                     maxLines = 2,
                     textAlign = TextAlign.Center,
@@ -160,7 +160,7 @@ private object GenreDefaults {
 
     // genre icon
     @DrawableRes
-    fun StoreGenre.getIcon(): Int {
+    fun Genre.getIcon(): Int {
         return when(this.id) {
             1301 -> R.drawable.ic_color_palette
             1321 -> R.drawable.ic_analytics

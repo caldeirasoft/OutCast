@@ -30,7 +30,7 @@ class EpisodeViewModel(
         val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
         withState { state ->
             val episode = state.storeEpisode.invoke()
-            if (episode != null && !episode.isComplete) {
+            if (episode != null && episode.description == null) {
                 suspend {
                     fetchStoreEpisodeDataUseCase.execute(
                         storeEpisode = episode,

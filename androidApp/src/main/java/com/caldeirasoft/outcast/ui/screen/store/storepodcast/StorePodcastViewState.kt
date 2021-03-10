@@ -6,11 +6,11 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.Uninitialized
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.models.store.StorePodcastPage
+import com.caldeirasoft.outcast.domain.models.PodcastPage
 
 data class StorePodcastViewState(
     val storePodcast: StorePodcast,
-    val storePodcastPage: Async<StorePodcastPage> = Uninitialized,
+    val storePodcastPage: Async<PodcastPage> = Uninitialized,
     val otherPodcasts: PagingData<StoreItem> = PagingData.empty()
 ) : MavericksState {
     constructor(podcast: StorePodcast) :

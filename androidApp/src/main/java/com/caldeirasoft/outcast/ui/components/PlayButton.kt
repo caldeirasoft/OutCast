@@ -16,13 +16,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
+import com.caldeirasoft.outcast.db.Episode
 
 
 @Composable
 fun PlayButton(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
 ) {
     OutlinedButton(
         colors = ButtonDefaults.textButtonColors(),
@@ -79,7 +79,7 @@ fun PlayButton(
 @Composable
 fun QueueButton(
     modifier: Modifier = Modifier,
-    storeEpisode: StoreEpisode,
+    episode: Episode,
 ) {
     IconButton(onClick = { /*TODO*/ }) {
         Icon(imageVector = Icons.Default.PlaylistAdd,

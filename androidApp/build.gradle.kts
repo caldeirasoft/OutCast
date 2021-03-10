@@ -3,7 +3,6 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.serialization") apply true
-    id("com.squareup.sqldelight") apply true
 }
 
 // get compose version in gradle.properties file
@@ -61,14 +60,6 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeVersion
-    }
-}
-
-sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
-        schemaOutputDirectory = file("build/dbs")
-        dialect = "sqlite:3.24"
     }
 }
 
