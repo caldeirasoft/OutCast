@@ -1,34 +1,22 @@
 package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
-import com.caldeirasoft.outcast.data.util.PodcastRemoteMediator
-import com.caldeirasoft.outcast.data.util.StoreChartsPagingSource
-import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.data.util.local.DiskCache
 import com.caldeirasoft.outcast.data.util.local.MemoryCache
 import com.caldeirasoft.outcast.data.util.local.Source
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.EpisodeSummary
-import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.dto.GenreResult
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
 import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -609,36 +597,6 @@ class StoreRepository (
     }
 
     /**
-     * loadDirectoryPagingData
-     */
-    @OptIn(ExperimentalPagingApi::class)
-    fun loadPodcastEpisodesPagingData(
-        podcast: Podcast,
-        storeFront: String,
-    ): Flow<PagingData<EpisodeSummary>> {
-        val mediator = PodcastRemoteMediator(
-            podcast = podcast, storeFront = storeFront, storeRepository = this,
-            database = database
-        )
-        val pagingSourceFactory =
-            QueryDataSourceFactory(
-                queryProvider = { limit, offset ->
-                    database.episodeQueries.getAllPagedByPodcastId(podcastId = podcast.podcastId,
-                        limit = limit,
-                        offset = offset)
-                },
-                countQuery = database.episodeQueries.countAllByPodcastId(podcastId = podcast.podcastId),
-            ).asPagingSourceFactory()
-
-        return Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
-            remoteMediator = mediator,
-            pagingSourceFactory = { pagingSourceFactory.invoke() }
-        ).flow
-    }
-
-
-    /**
      * getTopChartsAsync
      */
     suspend fun getTopChartsAsync(storeFront: String, genreId: Int?): StoreTopCharts
@@ -701,32 +659,6 @@ class StoreRepository (
         val resultIdsResult = storeResponse.body() ?: throw HttpException(storeResponse)
         return resultIdsResult.resultIds
     }
-
-    /*
-     * getTopChartPagingData
-     */
-    fun getTopChartPagingData(
-        scope: CoroutineScope,
-        genreId: Int?,
-        type: StoreItemType,
-        storeFront: String,
-        dataLoadedCallback: ((StoreTopCharts) -> Unit)?): Flow<PagingData<StoreItem>> =
-        Pager(
-            PagingConfig(
-                pageSize = 10,
-                enablePlaceholders = false,
-                maxSize = 200,
-                prefetchDistance = 5
-            )
-        ) {
-            StoreChartsPagingSource(
-                scope = scope,
-                itemType = type,
-                loadDataFromNetwork = { getTopChartsAsync(storeFront, genreId) },
-                getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) },
-                dataLoadedCallback = dataLoadedCallback
-            )
-        }.flow
 
     /**
      * getStoreItemFromLookupResultItem
