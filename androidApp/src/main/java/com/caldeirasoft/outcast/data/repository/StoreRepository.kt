@@ -85,34 +85,6 @@ class StoreRepository (
     }
 
     /**
-     * getStorePagingData
-     */
-    fun getStoreRoomPagingData(
-        scope: CoroutineScope,
-        storeRoom: StoreRoom,
-        dataLoadedCallback: ((StorePage) -> Unit)?
-    ): Flow<PagingData<StoreItem>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = 5,
-                enablePlaceholders = false,
-                maxSize = 100,
-                prefetchDistance = 2
-            ),
-            pagingSourceFactory = {
-                StoreDataPagingSource(
-                    scope = scope,
-                    loadDataFromNetwork = {
-                        if (storeRoom.url.isEmpty()) storeRoom.getPage()
-                        else getStoreDataAsync(storeRoom.url, storeRoom.storeFront)
-                    },
-                    dataLoadedCallback = dataLoadedCallback,
-                    getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
-                )
-            }
-        ).flow
-
-    /**
      * loadGroupingData
      */
     suspend fun loadStoreDirectoryData(
