@@ -72,19 +72,15 @@ class StoreRepository (
     /**
      * getGroupingDataAsync
      */
-    private suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
-        Timber.d("DBG - getGroupingData")
+    suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
         val storeResponse =
             itunesAPI.groupingData(storeFront = storeFront, genre = genre ?: DEFAULT_GENRE)
         if (storeResponse.isSuccessful.not())
             throw HttpException(storeResponse)
-        Timber.d("DBG - getGroupingData body")
         val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
-        Timber.d("DBG - getStoreData")
         val storePage = getStoreData(storePageDto)
         if (storePage !is StoreGroupingPage)
             throw NullPointerException("DBG - Invalid cast to StoreGroupingPage")
-        Timber.d("DBG - return StoreData")
         return storePage
     }
 
@@ -110,32 +106,6 @@ class StoreRepository (
                         if (storeRoom.url.isEmpty()) storeRoom.getPage()
                         else getStoreDataAsync(storeRoom.url, storeRoom.storeFront)
                     },
-                    dataLoadedCallback = dataLoadedCallback,
-                    getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
-                )
-            }
-        ).flow
-
-    /**
-     * getGroupingDataPagingSource
-     */
-    fun getGroupingPagingData(
-        scope: CoroutineScope,
-        genre: Int?,
-        storeFront: String,
-        dataLoadedCallback: ((StorePage) -> Unit)?
-    ): Flow<PagingData<StoreItem>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = 5,
-                enablePlaceholders = false,
-                maxSize = 100,
-                prefetchDistance = 2
-            ),
-            pagingSourceFactory = {
-                StoreDataPagingSource(
-                    scope = scope,
-                    loadDataFromNetwork = { getGroupingDataAsync(genre, storeFront) },
                     dataLoadedCallback = dataLoadedCallback,
                     getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
                 )
