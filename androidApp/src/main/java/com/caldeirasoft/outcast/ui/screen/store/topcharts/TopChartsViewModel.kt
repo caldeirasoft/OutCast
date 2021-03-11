@@ -37,7 +37,7 @@ class TopChartsViewModel(
         withState { state ->
             loadStoreTopChartsPagingDataUseCase.execute(
                 scope = viewModelScope,
-                storeGenre = state.selectedGenre,
+                genreId = state.selectedGenre,
                 storeFront = store,
                 storeItemType = state.selectedChartTab,
                 dataLoadedCallback = { page ->

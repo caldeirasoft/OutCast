@@ -1,7 +1,10 @@
 package com.caldeirasoft.outcast.domain.usecase
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.repository.StoreRepository
+import com.caldeirasoft.outcast.data.util.StoreChartsPagingSource
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreTopCharts
@@ -13,9 +16,24 @@ class LoadStoreTopChartsPagingDataUseCase(
 ) {
     fun execute(
         scope: CoroutineScope,
-        storeGenre: Int?,
+        genreId: Int?,
         storeItemType: StoreItemType,
         storeFront: String,
         dataLoadedCallback: ((StoreTopCharts) -> Unit)?): Flow<PagingData<StoreItem>> =
-        storeRepository.getTopChartPagingData(scope, storeGenre, storeItemType, storeFront, dataLoadedCallback)
+        Pager(
+            PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                maxSize = 200,
+                prefetchDistance = 5
+            )
+        ) {
+            StoreChartsPagingSource(
+                scope = scope,
+                itemType = storeItemType,
+                loadDataFromNetwork = { storeRepository.getTopChartsAsync(storeFront, genreId) },
+                getStoreItems = storeRepository::getListStoreItemDataAsync,
+                dataLoadedCallback = dataLoadedCallback
+            )
+        }.flow
 }
