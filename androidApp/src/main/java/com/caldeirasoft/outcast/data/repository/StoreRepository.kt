@@ -47,7 +47,8 @@ class StoreRepository (
 
     companion object {
         const val DEFAULT_GENRE = 26
-        const val CACHE_STORE_FILE_NAME = "storeCache.db"
+        const val DIRECTORY_CACHE_KEY = "directory"
+        const val TOP_CHARTS_CACHE_KEY = "charts"
     }
 
     // Setup datacache
@@ -142,40 +143,6 @@ class StoreRepository (
         ).flow
 
     /**
-     * loadDirectoryPagingData
-     */
-    fun loadDirectoryPagingData(
-        scope: CoroutineScope,
-        storeFront: String,
-        newVersionAvailable: () -> Unit,
-        dataLoadedCallback: ((StorePage) -> Unit)?
-    ): Flow<PagingData<StoreItem>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = 5,
-                enablePlaceholders = false,
-                maxSize = 100,
-                prefetchDistance = 2
-            ),
-            pagingSourceFactory = {
-                Timber.d("DBG - create pagingSourceFactory")
-                StoreDataPagingSource(
-                    scope = scope,
-                    loadDataFromNetwork = {
-                        loadStoreDirectoryData(scope,
-                            storeFront,
-                            newVersionAvailable)
-                            .also {
-                                dataLoadedCallback?.invoke(it)
-                            }
-                    },
-                    dataLoadedCallback = null,
-                    getStoreItems = { ids, storeFront, storeData -> getListStoreItemDataAsync(ids, storeFront, storeData) }
-                )
-            }
-        ).flow
-
-    /**
      * loadGroupingData
      */
     suspend fun loadStoreDirectoryData(
@@ -183,32 +150,24 @@ class StoreRepository (
         storeFront: String,
         newVersionAvailable: (() -> Unit)?
     ): StoreGroupingPage {
-        Timber.d("DBG - load GroupingData from cache")
-        val groupingPageCacheEntry = cache.getEntry("storeDirectory", useEntryEvenIfExpired = true, timeLimit = 1.days) {
-            Timber.d("DBG - load GroupingData from network")
+        val groupingPageCacheEntry = cache.getEntry("${DIRECTORY_CACHE_KEY}${storeFront}", useEntryEvenIfExpired = true, timeLimit = 1.days) {
             getGroupingDataAsync(null, storeFront)
         }
-        Timber.d("DBG - load GroupingData done")
 
         return newVersionAvailable?.let {
             val groupingPageCache = groupingPageCacheEntry.data
-            if (groupingPageCacheEntry.source != Source.ORIGIN &&
-                (groupingPageCacheEntry.isExpired || groupingPageCache.storeFront != storeFront)
-            ) {
-                Timber.d("DBG - cached GroupingData is too old")
+            if (groupingPageCacheEntry.source != Source.ORIGIN && groupingPageCacheEntry.isExpired)
+            {
                 scope.launch {
-                    Timber.d("DBG - get new GroupingData from network")
                     val newGroupingPage = getGroupingDataAsync(null, storeFront)
                     // if network version is newer/different than cached version -> notify
-                    if ((newGroupingPage.storeFront != groupingPageCache.storeFront) ||
-                        (newGroupingPage.timestamp != groupingPageCache.timestamp)
+                    if ((newGroupingPage.timestamp != groupingPageCache.timestamp)
                     ) {
-                        cache.set("storeDirectory", newGroupingPage)
+                        cache.set("${DIRECTORY_CACHE_KEY}${storeFront}", newGroupingPage)
                         newVersionAvailable.invoke()
                     } else {
-                        Timber.d("DBG - new Grouping data is the same")
                         //groupingPageCache.fetchedAt = now
-                        cache.set("storeDirectory", groupingPageCache)
+                        cache.set("${DIRECTORY_CACHE_KEY}${storeFront}", groupingPageCache)
                     }
                 }
             }
