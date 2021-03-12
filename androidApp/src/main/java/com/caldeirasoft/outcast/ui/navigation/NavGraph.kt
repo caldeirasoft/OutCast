@@ -12,12 +12,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
+import com.caldeirasoft.outcast.ui.screen.store.categories.StoreCategoriesScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
@@ -122,6 +124,18 @@ fun MainNavHost(startScreen: ScreenName) {
                     val storeRoom = backStackEntry.getObjectNotNull<StoreRoom>(NavArgs.Room)
                     StoreRoomScreen(
                         storeRoom = storeRoom,
+                        navigateTo = actions.select,
+                        navigateBack = actions.up)
+                }
+                composable(
+                    "${ScreenName.STORE_CATEGORIES.name}/{${NavArgs.Categories}}",
+                    arguments = listOf(navArgument(NavArgs.Categories) {
+                        type = NavType.StringType
+                    })
+                ) { backStackEntry ->
+                    val storeCategories = backStackEntry.getObjectNotNull<StoreCollectionGenres>(NavArgs.Categories)
+                    StoreCategoriesScreen(
+                        storeCollection = storeCategories,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

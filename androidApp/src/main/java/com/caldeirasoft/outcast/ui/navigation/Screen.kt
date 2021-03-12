@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import kotlinx.serialization.encodeToString
@@ -24,6 +25,7 @@ enum class ScreenName {
     STORE_CHARTS,
     STORE_GENRE,
     STORE_ROOM,
+    STORE_CATEGORIES,
     STORE_PODCAST,
     STORE_EPISODES,
     SETTINGS,
@@ -39,6 +41,7 @@ sealed class Screen (val id: ScreenName) {
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)
+    data class StoreCategories(val genres: StoreCollectionGenres) : Screen(ScreenName.STORE_CATEGORIES)
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
     data class GenreScreen(val genre: Genre) : Screen(ScreenName.STORE_GENRE)
