@@ -43,8 +43,8 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
-fun KoinApplication.initKoinModules(appModule: Module) {
-    modules(networkModule, databaseModule, repositoryModule, usecaseModule, appModule)
+fun KoinApplication.initKoinModules() {
+    modules(networkModule, databaseModule, repositoryModule, usecaseModule)
 }
 
 internal val mainDispatcherQualifier = named("MainDispatcher")

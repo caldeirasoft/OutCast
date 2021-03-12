@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast
 
 import android.app.Application
 import com.airbnb.mvrx.Mavericks
-import com.caldeirasoft.outcast.di.appModule
 import com.caldeirasoft.outcast.di.initKoinModules
 import com.facebook.stetho.Stetho
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,7 +21,7 @@ class App : Application() {
         startKoin {
             androidLogger()
             androidContext(this@App)
-            initKoinModules(appModule = appModule)
+            initKoinModules()
         }
 
         if (BuildConfig.DEBUG) {
