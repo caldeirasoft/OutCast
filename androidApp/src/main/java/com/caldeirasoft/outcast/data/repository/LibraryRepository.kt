@@ -75,12 +75,11 @@ class LibraryRepository(
             .asFlow()
             .mapToList()
 
-    fun loadEpisode(episodeId: Long): Flow<EpisodeWithInfos> =
+    fun loadEpisode(episodeId: Long): Flow<EpisodeWithInfos?> =
         database.episodeQueries
             .getById(episodeId = episodeId)
             .asFlow()
             .mapToOneOrNull()
-            .mapNotNull { it }
 
     fun markEpisodeAsPlayed(episodeId: Long) {
         database.episodeQueries

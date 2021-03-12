@@ -37,11 +37,11 @@ inline fun <ResponseType: Any> networkCall(
  */
 inline fun <ResponseType: Any> networkCall(
     crossinline fetchFromRemote: suspend () -> ResponseType
-) = flow<Resource> {
+) = flow<Resource<ResponseType>> {
     fetchFromRemote().let {
         emit(Resource.Success(it))
     }
-}.onStart { emit(Resource.Loading) }
+}.onStart { emit(Resource.Loading()) }
     .catch { emit(Resource.Error(it)) }
 
 /**
@@ -51,26 +51,30 @@ inline fun <ResponseType: Any> networkCall(
  * [ResultType] represents the type for database.
  * [RequestType] represents the type for network.
  */
-inline fun <RequestedType: Any> networkBoundResource(
-    crossinline fetchFromLocal: () -> Flow<RequestedType?>,
-    crossinline shouldFetchFromRemote: (RequestedType?) -> Boolean = { true },
+inline fun <ResultType, RequestedType> networkBoundResource(
+    crossinline loadFromDb: () -> Flow<ResultType?>,
+    crossinline shouldFetch: (ResultType?) -> Boolean = { true },
     crossinline fetchFromRemote: suspend () -> RequestedType,
-    crossinline saveRemoteData: suspend (RequestedType) -> Unit = { Unit },
-) = flow<Resource> {
-    val source = fetchFromLocal.invoke()
-    val cachedData = source.firstOrNull()
-
-    if (shouldFetchFromRemote(cachedData)) {
+    crossinline saveRemoteData: suspend (RequestedType) -> Unit,
+) = flow<Resource<ResultType>> {
+    val cachedData = loadFromDb().firstOrNull()
+    if (shouldFetch(cachedData)) {
         fetchFromRemote().let { remoteData ->
-            emit(Resource.Success(remoteData))
             saveRemoteData(remoteData)
+            emitAll(loadFromDb()
+                .filterNotNull()
+                .map {
+                Resource.Success(it)
+            })
         }
     } else {
-        cachedData?.let {
-            emit(Resource.Success(cachedData))
-        }
+        emitAll(loadFromDb()
+            .filterNotNull()
+            .map {
+            Resource.Success(it)
+        })
     }
-}.onStart { emit(Resource.Loading) }
+}.onStart { emit(Resource.Loading()) }
     .catch { emit(Resource.Error(it)) }
 
 /**
@@ -83,9 +87,9 @@ inline fun <RequestedType: Any> networkBoundResource(
 inline fun <ResponseType: Any> fetchResourceAndCache(
     crossinline networkCall: suspend () -> NetworkResponse<ResponseType>,
     crossinline saveRemoteData: suspend (ResponseType) -> Unit = { Unit },
-) = flow<Resource> {
+) = flow {
 
-    emit(Resource.Loading)
+    emit(Resource.Loading())
     when (val response = networkCall.invoke()) {
         is NetworkResponse.Success -> {
             saveRemoteData(response.body)
