@@ -7,7 +7,10 @@ import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.data.db.InboxDataSource
 import com.caldeirasoft.outcast.data.db.createDatabase
-import com.caldeirasoft.outcast.data.repository.*
+import com.caldeirasoft.outcast.data.repository.DataStoreRepository
+import com.caldeirasoft.outcast.data.repository.LibraryRepository
+import com.caldeirasoft.outcast.data.repository.QueueRepository
+import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.data.util.network.DnsProviders
 import com.caldeirasoft.outcast.data.util.network.GzipRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
@@ -37,7 +40,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.KoinApplication
-import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -149,7 +151,6 @@ internal val repositoryModule = module {
     }
     single<InboxDataSource> { InboxDataSource(database = get()) }
     single<QueueRepository> { QueueRepository(database = get()) }
-    single<LocalCacheRepository> { LocalCacheRepository(context = get(), json = get()) }
     single<DataStoreRepository> { DataStoreRepository(context = get()) }
 }
 

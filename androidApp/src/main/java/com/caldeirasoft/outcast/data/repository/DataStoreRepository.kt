@@ -1,18 +1,17 @@
 package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.createDataStore
+import androidx.datastore.preferences.preferencesDataStore
 import com.caldeirasoft.outcast.R
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.IOException
 import java.security.InvalidKeyException
 import java.util.*
 
@@ -27,17 +26,9 @@ class DataStoreRepository(val context: Context) {
     }
 
     // Build the DataStore
-    private val dataStore = context.createDataStore(name = DATA_STORE_FILE_NAME)
+    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATA_STORE_FILE_NAME)
 
-    private val preferencesFlow = dataStore.data
-        .catch { exception ->
-            if (exception is IOException)
-                emit(emptyPreferences())
-            else throw exception
-        }
-
-    val storeCountry: Flow<String>
-            = preferencesFlow
+    val storeCountry: Flow<String> = context.dataStore.data
         .map { preferences ->
             Timber.d("DBG - storeCountry")
             preferences[PreferenceKeys.STOREFRONT_REGION] ?: "FR"
@@ -45,17 +36,16 @@ class DataStoreRepository(val context: Context) {
         }
 
     suspend fun saveStoreCountryPreference(country: String) {
-        dataStore.edit { preferences ->
+        context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.STOREFRONT_REGION] = country
         }
     }
 
-    val lastSyncDate: Flow<Long>
-            = preferencesFlow
+    val lastSyncDate: Flow<Long> = context.dataStore.data
         .map { preferences -> preferences[PreferenceKeys.LAST_SYNC] ?: -1 }
 
     suspend fun saveLastSyncDate() {
-        dataStore.edit { preferences ->
+        context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.LAST_SYNC] = Calendar.getInstance().timeInMillis
         }
     }

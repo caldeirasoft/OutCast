@@ -43,6 +43,7 @@ dependencyResolutionManagement {
         create("libs") {
             val kotlinVersion: String by settings
             val sqldelightVersion: String by settings
+            val composeVersion: String by settings
             version("kotlin", kotlinVersion)
             version("desugar_jdk_libs","1.1.1")
             version("leakcanary","2.6")
@@ -57,9 +58,9 @@ dependencyResolutionManagement {
             alias("appcompat").to("androidx.appcompat:appcompat:1.3.+")
             alias("palette").to("androidx.palette:palette:1.0.+")
             alias("runtime-ktx").to("androidx.lifecycle:lifecycle-runtime-ktx:2.3.+")
-            alias("datastore-preferences").to("androidx.datastore:datastore-preferences:1.0.0-alpha06")
+            alias("datastore-preferences").to("androidx.datastore:datastore-preferences:1.0.0-alpha08")
 
-            version("compose", "1.0.0-beta01")
+            version("compose", composeVersion)
             alias("compose-runtime").to("androidx.compose.runtime", "runtime").versionRef("compose")
             alias("compose-foundation").to("androidx.compose.foundation", "foundation").versionRef("compose")
             alias("compose-layout").to("androidx.compose.foundation", "foundation-layout").versionRef("compose")
@@ -79,7 +80,7 @@ dependencyResolutionManagement {
 
             alias("activity-compose").to("androidx.activity:activity-compose:1.3.0-alpha03")
             alias("viewmodel-compose").to("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha02")
-            alias("navigation-compose").to("androidx.navigation:navigation-compose:1.0.0-alpha08")
+            alias("navigation-compose").to("androidx.navigation:navigation-compose:1.0.0-alpha09")
             alias("paging-compose").to("androidx.paging:paging-compose:1.0.0-alpha08")
 
             version("koin", "2+")
@@ -123,8 +124,8 @@ dependencyResolutionManagement {
             bundle("stetho", listOf("stetho-core", "stetho-okhttp3"))
 
             alias("timber").to("com.jakewharton.timber:timber:4.+")
-            alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.6")
-            alias("accompanist-coil").to("dev.chrisbanes.accompanist:accompanist-coil:0.6.1")
+            alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.7")
+            alias("accompanist-coil").to("dev.chrisbanes.accompanist:accompanist-coil:0.6.2")
             alias("mavericks").to("com.airbnb.android:mavericks-compose:2.1.0-alpha01")
             alias("junit").to("junit:junit:4.+")
         }
