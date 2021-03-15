@@ -315,6 +315,7 @@ class StoreRepository (
         val storeGenres: StoreCollectionGenres? =
             storePageDto.pageData?.categoryList?.let { categoryList ->
                 StoreCollectionGenres(
+                    id = categoryList.genreId.toLong(),
                     label = categoryList.parentCategoryLabel.orEmpty(),
                     genres = categoryList.children.map { child -> child.toGenre() },
                     storeFront = storeFront
@@ -326,7 +327,11 @@ class StoreRepository (
                 id = storePageDto.pageData?.contentId.orEmpty(),
                 label = storePageDto.pageData?.categoryList?.name.orEmpty(),
                 storeFront = storeFront,
-                storeList = collectionSequence.toMutableList(),
+                storeList = collectionSequence.toMutableList().also {
+                    storeGenres?.let { genres ->
+                        it.add(2, genres)
+                    }
+                },
                 genres = storeGenres,
             ),
             storeFront = storeFront,

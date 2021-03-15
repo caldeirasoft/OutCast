@@ -22,6 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
@@ -127,10 +128,10 @@ fun StoreCollectionGenresContent(
 {
     val columns = 4
     val maxLines = 2
-    //val genreMore = StoreGenre(-1, "More", "", "")
+    val genreMore = Genre(-1, "More", "")
     val genresToDisplay =
         storeCollection.genres.let {
-            if (it.size > columns * maxLines) it.take(columns * maxLines - 1)
+            if (it.size > columns * maxLines) it.take(columns * maxLines - 1).plus(genreMore)
             else it
         }
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -150,10 +151,11 @@ fun StoreCollectionGenresContent(
                     rowHeight = 96.dp
                 ) { item, _ ->
                     when (item.id) {
-                            /*GenreGridItemMore(
-                                storeGenre = item,
+                        -1 ->
+                            GenreGridItemMore(
+                                genre = item,
                                 howManyMore = storeCollection.genres.size - (columns * maxLines - 1),
-                                onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })*/
+                                onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })
                         else ->
                             GenreGridItem(
                                 genre = item,
