@@ -44,7 +44,6 @@ fun ReachableScaffold(
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun ReachableAppBar(
     title: @Composable () -> Unit,
@@ -86,7 +85,6 @@ fun ReachableAppBar(
     ReachableAppBar(expandedContent, collapsedContent, state, headerHeight)
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun ReachableAppBar(
     expandedContent: @Composable BoxScope.() -> Unit = {},

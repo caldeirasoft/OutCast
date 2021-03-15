@@ -88,7 +88,7 @@ fun OverflowText(
     style: TextStyle = LocalTextStyle.current
 ) {
     var wasMeasured by remember { mutableStateOf(false) }
-    var didOverflowHeight by remember { mutableStateOf(false) }
+    var didOverflowHeight by remember { mutableStateOf(true) }
     var isExpanded by remember { mutableStateOf(false) }
     Box(modifier = modifier.fillMaxSize()) {
         Text(

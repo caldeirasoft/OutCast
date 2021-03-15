@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,10 +30,8 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -42,7 +39,6 @@ import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -70,11 +66,8 @@ private fun StoreRoomScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState(0)
     val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
 
     ReachableScaffold(
         headerRatioOrientation = Orientation.Vertical,
@@ -183,11 +176,7 @@ private fun StoreRoomScreen(
                                         is StoreEpisode -> {
                                             EpisodeItemWithArtwork(
                                                 onEpisodeClick = {
-                                                    coroutineScope.launch {
-                                                        openEpisodeDialog(drawerState,
-                                                            drawerContent,
-                                                            item.episode)
-                                                    }
+                                                    navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                                                 },
                                                 onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
                                                 episode = item.episode,

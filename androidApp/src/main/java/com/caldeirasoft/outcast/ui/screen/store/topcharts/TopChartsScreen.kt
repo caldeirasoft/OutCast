@@ -30,7 +30,7 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import com.caldeirasoft.outcast.ui.util.*
@@ -164,11 +164,7 @@ fun TopChartsScreen(
                             }
                             is StoreEpisode -> {
                                 EpisodeItemWithArtwork(
-                                    onEpisodeClick = {
-                                        coroutineScope.launch {
-                                            openEpisodeDialog(drawerState, drawerContent, item.episode)
-                                        }
-                                    },
+                                    onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
                                     onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
                                     episode = item.episode,
                                     index = index + 1

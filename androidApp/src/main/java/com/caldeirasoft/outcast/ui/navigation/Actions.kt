@@ -10,6 +10,8 @@ class Actions(navController: NavController) {
         when (screen) {
             is PodcastScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
+            is EpisodeScreen ->
+                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.episodeArg)}")
             is StoreEpisodesScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
             is StoreCategories ->

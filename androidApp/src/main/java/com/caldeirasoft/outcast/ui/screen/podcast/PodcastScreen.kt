@@ -34,17 +34,14 @@ import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @Composable
@@ -70,12 +67,9 @@ private fun PodcastScreen(
     navigateBack: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
-    val coroutineScope = rememberCoroutineScope()
     val podcastData = state.podcast
     val episodesLazyPagingItems = flowOf(state.episodes).collectAsLazyPagingItems()
     val otherPodcastsLazyPagingItems = flowOf(state.otherPodcasts).collectAsLazyPagingItems()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
 
 
     ReachableScaffold(headerRatio = 1 / 3f) { headerHeight ->
@@ -127,10 +121,10 @@ private fun PodcastScreen(
                 }
             }
 
-            // description if present
+            /* description if present */
             item {
                 podcastData.description?.let { description ->
-                    StorePodcastDescriptionContent(description = description)
+                    PodcastDescriptionContent(description = description)
 
                     podcastData.genre?.let { genre ->
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -154,11 +148,7 @@ private fun PodcastScreen(
                     // trailer
                     EpisodeTrailerItem(
                         episode = trailer,
-                        onEpisodeClick = {
-                            coroutineScope.launch {
-                                openEpisodeDialog(drawerState, drawerContent, trailer)
-                            }
-                        })
+                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(trailer.toEpisodeArg())) })
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
@@ -186,9 +176,7 @@ private fun PodcastScreen(
                             EpisodeItemWithDesc(
                                 episode = episode,
                                 onEpisodeClick = {
-                                    coroutineScope.launch {
-                                        openEpisodeDialog(drawerState, drawerContent, episode)
-                                    }
+                                    navigateTo(Screen.EpisodeScreen(episode.toEpisodeArg()))
                                 }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -244,7 +232,7 @@ private fun PodcastScreen(
 }
 
 @Composable
-fun PodcastExpandedHeader(
+private fun PodcastExpandedHeader(
     state: PodcastViewState,
     listState: LazyListState,
     headerHeight: Int)
@@ -336,7 +324,7 @@ fun PodcastExpandedHeader(
 }
 
 @Composable
-fun PodcastCollapsedHeader(
+private fun PodcastCollapsedHeader(
     state: PodcastViewState,
     listState: LazyListState,
     headerHeight: Int,
@@ -380,7 +368,7 @@ fun PodcastCollapsedHeader(
 }
 
 @Composable
-private fun StorePodcastDescriptionContent(description: String) {
+private fun PodcastDescriptionContent(description: String) {
     Box(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp)
