@@ -29,6 +29,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionRooms
 import com.caldeirasoft.outcast.ui.components.*
@@ -132,6 +133,18 @@ private fun StoreDirectoryContent(
                                 )
                                 // content
                                 StoreCollectionItemsContent(
+                                    storeCollection = collection,
+                                    navigateTo = navigateTo
+                                )
+                            }
+                            is StoreCollectionGenres -> {
+                                // header
+                                StoreHeadingSectionWithLink(
+                                    title = collection.label,
+                                    onClick = { navigateTo(Screen.StoreCategories(collection)) }
+                                )
+                                // genres
+                                StoreCollectionGenresContent(
                                     storeCollection = collection,
                                     navigateTo = navigateTo
                                 )
