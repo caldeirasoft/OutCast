@@ -35,6 +35,10 @@ fun Color.Companion.getColor(colorString: String): Color {
     return Color(android.graphics.Color.parseColor("#$colorString"))
 }
 
+fun Color.Companion.getColor(colorString: String?): Color? {
+    return colorString?.let { Color(android.graphics.Color.parseColor("#$colorString")) }
+}
+
 fun Color.Companion.blendARGB(
     color1: Color, color2: Color,
     @FloatRange(from = 0.0, to = 1.0) ratio: Float,

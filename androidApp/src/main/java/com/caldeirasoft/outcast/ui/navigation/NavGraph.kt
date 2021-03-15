@@ -17,13 +17,14 @@ import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.categories.StoreCategoriesScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import kotlinx.coroutines.FlowPreview
@@ -36,6 +37,7 @@ object NavArgs {
     const val Title = "title"
     const val Url = "url"
     const val Podcast = "podcast"
+    const val Episode = "episode"
     const val Room = "room"
     const val Charts = "charts"
     const val Categories = "categories"
@@ -150,12 +152,12 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.STORE_EPISODES.name}/{${NavArgs.Podcast}}",
-                    arguments = listOf(navArgument(NavArgs.Podcast) { type = NavType.StringType })
+                    "${ScreenName.EPISODE.name}/{${NavArgs.Episode}}",
+                    arguments = listOf(navArgument(NavArgs.Episode) { type = NavType.StringType })
                 ) { backStackEntry ->
-                    val podcast = backStackEntry.getObjectNotNull<StorePodcast>(NavArgs.Podcast)
-                    StorePodcastEpisodesScreen(
-                        storePodcast = podcast,
+                    val episodeArg = backStackEntry.getObjectNotNull<EpisodeArg>(NavArgs.Episode)
+                    EpisodeScreen(
+                        episodeArg = episodeArg,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

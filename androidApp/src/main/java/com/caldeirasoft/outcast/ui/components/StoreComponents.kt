@@ -26,7 +26,7 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.openEpisodeDialog
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
@@ -39,10 +39,6 @@ fun StoreCollectionItemsContent(
     navigateTo: ScreenFn,
 )
 {
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
     // content
     LazyRow(
         contentPadding = PaddingValues(start = 16.dp,
@@ -64,11 +60,7 @@ fun StoreCollectionItemsContent(
                     EpisodeCardItemWithArtwork(
                         modifier = Modifier.width(320.dp),
                         onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
-                        onEpisodeClick = {
-                            coroutineScope.launch {
-                                openEpisodeDialog(drawerState, drawerContent, item.episode)
-                            }
-                        },
+                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
                         episode = item.episode,
                         //index = index + 1
                     )
@@ -317,9 +309,6 @@ fun StoreCollectionTopEpisodesContent(
     storeCollection: StoreCollectionTopEpisodes,
     navigateTo: (Screen) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
     // content
     LazyRow(
         contentPadding = PaddingValues(
@@ -331,11 +320,7 @@ fun StoreCollectionTopEpisodesContent(
             EpisodeCardItemWithArtwork(
                 modifier = Modifier.width(320.dp),
                 onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
-                onEpisodeClick = {
-                    coroutineScope.launch {
-                        openEpisodeDialog(drawerState, drawerContent, item.episode)
-                    }
-                },
+                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
                 episode = item.episode,
                 index = index + 1
             )

@@ -10,6 +10,7 @@ import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
@@ -20,6 +21,7 @@ enum class ScreenName {
     LIBRARY,
     PROFILE,
     PODCAST,
+    EPISODE,
     STORE_DISCOVER,
     STORE_SEARCH,
     STORE_CHARTS,
@@ -38,6 +40,7 @@ sealed class Screen (val id: ScreenName) {
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
     data class PodcastScreen(val podcast: StorePodcast) : Screen(ScreenName.PODCAST)
+    data class EpisodeScreen(val episodeArg: EpisodeArg) : Screen(ScreenName.EPISODE)
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)

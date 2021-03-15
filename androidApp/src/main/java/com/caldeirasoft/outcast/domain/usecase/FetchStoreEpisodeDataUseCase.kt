@@ -15,7 +15,7 @@ class FetchStoreEpisodeDataUseCase constructor(
     fun execute(episode: Episode, storeFront: String) : Flow<Resource<EpisodeWithInfos>> =
         networkBoundResource(
             loadFromDb = { libraryRepository.loadEpisode(episode.episodeId) },
-            shouldFetch = { episode -> episode == null },
+            shouldFetch = { it == null },
             fetchFromRemote = {
                 storeRepository.getPodcastDataAsync(episode.url, storeFront)
             },
