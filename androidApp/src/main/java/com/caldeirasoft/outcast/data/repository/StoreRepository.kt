@@ -217,34 +217,32 @@ class StoreRepository (
                                 elementChild.content.map { content -> content.contentId }
                             when (elementChild.type) {
                                 "popularity" -> { // top podcasts // top episodes
-                                    /*
                                     when (elementChild.fcKind) {
                                         // podcast
                                         16 -> yield(
-                                            StoreCollectionTopPodcasts(
+                                            StoreCollectionPodcasts(
                                                 id = elementChild.adamId,
                                                 label = elementChild.name,
-                                                genreId = DEFAULT_GENRE,
                                                 itemsIds = ids.take(15),
                                                 storeFront = storeFront,
+                                                sortByPopularity = true,
+                                                isTopCharts = true,
                                             )
                                         )
                                         // episodes
-                                        /*186 -> yield(
-                                            StoreCollectionTopEpisodes(
+                                        186 -> yield(
+                                            StoreCollectionEpisodes(
+                                                id = elementChild.adamId,
                                                 label = elementChild.name,
-                                                genreId = DEFAULT_GENRE,
-                                                storeList = ids.take(15)
-                                                    .filter { storeLookup.contains(it) }
-                                                    .map { storeLookup[it] }
-                                                    .filterIsInstance<StoreEpisode>(),
+                                                itemsIds = ids.take(15),
                                                 storeFront = storeFront,
+                                                sortByPopularity = true,
+                                                isTopCharts = true,
                                             )
-                                        )*/
+                                        )
                                         else -> {
                                         }
                                     }
-                                     */
                                 }
                                 "normal" -> {
                                     when (elementChild.content.first().kindIds.first()) {
@@ -256,7 +254,7 @@ class StoreRepository (
                                                     url = elementChild.seeAllUrl,
                                                     itemsIds = ids,
                                                     storeFront = storeFront,
-                                                    sortByPopularity = (elementChild.sort == 4)
+                                                    //sortByPopularity = (elementChild.sort == 4)
                                                 )
                                             )
                                         15 -> // episodes
@@ -267,7 +265,7 @@ class StoreRepository (
                                                     url = elementChild.seeAllUrl,
                                                     itemsIds = ids,
                                                     storeFront = storeFront,
-                                                    sortByPopularity = (elementChild.sort == 4)
+                                                    //sortByPopularity = (elementChild.sort == 4)
                                                 )
                                             )
                                     }
@@ -400,22 +398,24 @@ class StoreRepository (
                     dkId != null -> {
                         // popular episodes
                         yield(
-                            StoreCollectionTopEpisodes(
+                            StoreCollectionEpisodes(
                                 id = dkId.toLong(),
                                 label = contentData.title,
                                 itemsIds = ids,
                                 storeFront = storeFront,
+                                sortByPopularity = true,
                             )
                         )
                     }
                     chunkId.isNullOrEmpty() -> {
                         // popular podcasts
                         yield(
-                            StoreCollectionTopPodcasts(
+                            StoreCollectionPodcasts(
                                 id = 0L,
                                 label = contentData.title,
                                 itemsIds = ids,
                                 storeFront = storeFront,
+                                sortByPopularity = true,
                             )
                         )
                     }

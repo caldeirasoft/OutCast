@@ -28,6 +28,7 @@ import androidx.paging.compose.items
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
@@ -120,41 +121,34 @@ private fun StoreDirectoryContent(
                             is StoreCollectionFeatured ->
                                 StoreCollectionFeaturedContent(
                                     storeCollection = collection,
-                                    navigateTo = navigateTo
+                                    navigateTo = navigateTo,
                                 )
                             is StoreCollectionPodcasts -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.Room(collection.room)) }
-                                )
-
                                 // content
                                 StoreCollectionPodcastsContent(
                                     storeCollection = collection,
-                                    navigateTo = navigateTo
+                                    navigateTo = navigateTo,
+                                    onHeaderLinkClick = {
+                                        if (collection.isTopCharts)
+                                            navigateTo(Screen.Charts(StoreItemType.PODCAST))
+                                        else navigateTo(Screen.Room(collection.room))
+                                    }
                                 )
                             }
                             is StoreCollectionEpisodes -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.Room(collection.room)) }
-                                )
-
                                 // content
                                 StoreCollectionEpisodesContent(
                                     storeCollection = collection,
                                     numRows = 3,
-                                    navigateTo = navigateTo
+                                    navigateTo = navigateTo,
+                                    onHeaderLinkClick = {
+                                        if (collection.isTopCharts)
+                                            navigateTo(Screen.Charts(StoreItemType.EPISODE))
+                                        else navigateTo(Screen.Room(collection.room))
+                                    }
                                 )
                             }
                             is StoreCollectionGenres -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.StoreCategories(collection)) }
-                                )
                                 // genres
                                 StoreCollectionGenresContent(
                                     storeCollection = collection,
@@ -162,8 +156,6 @@ private fun StoreDirectoryContent(
                                 )
                             }
                             is StoreCollectionRooms -> {
-                                // header
-                                StoreHeadingSection(title = collection.label)
                                 // genres
                                 StoreCollectionRoomsContent(
                                     storeCollection = collection,

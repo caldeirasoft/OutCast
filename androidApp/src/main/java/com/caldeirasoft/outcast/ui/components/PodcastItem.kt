@@ -86,6 +86,7 @@ fun PodcastThumbnail(
 fun PodcastGridItem(
     modifier: Modifier = Modifier,
     podcast: StorePodcast,
+    index: Int? = null,
 )
 {
     Column(modifier = modifier
@@ -103,9 +104,19 @@ fun PodcastGridItem(
                     .aspectRatio(1f))
         }
         Text(
-            podcast.name,
+            text = with(AnnotatedString.Builder()) {
+                if (index != null) {
+                    pushStyle(SpanStyle(color = Color.Red))
+                    append("${index}. ")
+                    pop()
+                }
+                append(podcast.name)
+                toAnnotatedString()
+            },
             modifier = Modifier.fillMaxWidth(),
-            overflow = TextOverflow.Ellipsis, maxLines = 2, style = MaterialTheme.typography.body2
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2,
+            style = MaterialTheme.typography.body2
         )
         Text(
             podcast.artistName,

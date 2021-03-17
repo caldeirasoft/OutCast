@@ -198,13 +198,9 @@ private fun PodcastScreen(
                                         else -> "-"
                                     },
                                 )
-                                StoreHeadingSectionWithLink(
-                                    title = collectionWithTitle.label,
-                                    onClick = { navigateTo(Screen.Room(collectionWithTitle.room)) }
-                                )
                                 // content
                                 StoreCollectionPodcastsContent(
-                                    storeCollection = collection,
+                                    storeCollection = collectionWithTitle,
                                     navigateTo = navigateTo
                                 )
                             }

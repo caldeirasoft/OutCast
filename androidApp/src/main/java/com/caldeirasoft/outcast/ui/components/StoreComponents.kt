@@ -34,21 +34,30 @@ import com.skydoves.landscapist.coil.CoilImage
 fun StoreCollectionPodcastsContent(
     storeCollection: StoreCollectionPodcasts,
     navigateTo: ScreenFn,
+    onHeaderLinkClick: () -> Unit = { navigateTo(Screen.Room(storeCollection.room)) },
+    showIndex: Boolean = false,
 ) {
+    StoreHeadingSectionWithLink(
+        title = storeCollection.label,
+        onClick = onHeaderLinkClick
+    )
+
     // content
     LazyRow(
         contentPadding = PaddingValues(start = 16.dp,
             end = 0.dp,
             bottom = 16.dp)
     ) {
-        items(items = storeCollection.items) { item ->
+        itemsIndexed(items = storeCollection.items) { index, item ->
             PodcastGridItem(
                 modifier = Modifier
                     .width(100.dp)
                     .clickable(onClick = {
                         navigateTo(Screen.PodcastScreen(item))
                     }),
-                podcast = item)
+                podcast = item,
+                index = if (storeCollection.sortByPopularity) index + 1 else null
+            )
         }
     }
 }
@@ -58,12 +67,20 @@ fun StoreCollectionEpisodesContent(
     storeCollection: StoreCollectionEpisodes,
     numRows: Int,
     navigateTo: (Screen) -> Unit,
+    onHeaderLinkClick: () -> Unit = { navigateTo(Screen.Room(storeCollection.room)) },
+    showIndex: Boolean = false,
 ) {
     val indexedItems =
         storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
     val chunkedItems = indexedItems.chunked(numRows)
     val pagerState: PagerState = remember { PagerState(pages = chunkedItems.size - 1) }
     val selectedPage = remember { mutableStateOf(0) }
+
+    // header
+    StoreHeadingSectionWithLink(
+        title = storeCollection.label,
+        onClick = onHeaderLinkClick
+    )
 
     Pager(
         state = pagerState,
@@ -91,7 +108,7 @@ fun StoreCollectionEpisodesContent(
                         modifier = Modifier.fillMaxWidth(),
                         onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.podcast)) },
                         onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
-                        //index = index + 1
+                        index = if (storeCollection.sortByPopularity) (index + 1) else null
                     )
                 }
             }
@@ -129,8 +146,10 @@ fun StoreRoomItem(
 fun StoreCollectionRoomsContent(
     storeCollection: StoreCollectionRooms,
     navigateTo: (Screen) -> Unit
-)
-{
+) {
+    // header
+    StoreHeadingSection(title = storeCollection.label)
+
     // room content
     LazyRow(
         contentPadding = PaddingValues(start = 8.dp,
@@ -162,6 +181,12 @@ fun StoreCollectionGenresContent(
             else it
         }
     Column(modifier = Modifier.fillMaxWidth()) {
+        // header
+        StoreHeadingSectionWithLink(
+            title = storeCollection.label,
+            onClick = { navigateTo(Screen.StoreCategories(storeCollection)) }
+        )
+
         Surface(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -286,74 +311,6 @@ fun StoreCollectionFeaturedContent(
                     MaterialTheme.colors.primary,
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun StoreCollectionTopPodcastsContent(
-    storeCollection: StoreCollectionTopPodcasts,
-    numRows: Int,
-    navigateTo: (Screen) -> Unit
-) {
-    val indexedItems =
-        storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
-    val chunkedItems = indexedItems.chunked(numRows)
-    val pagerState: PagerState = remember { PagerState(pages = chunkedItems.size - 1)}
-    val selectedPage = remember { mutableStateOf(0) }
-
-    Pager(
-        state = pagerState,
-        //contentAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxWidth()
-    )
-    {
-        val chartItems = chunkedItems[this.currentPage]
-        selectedPage.value = pagerState.currentPage
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.90f)
-            //.padding(horizontal = 4.dp)
-        )
-        {
-            chartItems.forEach { (index, storeItem) ->
-                SmallPodcastListItemIndexed(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = {
-                            navigateTo(Screen.PodcastScreen(storeItem))
-                        }),
-                    storePodcast = storeItem,
-                    index = index + 1
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun StoreCollectionTopEpisodesContent(
-    storeCollection: StoreCollectionTopEpisodes,
-    navigateTo: (Screen) -> Unit
-) {
-    // content
-    LazyRow(
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 0.dp,
-            bottom = 16.dp)
-    ) {
-        itemsIndexed(items = storeCollection.items) { index, item ->
-            StoreEpisodeItem(
-                modifier = Modifier.width(320.dp),
-                onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
-                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
-                episode = item.episode,
-                index = index + 1
-            )
-            Spacer(modifier = Modifier.width(16.dp))
         }
     }
 }

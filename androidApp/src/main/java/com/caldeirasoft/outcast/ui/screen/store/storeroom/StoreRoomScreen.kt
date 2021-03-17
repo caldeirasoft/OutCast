@@ -114,12 +114,6 @@ private fun StoreRoomScreen(
 
                                 when (collection) {
                                     is StoreCollectionPodcasts -> {
-                                        // header
-                                        StoreHeadingSectionWithLink(
-                                            title = collection.label,
-                                            onClick = { navigateTo(Screen.Room(collection.room)) }
-                                        )
-
                                         // content
                                         StoreCollectionPodcastsContent(
                                             storeCollection = collection,
@@ -127,12 +121,6 @@ private fun StoreRoomScreen(
                                         )
                                     }
                                     is StoreCollectionEpisodes -> {
-                                        // header
-                                        StoreHeadingSectionWithLink(
-                                            title = collection.label,
-                                            onClick = { navigateTo(Screen.Room(collection.room)) }
-                                        )
-
                                         // content
                                         StoreCollectionEpisodesContent(
                                             storeCollection = collection,
@@ -141,34 +129,11 @@ private fun StoreRoomScreen(
                                         )
                                     }
                                     is StoreCollectionRooms -> {
-                                        // header
-                                        StoreHeadingSection(title = collection.label)
                                         // genres
                                         StoreCollectionRoomsContent(
                                             storeCollection = collection,
                                             navigateTo = navigateTo
                                         )
-                                    }
-                                    is StoreCollectionTopPodcasts -> {
-                                        // header
-                                        StoreHeadingSectionWithLink(
-                                            title = collection.label,
-                                            onClick = { navigateTo(Screen.Room(collection.room)) }
-                                        )
-                                        StoreCollectionTopPodcastsContent(
-                                            storeCollection = collection,
-                                            numRows = 4,
-                                            navigateTo = navigateTo)
-                                    }
-                                    is StoreCollectionTopEpisodes -> {
-                                        // header
-                                        StoreHeadingSectionWithLink(
-                                            title = collection.label,
-                                            onClick = { navigateTo(Screen.Room(collection.room)) }
-                                        )
-                                        StoreCollectionTopEpisodesContent(
-                                            storeCollection = collection,
-                                            navigateTo = navigateTo)
                                     }
                                 }
                             }

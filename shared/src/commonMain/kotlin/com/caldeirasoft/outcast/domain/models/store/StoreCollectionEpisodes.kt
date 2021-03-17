@@ -12,6 +12,7 @@ data class StoreCollectionEpisodes(
     override val storeFront: String,
     val itemsIds: List<Long> = emptyList(),
     val sortByPopularity: Boolean = false,
+    val isTopCharts: Boolean = false,
 ) : StoreCollection {
     val items: MutableList<StoreEpisode> = mutableListOf()
 

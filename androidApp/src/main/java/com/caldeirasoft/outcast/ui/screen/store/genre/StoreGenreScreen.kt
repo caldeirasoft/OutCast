@@ -87,12 +87,6 @@ private fun StoreGenreContent(
                                     navigateTo = navigateTo
                                 )
                             is StoreCollectionPodcasts -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.Room(collection.room)) }
-                                )
-
                                 // content
                                 StoreCollectionPodcastsContent(
                                     storeCollection = collection,
@@ -100,12 +94,6 @@ private fun StoreGenreContent(
                                 )
                             }
                             is StoreCollectionEpisodes -> {
-                                // header
-                                StoreHeadingSectionWithLink(
-                                    title = collection.label,
-                                    onClick = { navigateTo(Screen.Room(collection.room)) }
-                                )
-
                                 // content
                                 StoreCollectionEpisodesContent(
                                     storeCollection = collection,

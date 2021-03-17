@@ -50,16 +50,6 @@ interface StorePagingSource
             .flatMap { it.itemsIds.take(12) }
             .let { list -> ids.addAll(list) }
 
-        subList
-            .filterIsInstance<StoreCollectionTopPodcasts>()
-            .flatMap { it.itemsIds.take(8) }
-            .let { list -> ids.addAll(list) }
-
-        subList
-            .filterIsInstance<StoreCollectionTopEpisodes>()
-            .flatMap { it.itemsIds.take(12) }
-            .let { list -> ids.addAll(list) }
-
         val fetchItems = getItemsFromIds(ids.toList(), storePage)
         val storeItemsMap = fetchItems
             .filterIsInstance<StoreItemWithArtwork>()
@@ -85,26 +75,6 @@ interface StorePagingSource
                         yield(collection)
                     }
                     is StoreCollectionEpisodes -> {
-                        collection.itemsIds
-                            .filter { storeItemsMap.contains(it) }
-                            .mapNotNull { storeItemsMap[it] }
-                            .filterIsInstance<StoreEpisode>()
-                            .let {
-                                collection.items += it
-                            }
-                        yield(collection)
-                    }
-                    is StoreCollectionTopPodcasts -> {
-                        collection.itemsIds
-                            .filter { storeItemsMap.contains(it) }
-                            .mapNotNull { storeItemsMap[it] }
-                            .filterIsInstance<StorePodcast>()
-                            .let {
-                                collection.items += it
-                            }
-                        yield(collection)
-                    }
-                    is StoreCollectionTopEpisodes -> {
                         collection.itemsIds
                             .filter { storeItemsMap.contains(it) }
                             .mapNotNull { storeItemsMap[it] }
