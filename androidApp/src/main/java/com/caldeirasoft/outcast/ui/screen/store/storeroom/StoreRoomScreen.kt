@@ -113,15 +113,30 @@ private fun StoreRoomScreen(
                             items(lazyPagingItems = lazyPagingItems) { collection ->
 
                                 when (collection) {
-                                    is StoreCollectionItems -> {
+                                    is StoreCollectionPodcasts -> {
                                         // header
                                         StoreHeadingSectionWithLink(
                                             title = collection.label,
                                             onClick = { navigateTo(Screen.Room(collection.room)) }
                                         )
+
                                         // content
-                                        StoreCollectionItemsContent(
+                                        StoreCollectionPodcastsContent(
                                             storeCollection = collection,
+                                            navigateTo = navigateTo
+                                        )
+                                    }
+                                    is StoreCollectionEpisodes -> {
+                                        // header
+                                        StoreHeadingSectionWithLink(
+                                            title = collection.label,
+                                            onClick = { navigateTo(Screen.Room(collection.room)) }
+                                        )
+
+                                        // content
+                                        StoreCollectionEpisodesContent(
+                                            storeCollection = collection,
+                                            numRows = 3,
                                             navigateTo = navigateTo
                                         )
                                     }
@@ -174,14 +189,18 @@ private fun StoreRoomScreen(
                                             Divider()
                                         }
                                         is StoreEpisode -> {
-                                            EpisodeItemWithArtwork(
+                                            StoreEpisodeItem(
+                                                modifier = Modifier,
                                                 onEpisodeClick = {
                                                     navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                                                 },
-                                                onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
+                                                onPodcastClick = {
+                                                    navigateTo(Screen.PodcastScreen(item.podcast))
+                                                },
                                                 episode = item.episode,
                                                 index = index + 1
                                             )
+                                            Spacer(modifier = Modifier.height(8.dp))
                                             Divider()
                                         }
                                     }

@@ -41,13 +41,18 @@ interface StorePagingSource
             .subList(startPosition, endPosition)
 
         subList
-            .filterIsInstance<StoreCollectionItems>()
+            .filterIsInstance<StoreCollectionPodcasts>()
             .flatMap { it.itemsIds.take(8) }
             .let { list -> ids.addAll(list) }
 
         subList
-            .filterIsInstance<StoreCollectionTopPodcasts>()
+            .filterIsInstance<StoreCollectionEpisodes>()
             .flatMap { it.itemsIds.take(12) }
+            .let { list -> ids.addAll(list) }
+
+        subList
+            .filterIsInstance<StoreCollectionTopPodcasts>()
+            .flatMap { it.itemsIds.take(8) }
             .let { list -> ids.addAll(list) }
 
         subList
@@ -63,16 +68,27 @@ interface StorePagingSource
 
         val itemsSequence: Sequence<StoreCollection> = sequence {
             for (i in startPosition until endPosition) {
-                when (val collection = storePage.storeList[i])
-                {
+                when (val collection = storePage.storeList[i]) {
                     is StoreCollectionFeatured,
                     is StoreCollectionGenres,
-                    is StoreCollectionRooms ->
+                    is StoreCollectionRooms,
+                    ->
                         yield(collection)
-                    is StoreCollectionItems -> {
+                    is StoreCollectionPodcasts -> {
                         collection.itemsIds
                             .filter { storeItemsMap.contains(it) }
                             .mapNotNull { storeItemsMap[it] }
+                            .filterIsInstance<StorePodcast>()
+                            .let {
+                                collection.items += it
+                            }
+                        yield(collection)
+                    }
+                    is StoreCollectionEpisodes -> {
+                        collection.itemsIds
+                            .filter { storeItemsMap.contains(it) }
+                            .mapNotNull { storeItemsMap[it] }
+                            .filterIsInstance<StoreEpisode>()
                             .let {
                                 collection.items += it
                             }

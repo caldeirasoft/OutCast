@@ -30,7 +30,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
+import com.caldeirasoft.outcast.domain.models.episode
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.ui.components.*
@@ -169,14 +170,14 @@ private fun PodcastScreen(
                     item {
                         StoreHeadingSectionWithLink(
                             title = stringResource(id = R.string.store_episodes),
-                            onClick = {  })
+                            onClick = { })
                     }
-                    items(lazyPagingItems = episodesLazyPagingItems) { episode ->
-                        episode?.let {
-                            EpisodeItemWithDesc(
-                                episode = episode,
+                    items(lazyPagingItems = episodesLazyPagingItems) { episodeSummary ->
+                        episodeSummary?.let {
+                            EpisodeItem(
+                                episode = episodeSummary.episode,
                                 onEpisodeClick = {
-                                    navigateTo(Screen.EpisodeScreen(episode.toEpisodeArg()))
+                                    navigateTo(Screen.EpisodeScreen(episodeSummary.toEpisodeArg()))
                                 }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -186,7 +187,7 @@ private fun PodcastScreen(
                     // related podcasts
                     items(lazyPagingItems = otherPodcastsLazyPagingItems) { collection ->
                         when (collection) {
-                            is StoreCollectionItems -> {
+                            is StoreCollectionPodcasts -> {
                                 val collectionWithTitle = collection.copy(
                                     label = when (collection.label) {
                                         "podcastsByArtist" -> stringResource(id = R.string.podcast_podcastsByArtist,
@@ -202,7 +203,7 @@ private fun PodcastScreen(
                                     onClick = { navigateTo(Screen.Room(collectionWithTitle.room)) }
                                 )
                                 // content
-                                StoreCollectionItemsContent(
+                                StoreCollectionPodcastsContent(
                                     storeCollection = collection,
                                     navigateTo = navigateTo
                                 )

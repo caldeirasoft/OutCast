@@ -26,7 +26,7 @@ fun GenreItem(
     onGenreClick: () -> Unit,
 ) {
     ListItem(
-        modifier = Modifier,
+        modifier = Modifier.clickable { onGenreClick() },
         text = { Text(text = genre.name) },
         icon = {
             Image(

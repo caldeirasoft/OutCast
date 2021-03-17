@@ -105,7 +105,8 @@ internal val networkModule = module {
                 subclass(StoreCollectionRooms::class)
                 subclass(StoreCollectionGenres::class)
                 subclass(StoreCollectionFeatured::class)
-                subclass(StoreCollectionItems::class)
+                subclass(StoreCollectionPodcasts::class)
+                subclass(StoreCollectionEpisodes::class)
                 subclass(StoreCollectionTopPodcasts::class)
                 subclass(StoreCollectionTopEpisodes::class)
             }

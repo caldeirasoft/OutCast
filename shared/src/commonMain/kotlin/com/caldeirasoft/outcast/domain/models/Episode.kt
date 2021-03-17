@@ -8,6 +8,9 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 fun Episode.getArtworkUrl(): String =
     StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 
+fun EpisodeSummary.getArtworkUrl(): String =
+    StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
+
 val EpisodeWithInfos.episode: Episode
     get() = Episode(
         episodeId = this.episodeId,

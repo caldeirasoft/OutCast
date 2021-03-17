@@ -128,7 +128,7 @@ insert:
 INSERT INTO episode
 (episodeId, name, url, podcastId, podcastName, artistName, artistId,
  releaseDateTime, genre, feedUrl, description, contentAdvisoryRating, artwork,
-  mediaUrl, mediaType, duration, podcastEpisodeSeason, podcastEpisodeNumber, podcastEpisodeWebsiteUrl)
+  mediaUrl, mediaType, duration, podcastEpisodeSeason, podcastEpisodeNumber, podcastEpisodeWebsiteUrl, podcastEpisodeType)
 VALUES
 ?
 ON CONFLICT(episodeId)

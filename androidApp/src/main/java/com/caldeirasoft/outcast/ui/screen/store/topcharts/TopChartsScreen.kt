@@ -163,10 +163,10 @@ fun TopChartsScreen(
                                 Divider()
                             }
                             is StoreEpisode -> {
-                                EpisodeItemWithArtwork(
+                                StoreEpisodeItem(
+                                    episode = item.episode,
                                     onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
                                     onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
-                                    episode = item.episode,
                                     index = index + 1
                                 )
                                 Divider()

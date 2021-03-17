@@ -247,16 +247,30 @@ class StoreRepository (
                                      */
                                 }
                                 "normal" -> {
-                                    yield(
-                                        StoreCollectionItems(
-                                            id = elementChild.adamId,
-                                            label = elementChild.name,
-                                            url = elementChild.seeAllUrl,
-                                            itemsIds = ids,
-                                            storeFront = storeFront,
-                                            sortByPopularity = (elementChild.sort == 4)
-                                        )
-                                    )
+                                    when (elementChild.content.first().kindIds.first()) {
+                                        4 -> // podcast
+                                            yield(
+                                                StoreCollectionPodcasts(
+                                                    id = elementChild.adamId,
+                                                    label = elementChild.name,
+                                                    url = elementChild.seeAllUrl,
+                                                    itemsIds = ids,
+                                                    storeFront = storeFront,
+                                                    sortByPopularity = (elementChild.sort == 4)
+                                                )
+                                            )
+                                        15 -> // episodes
+                                            yield(
+                                                StoreCollectionEpisodes(
+                                                    id = elementChild.adamId,
+                                                    label = elementChild.name,
+                                                    url = elementChild.seeAllUrl,
+                                                    itemsIds = ids,
+                                                    storeFront = storeFront,
+                                                    sortByPopularity = (elementChild.sort == 4)
+                                                )
+                                            )
+                                    }
                                 }
                                 else -> {
                                 }
@@ -408,7 +422,7 @@ class StoreRepository (
                     else -> {
                         // regular podcasts
                         yield(
-                            StoreCollectionItems(
+                            StoreCollectionPodcasts(
                                 id = chunkId.toLong(),
                                 label = contentData.title,
                                 itemsIds = ids,
@@ -478,7 +492,7 @@ class StoreRepository (
             entries?.forEach { segmentData ->
                 val ids = segmentData.adamIds
                 yield(
-                    StoreCollectionItems(
+                    StoreCollectionPodcasts(
                         id = segmentData.adamId.toLong(),
                         label = segmentData.title,
                         url = segmentData.seeAllUrl?.url,
@@ -537,7 +551,7 @@ class StoreRepository (
                     otherPodcasts = sequence<StoreCollection> {
                         if (moreByArtist.isEmpty().not()) {
                             yield(
-                                StoreCollectionItems(
+                                StoreCollectionPodcasts(
                                     0L,
                                     "podcastsByArtist",
                                     itemsIds = moreByArtist.toList(),
@@ -547,7 +561,7 @@ class StoreRepository (
                         }
                         if (listenersAlsoBought.isEmpty().not()) {
                             yield(
-                                StoreCollectionItems(
+                                StoreCollectionPodcasts(
                                     0L,
                                     "podcastsListenersAlsoFollow",
                                     itemsIds = listenersAlsoBought.toList(),
@@ -557,7 +571,7 @@ class StoreRepository (
                         }
                         if (topPodcastsInGenre.isEmpty().not()) {
                             yield(
-                                StoreCollectionItems(
+                                StoreCollectionPodcasts(
                                     0L,
                                     "topPodcastsInGenre",
                                     itemsIds = topPodcastsInGenre.toList(),
@@ -580,7 +594,7 @@ class StoreRepository (
                             feedUrl = episodeEntry.feedUrl.orEmpty(),
                             releaseDateTime = episodeEntry.releaseDateTime
                                 ?: Clock.System.now(),
-                            artwork = episodeEntry.artwork?.toArtwork(),
+                            artwork = podcastEntry.artwork?.toArtwork(),
                             contentAdvisoryRating = episodeEntry.contentRatingsBySystem?.riaa?.name,
                             mediaUrl = episodeEntry.offers.firstOrNull()?.download?.url.orEmpty(),
                             mediaType = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.fileExtension.orEmpty(),

@@ -28,10 +28,7 @@ import androidx.paging.compose.items
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionRooms
+import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -125,15 +122,30 @@ private fun StoreDirectoryContent(
                                     storeCollection = collection,
                                     navigateTo = navigateTo
                                 )
-                            is StoreCollectionItems -> {
+                            is StoreCollectionPodcasts -> {
                                 // header
                                 StoreHeadingSectionWithLink(
                                     title = collection.label,
                                     onClick = { navigateTo(Screen.Room(collection.room)) }
                                 )
+
                                 // content
-                                StoreCollectionItemsContent(
+                                StoreCollectionPodcastsContent(
                                     storeCollection = collection,
+                                    navigateTo = navigateTo
+                                )
+                            }
+                            is StoreCollectionEpisodes -> {
+                                // header
+                                StoreHeadingSectionWithLink(
+                                    title = collection.label,
+                                    onClick = { navigateTo(Screen.Room(collection.room)) }
+                                )
+
+                                // content
+                                StoreCollectionEpisodesContent(
+                                    storeCollection = collection,
+                                    numRows = 3,
                                     navigateTo = navigateTo
                                 )
                             }

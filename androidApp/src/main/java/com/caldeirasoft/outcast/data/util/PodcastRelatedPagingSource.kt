@@ -4,7 +4,8 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.*
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 
@@ -53,7 +54,7 @@ class PodcastRelatedPagingSource(
             .subList(startPosition, endPosition)
 
         subList
-            .filterIsInstance<StoreCollectionItems>()
+            .filterIsInstance<StoreCollectionPodcasts>()
             .flatMap { it.itemsIds }
             .let { list -> ids.addAll(list) }
 
@@ -67,11 +68,12 @@ class PodcastRelatedPagingSource(
             for (i in startPosition until endPosition) {
                 when (val collection = storePage.storeList[i])
                 {
-                    is StoreCollectionItems -> {
+                    is StoreCollectionPodcasts -> {
                         collection.items +=
                             collection.itemsIds
                                 .filter { storeItemsMap.contains(it) }
                                 .mapNotNull { storeItemsMap[it] }
+                                .filterIsInstance<StorePodcast>()
                         yield(collection)
                     }
                 }

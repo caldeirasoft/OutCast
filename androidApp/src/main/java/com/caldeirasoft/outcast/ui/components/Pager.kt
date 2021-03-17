@@ -65,7 +65,7 @@ class PagerState(currentPage: Int = 0, pages: Int = 0) {
 }
 
 
-class PagerScope(private val state: PagerState) {
+class PagerScope(private val state: PagerState, val page: Int) {
     val currentPage get() = state.currentPage
 }
 
@@ -82,11 +82,12 @@ private val Measurable.page: Int
 fun Pager(
     state: PagerState,
     modifier: Modifier = Modifier,
-    pageContent: @Composable PagerScope.() -> Unit
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    offscreenLimit: Int = 2,
+    pageContent: @Composable PagerScope.() -> Unit,
 ) {
     var pageSize by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
-    val offscreenLimit = 2
 
     Layout(
         content = {
@@ -95,9 +96,11 @@ fun Pager(
 
             for (page in minPage..maxPage) {
                 val pageData = PageData(page)
+                val scope = PagerScope(state, page)
                 key(pageData) {
-                    Box(contentAlignment = Alignment.Center, modifier = PageData(page)) {
-                        PagerScope(state).pageContent()
+                    Box(contentAlignment = Alignment.Center,
+                        modifier = pageData) {
+                        scope.pageContent()
                     }
                 }
             }
@@ -120,15 +123,28 @@ fun Pager(
     )
 
     { measurable, constraints ->
-        layout(constraints.maxWidth, constraints.maxHeight) {
-            val currentPage = state.currentPage
-            val offset = state.currentPageOffset
-            val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-
+        val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeableMap =
             measurable
                 .map { it.measure(childConstraints) to it.page }
+        val rowHeights = placeableMap.map { (placeable, _) -> placeable.height }
+        val maxHeight = rowHeights
+            .maxOrNull()
+            ?.coerceIn(constraints.minHeight.rangeTo(constraints.maxHeight))
+            ?: constraints.minHeight
+
+        layout(constraints.maxWidth, maxHeight) {
+            val currentPage = state.currentPage
+            val offset = state.currentPageOffset
+
+            placeableMap
                 .forEach { (placeable, page) ->
-                    val xCenterOffset = (constraints.maxWidth - placeable.width) / 2
+                    val xCenterOffset = when (contentAlignment) {
+                        Alignment.Start -> 0
+                        Alignment.End -> constraints.maxWidth - placeable.width
+                        Alignment.CenterHorizontally -> (constraints.maxWidth - placeable.width) / 2
+                        else -> 0
+                    }
                     val yCenterOffset = (constraints.maxHeight - placeable.height) / 2
                     if (currentPage == page) pageSize = placeable.width
                     val xItemOffset = ((page + offset - currentPage) * placeable.width).roundToInt()

@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.airbnb.mvrx.compose.collectAsState
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionEpisodes
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionRooms
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
@@ -86,24 +86,30 @@ private fun StoreGenreContent(
                                     storeCollection = collection,
                                     navigateTo = navigateTo
                                 )
-                            is StoreCollectionItems -> {
+                            is StoreCollectionPodcasts -> {
                                 // header
                                 StoreHeadingSectionWithLink(
                                     title = collection.label,
                                     onClick = { navigateTo(Screen.Room(collection.room)) }
                                 )
+
                                 // content
-                                StoreCollectionItemsContent(
+                                StoreCollectionPodcastsContent(
                                     storeCollection = collection,
                                     navigateTo = navigateTo
                                 )
                             }
-                            is StoreCollectionRooms -> {
+                            is StoreCollectionEpisodes -> {
                                 // header
-                                StoreHeadingSection(title = collection.label)
-                                // genres
-                                StoreCollectionRoomsContent(
+                                StoreHeadingSectionWithLink(
+                                    title = collection.label,
+                                    onClick = { navigateTo(Screen.Room(collection.room)) }
+                                )
+
+                                // content
+                                StoreCollectionEpisodesContent(
                                     storeCollection = collection,
+                                    numRows = 3,
                                     navigateTo = navigateTo
                                 )
                             }

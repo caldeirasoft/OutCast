@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Lens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,22 +23,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
 import com.skydoves.landscapist.coil.CoilImage
-import kotlinx.coroutines.launch
 
 @Composable
-fun StoreCollectionItemsContent(
-    storeCollection: StoreCollectionItems,
+fun StoreCollectionPodcastsContent(
+    storeCollection: StoreCollectionPodcasts,
     navigateTo: ScreenFn,
-)
-{
+) {
     // content
     LazyRow(
         contentPadding = PaddingValues(start = 16.dp,
@@ -47,25 +42,57 @@ fun StoreCollectionItemsContent(
             bottom = 16.dp)
     ) {
         items(items = storeCollection.items) { item ->
-            when (item) {
-                is StorePodcast -> {
-                    PodcastGridItem(
-                        modifier = Modifier
-                            .width(100.dp)
-                            .clickable(onClick = {
-                                navigateTo(Screen.PodcastScreen(item))
-                            }),
-                        podcast = item)
-                }
-                is StoreEpisode -> {
-                    EpisodeCardItemWithArtwork(
-                        modifier = Modifier.width(320.dp),
-                        onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
-                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
-                        episode = item.episode,
+            PodcastGridItem(
+                modifier = Modifier
+                    .width(100.dp)
+                    .clickable(onClick = {
+                        navigateTo(Screen.PodcastScreen(item))
+                    }),
+                podcast = item)
+        }
+    }
+}
+
+@Composable
+fun StoreCollectionEpisodesContent(
+    storeCollection: StoreCollectionEpisodes,
+    numRows: Int,
+    navigateTo: (Screen) -> Unit,
+) {
+    val indexedItems =
+        storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
+    val chunkedItems = indexedItems.chunked(numRows)
+    val pagerState: PagerState = remember { PagerState(pages = chunkedItems.size - 1) }
+    val selectedPage = remember { mutableStateOf(0) }
+
+    Pager(
+        state = pagerState,
+        contentAlignment = Alignment.Start,
+        offscreenLimit = 2,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
+    )
+    {
+        if (chunkedItems.indices.contains(this.page)) {
+            val chartItems = chunkedItems[Math.floorMod(this.page, chunkedItems.size)]
+            selectedPage.value = pagerState.currentPage
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(280.dp)
+                //.padding(horizontal = 4.dp)
+            )
+            {
+                chartItems.forEach { (index, storeItem) ->
+                    StoreEpisodeItem(
+                        episode = storeItem.episode,
+                        modifier = Modifier.fillMaxWidth(),
+                        onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.podcast)) },
+                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
                         //index = index + 1
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
                 }
             }
         }
@@ -75,7 +102,7 @@ fun StoreCollectionItemsContent(
 @Composable
 fun StoreRoomItem(
     room: StoreRoom,
-    navigateTo: (Screen) -> Unit
+    navigateTo: (Screen) -> Unit,
 ) {
     Card(
         backgroundColor = colors[0],
@@ -183,7 +210,7 @@ fun StoreCollectionFeaturedContent(
                 .aspectRatio(2.03f)
         )
         {
-            val item = storeCollection.items[this.currentPage]
+            val item = storeCollection.items[Math.floorMod(this.page, storeCollection.items.size)]
             selectedPage.value = pagerState.currentPage
             val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
             Card(
@@ -319,7 +346,7 @@ fun StoreCollectionTopEpisodesContent(
             bottom = 16.dp)
     ) {
         itemsIndexed(items = storeCollection.items) { index, item ->
-            EpisodeCardItemWithArtwork(
+            StoreEpisodeItem(
                 modifier = Modifier.width(320.dp),
                 onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
                 onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
