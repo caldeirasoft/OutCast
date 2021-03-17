@@ -18,6 +18,7 @@ import com.caldeirasoft.outcast.db.EpisodeSummary
 import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
+import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
 
@@ -57,7 +58,15 @@ fun StoreEpisodeItem(
         },
         secondaryText = {
             val context = LocalContext.current
-            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+            Text(
+                text = with(AnnotatedString.Builder()) {
+                    append(episode.duration.formatDuration())
+                    append(" ● ")
+                    append(episode.releaseDateTime.formatRelativeDisplay(context))
+                    toAnnotatedString()
+                },
+                maxLines = 3,
+            )
         },
         icon = {
             PodcastThumbnail(
@@ -118,6 +127,8 @@ fun EpisodeItem(
             val context = LocalContext.current
             Text(
                 text = with(AnnotatedString.Builder()) {
+                    append(episode.duration.formatDuration())
+                    append(" ● ")
                     append(episode.releaseDateTime.formatRelativeDisplay(context))
                     append("\n")
                     episode.description?.let {
