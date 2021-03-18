@@ -81,17 +81,34 @@ SET updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
 WHERE podcastId = ?
 ;
 
-subscribe:
-UPDATE podcast
-SET isSubscribed = 1, newEpisodeAction = ?
-WHERE podcastId = ?
-;
+subscribe {
+    UPDATE podcast
+    SET isSubscribed = 1, newEpisodeAction = ?
+    WHERE podcastId = :podcastId;
 
-unsubscribe:
-UPDATE podcast
-SET isSubscribed = 0
-WHERE podcastId = ?
-;
+    INSERT OR REPLACE INTO inbox (episodeId)
+    SELECT episodeId
+    FROM episode e
+    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
+    WHERE e.podcastId = :podcastId
+      AND p.newEpisodeAction == 'INBOX'
+      ORDER BY e.releaseDateTime DESC
+    LIMIT 1;
+}
+
+
+unsubscribe {
+    UPDATE podcast
+    SET isSubscribed = 0
+    WHERE podcastId = :podcastId;
+
+    DELETE FROM inbox
+    WHERE episodeId IN (
+        SELECT episodeId
+        FROM episode e
+        WHERE e.podcastId = :podcastId
+    );
+}
 
 deleteById:
 DELETE FROM podcast

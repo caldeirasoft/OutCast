@@ -45,7 +45,6 @@ fun createDatabase(driver: SqlDriver): Database {
         releaseDateTimeAdapter = instantAdapter,
         updatedAtAdapter = instantAdapter,
         playedAtAdapter = instantAdapter,
-        statusAdapter = EnumColumnAdapter()
     )
 
 

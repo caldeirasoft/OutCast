@@ -14,7 +14,6 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.models.EpisodeStatus
 import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.*
 import kotlinx.coroutines.CoroutineScope
@@ -606,7 +605,6 @@ class StoreRepository (
                             podcastEpisodeType = episodeEntry.podcastEpisodeType.orEmpty(),
                             podcastEpisodeWebsiteUrl = episodeEntry.podcastEpisodeWebsiteUrl,
                             updatedAt = Clock.System.now(),
-                            status = EpisodeStatus.LIBRARY,
                             isPlayed = false,
                             playedAt = Instant.DISTANT_PAST,
                             isFavorite = false,

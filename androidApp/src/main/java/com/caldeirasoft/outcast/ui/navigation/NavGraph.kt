@@ -69,10 +69,10 @@ fun MainNavHost(startScreen: ScreenName) {
                     navController = navController,
                     items = listOf(
                         BottomNavigationScreen.Queue,
+                        BottomNavigationScreen.Inbox,
                         BottomNavigationScreen.Library,
                         BottomNavigationScreen.Discover,
-                        BottomNavigationScreen.Search,
-                        BottomNavigationScreen.Profile
+                        BottomNavigationScreen.More,
                     ),
                     navigateTo = actions.selectBottomNav
                 )
@@ -82,8 +82,15 @@ fun MainNavHost(startScreen: ScreenName) {
                 navController = navController,
                 startDestination = startScreen.name,
             ) {
-                composable(ScreenName.QUEUE.name) { Text(text = "Queue") }
-                composable(ScreenName.INBOX.name) { InboxScreen() }
+                composable(ScreenName.QUEUE.name) {
+                    Text(text = "Queue")
+                }
+                composable(ScreenName.INBOX.name) {
+                    InboxScreen(
+                        navigateTo = actions.select,
+                        navigateBack = actions.up
+                    )
+                }
                 composable(ScreenName.LIBRARY.name) {
                     LibraryScreen(
                         navigateTo = actions.select,
@@ -196,7 +203,10 @@ fun SetupBottomNavBar(
         items.forEach { screen ->
             BottomNavigationItem(
                 icon = {
-                    Icon(screen.icon, contentDescription = stringResource(id = screen.resourceId))
+                    Icon(
+                        imageVector = if (currentRoute == screen.id.name) screen.selectedIcon else screen.icon,
+                        contentDescription = stringResource(id = screen.resourceId)
+                    )
                 },
                 label = {
                     Text(text = stringResource(id = screen.resourceId),

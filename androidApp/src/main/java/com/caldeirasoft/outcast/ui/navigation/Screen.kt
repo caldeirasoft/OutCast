@@ -3,6 +3,9 @@ package com.caldeirasoft.outcast.ui.navigation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.Queue
+import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
@@ -31,6 +34,10 @@ enum class ScreenName {
     STORE_CATEGORIES,
     STORE_PODCAST,
     STORE_EPISODES,
+    MORE,
+    FAVORITES,
+    HISTORY,
+    FILES,
     SETTINGS,
     STATISTICS,
 }
@@ -59,12 +66,32 @@ sealed class Screen (val id: ScreenName) {
     }
 }
 
-sealed class BottomNavigationScreen(val id: ScreenName, @StringRes val resourceId: Int, val icon: ImageVector)
-{
-    object Queue : BottomNavigationScreen(ScreenName.QUEUE, R.string.screen_queue, Icons.Default.QueueMusic)
-    object Library : BottomNavigationScreen(ScreenName.LIBRARY, R.string.screen_library, Icons.Default.LibraryMusic)
-    object Discover : BottomNavigationScreen(ScreenName.STORE_DISCOVER, R.string.screen_discover, Icons.Default.Web)
-    object Search : BottomNavigationScreen(ScreenName.STORE_SEARCH, R.string.screen_search, Icons.Default.Search)
-    object Profile : BottomNavigationScreen(ScreenName.PROFILE, R.string.screen_profile, Icons.Default.Person)
+sealed class BottomNavigationScreen(
+    val id: ScreenName,
+    @StringRes val resourceId: Int,
+    val icon: ImageVector,
+    val selectedIcon: ImageVector = icon,
+) {
+    object Queue : BottomNavigationScreen(ScreenName.QUEUE,
+        R.string.screen_queue,
+        Icons.Outlined.Queue,
+        Icons.Filled.Queue)
+
+    object Inbox : BottomNavigationScreen(ScreenName.INBOX,
+        R.string.screen_inbox,
+        Icons.Outlined.Inbox,
+        Icons.Filled.Inbox)
+
+    object Library : BottomNavigationScreen(ScreenName.LIBRARY,
+        R.string.screen_library,
+        Icons.Outlined.Subscriptions,
+        Icons.Filled.Subscriptions)
+
+    object Discover : BottomNavigationScreen(ScreenName.STORE_DISCOVER,
+        R.string.screen_discover,
+        Icons.Default.Search)
+
+    object More :
+        BottomNavigationScreen(ScreenName.MORE, R.string.screen_more, Icons.Default.MoreHoriz)
 }
 

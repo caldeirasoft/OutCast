@@ -4,7 +4,6 @@ package com.caldeirasoft.outcast.ui.screen.episode
 
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.EpisodeStatus
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
@@ -57,7 +56,6 @@ data class EpisodeArg(
         isPlayed = false,
         isFavorite = false,
         playedAt = null,
-        status = EpisodeStatus.LIBRARY
     )
 
     companion object {

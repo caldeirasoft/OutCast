@@ -1,6 +1,5 @@
 import com.caldeirasoft.outcast.domain.models.Artwork;
 import com.caldeirasoft.outcast.domain.models.Genre;
-import com.caldeirasoft.outcast.domain.models.EpisodeStatus;
 import java.lang.Boolean;
 import java.lang.Integer;
 import kotlin.collections.List;
@@ -27,7 +26,6 @@ CREATE TABLE episode (
     podcastEpisodeNumber INTEGER AS Int,
     podcastEpisodeWebsiteUrl TEXT,
     podcastEpisodeType TEXT,
-    status TEXT AS EpisodeStatus NOT NULL DEFAULT 'LIBRARY',
     playbackPosition INTEGER AS Int,
     isPlayed INTEGER as Boolean NOT NULL DEFAULT 0,
     isFavorite INTEGER as Boolean NOT NULL DEFAULT 0,

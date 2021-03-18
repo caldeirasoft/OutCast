@@ -1,35 +1,20 @@
 package com.caldeirasoft.outcast.presentation.viewmodel
 
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.db.Episode
+import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.domain.usecase.FetchInboxUseCase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import com.caldeirasoft.outcast.ui.screen.inbox.InboxViewState
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-@FlowPreview
-@ExperimentalCoroutinesApi
-class InboxViewModel(val fetchInboxUseCase: FetchInboxUseCase) : ViewModel(), LifecycleObserver
-{
-    val filterGenre: SharedFlow<Int?> = MutableSharedFlow()
+@OptIn(KoinApiExtension::class)
+class InboxViewModel(
+    initialState: InboxViewState,
+) : MavericksViewModel<InboxViewState>(initialState), KoinComponent {
+    private val fetchInboxUseCase: FetchInboxUseCase by inject()
 
-    private val episodesData = MutableSharedFlow<List<Episode>>()
-
-    val episodesDataState
-            = episodesData
-
-    fun fetchEpisodes(genre: Int?) {
-        viewModelScope.launch {
-            fetchInboxUseCase
-                .invoke()
-                .onEach { episodesData.emit(it) }
-        }
+    init {
+        fetchInboxUseCase.invoke()
+            .setOnEach { copy(episodes = it) }
     }
-
-    val textData = "Inbox Text"
 }
