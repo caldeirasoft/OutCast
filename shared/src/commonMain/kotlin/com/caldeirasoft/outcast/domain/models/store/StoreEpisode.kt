@@ -5,6 +5,7 @@ package com.caldeirasoft.outcast.domain.models.store
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.EpisodeStatus
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
@@ -60,11 +61,16 @@ class StoreEpisode(override val id: Long,
             contentAdvisoryRating = this.contentAdvisoryRating,
             mediaUrl = this.mediaUrl,
             mediaType = this.mediaType,
-            duration = this.duration.toLong(),
-            podcastEpisodeNumber = this.podcastEpisodeNumber?.toLong(),
-            podcastEpisodeSeason = this.podcastEpisodeSeason?.toLong(),
+            duration = this.duration,
+            podcastEpisodeNumber = this.podcastEpisodeNumber,
+            podcastEpisodeSeason = this.podcastEpisodeSeason,
             podcastEpisodeType = this.podcastEpisodeType,
             podcastEpisodeWebsiteUrl = this.podcastEpisodeWebsiteUrl,
-            updatedAt = Clock.System.now()
+            updatedAt = Clock.System.now(),
+            status = EpisodeStatus.LIBRARY,
+            playbackPosition = null,
+            isPlayed = false,
+            isFavorite = false,
+            playedAt = null,
         )
 }

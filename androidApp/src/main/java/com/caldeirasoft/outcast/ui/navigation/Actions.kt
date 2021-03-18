@@ -9,10 +9,10 @@ class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
         when (screen) {
             is PodcastScreen ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
+                navController.navigate("${screen.id.name}/${screen.podcastId}")
             is EpisodeScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.episodeArg)}")
-            is StoreEpisodesScreen ->
+            is StorePodcastScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
             is StoreCategories ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.genres)}")

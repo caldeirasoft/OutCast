@@ -14,7 +14,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.EpisodeSummary
 import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
@@ -181,34 +180,6 @@ fun EpisodeTrailerItem(
         onEpisodeClick = onEpisodeClick
     )
 }
-
-@Composable
-fun EpisodeTrailerItem(
-    modifier: Modifier = Modifier,
-    episode: EpisodeSummary,
-    onEpisodeClick: () -> Unit,
-) {
-    EpisodeDefaults.EpisodeItem(
-        modifier = modifier,
-        icon = {
-            PodcastThumbnail(
-                imageModel = episode.getArtworkUrl(),
-                modifier = Modifier
-                    .size(EpisodeDefaults.ThumbnailSize)
-                    .clickable(onClick = { })
-            )
-        },
-        text = { Text(text = episode.name, maxLines = 1) },
-        overlineText = {
-            val context = LocalContext.current
-            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
-        },
-        actionButtons = { },
-        releasedTimeText = { },
-        onEpisodeClick = onEpisodeClick
-    )
-}
-
 
 private object EpisodeDefaults {
     // List item related defaults.

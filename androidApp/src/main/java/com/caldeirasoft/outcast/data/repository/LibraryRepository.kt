@@ -2,10 +2,8 @@ package com.caldeirasoft.outcast.data.repository
 
 import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.Database
-import com.caldeirasoft.outcast.db.EpisodeSummary
-import com.caldeirasoft.outcast.db.EpisodeWithInfos
+import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.db.PodcastSummary
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -20,7 +18,7 @@ class LibraryRepository(
     val database: Database
 )
 {
-    fun loadAllPodcasts(): Flow<List<PodcastSummary>> =
+    fun loadAllPodcasts(): Flow<List<Podcast>> =
         database.podcastQueries
             .getAll()
             .asFlow()
@@ -47,13 +45,13 @@ class LibraryRepository(
             .unsubscribe(podcastId = podcastId)
     }
 
-    fun loadEpisodesByPodcastId(podcastId: Long): Flow<List<EpisodeSummary>> =
+    fun loadEpisodesByPodcastId(podcastId: Long): Flow<List<Episode>> =
         database.episodeQueries
             .getAllByPodcastId(podcastId = podcastId)
             .asFlow()
             .mapToList()
 
-    fun getEpisodesByPodcastIdPagingSourceFactory(podcastId: Long): () -> PagingSource<Int, EpisodeSummary> =
+    fun getEpisodesByPodcastIdPagingSourceFactory(podcastId: Long): () -> PagingSource<Int, Episode> =
         QueryDataSourceFactory(
             queryProvider = { limit, offset ->
                 database.episodeQueries.getAllPagedByPodcastId(podcastId = podcastId,
@@ -63,19 +61,19 @@ class LibraryRepository(
             countQuery = database.episodeQueries.countAllByPodcastId(podcastId = podcastId),
         ).asPagingSourceFactory()
 
-    fun loadEpisodesFavorites(): Flow<List<EpisodeSummary>> =
+    fun loadEpisodesFavorites(): Flow<List<Episode>> =
         database.episodeQueries
             .getFavorites()
             .asFlow()
             .mapToList()
 
-    fun loadEpisodesHistory(): Flow<List<EpisodeSummary>> =
+    fun loadEpisodesHistory(): Flow<List<Episode>> =
         database.episodeQueries
             .getHistory()
             .asFlow()
             .mapToList()
 
-    fun loadEpisode(episodeId: Long): Flow<EpisodeWithInfos?> =
+    fun loadEpisode(episodeId: Long): Flow<Episode?> =
         database.episodeQueries
             .getById(episodeId = episodeId)
             .asFlow()
@@ -93,8 +91,9 @@ class LibraryRepository(
         }
     }
 
-    fun updateEpisodePlaybackPosition(episodeId: Long, playbackPosition: Long?) {
-        database.episodeQueries.addToHistory(playbackPosition = playbackPosition, episodeId = episodeId)
+    fun updateEpisodePlaybackPosition(episodeId: Long, playbackPosition: Int?) {
+        database.episodeQueries.addToHistory(playbackPosition = playbackPosition,
+            episodeId = episodeId)
     }
 
     /**

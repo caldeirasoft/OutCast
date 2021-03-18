@@ -1,43 +1,33 @@
 @file:UseSerializers(InstantSerializer::class)
-package com.caldeirasoft.outcast.domain.models.store
+
+package com.caldeirasoft.outcast.ui.screen.podcast
 
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
-import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
+
 @Serializable
-data class StorePodcast(
-    override val id: Long,
+data class PodcastArg(
+    val id: Long,
     val name: String,
     val url: String,
     val artistName: String,
     val artistId: Long? = null,
     val artistUrl: String? = null,
     val description: String? = null,
-    val feedUrl: String,
-    val releaseDate: Instant,
+    @Serializable(with = InstantSerializer::class)
     val releaseDateTime: Instant,
-    override val artwork: Artwork?,
+    val artwork: Artwork?,
     val trackCount: Int,
-    val podcastWebsiteUrl: String? = null,
-    val copyright: String? = null,
-    val contentAdvisoryRating: String? = null,
-    val userRating: Float,
     val genre: Genre?,
-    override val storeFront: String,
-) : StoreItemWithArtwork {
-
-    @Transient
-    val podcast: Podcast =
+) {
+    fun toPodcast() =
         Podcast(
             podcastId = id,
             name = name,
@@ -48,28 +38,16 @@ data class StorePodcast(
             artwork = artwork,
             artistId = artistId,
             artistUrl = artistUrl,
-            contentAdvisoryRating = contentAdvisoryRating,
-            copyright = copyright,
+            contentAdvisoryRating = null,
+            copyright = null,
             description = description,
-            feedUrl = feedUrl,
-            podcastWebsiteURL = podcastWebsiteUrl,
+            feedUrl = "",
+            podcastWebsiteURL = null,
             releaseDateTime = releaseDateTime,
             trackCount = trackCount.toLong(),
             updatedAt = releaseDateTime,
-            userRating = userRating.toDouble(),
+            userRating = null,
             isSubscribed = false,
             newEpisodeAction = NewEpisodesAction.CLEAR
         )
-
-    @Transient
-    val page: PodcastPage =
-        PodcastPage(
-            podcast = this.podcast,
-            storeFront = this.storeFront,
-            timestamp = Clock.System.now(),
-            episodes = listOf(),
-        )
-
-    override fun getArtworkUrl():String =
-        StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 }

@@ -2,13 +2,12 @@ package com.caldeirasoft.outcast.data.repository
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.EpisodeSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 
 class QueueRepository(val database: Database) {
-    fun fetchQueue(): Flow<List<EpisodeSummary>> =
+    fun fetchQueue(): Flow<List<Episode>> =
         database.queueQueries
             .selectAll()
             .asFlow()

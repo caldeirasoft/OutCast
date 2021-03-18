@@ -14,6 +14,7 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.models.EpisodeStatus
 import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.*
 import kotlinx.coroutines.CoroutineScope
@@ -598,15 +599,20 @@ class StoreRepository (
                             contentAdvisoryRating = episodeEntry.contentRatingsBySystem?.riaa?.name,
                             mediaUrl = episodeEntry.offers.firstOrNull()?.download?.url.orEmpty(),
                             mediaType = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.fileExtension.orEmpty(),
-                            duration = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.duration?.toLong()
-                                ?: 0L,
-                            podcastEpisodeNumber = episodeEntry.podcastEpisodeNumber?.toLong(),
-                            podcastEpisodeSeason = episodeEntry.podcastEpisodeSeason?.toLong(),
+                            duration = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.duration
+                                ?: 0,
+                            podcastEpisodeNumber = episodeEntry.podcastEpisodeNumber,
+                            podcastEpisodeSeason = episodeEntry.podcastEpisodeSeason,
                             podcastEpisodeType = episodeEntry.podcastEpisodeType.orEmpty(),
                             podcastEpisodeWebsiteUrl = episodeEntry.podcastEpisodeWebsiteUrl,
-                            updatedAt = Clock.System.now()
+                            updatedAt = Clock.System.now(),
+                            status = EpisodeStatus.LIBRARY,
+                            isPlayed = false,
+                            playedAt = Instant.DISTANT_PAST,
+                            isFavorite = false,
+                            playbackPosition = null
                         )
-                    },
+                    }.sortedByDescending { it.releaseDateTime },
                     timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
                 )
 

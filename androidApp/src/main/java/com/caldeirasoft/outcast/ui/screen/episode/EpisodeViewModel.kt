@@ -1,7 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
 import com.airbnb.mvrx.MavericksViewModel
-import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreEpisodeDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.util.Resource
@@ -38,10 +37,7 @@ class EpisodeViewModel(
                             copy(isLoading = true)
                         is Resource.Success -> {
                             copy(isLoading = false,
-                                episode = it.data.episode,
-                                isFavorite = it.data.isFavorite == 1L,
-                                isPlayed = it.data.isPlayed == 1L,
-                                playbackPosition = it.data.playbackPosition
+                                episode = it.data
                             )
                         }
                         is Resource.Error ->

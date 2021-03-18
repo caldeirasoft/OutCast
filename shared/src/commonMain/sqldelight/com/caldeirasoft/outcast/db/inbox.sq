@@ -16,7 +16,7 @@ BEGIN
     INSERT OR REPLACE INTO inbox (episodeId)
     SELECT episodeId
     FROM episode e
-    INNER JOIN library p ON (e.podcastId = p.podcastId)
+    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
     WHERE e.episodeId = new.episodeId
       AND p.newEpisodeAction == 'INBOX';
 END;
@@ -24,7 +24,7 @@ END;
 
 selectAll:
 SELECT e.*
-FROM episodeSummary e
+FROM episode e
 INNER JOIN inbox USING (episodeId)
 ORDER BY e.releaseDateTime DESC;
 
@@ -37,7 +37,7 @@ WHERE p.genreId IS NOT NULL;
 
 selectEpisodesByGenreId:
 SELECT e.*
-FROM episodeSummary e
+FROM episode e
 INNER JOIN podcast p USING (podcastId)
 INNER JOIN inbox USING (episodeId)
 WHERE p.genreId = :genreId

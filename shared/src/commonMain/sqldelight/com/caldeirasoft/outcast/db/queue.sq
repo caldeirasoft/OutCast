@@ -17,7 +17,7 @@ BEGIN
     INSERT OR REPLACE INTO queue (episodeId, queueIndex)
     SELECT episodeId, 0 AS queueIndex
     FROM episode e
-    INNER JOIN library p ON (e.podcastId = p.podcastId)
+    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
         WHERE e.episodeId = new.episodeId
           AND p.newEpisodeAction == 'QUEUE_NEXT';
 END;
@@ -28,7 +28,7 @@ BEGIN
     INSERT OR REPLACE INTO queue (episodeId, queueIndex)
     SELECT episodeId, -1 AS queueIndex
     FROM episode e
-    INNER JOIN library p ON (e.podcastId = p.podcastId)
+    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
         WHERE e.episodeId = new.episodeId
           AND p.newEpisodeAction == 'QUEUE_LAST';
 END;
@@ -64,7 +64,7 @@ END;
 
 selectAll:
 SELECT e.*
-FROM episodeSummary AS e
+FROM episode AS e
 INNER JOIN queue q USING (episodeId)
 ORDER BY q.queueIndex;
 

@@ -3,7 +3,7 @@ package com.caldeirasoft.outcast.presentation.viewmodel
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.usecase.FetchInboxUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -18,8 +18,7 @@ class InboxViewModel(val fetchInboxUseCase: FetchInboxUseCase) : ViewModel(), Li
 {
     val filterGenre: SharedFlow<Int?> = MutableSharedFlow()
 
-    private val episodesData
-            = MutableSharedFlow<List<EpisodeSummary>>()
+    private val episodesData = MutableSharedFlow<List<Episode>>()
 
     val episodesDataState
             = episodesData

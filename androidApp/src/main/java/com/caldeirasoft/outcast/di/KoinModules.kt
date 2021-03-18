@@ -166,8 +166,13 @@ internal val usecaseModule = module {
     single { LoadStoreGenreDataUseCase(storeRepository = get()) }
     single { LoadStoreDirectoryUseCase(storeRepository = get())}
     single { LoadStoreDirectoryPagingDataUseCase(storeRepository = get()) }
-    single { LoadPodcastEpisodesPagingDataUseCase(storeRepository = get(), libraryRepository = get()) }
-    single { FetchStoreGroupingPagingDataUseCase(storeRepository = get())}
+    single { LoadPodcastEpisodesUseCase(libraryRepository = get()) }
+    single {
+        LoadPodcastEpisodesPagingDataUseCase(storeRepository = get(),
+            libraryRepository = get())
+    }
+    single { LoadPodcastRelatedPagingDataUseCase(storeRepository = get()) }
+    single { FetchStoreGroupingPagingDataUseCase(storeRepository = get()) }
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     single { FetchStoreRoomPagingDataUseCase(storeRepository = get()) }
     single { FetchStorePodcastDataUseCase(storeRepository = get()) }

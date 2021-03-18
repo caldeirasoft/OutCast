@@ -2,19 +2,18 @@ package com.caldeirasoft.outcast.data.db
 
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.EpisodeSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 
 class InboxDataSource (val database: Database) {
-    fun fetchEpisodes(): Flow<List<EpisodeSummary>> =
+    fun fetchEpisodes(): Flow<List<Episode>> =
         database.inboxQueries
             .selectAll()
             .asFlow()
             .mapToList()
 
-    fun fetchEpisodesByGenre(genreId: Int): Flow<List<EpisodeSummary>> =
+    fun fetchEpisodesByGenre(genreId: Int): Flow<List<Episode>> =
         database.inboxQueries
             .selectEpisodesByGenreId(genreId = genreId)
             .asFlow()

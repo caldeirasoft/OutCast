@@ -7,7 +7,7 @@ import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.repository.LibraryRepository
 import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.data.util.PodcastRemoteMediator
-import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import kotlinx.coroutines.flow.Flow
 
@@ -16,7 +16,7 @@ class LoadPodcastEpisodesPagingDataUseCase(
     val libraryRepository: LibraryRepository
 ) {
     @OptIn(ExperimentalPagingApi::class)
-    fun execute(podcast: Podcast, storeFront: String): Flow<PagingData<EpisodeSummary>> {
+    fun execute(podcast: Podcast, storeFront: String): Flow<PagingData<Episode>> {
         val mediator = PodcastRemoteMediator(
             podcast = podcast,
             storeFront = storeFront,

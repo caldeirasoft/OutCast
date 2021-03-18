@@ -3,8 +3,8 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.EpisodeSummary
 import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.EpisodeStatus
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
@@ -29,7 +29,7 @@ data class EpisodeArg(
     val artwork: Artwork?,
     val mediaUrl: String,
     val mediaType: String,
-    val duration: Long,
+    val duration: Int,
 ) {
     fun toEpisode() = Episode(
         episodeId = episodeId,
@@ -52,25 +52,30 @@ data class EpisodeArg(
         podcastEpisodeNumber = null,
         podcastEpisodeWebsiteUrl = null,
         podcastEpisodeType = null,
-        updatedAt = Instant.DISTANT_PAST
+        updatedAt = Instant.DISTANT_PAST,
+        playbackPosition = null,
+        isPlayed = false,
+        isFavorite = false,
+        playedAt = null,
+        status = EpisodeStatus.LIBRARY
     )
 
     companion object {
-        fun EpisodeSummary.toEpisodeArg(): EpisodeArg = EpisodeArg(
+        fun Episode.toEpisodeArg(): EpisodeArg = EpisodeArg(
             episodeId = episodeId,
             name = name,
             url = url,
             podcastId = podcastId,
             podcastName = podcastName,
-            artistName = "",
-            artistId = 0L,
+            artistName = artistName,
+            artistId = artistId,
             releaseDateTime = releaseDateTime,
-            genre = listOf(),
-            feedUrl = "",
+            genre = genre,
+            feedUrl = feedUrl,
             description = description,
             artwork = artwork,
-            mediaUrl = "",
-            mediaType = "",
+            mediaUrl = mediaUrl,
+            mediaType = mediaType,
             duration = duration,
         )
 
@@ -89,7 +94,7 @@ data class EpisodeArg(
             artwork = artwork,
             mediaUrl = "",
             mediaType = "",
-            duration = duration.toLong(),
+            duration = duration,
         )
     }
 }

@@ -6,7 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.caldeirasoft.outcast.data.repository.LibraryRepository
 import com.caldeirasoft.outcast.data.repository.StoreRepository
-import com.caldeirasoft.outcast.db.EpisodeSummary
+import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import retrofit2.HttpException
@@ -18,11 +18,10 @@ class PodcastRemoteMediator(
     val storeFront: String,
     val storeRepository: StoreRepository,
     val libraryRepository: LibraryRepository,
-) : RemoteMediator<Int, EpisodeSummary>()
-{
+) : RemoteMediator<Int, Episode>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, EpisodeSummary>
+        state: PagingState<Int, Episode>,
     ): MediatorResult {
         var doUpdate = true
         when (loadType) {

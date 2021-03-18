@@ -11,11 +11,10 @@ data class StoreCollectionEpisodes(
     var url: String? = null,
     override val storeFront: String,
     val itemsIds: List<Long> = emptyList(),
+    val items: MutableList<StoreEpisode> = mutableListOf(),
     val sortByPopularity: Boolean = false,
     val isTopCharts: Boolean = false,
 ) : StoreCollection {
-    val items: MutableList<StoreEpisode> = mutableListOf()
-
     val room: StoreRoom
         get() = StoreRoom(
             id = 0,

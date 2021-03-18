@@ -146,7 +146,7 @@ private fun StoreRoomScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable(onClick = {
-                                                        navigateTo(Screen.PodcastScreen(item))
+                                                        navigateTo(Screen.StorePodcastScreen(item))
                                                     }),
                                                 storePodcast = item,
                                                 index = index + 1
@@ -160,7 +160,7 @@ private fun StoreRoomScreen(
                                                     navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                                                 },
                                                 onPodcastClick = {
-                                                    navigateTo(Screen.PodcastScreen(item.podcast))
+                                                    navigateTo(Screen.StorePodcastScreen(item.podcast))
                                                 },
                                                 episode = item.episode,
                                                 index = index + 1
@@ -184,7 +184,7 @@ private fun StoreRoomScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
-                                                    navigateTo(Screen.PodcastScreen(item))
+                                                    navigateTo(Screen.StorePodcastScreen(item))
                                                 }),
                                             podcast = item
                                         )

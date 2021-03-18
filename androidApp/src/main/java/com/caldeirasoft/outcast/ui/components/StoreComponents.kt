@@ -53,7 +53,7 @@ fun StoreCollectionPodcastsContent(
                 modifier = Modifier
                     .width(100.dp)
                     .clickable(onClick = {
-                        navigateTo(Screen.PodcastScreen(item))
+                        navigateTo(Screen.StorePodcastScreen(item))
                     }),
                 podcast = item,
                 index = if (storeCollection.sortByPopularity) index + 1 else null
@@ -106,7 +106,7 @@ fun StoreCollectionEpisodesContent(
                     StoreEpisodeItem(
                         episode = storeItem.episode,
                         modifier = Modifier.fillMaxWidth(),
-                        onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.podcast)) },
+                        onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast)) },
                         onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
                         index = if (storeCollection.sortByPopularity) (index + 1) else null
                     )

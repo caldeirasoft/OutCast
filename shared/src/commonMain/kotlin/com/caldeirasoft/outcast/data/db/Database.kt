@@ -1,7 +1,8 @@
 package com.caldeirasoft.outcast.data.db
 
 import com.caldeirasoft.outcast.Database
-import com.caldeirasoft.outcast.db.*
+import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.squareup.sqldelight.ColumnAdapter
@@ -35,10 +36,7 @@ fun createDatabase(driver: SqlDriver): Database {
         artworkAdapter = artworkAdapter,
         releaseDateTimeAdapter = instantAdapter,
         updatedAtAdapter = instantAdapter,
-        genreAdapter = genreAdapter
-    )
-
-    val libraryAdapter = Library.Adapter(
+        genreAdapter = genreAdapter,
         newEpisodeActionAdapter = EnumColumnAdapter(),
     )
 
@@ -47,22 +45,14 @@ fun createDatabase(driver: SqlDriver): Database {
         releaseDateTimeAdapter = instantAdapter,
         genreAdapter = genreListAdapter,
         updatedAtAdapter = instantAdapter,
-    )
-
-    val favoritesAdapter = Favorites.Adapter(
-        updatedAtAdapter = instantAdapter,
-    )
-
-    val historyAdapter = History.Adapter(
         playedAtAdapter = instantAdapter,
+        statusAdapter = EnumColumnAdapter()
     )
+
 
     val database = Database(driver,
         podcastAdapter = podcastAdapter,
         episodeAdapter = episodeAdapter,
-        favoritesAdapter = favoritesAdapter,
-        historyAdapter = historyAdapter,
-        libraryAdapter = libraryAdapter,
     )
     return database
     // Do more work with the database (see below).

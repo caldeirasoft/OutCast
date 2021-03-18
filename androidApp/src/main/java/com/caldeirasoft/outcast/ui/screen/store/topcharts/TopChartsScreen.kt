@@ -155,7 +155,7 @@ fun TopChartsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable(onClick = {
-                                            navigateTo(Screen.PodcastScreen(item))
+                                            navigateTo(Screen.StorePodcastScreen(item))
                                         }),
                                     storePodcast = item,
                                     index = index + 1
@@ -166,7 +166,7 @@ fun TopChartsScreen(
                                 StoreEpisodeItem(
                                     episode = item.episode,
                                     onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
-                                    onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
+                                    onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
                                     index = index + 1
                                 )
                                 Divider()

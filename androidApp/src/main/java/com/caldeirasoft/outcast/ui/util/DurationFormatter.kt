@@ -1,10 +1,11 @@
 package com.caldeirasoft.outcast.ui.util
 
+import java.lang.StringBuilder
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 object DurationFormatter {
-    fun Long.formatDuration(): String {
+    fun Int.formatDuration(): String {
         val duration = this.toDuration(DurationUnit.SECONDS)
         return duration.toComponents { hours, minutes, seconds, nanoseconds ->
             with(StringBuilder()) {

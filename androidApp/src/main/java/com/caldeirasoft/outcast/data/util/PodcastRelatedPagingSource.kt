@@ -6,21 +6,16 @@ import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.*
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.usecase.GetStoreItemsUseCase
 import kotlinx.coroutines.CoroutineScope
 
 class PodcastRelatedPagingSource(
     override val scope: CoroutineScope,
     val otherPodcasts: StorePageWithCollection,
-    val getStoreItemsUseCase: GetStoreItemsUseCase
-) : PagingSource<Int, StoreItem>(), StorePagingSource
-{
-    override val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem> =
-        getStoreItemsUseCase::execute
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreItem> {
+    override val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem>,
+) : PagingSource<Int, StoreCollection>(), StorePagingSource {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, StoreCollection> {
         val startPosition = params.key ?: 0
-        val items = mutableListOf<StoreItem>()
+        val items = mutableListOf<StoreCollection>()
 
         val endPosition =
             Integer.min(
@@ -82,6 +77,6 @@ class PodcastRelatedPagingSource(
         return itemsSequence.toList()
     }
 
-    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
+    override fun getRefreshKey(state: PagingState<Int, StoreCollection>): Int? =
         state.anchorPosition
 }
