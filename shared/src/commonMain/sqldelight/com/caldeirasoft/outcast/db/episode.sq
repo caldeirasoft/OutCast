@@ -15,7 +15,7 @@ CREATE TABLE episode (
     artistName TEXT NOT NULL,
     artistId INTEGER,
     releaseDateTime TEXT as Instant NOT NULL,
-    genre TEXT AS List<Integer> NOT NULL,
+    genreId INTEGER AS Int NOT NULL,
     feedUrl TEXT NOT NULL,
     description TEXT,
     contentAdvisoryRating TEXT,
@@ -27,7 +27,7 @@ CREATE TABLE episode (
     podcastEpisodeNumber INTEGER AS Int,
     podcastEpisodeWebsiteUrl TEXT,
     podcastEpisodeType TEXT,
-    status TEXT AS EpisodeStatus NOT NULL DEFAULT 0,
+    status TEXT AS EpisodeStatus NOT NULL DEFAULT 'LIBRARY',
     playbackPosition INTEGER AS Int,
     isPlayed INTEGER as Boolean NOT NULL DEFAULT 0,
     isFavorite INTEGER as Boolean NOT NULL DEFAULT 0,
@@ -72,7 +72,7 @@ WHERE playbackPosition != NULL OR isPlayed = 1;
 insert:
 INSERT INTO episode
 (episodeId, name, url, podcastId, podcastName, artistName, artistId,
- releaseDateTime, genre, feedUrl, description, contentAdvisoryRating, artwork,
+ releaseDateTime, genreId, feedUrl, description, contentAdvisoryRating, artwork,
   mediaUrl, mediaType, duration, podcastEpisodeSeason, podcastEpisodeNumber, podcastEpisodeWebsiteUrl, podcastEpisodeType)
 VALUES
 ?
@@ -85,7 +85,7 @@ DO UPDATE SET
     artistName = excluded.artistName,
     artistId = excluded.artistId,
     releaseDateTime = excluded.releaseDateTime,
-    genre = excluded.genre,
+    genreId = excluded.genreId,
     feedUrl = excluded.feedUrl,
     description = excluded.description,
     contentAdvisoryRating = excluded.contentAdvisoryRating,

@@ -5,6 +5,7 @@ import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadPodcastEpisodesUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadPodcastUseCase
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
@@ -30,6 +31,7 @@ class PodcastViewModel(
         withState { state ->
             loadPodcastUseCase
                 .execute(state.podcast.podcastId)
+                .filterNotNull()
                 .distinctUntilChanged()
                 .setOnEach { copy(podcast = it) }
 

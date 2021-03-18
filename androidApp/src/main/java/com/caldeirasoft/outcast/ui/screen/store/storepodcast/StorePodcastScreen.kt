@@ -11,10 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +60,9 @@ fun StorePodcastScreen(
         state = state,
         navigateTo = navigateTo,
         navigateBack = navigateBack,
-        showAllEpisodes = viewModel::showAllEpisodes
+        showAllEpisodes = viewModel::showAllEpisodes,
+        subscribePodcast = viewModel::subscribe,
+        showPodcastSettings = { }
     )
 }
 
@@ -74,6 +73,8 @@ private fun StorePodcastScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
     showAllEpisodes: () -> Unit,
+    subscribePodcast: () -> Unit,
+    showPodcastSettings: () -> Unit,
 ) {
     val listState = rememberLazyListState(0)
     val otherPodcastsLazyPagingItems = flowOf(state.otherPodcasts).collectAsLazyPagingItems()
@@ -98,17 +99,36 @@ private fun StorePodcastScreen(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    ActionChipButton(
-                        selected = true,
-                        onClick = { /*TODO*/ },
-                        icon = {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                            )
+
+                    if (!state.isSubscribed) {
+                        // subscribe button
+                        ActionChipButton(
+                            selected = false,
+                            onClick = subscribePodcast,
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                )
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.action_subscribe))
                         }
-                    ) {
-                        Text(text = stringResource(id = R.string.action_subscribe))
+                    }
+                    else {
+                        // subscribed button
+                        ActionChipButton(
+                            selected = true,
+                            onClick = subscribePodcast,
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                )
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.action_subscribed))
+                        }
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {

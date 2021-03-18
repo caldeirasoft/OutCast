@@ -50,4 +50,20 @@ data class PodcastArg(
             isSubscribed = false,
             newEpisodeAction = NewEpisodesAction.CLEAR
         )
+
+    companion object {
+        fun Podcast.toPodcastArg() = PodcastArg(
+            id = podcastId,
+            name = name,
+            artistName = artistName,
+            url = url,
+            genre = genre,
+            artwork = artwork,
+            artistId = artistId,
+            artistUrl = artistUrl,
+            description = description,
+            releaseDateTime = releaseDateTime,
+            trackCount = trackCount.toInt(),
+        )
+    }
 }

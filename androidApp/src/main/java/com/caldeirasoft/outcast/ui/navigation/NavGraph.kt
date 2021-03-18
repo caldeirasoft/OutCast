@@ -20,6 +20,7 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
+import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.StorePodcastScreen
@@ -83,7 +84,11 @@ fun MainNavHost(startScreen: ScreenName) {
             ) {
                 composable(ScreenName.QUEUE.name) { Text(text = "Queue") }
                 composable(ScreenName.INBOX.name) { InboxScreen() }
-                composable(ScreenName.LIBRARY.name) { Text(text = "Library") }
+                composable(ScreenName.LIBRARY.name) {
+                    LibraryScreen(
+                        navigateTo = actions.select,
+                        navigateBack = actions.up)
+                }
                 composable(ScreenName.PROFILE.name) { Text(text = "Profile") }
                 composable(ScreenName.STORE_DISCOVER.name) {
                     StoreDirectoryScreen(
@@ -190,7 +195,9 @@ fun SetupBottomNavBar(
         val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
         items.forEach { screen ->
             BottomNavigationItem(
-                icon = { Icon(screen.icon, contentDescription = stringResource(id = screen.resourceId)) },
+                icon = {
+                    Icon(screen.icon, contentDescription = stringResource(id = screen.resourceId))
+                },
                 label = {
                     Text(text = stringResource(id = screen.resourceId),
                         style = typography.overline)

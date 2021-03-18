@@ -11,6 +11,7 @@ import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
@@ -39,7 +40,7 @@ sealed class Screen (val id: ScreenName) {
     object Inbox : Screen(ScreenName.INBOX)
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
-    data class PodcastScreen(val podcastId: Long) : Screen(ScreenName.PODCAST)
+    data class PodcastScreen(val podcastArg: PodcastArg) : Screen(ScreenName.PODCAST)
     data class EpisodeScreen(val episodeArg: EpisodeArg) : Screen(ScreenName.EPISODE)
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
@@ -61,9 +62,9 @@ sealed class Screen (val id: ScreenName) {
 sealed class BottomNavigationScreen(val id: ScreenName, @StringRes val resourceId: Int, val icon: ImageVector)
 {
     object Queue : BottomNavigationScreen(ScreenName.QUEUE, R.string.screen_queue, Icons.Default.QueueMusic)
-    object Library : BottomNavigationScreen(ScreenName.LIBRARY, R.string.screen_queue, Icons.Default.LibraryMusic)
-    object Discover : BottomNavigationScreen(ScreenName.STORE_DISCOVER, R.string.screen_queue, Icons.Default.Web)
+    object Library : BottomNavigationScreen(ScreenName.LIBRARY, R.string.screen_library, Icons.Default.LibraryMusic)
+    object Discover : BottomNavigationScreen(ScreenName.STORE_DISCOVER, R.string.screen_discover, Icons.Default.Web)
     object Search : BottomNavigationScreen(ScreenName.STORE_SEARCH, R.string.screen_search, Icons.Default.Search)
-    object Profile : BottomNavigationScreen(ScreenName.PROFILE, R.string.screen_queue, Icons.Default.Person)
+    object Profile : BottomNavigationScreen(ScreenName.PROFILE, R.string.screen_profile, Icons.Default.Person)
 }
 

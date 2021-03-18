@@ -23,7 +23,7 @@ data class EpisodeArg(
     val artistId: Long?,
     @Serializable(with = InstantSerializer::class)
     val releaseDateTime: Instant,
-    val genre: List<Int>,
+    val genreId: Int,
     val feedUrl: String,
     val description: String?,
     val artwork: Artwork?,
@@ -40,7 +40,7 @@ data class EpisodeArg(
         artistName = artistName,
         artistId = artistId,
         releaseDateTime = releaseDateTime,
-        genre = genre,
+        genreId = genreId,
         feedUrl = feedUrl,
         description = description,
         contentAdvisoryRating = null,
@@ -61,7 +61,7 @@ data class EpisodeArg(
     )
 
     companion object {
-        fun Episode.toEpisodeArg(): EpisodeArg = EpisodeArg(
+        fun Episode.toEpisodeArg() = EpisodeArg(
             episodeId = episodeId,
             name = name,
             url = url,
@@ -70,7 +70,7 @@ data class EpisodeArg(
             artistName = artistName,
             artistId = artistId,
             releaseDateTime = releaseDateTime,
-            genre = genre,
+            genreId = genreId,
             feedUrl = feedUrl,
             description = description,
             artwork = artwork,
@@ -85,15 +85,15 @@ data class EpisodeArg(
             url = url,
             podcastId = podcastId,
             podcastName = podcastName,
-            artistName = "",
-            artistId = 0L,
+            artistName = artistName,
+            artistId = artistId,
             releaseDateTime = releaseDateTime,
-            genre = listOf(),
-            feedUrl = "",
+            genreId = genres.first().id,
+            feedUrl = feedUrl,
             description = description,
             artwork = artwork,
-            mediaUrl = "",
-            mediaType = "",
+            mediaUrl = mediaUrl,
+            mediaType = mediaType,
             duration = duration,
         )
     }

@@ -49,7 +49,7 @@
 
     <!-- actions -->
     <string name="action_subscribe">Subscribe</string>
-    <string name="action_unsubscribe">Unsubscribe</string>
+    <string name="action_subscribed">Subscribed</string>
     <string name="action_show_more">Show more ▼</string>
     <string name="action_show_all_episodes">Show all episodes</string>
 </resources>

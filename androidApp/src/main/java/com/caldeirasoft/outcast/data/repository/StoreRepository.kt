@@ -591,7 +591,7 @@ class StoreRepository (
                             artistName = episodeEntry.artistName.orEmpty(),
                             artistId = episodeEntry.artistId?.toLong(),
                             description = episodeEntry.description?.standard,
-                            genre = emptyList(),//episodeEntry.genres.map { it.toGenre() }.first(),
+                            genreId = episodeEntry.genres.map { it.toGenre() }.firstOrNull()?.id ?: DEFAULT_GENRE,
                             feedUrl = episodeEntry.feedUrl.orEmpty(),
                             releaseDateTime = episodeEntry.releaseDateTime
                                 ?: Clock.System.now(),

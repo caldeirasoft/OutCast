@@ -15,6 +15,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.skydoves.landscapist.coil.CoilImage
@@ -86,6 +88,51 @@ fun PodcastThumbnail(
 fun PodcastGridItem(
     modifier: Modifier = Modifier,
     podcast: StorePodcast,
+    index: Int? = null,
+)
+{
+    Column(modifier = modifier
+        .padding(horizontal = 8.dp)) {
+        Card(
+            backgroundColor = colors[1],
+            shape = RoundedCornerShape(8.dp)
+        )
+        {
+            CoilImage(
+                imageModel = podcast.getArtworkUrl(),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f))
+        }
+        Text(
+            text = with(AnnotatedString.Builder()) {
+                if (index != null) {
+                    pushStyle(SpanStyle(color = Color.Red))
+                    append("${index}. ")
+                    pop()
+                }
+                append(podcast.name)
+                toAnnotatedString()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2,
+            style = MaterialTheme.typography.body2
+        )
+        Text(
+            podcast.artistName,
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 1, overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.caption
+        )
+    }
+}
+
+@Composable
+fun PodcastGridItem(
+    modifier: Modifier = Modifier,
+    podcast: Podcast,
     index: Int? = null,
 )
 {

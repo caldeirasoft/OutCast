@@ -12,7 +12,6 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapNotNull
 
 class LibraryRepository(
     val database: Database
@@ -25,12 +24,11 @@ class LibraryRepository(
             .mapToList()
 
 
-    fun loadPodcast(podcastId: Long): Flow<Podcast> =
+    fun loadPodcast(podcastId: Long): Flow<Podcast?> =
         database.podcastQueries
             .getById(podcastId = podcastId)
             .asFlow()
             .mapToOneOrNull()
-            .mapNotNull { it }
 
     fun subscribeToPodcast(
         podcastId: Long,

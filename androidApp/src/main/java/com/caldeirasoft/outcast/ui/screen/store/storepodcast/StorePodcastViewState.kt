@@ -14,6 +14,8 @@ data class StorePodcastViewState(
     val episodes: List<Episode> = emptyList(),
     val otherPodcasts: PagingData<StoreCollection> = PagingData.empty(),
     val showAllEpisodes: Boolean = false,
+    val isSubscribing: Boolean = false,
+    val isSubscribed: Boolean = false,
 ) : MavericksState {
     constructor(arg: StorePodcast) :
             this(podcastPageAsync = Loading(arg.page))

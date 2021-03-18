@@ -43,7 +43,6 @@ fun createDatabase(driver: SqlDriver): Database {
     val episodeAdapter = Episode.Adapter(
         artworkAdapter = artworkAdapter,
         releaseDateTimeAdapter = instantAdapter,
-        genreAdapter = genreListAdapter,
         updatedAtAdapter = instantAdapter,
         playedAtAdapter = instantAdapter,
         statusAdapter = EnumColumnAdapter()
