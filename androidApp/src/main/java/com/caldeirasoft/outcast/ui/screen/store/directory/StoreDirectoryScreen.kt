@@ -14,7 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -32,12 +34,12 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.*
+import com.caldeirasoft.outcast.ui.util.ifLoadingMore
+import com.caldeirasoft.outcast.ui.util.px
+import com.caldeirasoft.outcast.ui.util.toDp
+import com.caldeirasoft.outcast.ui.util.toIntPx
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import org.koin.core.component.KoinApiExtension
 import timber.log.Timber
 import kotlin.math.log10
@@ -76,34 +78,16 @@ fun StoreDirectoryScreen(
     val state by viewModel.collectAsState()
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
 
-    SwipeToRefreshLayout(
-        refreshingState = lazyPagingItems.loadState.refresh is LoadState.Loading,
-        onRefresh = { lazyPagingItems.refresh() })
-    {
-        if (lazyPagingItems.itemCount > 0) {
-            val lastScrollState = remember { viewModel.scrollState }
+    ReachableScaffold { headerHeight ->
+        val spacerHeight = headerHeight - 56.px
 
-            val scrollState = rememberLazyListState(
-                initialFirstVisibleItemIndex = lastScrollState.index,
-                initialFirstVisibleItemScrollOffset = lastScrollState.offset
-            )
-
-            LaunchedEffect(scrollState) {
-                snapshotFlow { scrollState.isScrollInProgress }
-                    .distinctUntilChanged()
-                    .filter { !it }
-                    .collect {
-                        Timber.d("DBG - StoreDirectoryContent scroll save")
-                        viewModel.saveScrollState(
-                            scrollState.firstVisibleItemIndex,
-                            scrollState.firstVisibleItemScrollOffset
-                        )
-                    }
-            }
-
-            ReachableScaffold { headerHeight ->
-                val spacerHeight = headerHeight - 56.px
-
+        SwipeToRefreshLayout(
+            refreshingState = lazyPagingItems.loadState.refresh is LoadState.Loading,
+            onRefresh = { lazyPagingItems.refresh() })
+        {
+            LazyListLayout(lazyListItems = lazyPagingItems)
+            {
+                val scrollState = rememberLazyListState()
                 LazyColumn(
                     state = scrollState,
                     modifier = Modifier
@@ -114,73 +98,66 @@ fun StoreDirectoryScreen(
                         Spacer(modifier = Modifier.height(spacerHeight.toDp()))
                     }
 
-                    lazyPagingItems
-                        .ifError {
-                            item {
-                                ErrorScreen(t = it)
+                    items(lazyPagingItems = lazyPagingItems) { collection ->
+                        when (collection) {
+                            is StoreCollectionFeatured ->
+                                StoreCollectionFeaturedContent(
+                                    storeCollection = collection,
+                                    navigateTo = navigateTo,
+                                )
+                            is StoreCollectionPodcasts -> {
+                                // content
+                                StoreCollectionPodcastsContent(
+                                    storeCollection = collection,
+                                    navigateTo = navigateTo,
+                                    onHeaderLinkClick = {
+                                        if (collection.isTopCharts)
+                                            navigateTo(Screen.Charts(StoreItemType.PODCAST))
+                                        else navigateTo(Screen.Room(collection.room))
+                                    }
+                                )
                             }
-                        }
-                        .ifNotLoading {
-                            items(lazyPagingItems = lazyPagingItems) { collection ->
-                                when (collection) {
-                                    is StoreCollectionFeatured ->
-                                        StoreCollectionFeaturedContent(
-                                            storeCollection = collection,
-                                            navigateTo = navigateTo,
-                                        )
-                                    is StoreCollectionPodcasts -> {
-                                        // content
-                                        StoreCollectionPodcastsContent(
-                                            storeCollection = collection,
-                                            navigateTo = navigateTo,
-                                            onHeaderLinkClick = {
-                                                if (collection.isTopCharts)
-                                                    navigateTo(Screen.Charts(StoreItemType.PODCAST))
-                                                else navigateTo(Screen.Room(collection.room))
-                                            }
-                                        )
+                            is StoreCollectionEpisodes -> {
+                                // content
+                                StoreCollectionEpisodesContent(
+                                    storeCollection = collection,
+                                    numRows = 3,
+                                    navigateTo = navigateTo,
+                                    onHeaderLinkClick = {
+                                        if (collection.isTopCharts)
+                                            navigateTo(Screen.Charts(StoreItemType.EPISODE))
+                                        else navigateTo(Screen.Room(collection.room))
                                     }
-                                    is StoreCollectionEpisodes -> {
-                                        // content
-                                        StoreCollectionEpisodesContent(
-                                            storeCollection = collection,
-                                            numRows = 3,
-                                            navigateTo = navigateTo,
-                                            onHeaderLinkClick = {
-                                                if (collection.isTopCharts)
-                                                    navigateTo(Screen.Charts(StoreItemType.EPISODE))
-                                                else navigateTo(Screen.Room(collection.room))
-                                            }
-                                        )
-                                    }
-                                    is StoreCollectionGenres -> {
-                                        // genres
-                                        StoreCollectionGenresContent(
-                                            storeCollection = collection,
-                                            navigateTo = navigateTo
-                                        )
-                                    }
-                                    is StoreCollectionRooms -> {
-                                        // genres
-                                        StoreCollectionRoomsContent(
-                                            storeCollection = collection,
-                                            navigateTo = navigateTo
-                                        )
-                                    }
-                                }
+                                )
                             }
-                        }
-                        .ifLoadingMore {
-                            item {
-                                Text(
-                                    modifier = Modifier.padding(
-                                        vertical = 16.dp,
-                                        horizontal = 4.dp
-                                    ),
-                                    text = "Loading next"
+                            is StoreCollectionGenres -> {
+                                // genres
+                                StoreCollectionGenresContent(
+                                    storeCollection = collection,
+                                    navigateTo = navigateTo
+                                )
+                            }
+                            is StoreCollectionRooms -> {
+                                // genres
+                                StoreCollectionRoomsContent(
+                                    storeCollection = collection,
+                                    navigateTo = navigateTo
                                 )
                             }
                         }
+                    }
+
+                    lazyPagingItems.ifLoadingMore {
+                        item {
+                            Text(
+                                modifier = Modifier.padding(
+                                    vertical = 16.dp,
+                                    horizontal = 4.dp
+                                ),
+                                text = "Loading next"
+                            )
+                        }
+                    }
                 }
 
                 ReachableAppBarWithSearchBar(

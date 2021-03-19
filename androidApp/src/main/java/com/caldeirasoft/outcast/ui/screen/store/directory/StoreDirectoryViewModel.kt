@@ -8,8 +8,6 @@ import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreDirectoryPagingDataUseCase
 import com.caldeirasoft.outcast.domain.util.tryCast
-import com.caldeirasoft.outcast.ui.util.ListState
-import com.caldeirasoft.outcast.ui.util.ScrollViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -25,11 +23,10 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class StoreDirectoryViewModel(
     initialState: StoreDirectoryViewState,
-) : MavericksViewModel<StoreDirectoryViewState>(initialState), KoinComponent, ScrollViewModel {
+) : MavericksViewModel<StoreDirectoryViewState>(initialState), KoinComponent {
 
     private val loadStoreDirectoryPagingDataUseCase: LoadStoreDirectoryPagingDataUseCase by inject()
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
-    override var scrollState: ListState = ListState()
 
     // paged list
     val discover: Flow<PagingData<StoreItem>> =

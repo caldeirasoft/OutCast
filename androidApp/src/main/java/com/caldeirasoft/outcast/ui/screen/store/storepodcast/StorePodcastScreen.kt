@@ -31,6 +31,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.util.Log_D
@@ -76,90 +77,85 @@ private fun StorePodcastScreen(
     subscribePodcast: () -> Unit,
     showPodcastSettings: () -> Unit,
 ) {
-    val listState = rememberLazyListState(0)
     val otherPodcastsLazyPagingItems = flowOf(state.otherPodcasts).collectAsLazyPagingItems()
 
     ReachableScaffold(headerRatio = 1 / 3f) { headerHeight ->
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()) {
 
-            item {
-                StorePodcastExpandedHeader(
-                    state = state,
-                    listState = listState,
-                    headerHeight = headerHeight
-                )
-            }
+        when (val storePageAsync = state.podcastPageAsync) {
+            is Loading ->
+                LoadingScreen()
+            is Fail ->
+                ErrorScreen(t = storePageAsync.error)
+            is Success -> {
+                val storePodcastPage = storePageAsync.invoke()
+                val podcastData = storePodcastPage.podcast
 
-            item {
-                // buttons
-                Row(modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
+                val listState = rememberLazyListState(0)
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()) {
 
-                    if (!state.isSubscribed) {
-                        // subscribe button
-                        ActionChipButton(
-                            selected = false,
-                            onClick = subscribePodcast,
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                )
-                            }
-                        ) {
-                            Text(text = stringResource(id = R.string.action_subscribe))
-                        }
-                    }
-                    else {
-                        // subscribed button
-                        ActionChipButton(
-                            selected = true,
-                            onClick = subscribePodcast,
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                )
-                            }
-                        ) {
-                            Text(text = stringResource(id = R.string.action_subscribed))
-                        }
-                    }
-
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Default.Public,
-                            contentDescription = null,
+                    item {
+                        StorePodcastExpandedHeader(
+                            podcastData = podcastData,
+                            listState = listState,
+                            headerHeight = headerHeight
                         )
                     }
 
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = null,
-                        )
-                    }
-                }
-            }
-
-            when (val storePageAsync = state.podcastPageAsync) {
-                is Loading ->
                     item {
-                        ShimmerStoreCollectionsList()
-                    }
-                is Fail ->
-                    item {
-                        ErrorScreen(t = storePageAsync.error)
-                    }
-                is Success -> {
+                        // buttons
+                        Row(modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
 
-                    val storePodcastPage = storePageAsync.invoke()
-                    val podcastData = storePodcastPage.podcast
+                            if (!state.isSubscribed) {
+                                // subscribe button
+                                ActionChipButton(
+                                    selected = false,
+                                    onClick = subscribePodcast,
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                ) {
+                                    Text(text = stringResource(id = R.string.action_subscribe))
+                                }
+                            } else {
+                                // subscribed button
+                                ActionChipButton(
+                                    selected = true,
+                                    onClick = subscribePodcast,
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                ) {
+                                    Text(text = stringResource(id = R.string.action_subscribed))
+                                }
+                            }
+
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Default.Public,
+                                    contentDescription = null,
+                                )
+                            }
+
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                    }
 
                     /* description if present */
                     item {
@@ -268,30 +264,29 @@ private fun StorePodcastScreen(
                     }
                 }
 
-
+                ReachableAppBar(
+                    collapsedContent = {
+                        StorePodcastCollapsedHeader(
+                            podcastData = podcastData,
+                            listState = listState,
+                            headerHeight = headerHeight,
+                            navigateUp = navigateBack)
+                    },
+                    state = listState,
+                    headerHeight = headerHeight)
             }
-        }
 
-        ReachableAppBar(
-            collapsedContent = {
-                StorePodcastCollapsedHeader(
-                    state = state,
-                    listState = listState,
-                    headerHeight = headerHeight,
-                    navigateUp = navigateBack)
-            },
-            state = listState,
-            headerHeight = headerHeight)
+
+        }
     }
 }
 
 @Composable
 private fun StorePodcastExpandedHeader(
-    state: StorePodcastViewState,
+    podcastData: Podcast,
     listState: LazyListState,
     headerHeight: Int,
 ) {
-    val podcastData = state.podcastPageAsync.invoke()?.podcast
     val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -380,12 +375,11 @@ private fun StorePodcastExpandedHeader(
 
 @Composable
 private fun StorePodcastCollapsedHeader(
-    state: StorePodcastViewState,
+    podcastData: Podcast,
     listState: LazyListState,
     headerHeight: Int,
     navigateUp: () -> Unit,
 ) {
-    val podcastData = state.podcastPageAsync.invoke()?.podcast
     val collapsedHeaderAlpha = getCollapsedHeaderAlpha(listState, headerHeight)
 /*    // top app bar
     val artwork = viewState.storePage.artwork

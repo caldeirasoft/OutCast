@@ -25,7 +25,10 @@ import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.util.*
+import com.caldeirasoft.outcast.ui.util.ifLoadingMore
+import com.caldeirasoft.outcast.ui.util.mavericksViewModel
+import com.caldeirasoft.outcast.ui.util.px
+import com.caldeirasoft.outcast.ui.util.toDp
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
@@ -51,60 +54,50 @@ private fun StoreGenreContent(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val listState = rememberLazyListState(0)
     val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 56.px
 
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 56.dp)) {
+        LazyListLayout(lazyListItems = lazyPagingItems) {
+            val listState = rememberLazyListState(0)
 
-            item {
-                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-            }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 56.dp)) {
 
-            lazyPagingItems
-                .ifLoading {
-                    item {
-                        ShimmerStoreCollectionsList()
-                    }
+                item {
+                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
                 }
-                .ifError {
-                    item {
-                        ErrorScreen(t = it)
-                    }
-                }
-                .ifNotLoading {
-                    items(lazyPagingItems = lazyPagingItems) { collection ->
-                        when (collection) {
-                            is StoreCollectionFeatured ->
-                                StoreCollectionFeaturedContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo
-                                )
-                            is StoreCollectionPodcasts -> {
-                                // content
-                                StoreCollectionPodcastsContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo
-                                )
-                            }
-                            is StoreCollectionEpisodes -> {
-                                // content
-                                StoreCollectionEpisodesContent(
-                                    storeCollection = collection,
-                                    numRows = 3,
-                                    navigateTo = navigateTo
-                                )
-                            }
+
+                items(lazyPagingItems = lazyPagingItems) { collection ->
+                    when (collection) {
+                        is StoreCollectionFeatured ->
+                            StoreCollectionFeaturedContent(
+                                storeCollection = collection,
+                                navigateTo = navigateTo
+                            )
+                        is StoreCollectionPodcasts -> {
+                            // content
+                            StoreCollectionPodcastsContent(
+                                storeCollection = collection,
+                                navigateTo = navigateTo
+                            )
+                        }
+                        is StoreCollectionEpisodes -> {
+                            // content
+                            StoreCollectionEpisodesContent(
+                                storeCollection = collection,
+                                numRows = 3,
+                                navigateTo = navigateTo
+                            )
                         }
                     }
                 }
-                .ifLoadingMore {
+
+                lazyPagingItems.ifLoadingMore {
                     item {
                         Text(
                             modifier = Modifier.padding(
@@ -115,18 +108,21 @@ private fun StoreGenreContent(
                         )
                     }
                 }
-        }
+            }
 
-        ReachableAppBar(
-            title = { Text(text = state.title) },
-            navigationIcon = {
-                IconButton(onClick = navigateBack) {
-                    Icon(Icons.Filled.ArrowBack,
-                        contentDescription = null,)
-                }
-            },
-            actions = {},
-            state = listState,
-            headerHeight = headerHeight)
+            ReachableAppBar(
+                title = { Text(text = state.title) },
+                navigationIcon = {
+                    IconButton(onClick = navigateBack) {
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
+                },
+                actions = {},
+                state = listState,
+                headerHeight = headerHeight)
+        }
     }
 }
