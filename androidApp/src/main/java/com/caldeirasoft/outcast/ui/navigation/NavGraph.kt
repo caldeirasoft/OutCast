@@ -12,8 +12,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
-import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
@@ -112,9 +112,9 @@ fun MainNavHost(startScreen: ScreenName) {
                         navArgument("genre") { type = NavType.StringType },
                     )
                 ) { backStackEntry ->
-                    val storeGenre = backStackEntry.getObjectNotNull<StoreGenre>("genre")
+                    val genre = backStackEntry.getObjectNotNull<Genre>("genre")
                     StoreGenreScreen(
-                        storeGenre = storeGenre,
+                        genre = genre,
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )

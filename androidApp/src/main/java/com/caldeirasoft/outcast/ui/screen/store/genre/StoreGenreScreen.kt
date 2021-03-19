@@ -1,6 +1,5 @@
 package com.caldeirasoft.outcast.ui.screen.store.genre
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -19,42 +18,26 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.airbnb.mvrx.compose.collectAsState
+import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionEpisodes
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
 import com.caldeirasoft.outcast.domain.models.store.StoreCollectionPodcasts
-import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.util.ifLoadingMore
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun StoreGenreScreen(
-    storeGenre: StoreGenre,
+    genre: Genre,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: StoreGenreViewModel = mavericksViewModel(initialArgument = storeGenre)
+    val viewModel: StoreGenreViewModel = mavericksViewModel(initialArgument = genre)
     val state by viewModel.collectAsState()
-
-    StoreGenreContent(
-        state = state,
-        navigateTo = navigateTo,
-        navigateBack = navigateBack
-    )
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-private fun StoreGenreContent(
-    state: StoreGenreViewState,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
-) {
-    val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 56.px
