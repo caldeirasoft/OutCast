@@ -19,26 +19,33 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class StoreDirectoryViewModel(
     initialState: StoreDirectoryViewState,
-) : MavericksViewModel<StoreDirectoryViewState>(initialState), KoinComponent {
+) : MavericksViewModel<StoreDirectoryViewState>(initialState), KoinComponent, ScrollViewModel {
 
     private val loadStoreDirectoryPagingDataUseCase: LoadStoreDirectoryPagingDataUseCase by inject()
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
+    override var scrollState: ListState = ListState()
+
+    // paged list
+    val discover: Flow<PagingData<StoreItem>> =
+        getStoreDataPagedList()
+            .cachedIn(viewModelScope)
+
 
     // get paged list
-    suspend fun getDiscover() {
-        val store = fetchStoreFrontUseCase.getStoreFront().first()
-        loadStoreDirectoryPagingDataUseCase.executeAsync(
-            scope = viewModelScope,
-            storeFront = store,
-            newVersionAvailable = { Timber.d("DBG - New version available") },
-            dataLoadedCallback = {
-                it.tryCast<StoreGroupingPage> {
-                    //this@StoreDirectoryViewModel.storeData.tryEmit(this)
-                }
-            })
-            .cachedIn(viewModelScope)
-            .setOnEach {
-                copy(storeFront = store, discover = it)
+    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
+        fetchStoreFrontUseCase.getStoreFront()
+            .onEach {
+                setState { copy(storeFront = it) }
             }
-    }
+            .flatMapConcat { store ->
+                loadStoreDirectoryPagingDataUseCase.executeAsync(
+                    scope = viewModelScope,
+                    storeFront = store,
+                    newVersionAvailable = { Timber.d("DBG - New version available") },
+                    dataLoadedCallback = {
+                        it.tryCast<StoreGroupingPage> {
+                            //this@StoreDirectoryViewModel.storeData.tryEmit(this)
+                        }
+                    })
+            }
 }

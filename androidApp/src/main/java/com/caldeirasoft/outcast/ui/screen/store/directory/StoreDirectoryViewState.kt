@@ -8,5 +8,4 @@ import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 data class StoreDirectoryViewState(
     val storeData: StoreGroupingPage? = null,
     val storeFront: String? = null,
-    val discover: PagingData<StoreItem> = PagingData.empty()
 ) : MavericksState

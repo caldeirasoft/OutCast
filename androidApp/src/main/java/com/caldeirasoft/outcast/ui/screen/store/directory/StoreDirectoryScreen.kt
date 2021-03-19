@@ -69,40 +69,48 @@ enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @Drawab
 fun StoreDirectoryScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel : StoreDirectoryViewModel = mavericksViewModel()
+    Timber.d("DBG - StoreDirectoryScreen recompose")
+    val viewModel: StoreDirectoryViewModel = mavericksViewModel()
     val state by viewModel.collectAsState()
+    val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
 
-    LaunchedEffect(state)  {
-        if (state.storeFront == null)
-            viewModel.getDiscover()
-    }
-    StoreDirectoryContent(
-        state = state,
-        navigateTo = navigateTo
-    )
-}
+    SwipeToRefreshLayout(
+        refreshingState = lazyPagingItems.loadState.refresh is LoadState.Loading,
+        onRefresh = { lazyPagingItems.refresh() })
+    {
+        if (lazyPagingItems.itemCount > 0) {
+            val lastScrollState = remember { viewModel.scrollState }
 
-@ExperimentalAnimationApi
-@Composable
-private fun StoreDirectoryContent(
-    state: StoreDirectoryViewState,
-    navigateTo: (Screen) -> Unit,
-) {
-    val listState = rememberLazyListState(0)
-    val lazyPagingItems = flowOf(state.discover).collectAsLazyPagingItems()
+            val scrollState = rememberLazyListState(
+                initialFirstVisibleItemIndex = lastScrollState.index,
+                initialFirstVisibleItemScrollOffset = lastScrollState.offset
+            )
 
-    ReachableScaffold { headerHeight ->
-        val spacerHeight = headerHeight - 56.px
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 56.dp))
-        {
-            item {
-                Spacer(modifier = Modifier.height(spacerHeight.toDp()))
+            LaunchedEffect(scrollState) {
+                snapshotFlow { scrollState.isScrollInProgress }
+                    .distinctUntilChanged()
+                    .filter { !it }
+                    .collect {
+                        Timber.d("DBG - StoreDirectoryContent scroll save")
+                        viewModel.saveScrollState(
+                            scrollState.firstVisibleItemIndex,
+                            scrollState.firstVisibleItemScrollOffset
+                        )
+                    }
             }
+
+            ReachableScaffold { headerHeight ->
+                val spacerHeight = headerHeight - 56.px
+
+                LazyColumn(
+                    state = scrollState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 56.dp))
+                {
+                    item {
+                        Spacer(modifier = Modifier.height(spacerHeight.toDp()))
+                    }
 
             lazyPagingItems
                 .ifLoading {
@@ -178,17 +186,19 @@ private fun StoreDirectoryContent(
                 }
         }
 
-        ReachableAppBarWithSearchBar(
-            title = {
-                Text(text = stringResource(id = R.string.store_tab_discover))
-            },
-            actions = {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                }
-            },
-            state = listState,
-            headerHeight = headerHeight)
+                ReachableAppBarWithSearchBar(
+                    title = {
+                        Text(text = stringResource(id = R.string.store_tab_discover))
+                    },
+                    actions = {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(Icons.Default.Search, contentDescription = null)
+                        }
+                    },
+                    state = scrollState,
+                    headerHeight = headerHeight)
+            }
+        }
     }
 }
 
