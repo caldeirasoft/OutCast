@@ -66,3 +66,11 @@ fun LazyPagingItems<*>.itemIfErrorOnLoadingMore(
     }
     return this
 }
+
+inline fun <reified T : Any> LazyPagingItems<T>.refreshOrRetry() {
+    if (loadState.refresh is LoadState.Error) {
+        retry()
+    } else {
+        refresh()
+    }
+}
