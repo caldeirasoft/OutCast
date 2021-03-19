@@ -1,6 +1,7 @@
 @file:OptIn(KoinApiExtension::class)
 package com.caldeirasoft.outcast.ui.screen.store.directory
 
+import SwipeToRefreshLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -13,16 +14,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.airbnb.mvrx.compose.collectAsState
@@ -36,8 +35,11 @@ import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import org.koin.core.component.KoinApiExtension
+import timber.log.Timber
 import kotlin.math.log10
 
 enum class StoreGenreItem(val genreId: Int, @StringRes val titleId: Int, @DrawableRes val drawableId: Int) {
@@ -112,79 +114,74 @@ fun StoreDirectoryScreen(
                         Spacer(modifier = Modifier.height(spacerHeight.toDp()))
                     }
 
-            lazyPagingItems
-                .ifLoading {
-                    item {
-                        ShimmerStoreCollectionsList()
-                    }
-                }
-                .ifError {
-                    item {
-                        ErrorScreen(t = it)
-                    }
-                }
-                .ifNotLoading {
-                    items(lazyPagingItems = lazyPagingItems) { collection ->
-                        when (collection) {
-                            is StoreCollectionFeatured ->
-                                StoreCollectionFeaturedContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo,
-                                )
-                            is StoreCollectionPodcasts -> {
-                                // content
-                                StoreCollectionPodcastsContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo,
-                                    onHeaderLinkClick = {
-                                        if (collection.isTopCharts)
-                                            navigateTo(Screen.Charts(StoreItemType.PODCAST))
-                                        else navigateTo(Screen.Room(collection.room))
+                    lazyPagingItems
+                        .ifError {
+                            item {
+                                ErrorScreen(t = it)
+                            }
+                        }
+                        .ifNotLoading {
+                            items(lazyPagingItems = lazyPagingItems) { collection ->
+                                when (collection) {
+                                    is StoreCollectionFeatured ->
+                                        StoreCollectionFeaturedContent(
+                                            storeCollection = collection,
+                                            navigateTo = navigateTo,
+                                        )
+                                    is StoreCollectionPodcasts -> {
+                                        // content
+                                        StoreCollectionPodcastsContent(
+                                            storeCollection = collection,
+                                            navigateTo = navigateTo,
+                                            onHeaderLinkClick = {
+                                                if (collection.isTopCharts)
+                                                    navigateTo(Screen.Charts(StoreItemType.PODCAST))
+                                                else navigateTo(Screen.Room(collection.room))
+                                            }
+                                        )
                                     }
-                                )
-                            }
-                            is StoreCollectionEpisodes -> {
-                                // content
-                                StoreCollectionEpisodesContent(
-                                    storeCollection = collection,
-                                    numRows = 3,
-                                    navigateTo = navigateTo,
-                                    onHeaderLinkClick = {
-                                        if (collection.isTopCharts)
-                                            navigateTo(Screen.Charts(StoreItemType.EPISODE))
-                                        else navigateTo(Screen.Room(collection.room))
+                                    is StoreCollectionEpisodes -> {
+                                        // content
+                                        StoreCollectionEpisodesContent(
+                                            storeCollection = collection,
+                                            numRows = 3,
+                                            navigateTo = navigateTo,
+                                            onHeaderLinkClick = {
+                                                if (collection.isTopCharts)
+                                                    navigateTo(Screen.Charts(StoreItemType.EPISODE))
+                                                else navigateTo(Screen.Room(collection.room))
+                                            }
+                                        )
                                     }
-                                )
+                                    is StoreCollectionGenres -> {
+                                        // genres
+                                        StoreCollectionGenresContent(
+                                            storeCollection = collection,
+                                            navigateTo = navigateTo
+                                        )
+                                    }
+                                    is StoreCollectionRooms -> {
+                                        // genres
+                                        StoreCollectionRoomsContent(
+                                            storeCollection = collection,
+                                            navigateTo = navigateTo
+                                        )
+                                    }
+                                }
                             }
-                            is StoreCollectionGenres -> {
-                                // genres
-                                StoreCollectionGenresContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo
-                                )
-                            }
-                            is StoreCollectionRooms -> {
-                                // genres
-                                StoreCollectionRoomsContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo
+                        }
+                        .ifLoadingMore {
+                            item {
+                                Text(
+                                    modifier = Modifier.padding(
+                                        vertical = 16.dp,
+                                        horizontal = 4.dp
+                                    ),
+                                    text = "Loading next"
                                 )
                             }
                         }
-                    }
                 }
-                .ifLoadingMore {
-                    item {
-                        Text(
-                            modifier = Modifier.padding(
-                                vertical = 16.dp,
-                                horizontal = 4.dp
-                            ),
-                            text = "Loading next"
-                        )
-                    }
-                }
-        }
 
                 ReachableAppBarWithSearchBar(
                     title = {
