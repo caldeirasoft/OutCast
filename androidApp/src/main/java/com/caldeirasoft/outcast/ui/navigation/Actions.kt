@@ -28,16 +28,14 @@ class Actions(navController: NavController) {
     }
 
     val selectBottomNav: (BottomNavigationScreen, String?) -> Unit = { screen, currentRoute ->
-        // This is the equivalent to popUpTo the start destination
-        // In order to ensure that each time a BottomNavigationItem is selected the
-        // back stack is not continuing to add destinations,
-        // we pop the back stack up to the startDestination. This is consistent with
-        // the behavior of using NavOptions singleTop=true, popUpTo=startDestination in the navigation runtime library.
-        navController.popBackStack(navController.graph.startDestination, false)
-        // This if check gives us a "singleTop" behavior where we do not create a
-        // second instance of the composable if we are already on that destination
-        if (currentRoute != screen.id.name) {
-            navController.navigate(screen.id.name)
+        navController.navigate(screen.id.name) {
+            // Pop up to the start destination of the graph to
+            // avoid building up a large stack of destinations
+            // on the back stack as users select items
+            popUpTo = navController.graph.startDestination
+            // Avoid multiple copies of the same destination when
+            // reselecting the same item
+            launchSingleTop = true
         }
     }
 

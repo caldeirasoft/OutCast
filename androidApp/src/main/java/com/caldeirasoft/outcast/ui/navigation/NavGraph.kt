@@ -107,12 +107,12 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select)
                 }
                 composable(
-                    "${ScreenName.STORE_GENRE.name}/{${NavArgs.Genre}}",
+                    route = "${ScreenName.STORE_GENRE.name}/{genre}",
                     arguments = listOf(
-                        navArgument(NavArgs.Genre) { type = NavType.StringType },
+                        navArgument("genre") { type = NavType.StringType },
                     )
                 ) { backStackEntry ->
-                    val storeGenre = backStackEntry.getObjectNotNull<StoreGenre>(NavArgs.Genre)
+                    val storeGenre = backStackEntry.getObjectNotNull<StoreGenre>("genre")
                     StoreGenreScreen(
                         storeGenre = storeGenre,
                         navigateTo = actions.select,
@@ -120,12 +120,12 @@ fun MainNavHost(startScreen: ScreenName) {
                     )
                 }
                 composable(
-                    "${ScreenName.STORE_CHARTS.name}/{${NavArgs.ItemType}}",
+                    route = "${ScreenName.STORE_CHARTS.name}/{itemType}",
                     arguments = listOf(
-                        navArgument(NavArgs.ItemType) { type = NavType.StringType })
+                        navArgument("itemType") { type = NavType.StringType })
                 ) { backStackEntry ->
                     val itemType =
-                        backStackEntry.arguments?.getString(NavArgs.ItemType)
+                        backStackEntry.arguments?.getString("itemType")
                             ?.let { StoreItemType.valueOf(it) }
                             ?: StoreItemType.PODCAST
                     TopChartsScreen(
@@ -134,53 +134,53 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.STORE_ROOM.name}/{${NavArgs.Room}}",
-                    arguments = listOf(navArgument(NavArgs.Room) { type = NavType.StringType })
+                    route = "${ScreenName.STORE_ROOM.name}/{room}",
+                    arguments = listOf(navArgument("room") { type = NavType.StringType })
                 ) { backStackEntry ->
-                    val storeRoom = backStackEntry.getObjectNotNull<StoreRoom>(NavArgs.Room)
+                    val storeRoom = backStackEntry.getObjectNotNull<StoreRoom>("room")
                     StoreRoomScreen(
                         storeRoom = storeRoom,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.STORE_CATEGORIES.name}/{${NavArgs.Categories}}",
-                    arguments = listOf(navArgument(NavArgs.Categories) {
+                    route = "${ScreenName.STORE_CATEGORIES.name}/{categories}",
+                    arguments = listOf(navArgument("categories") {
                         type = NavType.StringType
                     })
                 ) { backStackEntry ->
                     val storeCategories =
-                        backStackEntry.getObjectNotNull<StoreCollectionGenres>(NavArgs.Categories)
+                        backStackEntry.getObjectNotNull<StoreCollectionGenres>("categories")
                     StoreCategoriesScreen(
                         storeCollection = storeCategories,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.STORE_PODCAST.name}/{${NavArgs.Podcast}}",
-                    arguments = listOf(navArgument(NavArgs.Podcast) { type = NavType.StringType })
+                    route = "${ScreenName.STORE_PODCAST.name}/{podcast}",
+                    arguments = listOf(navArgument("podcast") { type = NavType.StringType })
                 ) { backStackEntry ->
-                    val podcast = backStackEntry.getObjectNotNull<StorePodcast>(NavArgs.Podcast)
+                    val podcast = backStackEntry.getObjectNotNull<StorePodcast>("podcast")
                     StorePodcastScreen(
                         storePodcast = podcast,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.PODCAST.name}/{${NavArgs.Podcast}}",
-                    arguments = listOf(navArgument(NavArgs.Podcast) { type = NavType.StringType })
+                    route = "${ScreenName.PODCAST.name}/{podcast}",
+                    arguments = listOf(navArgument("podcast") { type = NavType.StringType })
                 ) { backStackEntry ->
-                    val podcastArg = backStackEntry.getObjectNotNull<PodcastArg>(NavArgs.Podcast)
+                    val podcastArg = backStackEntry.getObjectNotNull<PodcastArg>("podcast")
                     PodcastScreen(
                         podcastArg = podcastArg,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
                 composable(
-                    "${ScreenName.EPISODE.name}/{${NavArgs.Episode}}",
-                    arguments = listOf(navArgument(NavArgs.Episode) { type = NavType.StringType })
+                    route = "${ScreenName.EPISODE.name}/{episode}",
+                    arguments = listOf(navArgument("episode") { type = NavType.StringType })
                 ) { backStackEntry ->
-                    val episodeArg = backStackEntry.getObjectNotNull<EpisodeArg>(NavArgs.Episode)
+                    val episodeArg = backStackEntry.getObjectNotNull<EpisodeArg>("episode")
                     EpisodeScreen(
                         episodeArg = episodeArg,
                         navigateTo = actions.select,
@@ -205,15 +205,21 @@ fun SetupBottomNavBar(
                 icon = {
                     Icon(
                         imageVector = if (currentRoute == screen.id.name) screen.selectedIcon else screen.icon,
-                        contentDescription = stringResource(id = screen.resourceId)
+                        contentDescription = stringResource(id = screen.resourceId),
                     )
                 },
                 label = {
-                    Text(text = stringResource(id = screen.resourceId),
-                        style = typography.overline)
+                    Text(
+                        text = stringResource(id = screen.resourceId),
+                        style = typography.caption,
+                    )
                 },
                 selected = currentRoute == screen.id.name,
-                onClick = { navigateTo(screen, currentRoute) }
+                onClick = {
+                    navigateTo(screen, currentRoute)
+                },
+                selectedContentColor = MaterialTheme.colors.primary,
+                unselectedContentColor = LocalContentColor.current.copy(alpha = ContentAlpha.medium)
             )
         }
     }
