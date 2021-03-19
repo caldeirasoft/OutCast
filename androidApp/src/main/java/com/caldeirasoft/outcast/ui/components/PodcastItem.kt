@@ -91,8 +91,7 @@ fun PodcastGridItem(
     index: Int? = null,
 )
 {
-    Column(modifier = modifier
-        .padding(horizontal = 8.dp)) {
+    Column(modifier = modifier) {
         Card(
             backgroundColor = colors[1],
             shape = RoundedCornerShape(8.dp)

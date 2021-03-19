@@ -46,12 +46,13 @@ fun StoreCollectionPodcastsContent(
     LazyRow(
         contentPadding = PaddingValues(start = 16.dp,
             end = 0.dp,
-            bottom = 16.dp)
+            bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(items = storeCollection.items) { index, item ->
             PodcastGridItem(
                 modifier = Modifier
-                    .width(100.dp)
+                    .width(150.dp)
                     .clickable(onClick = {
                         navigateTo(Screen.StorePodcastScreen(item))
                     }),
