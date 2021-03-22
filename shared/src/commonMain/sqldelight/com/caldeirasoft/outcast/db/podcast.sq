@@ -106,7 +106,9 @@ subscribe {
 unsubscribe {
     UPDATE podcast
     SET isSubscribed = 0
-    WHERE podcastId = :podcastId;
+        , newEpisodeAction = 'CLEAR'
+    WHERE podcastId = :podcastId
+    ;
 
     DELETE FROM inbox
     WHERE episodeId IN (

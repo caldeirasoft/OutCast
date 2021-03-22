@@ -39,7 +39,8 @@ class StoreRoomViewModel(
     override fun StoreRoomViewState.setPodcastFollowed(list: List<Podcast>): StoreRoomViewState =
         list.map { it.podcastId }
             .let { ids ->
-                val mapStatus = followingStatus.plus(ids.map { it to FollowStatus.FOLLOWED })
+                val mapStatus = followingStatus.filter { it.value == FollowStatus.FOLLOWING }
+                    .plus(ids.map { it to FollowStatus.FOLLOWED })
                 copy(followingStatus = mapStatus)
             }
 
@@ -48,6 +49,8 @@ class StoreRoomViewModel(
     }
 
     override fun setPodcastUnfollowed(item: StorePodcast) {
-        setState { copy(followingStatus = followingStatus.minus(item.podcast.podcastId)) }
+        setState {
+            copy(followingStatus = followingStatus.filter { (it.key == item.podcast.podcastId && it.value == FollowStatus.FOLLOWING).not() })
+        }
     }
 }

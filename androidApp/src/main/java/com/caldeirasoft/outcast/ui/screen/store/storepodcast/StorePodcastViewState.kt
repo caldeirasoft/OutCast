@@ -10,6 +10,7 @@ import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 
 data class StorePodcastViewState(
+    val podcastId: Long,
     val podcastPageAsync: Async<PodcastPage>,
     val episodes: List<Episode> = emptyList(),
     val otherPodcasts: PagingData<StoreCollection> = PagingData.empty(),
@@ -18,6 +19,6 @@ data class StorePodcastViewState(
     val isSubscribed: Boolean = false,
 ) : MavericksState {
     constructor(arg: StorePodcast) :
-            this(podcastPageAsync = Loading(arg.page))
+            this(podcastId = arg.podcast.podcastId, podcastPageAsync = Loading(arg.page))
 
 }

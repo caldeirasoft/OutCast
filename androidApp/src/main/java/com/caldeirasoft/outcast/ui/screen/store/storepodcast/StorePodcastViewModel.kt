@@ -16,13 +16,15 @@ import org.koin.core.component.inject
 
 @OptIn(KoinApiExtension::class)
 class StorePodcastViewModel(
-    initialState: StorePodcastViewState,
+    val initialState: StorePodcastViewState,
 ) : MavericksViewModel<StorePodcastViewState>(initialState), KoinComponent {
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
     private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase by inject()
     private val loadPodcastUseCase: LoadPodcastUseCase by inject()
     private val loadPodcastRelatedPagingDataUseCase: LoadPodcastRelatedPagingDataUseCase by inject()
+    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase by inject()
     private val subscribeUseCase: SubscribeUseCase by inject()
+    private val unsubscribeUseCase: UnsubscribeUseCase by inject()
 
     val episodesStateFlow: MutableStateFlow<List<Episode>> = MutableStateFlow(emptyList())
 
@@ -31,6 +33,13 @@ class StorePodcastViewModel(
             fetchPodcast()
         }
 
+        // fetch local podcast data subscription
+        loadPodcastUseCase.execute(initialState.podcastId)
+            .setOnEach { copy(isSubscribed = it?.isSubscribed ?: false) }
+
+        //loadFollowedPodcastsUseCase.execute()
+        //    .setOnEach { list -> copy(isSubscribed = list.map { it.podcastId }.contains(initialState.podcastId)) }
+
         episodesStateFlow
             .setOnEach { copy(episodes = it) }
     }
@@ -38,10 +47,6 @@ class StorePodcastViewModel(
     private suspend fun fetchPodcast() {
         withState { state ->
             state.podcastPageAsync.invoke()?.let { podcastPage ->
-
-                // fetch local podcast data subscription
-                loadPodcastUseCase.execute(podcastPage.podcast.podcastId)
-                    .setOnEach { copy(isSubscribed = it?.isSubscribed ?: false) }
 
                 // fetch remote podcast data
                 suspend {
@@ -84,5 +89,9 @@ class StorePodcastViewModel(
                     .setOnEach { copy(isSubscribing = false) }
             }
         }
+    }
+
+    fun unfollow() {
+        unsubscribeUseCase.execute(initialState.podcastId)
     }
 }

@@ -63,7 +63,8 @@ fun StorePodcastScreen(
         navigateBack = navigateBack,
         showAllEpisodes = viewModel::showAllEpisodes,
         subscribePodcast = viewModel::subscribe,
-        showPodcastSettings = { }
+        showPodcastSettings = { },
+        unfollowPodcast = viewModel::unfollow
     )
 }
 
@@ -75,6 +76,7 @@ private fun StorePodcastScreen(
     navigateBack: () -> Unit,
     showAllEpisodes: () -> Unit,
     subscribePodcast: () -> Unit,
+    unfollowPodcast: () -> Unit,
     showPodcastSettings: () -> Unit,
 ) {
     val otherPodcastsLazyPagingItems = flowOf(state.otherPodcasts).collectAsLazyPagingItems()
@@ -126,10 +128,10 @@ private fun StorePodcastScreen(
                                     Text(text = stringResource(id = R.string.action_subscribe))
                                 }
                             } else {
-                                // subscribed button
+                                // unfollow button
                                 ActionChipButton(
                                     selected = true,
-                                    onClick = subscribePodcast,
+                                    onClick = unfollowPodcast,
                                     icon = {
                                         Icon(
                                             imageVector = Icons.Default.CheckCircle,
@@ -300,7 +302,7 @@ private fun StorePodcastExpandedHeader(
         ) {
             BoxWithConstraints {
                 val bgDominantColor =
-                    Color.getColor(podcastData?.artwork?.bgColor!!)
+                    Color.getColor(podcastData.artwork?.bgColor!!)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -335,7 +337,7 @@ private fun StorePodcastExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 CoilImage(
-                    imageModel = podcastData?.artwork?.getArtworkPodcast().orEmpty(),
+                    imageModel = podcastData.artwork?.getArtworkPodcast().orEmpty(),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxHeight()
@@ -350,7 +352,7 @@ private fun StorePodcastExpandedHeader(
                 Box(modifier = Modifier
                     .weight(1f)) {
                     AutoSizedText(
-                        text = podcastData?.name.orEmpty(),
+                        text = podcastData.name,
                         modifier = Modifier
                             .align(Alignment.CenterStart)
                             .fillMaxHeight(),
@@ -361,7 +363,7 @@ private fun StorePodcastExpandedHeader(
                     )
                 }
                 Text(
-                    podcastData?.artistName.orEmpty(),
+                    podcastData.artistName,
                     modifier = Modifier
                         .padding(bottom = 4.dp),
                     style = MaterialTheme.typography.body1,
@@ -403,7 +405,7 @@ private fun StorePodcastCollapsedHeader(
             .fillMaxWidth(),
         title = {
             CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
-                Text(text = podcastData?.name.orEmpty())
+                Text(text = podcastData.name)
             }
         },
         navigationIcon = {
