@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
-import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -206,12 +205,6 @@ fun SetupBottomNavBar(
                     Icon(
                         imageVector = if (currentRoute == screen.id.name) screen.selectedIcon else screen.icon,
                         contentDescription = stringResource(id = screen.resourceId),
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = screen.resourceId),
-                        style = typography.caption,
                     )
                 },
                 selected = currentRoute == screen.id.name,
