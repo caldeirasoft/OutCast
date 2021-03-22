@@ -25,6 +25,7 @@ import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
@@ -36,6 +37,8 @@ fun StoreCollectionPodcastsContent(
     navigateTo: ScreenFn,
     onHeaderLinkClick: () -> Unit = { navigateTo(Screen.Room(storeCollection.room)) },
     showIndex: Boolean = false,
+    followingStatus: Map<Long, FollowStatus> = mapOf(),
+    onSubscribeClick: (StorePodcast) -> Unit = { },
 ) {
     StoreHeadingSectionWithLink(
         title = storeCollection.label,
@@ -57,7 +60,9 @@ fun StoreCollectionPodcastsContent(
                         navigateTo(Screen.StorePodcastScreen(item))
                     }),
                 podcast = item,
-                index = if (storeCollection.sortByPopularity) index + 1 else null
+                index = if (storeCollection.sortByPopularity) index + 1 else null,
+                followingStatus = followingStatus[item.id],
+                onSubscribeClick = onSubscribeClick
             )
         }
     }

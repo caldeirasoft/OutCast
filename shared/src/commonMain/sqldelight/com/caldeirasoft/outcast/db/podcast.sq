@@ -62,6 +62,12 @@ getAll:
 SELECT p.*
 FROM podcast p;
 
+getSubscribed:
+SELECT p.*
+FROM podcast p
+WHERE isSubscribed = 1
+;
+
 getById:
 SELECT *
 FROM podcast

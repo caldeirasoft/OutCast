@@ -127,7 +127,9 @@ fun StoreRoomScreen(
                                                         item))
                                                 }),
                                             storePodcast = item,
-                                            index = index + 1
+                                            index = index + 1,
+                                            followingStatus = state.followingStatus.get(item.id),
+                                            onSubscribeClick = viewModel::subscribeToPodcast
                                         )
                                         Divider()
                                     }
@@ -156,10 +158,11 @@ fun StoreRoomScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable(onClick = {
-                                                navigateTo(Screen.StorePodcastScreen(
-                                                    item))
+                                                navigateTo(Screen.StorePodcastScreen(item))
                                             }),
-                                        storePodcast = item
+                                        storePodcast = item,
+                                        followingStatus = state.followingStatus[item.id],
+                                        onSubscribeClick = viewModel::subscribeToPodcast
                                     )
                                 }
                             }

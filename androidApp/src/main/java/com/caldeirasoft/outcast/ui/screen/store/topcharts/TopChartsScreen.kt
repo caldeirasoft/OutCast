@@ -129,7 +129,9 @@ fun TopChartsScreen(
                                         navigateTo(Screen.StorePodcastScreen(item))
                                     }),
                                 storePodcast = item,
-                                index = index + 1
+                                index = index + 1,
+                                followingStatus = state.followingStatus[item.id],
+                                onSubscribeClick = viewModel::subscribeToPodcast
                             )
                             Divider()
                         }

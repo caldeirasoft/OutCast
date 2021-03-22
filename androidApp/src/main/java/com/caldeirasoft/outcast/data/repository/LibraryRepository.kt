@@ -23,6 +23,11 @@ class LibraryRepository(
             .asFlow()
             .mapToList()
 
+    fun loadFollowedPodcasts(): Flow<List<Podcast>> =
+        database.podcastQueries
+            .getSubscribed()
+            .asFlow()
+            .mapToList()
 
     fun loadPodcast(podcastId: Long): Flow<Podcast?> =
         database.podcastQueries
@@ -32,7 +37,7 @@ class LibraryRepository(
 
     fun subscribeToPodcast(
         podcastId: Long,
-        newEpisodeAction: NewEpisodesAction
+        newEpisodeAction: NewEpisodesAction,
     ) {
         database.podcastQueries
             .subscribe(newEpisodeAction = newEpisodeAction, podcastId = podcastId)

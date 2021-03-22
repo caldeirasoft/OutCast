@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.presentation.viewmodel
 
 import com.airbnb.mvrx.MavericksViewModel
-import com.caldeirasoft.outcast.domain.usecase.FetchPodcastsSubscribedUseCase
+import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.ui.screen.library.LibraryViewState
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -12,10 +12,10 @@ class LibraryViewModel(
     initialState: LibraryViewState,
 ) : MavericksViewModel<LibraryViewState>(initialState), KoinComponent
 {
-    private val fetchPodcastsSubscribedUseCase: FetchPodcastsSubscribedUseCase by inject()
+    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase by inject()
 
     init {
-        fetchPodcastsSubscribedUseCase.invoke()
+        loadFollowedPodcastsUseCase.invoke()
             .setOnEach { copy(podcasts = it) }
     }
 }

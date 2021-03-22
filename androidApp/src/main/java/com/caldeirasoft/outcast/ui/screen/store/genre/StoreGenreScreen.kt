@@ -66,7 +66,9 @@ fun StoreGenreScreen(
                             // content
                             StoreCollectionPodcastsContent(
                                 storeCollection = collection,
-                                navigateTo = navigateTo
+                                navigateTo = navigateTo,
+                                followingStatus = state.followingStatus,
+                                onSubscribeClick = viewModel::subscribeToPodcast,
                             )
                         }
                         is StoreCollectionEpisodes -> {

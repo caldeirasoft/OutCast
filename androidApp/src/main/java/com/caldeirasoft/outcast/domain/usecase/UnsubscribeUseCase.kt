@@ -4,12 +4,10 @@ import com.caldeirasoft.outcast.data.repository.LibraryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class UnsubscribeUseCase constructor(val podcastRepository: LibraryRepository):
-    FlowUseCase<UnsubscribeUseCase.Params, Unit> {
+class UnsubscribeUseCase constructor(val podcastRepository: LibraryRepository) {
 
-    override fun execute(params: Params): Flow<Unit> = flow {
-        podcastRepository.unsubscribeFromPodcast(podcastId = params.podcastId)
+    fun execute(podcastId: Long): Flow<Unit> = flow {
+        podcastRepository.unsubscribeFromPodcast(podcastId = podcastId)
+        emit(Unit)
     }
-
-    data class Params(val podcastId: Long)
 }

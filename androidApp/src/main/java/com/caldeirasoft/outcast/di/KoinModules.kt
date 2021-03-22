@@ -155,12 +155,12 @@ internal val repositoryModule = module {
 }
 
 internal val usecaseModule = module {
-    single { FetchPodcastsSubscribedUseCase(libraryRepository = get()) }
+    single { LoadFollowedPodcastsUseCase(libraryRepository = get()) }
     single { FetchEpisodesFavoritesUseCase(libraryRepository = get()) }
     single { FetchEpisodesHistoryUseCase(libraryRepository = get()) }
     single { FetchInboxUseCase(inboxRepository = get()) }
     single { FetchQueueUseCase(queueRepository = get()) }
-    single { SubscribeUseCase(libraryRepository = get()) }
+    single { SubscribeUseCase(libraryRepository = get(), storeRepository = get()) }
     single { UnsubscribeUseCase(podcastRepository = get()) }
     single { LoadPodcastUseCase(podcastRepository = get()) }
     single { LoadStoreGenreDataUseCase(storeRepository = get()) }
