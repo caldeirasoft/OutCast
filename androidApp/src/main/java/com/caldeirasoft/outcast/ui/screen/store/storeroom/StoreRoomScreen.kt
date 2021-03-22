@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import androidx.paging.compose.itemsIndexed
 import coil.request.ImageRequest
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
@@ -85,10 +84,9 @@ fun StoreRoomScreen(
                     }
                 }
 
-                when (val storePage = state.storePage) {
+                when (state.storePage) {
                     is StoreMultiRoomPage ->
                         items(lazyPagingItems = lazyPagingItems) { collection ->
-
                             when (collection) {
                                 is StoreCollectionPodcasts -> {
                                     // content
@@ -115,45 +113,9 @@ fun StoreRoomScreen(
                             }
                         }
                     is StoreRoomPage ->
-                        if (storePage.isIndexed) {
-                            itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
-                                when (item) {
-                                    is StorePodcast -> {
-                                        PodcastListItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    navigateTo(Screen.StorePodcastScreen(
-                                                        item))
-                                                }),
-                                            storePodcast = item,
-                                            index = index + 1,
-                                            followingStatus = state.followingStatus.get(item.id),
-                                            onSubscribeClick = viewModel::subscribeToPodcast
-                                        )
-                                        Divider()
-                                    }
-                                    is StoreEpisode -> {
-                                        StoreEpisodeItem(
-                                            modifier = Modifier,
-                                            onEpisodeClick = {
-                                                navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
-                                            },
-                                            onPodcastClick = {
-                                                navigateTo(Screen.StorePodcastScreen(
-                                                    item.podcast))
-                                            },
-                                            episode = item.episode,
-                                            index = index + 1
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Divider()
-                                    }
-                                }
-                            }
-                        } else {
-                            items(lazyPagingItems = lazyPagingItems) { item ->
-                                if (item is StorePodcast) {
+                        items(lazyPagingItems = lazyPagingItems) { item ->
+                            when (item) {
+                                is StorePodcast -> {
                                     PodcastListItem(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -164,6 +126,21 @@ fun StoreRoomScreen(
                                         followingStatus = state.followingStatus[item.id],
                                         onSubscribeClick = viewModel::subscribeToPodcast
                                     )
+                                }
+                                is StoreEpisode -> {
+                                    StoreEpisodeItem(
+                                        modifier = Modifier,
+                                        onEpisodeClick = {
+                                            navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                                        },
+                                        onPodcastClick = {
+                                            navigateTo(Screen.StorePodcastScreen(
+                                                item.podcast))
+                                        },
+                                        episode = item.episode,
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Divider()
                                 }
                             }
                         }
