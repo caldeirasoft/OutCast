@@ -114,7 +114,9 @@ fun StoreDirectoryScreen(
                                         if (collection.isTopCharts)
                                             navigateTo(Screen.Charts(StoreItemType.PODCAST))
                                         else navigateTo(Screen.Room(collection.room))
-                                    }
+                                    },
+                                    followingStatus = state.followingStatus,
+                                    onSubscribeClick = viewModel::subscribeToPodcast,
                                 )
                             }
                             is StoreCollectionEpisodes -> {

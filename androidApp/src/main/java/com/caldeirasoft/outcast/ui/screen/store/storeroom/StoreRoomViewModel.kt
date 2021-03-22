@@ -2,15 +2,15 @@ package com.caldeirasoft.outcast.ui.screen.store.storeroom
 
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.airbnb.mvrx.MavericksViewModel
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.interfaces.StoreFeaturedPage
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreRoomPagingDataUseCase
 import com.caldeirasoft.outcast.domain.util.tryCast
-import com.caldeirasoft.outcast.ui.util.ListState
-import com.caldeirasoft.outcast.ui.util.ScrollViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
@@ -20,30 +20,34 @@ import org.koin.core.component.inject
 @ExperimentalCoroutinesApi
 class StoreRoomViewModel(
     initialState: StoreRoomViewState,
-) : MavericksViewModel<StoreRoomViewState>(initialState), KoinComponent, ScrollViewModel {
+) : FollowViewModel<StoreRoomViewState>(initialState), KoinComponent {
 
     private val fetchStoreRoomPagingDataUseCase: FetchStoreRoomPagingDataUseCase by inject()
-    override var scrollState: ListState = ListState()
 
     // paged list
     val discover: Flow<PagingData<StoreItem>> =
-        getRoomPagedList()
+        fetchStoreRoomPagingDataUseCase.executeAsync(
+            scope = viewModelScope,
+            storeRoom = initialState.room,
+            dataLoadedCallback = { page ->
+                page.tryCast<StoreFeaturedPage> {
+                    setState { copy(storePage = this@tryCast) }
+                }
+            })
             .cachedIn(viewModelScope)
 
-    // get paged list
-    @OptIn(FlowPreview::class)
-    private fun getRoomPagedList(): Flow<PagingData<StoreItem>> =
-        stateFlow
-            .map { it.room }
-            .distinctUntilChanged()
-            .flatMapConcat { room ->
-                fetchStoreRoomPagingDataUseCase.executeAsync(
-                    scope = viewModelScope,
-                    storeRoom = room,
-                    dataLoadedCallback = { page ->
-                        page.tryCast<StoreFeaturedPage> {
-                            setState { copy(storePage = this@tryCast) }
-                        }
-                    })
+    override fun StoreRoomViewState.setPodcastFollowed(list: List<Podcast>): StoreRoomViewState =
+        list.map { it.podcastId }
+            .let { ids ->
+                val mapStatus = followingStatus.plus(ids.map { it to FollowStatus.FOLLOWED })
+                copy(followingStatus = mapStatus)
             }
+
+    override fun setPodcastFollowing(item: StorePodcast) {
+        setState { copy(followingStatus = followingStatus.plus(item.podcast.podcastId to FollowStatus.FOLLOWING)) }
+    }
+
+    override fun setPodcastUnfollowed(item: StorePodcast) {
+        setState { copy(followingStatus = followingStatus.minus(item.podcast.podcastId)) }
+    }
 }

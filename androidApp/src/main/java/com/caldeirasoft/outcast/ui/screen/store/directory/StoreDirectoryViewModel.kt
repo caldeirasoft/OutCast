@@ -2,12 +2,15 @@ package com.caldeirasoft.outcast.ui.screen.store.directory
 
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.airbnb.mvrx.MavericksViewModel
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreDirectoryPagingDataUseCase
 import com.caldeirasoft.outcast.domain.util.tryCast
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -23,23 +26,15 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class StoreDirectoryViewModel(
     initialState: StoreDirectoryViewState,
-) : MavericksViewModel<StoreDirectoryViewState>(initialState), KoinComponent {
+) : FollowViewModel<StoreDirectoryViewState>(initialState), KoinComponent {
 
     private val loadStoreDirectoryPagingDataUseCase: LoadStoreDirectoryPagingDataUseCase by inject()
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
 
     // paged list
     val discover: Flow<PagingData<StoreItem>> =
-        getStoreDataPagedList()
-            .cachedIn(viewModelScope)
-
-
-    // get paged list
-    private fun getStoreDataPagedList(): Flow<PagingData<StoreItem>> =
         fetchStoreFrontUseCase.getStoreFront()
-            .onEach {
-                setState { copy(storeFront = it) }
-            }
+            .onEach { setState { copy(storeFront = it) } }
             .flatMapConcat { store ->
                 loadStoreDirectoryPagingDataUseCase.executeAsync(
                     scope = viewModelScope,
@@ -51,4 +46,20 @@ class StoreDirectoryViewModel(
                         }
                     })
             }
+            .cachedIn(viewModelScope)
+
+    override fun StoreDirectoryViewState.setPodcastFollowed(list: List<Podcast>): StoreDirectoryViewState =
+        list.map { it.podcastId }
+            .let { ids ->
+                val mapStatus = followingStatus.plus(ids.map { it to FollowStatus.FOLLOWED })
+                copy(followingStatus = mapStatus)
+            }
+
+    override fun setPodcastFollowing(item: StorePodcast) {
+        setState { copy(followingStatus = followingStatus.plus(item.podcast.podcastId to FollowStatus.FOLLOWING)) }
+    }
+
+    override fun setPodcastUnfollowed(item: StorePodcast) {
+        setState { copy(followingStatus = followingStatus.minus(item.podcast.podcastId)) }
+    }
 }
