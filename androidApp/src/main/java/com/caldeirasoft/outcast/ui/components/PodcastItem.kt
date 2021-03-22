@@ -13,7 +13,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.getArtworkUrl
@@ -23,23 +22,25 @@ import com.skydoves.landscapist.coil.CoilImage
 
 
 @Composable
-fun PodcastListItemIndexed(
+fun PodcastListItem(
     modifier: Modifier = Modifier,
     storePodcast: StorePodcast,
-    index: Int,
+    index: Int? = null,
     nameMaxLines: Int = 2,
-    iconModifier: Modifier = Modifier.size(PodcastDefaults.ThumbnailSize)
+    iconModifier: Modifier = Modifier.size(PodcastDefaults.ThumbnailSize),
 ) {
     ListItem(
         modifier = modifier.fillMaxWidth(),
         text = {
-            Text(
-                AnnotatedString.Builder().apply {
-                    withStyle(SpanStyle(color = Color.Red)) {
-                        append("${index}. ")
-                    }
-                    append(storePodcast.name)
-                }.toAnnotatedString(),
+            Text(with(AnnotatedString.Builder()) {
+                if (index != null) {
+                    pushStyle(SpanStyle(color = Color.Red))
+                    append("${index}. ")
+                    pop()
+                }
+                append(storePodcast.name)
+                toAnnotatedString()
+            },
                 maxLines = nameMaxLines
             )
         },
@@ -57,8 +58,8 @@ fun PodcastListItemIndexed(
 fun SmallPodcastListItemIndexed(
     modifier: Modifier = Modifier,
     storePodcast: StorePodcast,
-    index: Int
-) = PodcastListItemIndexed(
+    index: Int,
+) = PodcastListItem(
     modifier = modifier,
     storePodcast = storePodcast,
     index = index,

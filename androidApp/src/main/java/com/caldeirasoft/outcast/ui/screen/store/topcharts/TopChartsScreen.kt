@@ -122,7 +122,7 @@ fun TopChartsScreen(
                 itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
                     when (item) {
                         is StorePodcast -> {
-                            PodcastListItemIndexed(
+                            PodcastListItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable(onClick = {

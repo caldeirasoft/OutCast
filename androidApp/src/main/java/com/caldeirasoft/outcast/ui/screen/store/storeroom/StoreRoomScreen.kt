@@ -119,7 +119,7 @@ fun StoreRoomScreen(
                             itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
                                 when (item) {
                                     is StorePodcast -> {
-                                        PodcastListItemIndexed(
+                                        PodcastListItem(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
@@ -150,22 +150,16 @@ fun StoreRoomScreen(
                                 }
                             }
                         } else {
-                            gridItems(
-                                lazyPagingItems = lazyPagingItems,
-                                contentPadding = PaddingValues(16.dp),
-                                horizontalInnerPadding = 8.dp,
-                                verticalInnerPadding = 8.dp,
-                                columns = 3
-                            ) { item ->
+                            items(lazyPagingItems = lazyPagingItems) { item ->
                                 if (item is StorePodcast) {
-                                    PodcastGridItem(
+                                    PodcastListItem(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable(onClick = {
                                                 navigateTo(Screen.StorePodcastScreen(
                                                     item))
                                             }),
-                                        podcast = item
+                                        storePodcast = item
                                     )
                                 }
                             }
