@@ -6,6 +6,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -30,9 +32,14 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.components.foundation.LocalViewPagerController
+import com.caldeirasoft.outcast.ui.components.foundation.ViewPager
+import com.caldeirasoft.outcast.ui.components.foundation.ViewPagerController
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.ifLoadingMore
 import com.caldeirasoft.outcast.ui.util.px
@@ -110,11 +117,7 @@ fun StoreDirectoryScreen(
                                 StoreCollectionPodcastsContent(
                                     storeCollection = collection,
                                     navigateTo = navigateTo,
-                                    onHeaderLinkClick = {
-                                        if (collection.isTopCharts)
-                                            navigateTo(Screen.Charts(StoreItemType.PODCAST))
-                                        else navigateTo(Screen.Room(collection.room))
-                                    },
+                                    onHeaderLinkClick = { navigateTo(Screen.Room(collection.room)) },
                                     followingStatus = state.followingStatus,
                                     onSubscribeClick = viewModel::subscribeToPodcast,
                                 )
@@ -125,11 +128,17 @@ fun StoreDirectoryScreen(
                                     storeCollection = collection,
                                     numRows = 3,
                                     navigateTo = navigateTo,
-                                    onHeaderLinkClick = {
-                                        if (collection.isTopCharts)
-                                            navigateTo(Screen.Charts(StoreItemType.EPISODE))
-                                        else navigateTo(Screen.Room(collection.room))
-                                    }
+                                    onHeaderLinkClick = { navigateTo(Screen.Room(collection.room)) }
+                                )
+                            }
+                            is StoreCollectionCharts -> {
+                                // content
+                                StoreCollectionChartsContent(
+                                    storeCollection = collection,
+                                    state = state,
+                                    navigateTo = navigateTo,
+                                    onSubscribeClick = viewModel::subscribeToPodcast,
+                                    onChartSelected = viewModel::onTabSelected
                                 )
                             }
                             is StoreCollectionGenres -> {
@@ -265,10 +274,192 @@ private fun SearchBar(modifier: Modifier = Modifier)
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Icon(imageVector = Icons.Filled.Search,
+            Icon(
+                imageVector = Icons.Filled.Search,
                 contentDescription = null,
             )
             Text("Search", modifier = Modifier.padding(horizontal = 4.dp))
         }
     }
+}
+
+@Composable
+fun StoreCollectionChartsContent(
+    storeCollection: StoreCollectionCharts,
+    state: StoreDirectoryViewState,
+    navigateTo: (Screen) -> Unit,
+    onSubscribeClick: (StorePodcast) -> Unit = { },
+    onChartSelected: (StoreItemType) -> Unit,
+) {
+    val viewPagerController = remember { ViewPagerController() }
+    val selectedChartTab = remember { state.selectedChartTab }
+    Column(
+        modifier = Modifier.padding(
+            vertical = 16.dp
+        )
+    ) {
+        StoreHeadingSectionWithLink(
+            title = stringResource(id = R.string.store_tab_charts),
+            onClick = { navigateTo(Screen.Charts(state.selectedChartTab)) }
+        )
+        TopChartsTabRow(
+            selectedChartTab = state.selectedChartTab,
+            onChartSelected = onChartSelected,
+            pagerController = viewPagerController
+        )
+        CompositionLocalProvider(LocalViewPagerController provides viewPagerController) {
+            TopChartsTabContent(
+                state = state,
+                storeCollection = storeCollection,
+                selectedChartTab = selectedChartTab,
+                onChartSelected = onChartSelected,
+                navigateTo = navigateTo,
+                onSubscribeClick = onSubscribeClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopChartsTabRow(
+    selectedChartTab: StoreItemType,
+    onChartSelected: (StoreItemType) -> Unit,
+    pagerController: ViewPagerController,
+) {
+    TabRow(
+        selectedTabIndex = selectedChartTab.ordinal,
+        backgroundColor = Color.Transparent
+    )
+    {
+        StoreItemType.values().forEachIndexed { index, tab ->
+            Tab(
+                selected = (index == selectedChartTab.ordinal),
+                onClick = {
+                    onChartSelected(tab)
+                    pagerController.moveTo(tab.ordinal)
+                },
+                text = {
+                    Text(
+                        text = stringResource(id = when (tab) {
+                            StoreItemType.PODCAST -> R.string.store_podcasts
+                            StoreItemType.EPISODE -> R.string.store_episodes
+                        }),
+                        style = MaterialTheme.typography.body2)
+                }
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun TopChartsTabContent(
+    storeCollection: StoreCollectionCharts,
+    state: StoreDirectoryViewState,
+    selectedChartTab: StoreItemType,
+    onChartSelected: (StoreItemType) -> Unit,
+    navigateTo: (Screen) -> Unit,
+    onSubscribeClick: (StorePodcast) -> Unit = { },
+) {
+    ViewPager(
+        modifier = Modifier.fillMaxWidth(),
+        range = 0..1,
+        initialPage = selectedChartTab.ordinal,
+        onPageChanged = { onChartSelected(StoreItemType.values()[it]) }
+    ) {
+        val page = this.index
+        val topCharts: List<StoreItem> = when (page) {
+            0 -> storeCollection.topPodcasts
+            else -> storeCollection.topEpisodes
+        }
+        Column {
+            topCharts.forEachIndexed { index, storeItem ->
+                when (storeItem) {
+                    is StorePodcast -> {
+                        PodcastListItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = {
+                                    navigateTo(Screen.StorePodcastScreen(storeItem))
+                                }),
+                            storePodcast = storeItem,
+                            index = index + 1,
+                            followingStatus = state.followingStatus[storeItem.id],
+                            onSubscribeClick = onSubscribeClick
+                        )
+                        Divider()
+                    }
+                    is StoreEpisode -> {
+                        StoreEpisodeItem(
+                            episode = storeItem.episode,
+                            modifier = Modifier.fillMaxWidth(),
+                            onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast)) },
+                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
+                            index = index + 1
+                        )
+                        Divider()
+                    }
+                }
+            }
+        }
+    }
+    /*
+    val pagerState: PagerState = remember {
+        PagerState(
+            maxPage = 1,
+            currentPage = 0,
+            onPageChanged = { onChartSelected(StoreItemType.values()[it]) }
+        )
+    }
+
+    ViewPager(
+        state = pagerState,
+        offscreenLimit = 1,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp)
+    )
+    {
+        val topCharts: List<StoreItem> = when (this.page) {
+            0 -> storeCollection.topPodcasts
+            else -> storeCollection.topEpisodes
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+            //.padding(horizontal = 4.dp)
+        )
+        {
+            topCharts.forEachIndexed { index, storeItem ->
+                when (storeItem) {
+                    is StorePodcast -> {
+                        PodcastListItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = {
+                                    navigateTo(Screen.StorePodcastScreen(storeItem))
+                                }),
+                            storePodcast = storeItem,
+                            index = index + 1,
+                            followingStatus = state.followingStatus[storeItem.id],
+                            onSubscribeClick = onSubscribeClick
+                        )
+                        Divider()
+                    }
+                    is StoreEpisode -> {
+                        StoreEpisodeItem(
+                            episode = storeItem.episode,
+                            modifier = Modifier.fillMaxWidth(),
+                            onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast)) },
+                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
+                            index = index + 1
+                        )
+                        Divider()
+                    }
+                }
+            }
+        }
+    }
+
+     */
 }

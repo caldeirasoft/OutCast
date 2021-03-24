@@ -146,6 +146,8 @@ class StoreRepository (
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val storeLookup =
             getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
+        var topPodcastsIds: List<Long> = emptyList()
+        var topEpisodesIds: List<Long> = emptyList()
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.fcStructure?.model?.children
                 ?.first { element -> element.token == "allPodcasts" }?.children
@@ -219,29 +221,19 @@ class StoreRepository (
                                 "popularity" -> { // top podcasts // top episodes
                                     when (elementChild.fcKind) {
                                         // podcast
-                                        16 -> yield(
-                                            StoreCollectionPodcasts(
-                                                id = elementChild.adamId,
-                                                label = elementChild.name,
-                                                itemsIds = ids.take(15),
-                                                storeFront = storeFront,
-                                                sortByPopularity = true,
-                                                isTopCharts = true,
+                                        16 -> topPodcastsIds = ids.take(5)
+                                        186 -> topEpisodesIds = ids.take(5)
+                                    }
+                                    if (topPodcastsIds.isNotEmpty() && topEpisodesIds.isNotEmpty()) {
+                                        yield(
+                                            StoreCollectionCharts(
+                                                id = 0,
+                                                topPodcastsIds = topPodcastsIds,
+                                                topEpisodesIds = topEpisodesIds,
+                                                genreId = null,
+                                                storeFront = storeFront
                                             )
                                         )
-                                        // episodes
-                                        186 -> yield(
-                                            StoreCollectionEpisodes(
-                                                id = elementChild.adamId,
-                                                label = elementChild.name,
-                                                itemsIds = ids.take(15),
-                                                storeFront = storeFront,
-                                                sortByPopularity = true,
-                                                isTopCharts = true,
-                                            )
-                                        )
-                                        else -> {
-                                        }
                                     }
                                 }
                                 "normal" -> {
@@ -254,7 +246,6 @@ class StoreRepository (
                                                     url = elementChild.seeAllUrl,
                                                     itemsIds = ids,
                                                     storeFront = storeFront,
-                                                    //sortByPopularity = (elementChild.sort == 4)
                                                 )
                                             )
                                         15 -> // episodes
@@ -265,7 +256,6 @@ class StoreRepository (
                                                     url = elementChild.seeAllUrl,
                                                     itemsIds = ids,
                                                     storeFront = storeFront,
-                                                    //sortByPopularity = (elementChild.sort == 4)
                                                 )
                                             )
                                     }

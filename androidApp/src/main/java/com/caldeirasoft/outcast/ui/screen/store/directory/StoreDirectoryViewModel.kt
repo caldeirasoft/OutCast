@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.store.directory
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -63,6 +64,12 @@ class StoreDirectoryViewModel(
     override fun setPodcastUnfollowed(item: StorePodcast) {
         setState {
             copy(followingStatus = followingStatus.filter { (it.key == item.podcast.podcastId && it.value == FollowStatus.FOLLOWING).not() })
+        }
+    }
+
+    fun onTabSelected(tab: StoreItemType) {
+        setState {
+            copy(selectedChartTab = tab)
         }
     }
 }

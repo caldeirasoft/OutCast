@@ -12,7 +12,6 @@ data class StoreCollectionPodcasts(
     val itemsIds: List<Long> = emptyList(),
     val items: MutableList<StorePodcast> = mutableListOf(),
     val sortByPopularity: Boolean = false,
-    val isTopCharts: Boolean = false,
 ) : StoreCollection {
     val room: StoreRoom
         get() = StoreRoom(

@@ -13,7 +13,6 @@ data class StoreCollectionEpisodes(
     val itemsIds: List<Long> = emptyList(),
     val items: MutableList<StoreEpisode> = mutableListOf(),
     val sortByPopularity: Boolean = false,
-    val isTopCharts: Boolean = false,
 ) : StoreCollection {
     val room: StoreRoom
         get() = StoreRoom(

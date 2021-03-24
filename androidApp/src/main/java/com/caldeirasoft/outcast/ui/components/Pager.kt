@@ -22,17 +22,22 @@ import kotlin.math.roundToInt
  */
 // I Added support for vertical direction as well.
 
-class PagerState(currentPage: Int = 0, pages: Int = 0) {
+class PagerState(currentPage: Int = 0, pages: Int = 0, val onPageChanged: (Int) -> Unit = {}) {
     var minPage = 0
     var maxPage: Int = pages
-    var currentPage by mutableStateOf(currentPage.coerceIn(0, pages))
+
+    private var _currentPage by mutableStateOf(currentPage.coerceIn(minPage, maxPage))
+    var currentPage: Int
+        get() = _currentPage
+        set(value) {
+            _currentPage = value.coerceIn(minPage, maxPage)
+        }
 
     enum class SelectionState { Selected, Undecided }
 
     var selectionState by mutableStateOf(SelectionState.Selected)
 
     private suspend fun selectPage() {
-        currentPage -= currentPageOffset.roundToInt()
         snapToOffset(0f)
         selectionState = SelectionState.Selected
     }
@@ -54,6 +59,8 @@ class PagerState(currentPage: Int = 0, pages: Int = 0) {
         if (velocity > 0 && currentPage == 0) return
 
         try {
+            currentPage -= currentPageOffset.roundToInt()
+            onPageChanged(currentPage)
             _currentPageOffset.animateDecay(velocity, exponentialDecay())
             _currentPageOffset.animateTo(currentPageOffset.roundToInt().toFloat())
             selectPage()
