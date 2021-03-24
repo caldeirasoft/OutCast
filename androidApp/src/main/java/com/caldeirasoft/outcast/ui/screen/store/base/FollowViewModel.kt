@@ -1,29 +1,36 @@
 package com.caldeirasoft.outcast.ui.screen.store.base
 
+import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
-import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(KoinApiExtension::class)
-abstract class FollowViewModel<S : FollowState>(initialState: S) :
+abstract class FollowViewModel<S : MavericksState>(initialState: S) :
     MavericksViewModel<S>(initialState), KoinComponent {
 
     private val followUseCase: SubscribeUseCase by inject()
     private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase by inject()
 
+    val followingStatus: MutableStateFlow<Map<Long, FollowStatus>> =
+        MutableStateFlow(emptyMap())
+
     init {
         loadFollowedPodcastsUseCase.execute()
-            .setOnEach { setPodcastFollowed(it) }
+            .map { it.map { it.podcastId } }
+            .map { ids ->
+                val mapStatus = followingStatus.value.filter { it.value == FollowStatus.FOLLOWING }
+                    .plus(ids.map { it to FollowStatus.FOLLOWED })
+                mapStatus
+            }
+            .onEach { followingStatus.emit(it) }
+            .launchIn(viewModelScope)
     }
 
     fun subscribeToPodcast(item: StorePodcast) {
@@ -37,9 +44,11 @@ abstract class FollowViewModel<S : FollowState>(initialState: S) :
             .launchIn(viewModelScope)
     }
 
-    abstract fun S.setPodcastFollowed(list: List<Podcast>): S
+    suspend fun setPodcastFollowing(item: StorePodcast) {
+        followingStatus.emit(followingStatus.value.plus(item.podcast.podcastId to FollowStatus.FOLLOWING))
+    }
 
-    abstract fun setPodcastFollowing(item: StorePodcast)
-
-    abstract fun setPodcastUnfollowed(item: StorePodcast)
+    suspend fun setPodcastUnfollowed(item: StorePodcast) {
+        followingStatus.emit(followingStatus.value.filter { (it.key == item.podcast.podcastId && it.value == FollowStatus.FOLLOWING).not() })
+    }
 }
