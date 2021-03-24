@@ -1,44 +1,32 @@
 package com.caldeirasoft.outcast.ui.screen.store.topcharts
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
+import com.caldeirasoft.outcast.ui.components.foundation.LocalViewPagerController
+import com.caldeirasoft.outcast.ui.components.foundation.ViewPager
+import com.caldeirasoft.outcast.ui.components.foundation.ViewPagerController
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
-import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
-import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
-import com.caldeirasoft.outcast.ui.util.ifLoadingMore
+import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartEpisodeScreen
+import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartPodcastScreen
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
-import com.caldeirasoft.outcast.ui.util.px
-import com.caldeirasoft.outcast.ui.util.toDp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.launch
 
 
 @FlowPreview
@@ -51,136 +39,103 @@ fun TopChartsScreen(
 ) {
     val viewModel: TopChartsViewModel = mavericksViewModel(initialArgument = storeItemType)
     val state by viewModel.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val selectedGenre = state.selectedGenre
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-    val lazyPagingItems = viewModel.topCharts.collectAsLazyPagingItems()
+    val viewPagerController = remember { ViewPagerController() }
+    val selectedChartTab = remember { state.selectedChartTab }
 
-    ReachableScaffold { headerHeight ->
-        val spacerHeight = headerHeight - 56.px
-
-        LazyListLayout(lazyListItems = lazyPagingItems) {
-            val listState = rememberLazyListState(0)
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 56.dp)) {
-
-                item {
-                    Spacer(modifier = Modifier.height(spacerHeight.toDp()))
-                }
-
-                item {
-                    LazyRow(contentPadding = PaddingValues(start = 16.dp, end = 16.dp)) {
-                        item {
-                            ChipRadioSelector(
-                                selectedValue = state.selectedChartTab,
-                                values = StoreItemType.values(),
-                                onClick = viewModel::onTabSelected,
-                                text = {
-                                    Text(text = stringResource(id = when (it) {
-                                        StoreItemType.PODCAST -> R.string.store_podcasts
-                                        StoreItemType.EPISODE -> R.string.store_episodes
-                                    }))
-                                })
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.width(16.dp))
-                        }
-
-                        item {
-                            ChipButton(
-                                selected = (selectedGenre != null),
-                                onClick = {
-                                    drawerContent.updateContent {
-                                        CategoriesListBottomSheet(
-                                            selectedGenre = selectedGenre,
-                                            onGenreSelected = viewModel::onGenreSelected
-                                        )
-                                    }
-                                    coroutineScope.launch {
-                                        drawerState.show()
-                                    }
-                                })
-                            {
-                                Text(
-                                    text = when (selectedGenre) {
-                                        null -> stringResource(id = R.string.store_tab_categories)
-                                        else -> stringResource(id = StoreGenreItem.values()
-                                            .first { it.genreId == selectedGenre }.titleId)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
-                    when (item) {
-                        is StorePodcast -> {
-                            PodcastListItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(onClick = {
-                                        navigateTo(Screen.StorePodcastScreen(item))
-                                    }),
-                                storePodcast = item,
-                                index = index + 1,
-                                followingStatus = state.followingStatus[item.id],
-                                onSubscribeClick = viewModel::subscribeToPodcast
-                            )
-                            Divider()
-                        }
-                        is StoreEpisode -> {
-                            StoreEpisodeItem(
-                                episode = item.episode,
-                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
-                                onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
-                                index = index + 1
-                            )
-                            Divider()
-                        }
-                    }
-                }
-                lazyPagingItems.ifLoadingMore {
-                    item {
-                        Text(
-                            modifier = Modifier.padding(
-                                vertical = 16.dp,
-                                horizontal = 4.dp
-                            ),
-                            text = "Loading next"
-                        )
-                    }
-                }
-            }
-
-            ReachableAppBar(
-                title = { Text(text = stringResource(id = R.string.store_tab_charts)) },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.store_tab_charts))
+                },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            contentDescription = null,
-                        )
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
                 },
                 actions = {
                     IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = null,
-                        )
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
                     }
                 },
-                state = listState,
-                headerHeight = headerHeight)
+                backgroundColor = Color.Transparent,
+                elevation = 0.dp
+            )
+        }
+    ) {
+        Column {
+            TopChartsTabRow(
+                selectedChartTab = state.selectedChartTab,
+                onChartSelected = viewModel::onTabSelected,
+                pagerController = viewPagerController
+            )
+            Surface(modifier = Modifier
+                .weight(1f)
+            ) {
+                CompositionLocalProvider(LocalViewPagerController provides viewPagerController) {
+                    TopChartsTabContent(
+                        selectedChartTab = selectedChartTab,
+                        onChartSelected = viewModel::onTabSelected,
+                        navigateTo = navigateTo,
+                    )
+                }
+            }
         }
     }
 }
 
-//private val emptyTabIndicator: @Composable (List<TabPosition>) -> Unit = {}
+@Composable
+private fun TopChartsTabRow(
+    selectedChartTab: StoreItemType,
+    onChartSelected: (StoreItemType) -> Unit,
+    pagerController: ViewPagerController,
+) {
+    TabRow(
+        selectedTabIndex = selectedChartTab.ordinal,
+        backgroundColor = Color.Transparent
+    )
+    {
+        StoreItemType.values().forEachIndexed { index, tab ->
+            Tab(
+                selected = (index == selectedChartTab.ordinal),
+                onClick = {
+                    onChartSelected(tab)
+                    pagerController.moveTo(tab.ordinal)
+                },
+                text = {
+                    Text(
+                        text = stringResource(id = when (tab) {
+                            StoreItemType.PODCAST -> R.string.store_podcasts
+                            StoreItemType.EPISODE -> R.string.store_episodes
+                        }),
+                        style = MaterialTheme.typography.body2)
+                }
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun TopChartsTabContent(
+    selectedChartTab: StoreItemType,
+    onChartSelected: (StoreItemType) -> Unit,
+    navigateTo: (Screen) -> Unit,
+) {
+    ViewPager(
+        modifier = Modifier.fillMaxSize(),
+        range = 0..1,
+        initialPage = selectedChartTab.ordinal,
+        onPageChanged = { onChartSelected(StoreItemType.values()[Math.floorMod(it, 2)]) }
+    ) {
+        val page = Math.floorMod(this.index, 2)
+        val itemType = StoreItemType.values()[page]
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (itemType) {
+                StoreItemType.PODCAST -> TopChartPodcastScreen(navigateTo = navigateTo)
+                StoreItemType.EPISODE -> TopChartEpisodeScreen(navigateTo = navigateTo)
+            }
+        }
+    }
+}
+

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.abs
 
 /**
@@ -86,10 +87,11 @@ fun ViewPager(
         val draggableState = rememberDraggableState {
             coroutineScope.launch {
                 val old = offset.value
-                val min = if (range != null && index.value == range.endInclusive) 0 else -width
-                val max = if (range != null && index.value == range.start) 0 else width
+                val min = if (range != null && index.value == range.last) 0 else -width
+                val max = if (range != null && index.value == range.first) 0 else width
                 offset.snapTo((offset.value - it).coerceIn(min.toFloat(), max.toFloat()))
                 offset.value - old
+                Timber.d("draggable - min:$min, max:$max, offset:${offset.value}, index:${index.value}")
             }
         }
 
@@ -131,20 +133,32 @@ fun ViewPager(
                         decayAnimation.calculateTargetValue(offset.value, -2f * velocity)
                     val target = anchors.minByOrNull { abs(it - initialTarget) } ?: 0f
                     when {
-                        target < 0 -> onPageChanged(index.value + 1)
-                        target > 0 -> onPageChanged(index.value - 1)
+                        target < 0 && (range == null || index.value < range.last) ->
+                            onPageChanged(index.value + 1)
+                        target > 0 && (range == null || index.value > range.first) ->
+                            onPageChanged(index.value + -1)
                     }
 
-                    val flingResult = offset.animateTo(target, spring())
-                    offset.snapTo(0f)
+                    if ((target == 0f) ||
+                        (target < 0 && (range == null || index.value < range.last)) ||
+                        (target > 0 && (range == null || index.value > range.first))
+                    ) {
+                        Timber.d("offset: ${offset.value}, target:$target - index:${index.value}")
+                        val flingResult = offset.animateTo(target, spring())
+                        offset.snapTo(0f)
 
-                    if (flingResult.endReason == AnimationEndReason.Finished) {
-                        if (flingResult.endState.value < 0) {
-                            index.value += 1
-                            onNext()
-                        } else if (flingResult.endState.value > 0) {
-                            index.value -= 1
-                            onPrevious()
+                        if (flingResult.endReason == AnimationEndReason.Finished) {
+                            if (flingResult.endState.value < 0) {
+                                index.value += (if (range != null && index.value >= range.last) 0 else 1)
+                                onNext()
+                                Timber.d("onNext")
+                                //onPageChanged(index.value)
+                            } else if (flingResult.endState.value > 0) {
+                                index.value -= (if (range != null && index.value <= range.first) 0 else 1)
+                                onPrevious()
+                                Timber.d("onPrevious")
+                                //onPageChanged(index.value)
+                            }
                         }
                     }
                 },
