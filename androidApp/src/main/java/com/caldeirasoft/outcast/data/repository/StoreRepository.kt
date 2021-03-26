@@ -176,7 +176,7 @@ class StoreRepository (
                                                             ?: Clock.System.now(),
                                                         releaseDateTime = it.releaseDateTime
                                                             ?: Clock.System.now(),
-                                                        artwork = it.artwork?.toArtwork(),
+                                                        artwork = elementChild.artwork?.toArtwork(),
                                                         trackCount = it.trackCount ?: 0,
                                                         podcastWebsiteUrl = it.podcastWebsiteUrl,
                                                         copyright = it.copyright,
@@ -197,7 +197,7 @@ class StoreRepository (
                                                 id = elementChild.adamId,
                                                 label = elementChild.link.label,
                                                 url = elementChild.link.url,
-                                                artwork = elementChild.artwork!!.toArtwork(),
+                                                artwork = elementChild.artwork?.toArtwork(),
                                                 storeFront = storeFront
                                             )
                                         )

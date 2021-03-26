@@ -3,6 +3,7 @@
 package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
@@ -38,7 +39,7 @@ class StoreEpisode(override val id: Long,
                    override val artwork: Artwork? = null,
                    val isComplete: Boolean = false,
                    val podcast: StorePodcast,
-) : StoreItemWithArtwork {
+) : StoreItemWithArtwork, StoreItemFeatured {
     override fun getArtworkUrl(): String =
         StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 

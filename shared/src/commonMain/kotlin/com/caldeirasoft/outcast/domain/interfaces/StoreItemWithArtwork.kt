@@ -7,6 +7,9 @@ interface StoreItemWithArtwork : StoreItem {
 
     fun getArtworkUrl(): String
 
+    fun getArtworkFeaturedUrl(): String =
+        artworkUrl(artwork, 1060, 520, crop = "fa")
+
     companion object {
         fun artworkUrl(artwork: Artwork?, width:Int, height: Int, crop:String = "bb", format:String = "jpg"): String {
             return artwork?.url?.replace("{w}", width.toString())

@@ -2,6 +2,7 @@
 package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
@@ -34,7 +35,7 @@ data class StorePodcast(
     val userRating: Float,
     val genre: Genre?,
     override val storeFront: String,
-) : StoreItemWithArtwork {
+) : StoreItemWithArtwork, StoreItemFeatured {
 
     @Transient
     val podcast: Podcast =
