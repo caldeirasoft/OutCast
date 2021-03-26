@@ -9,7 +9,9 @@ import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCa
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flattenMerge
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -30,25 +32,17 @@ abstract class TopChartSectionViewModel(
     // paged list
     @OptIn(FlowPreview::class)
     val topCharts: Flow<PagingData<StoreItem>> =
-        stateFlow
-            .map { it.selectedGenre }
-            .distinctUntilChanged()
-            .combine(fetchStoreFrontUseCase.getStoreFront()) { selectedGenre, storeFront ->
+        fetchStoreFrontUseCase.getStoreFront()
+            .map { storeFront ->
                 loadStoreTopChartsPagingDataUseCase.execute(
                     scope = viewModelScope,
-                    genreId = selectedGenre, // genre
+                    genreId = null, // genre
                     storeFront = storeFront,
                     storeItemType = storeItemType, // item type
                 )
             }
             .flattenMerge()
             .cachedIn(viewModelScope)
-
-    fun onGenreSelected(genreId: Int?) {
-        setState {
-            copy(selectedGenre = genreId)
-        }
-    }
 }
 
 
