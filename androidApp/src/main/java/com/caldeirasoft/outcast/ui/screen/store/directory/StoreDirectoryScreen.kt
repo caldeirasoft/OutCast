@@ -15,14 +15,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -40,13 +38,20 @@ import com.caldeirasoft.outcast.ui.components.foundation.ViewPager
 import com.caldeirasoft.outcast.ui.components.foundation.ViewPagerController
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
+import com.caldeirasoft.outcast.ui.screen.store.topcharts.pagerTabIndicatorOffset
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.ifLoadingMore
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toIntPx
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.pageChanges
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
 import timber.log.Timber
 import kotlin.math.log10
@@ -284,7 +289,7 @@ private fun SearchBar(modifier: Modifier = Modifier)
 }
 
 @Composable
-fun StoreCollectionChartsContent(
+fun StoreCollectionChartsContent22(
     storeCollection: StoreCollectionCharts,
     state: StoreDirectoryViewState,
     navigateTo: (Screen) -> Unit,
@@ -316,6 +321,111 @@ fun StoreCollectionChartsContent(
                 navigateTo = navigateTo,
                 onSubscribeClick = onSubscribeClick
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+private fun StoreCollectionChartsContent(
+    storeCollection: StoreCollectionCharts,
+    state: StoreDirectoryViewState,
+    navigateTo: (Screen) -> Unit,
+    onSubscribeClick: (StorePodcast) -> Unit = { },
+    onChartSelected: (StoreItemType) -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    // Remember a PagerState with our tab count
+    val pagerState = rememberPagerState(pageCount = 2)
+    val selectedChartTab = remember { state.selectedChartTab }
+    var fullHeight by remember { mutableStateOf(500.dp) }
+    var heights by remember { mutableStateOf(mapOf<Int, Int>()) }
+
+    LaunchedEffect(pagerState) {
+        pagerState.pageChanges.collect { page ->
+            onChartSelected(StoreItemType.values()[page])
+        }
+    }
+
+    Column {
+        TabRow(
+            selectedTabIndex = selectedChartTab.ordinal,
+            backgroundColor = Color.Transparent,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                )
+            }
+        )
+        {
+            StoreItemType.values().forEachIndexed { index, tab ->
+                Tab(
+                    selected = (index == selectedChartTab.ordinal),
+                    onClick = {
+                        onChartSelected(tab)
+                        // Animate to the selected page when clicked
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(tab.ordinal)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = when (tab) {
+                                StoreItemType.PODCAST -> R.string.store_podcasts
+                                StoreItemType.EPISODE -> R.string.store_episodes
+                            }),
+                            style = MaterialTheme.typography.body2)
+                    }
+                )
+            }
+        }
+
+        fullHeight = heights[pagerState.currentPage]?.toDp() ?: 600.dp
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.height(fullHeight)
+        ) { page ->
+            val topCharts: List<StoreItem> = when (page) {
+                0 -> storeCollection.topPodcasts
+                else -> storeCollection.topEpisodes
+            }
+            Column(modifier = Modifier
+                .wrapContentHeight()
+                .onSizeChanged {
+                    if (!heights.containsKey(page))
+                        heights = heights.plus(page to it.height)
+                }) {
+                topCharts.forEachIndexed { index, storeItem ->
+                    when (storeItem) {
+                        is StorePodcast -> {
+                            PodcastListItem(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(onClick = {
+                                        navigateTo(Screen.StorePodcastScreen(storeItem))
+                                    }),
+                                storePodcast = storeItem,
+                                index = index + 1,
+                                followingStatus = state.followingStatus[storeItem.id],
+                                onSubscribeClick = onSubscribeClick
+                            )
+                            Divider()
+                        }
+                        is StoreEpisode -> {
+                            StoreEpisodeItem(
+                                episode = storeItem.episode,
+                                modifier = Modifier.fillMaxWidth(),
+                                onPodcastClick = {
+                                    navigateTo(Screen.StorePodcastScreen(storeItem.podcast))
+                                },
+                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
+                                index = index + 1
+                            )
+                            Divider()
+                        }
+                    }
+                }
+            }
         }
     }
 }
