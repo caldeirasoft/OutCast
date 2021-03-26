@@ -29,6 +29,9 @@ import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
@@ -226,23 +229,23 @@ fun StoreCollectionGenresContent(
 }
 
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun StoreCollectionFeaturedContent(
     storeCollection: StoreCollectionFeatured,
     navigateTo: (Screen) -> Unit
 ) {
-    val pagerState: PagerState = remember { PagerState(pages = storeCollection.items.size - 1)}
-    val selectedPage = remember { mutableStateOf(0) }
+    // Remember a PagerState with our tab count
+    val pagerState = rememberPagerState(pageCount = storeCollection.items.size)
 
     Column {
-        Pager(
-            state = pagerState, modifier = Modifier
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2.03f)
-        )
-        {
-            val item = storeCollection.items[Math.floorMod(this.page, storeCollection.items.size)]
-            selectedPage.value = pagerState.currentPage
+        ) { page ->
+            val item = storeCollection.items[Math.floorMod(page, storeCollection.items.size)]
             val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
             Card(
                 backgroundColor = bgDominantColor,
@@ -252,69 +255,11 @@ fun StoreCollectionFeaturedContent(
                     .padding(horizontal = 4.dp)
             )
             {
-                Box {
-                    CoilImage(
-                        imageModel = item.getArtworkUrl(),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-
-                    /*
-                    if (item is StorePodcastFeatured && false) {
-                        ConstraintLayout(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .padding(horizontal = 24.dp, vertical = 16.dp)
-                                .align(Alignment.BottomCenter)
-                        ) {
-                            val (name, artist, icon) = createRefs()
-                            Text(
-                                item.name,
-                                modifier = Modifier
-                                    .constrainAs(name) {
-                                        linkTo(top = parent.top, bottom = artist.top, bias = 1f)
-                                        linkTo(start = parent.start, end = icon.start)
-                                        width = Dimension.fillToConstraints
-                                        height = Dimension.wrapContent
-
-                                    },
-                                style = MaterialTheme.typography.h6,
-                                color = Color.getColor(item.artwork?.textColor1!!)
-                            )
-                            Text(
-                                item.artistName,
-                                modifier = Modifier
-                                    .constrainAs(artist) {
-                                        linkTo(top = name.bottom, bottom = parent.bottom, bias = 1f)
-                                        linkTo(start = parent.start, end = icon.start)
-                                        width = Dimension.fillToConstraints
-                                        height = Dimension.fillToConstraints
-                                    },
-                                style = MaterialTheme.typography.body2,
-                                color = Color.getColor(item.artwork?.textColor2!!)
-                            )
-                            Icon(imageVector = Icons.Filled.Add,
-                                tint = Color.getColor(item.artwork?.textColor1!!),
-                                modifier = Modifier
-                                    .constrainAs(icon) {
-                                        linkTo(top = parent.top, bottom = parent.bottom)
-                                        linkTo(start = name.end, end = parent.end)
-                                        width = Dimension.wrapContent
-                                    })
-                        }
-
-                    }
-                    */
-                }
-            }
-        }
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            storeCollection.items.forEachIndexed { index, _ ->
-                CarouselDot(
-                    selected = index == selectedPage.value,
-                    MaterialTheme.colors.primary,
+                CoilImage(
+                    imageModel = item.getArtworkFeaturedUrl(),
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxSize()
                 )
             }
         }
