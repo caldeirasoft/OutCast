@@ -112,20 +112,37 @@ dependencyResolutionManagement {
             alias("sqldelight-android").to("com.squareup.sqldelight", "android-driver").versionRef("sqldelight")
             alias("sqldelight-coroutines").to("com.squareup.sqldelight", "coroutines-extensions").versionRef("sqldelight")
             alias("sqldelight-paging").to("com.squareup.sqldelight:android-paging-extensions:1.2.1")
-            bundle("sqldelight", listOf("sqldelight-android", "sqldelight-coroutines", "sqldelight-paging"))
+            bundle("sqldelight",
+                listOf("sqldelight-android", "sqldelight-coroutines", "sqldelight-paging"))
 
             version("chucker", "3.4.+")
-            alias("chucker-debug").to("com.github.chuckerteam.chucker", "library").versionRef("chucker")
-            alias("chucker-release").to("com.github.chuckerteam.chucker", "library-no-op").versionRef("chucker")
+            alias("chucker-debug").to("com.github.chuckerteam.chucker", "library")
+                .versionRef("chucker")
+            alias("chucker-release").to("com.github.chuckerteam.chucker", "library-no-op")
+                .versionRef("chucker")
 
             version("stetho", "1.5.0") // 1.5.1 has critical bug
             alias("stetho-core").to("com.facebook.stetho", "stetho").versionRef("stetho")
             alias("stetho-okhttp3").to("com.facebook.stetho", "stetho-okhttp3").versionRef("stetho")
             bundle("stetho", listOf("stetho-core", "stetho-okhttp3"))
 
+            version("accompanist", "0.7.0")
+            alias("accompanist-coil").to("com.google.accompanist", "accompanist-coil")
+                .versionRef("accompanist")
+            alias("accompanist-pager").to("com.google.accompanist", "accompanist-pager")
+                .versionRef("accompanist")
+            alias("accompanist-systemuicontroller").to("com.google.accompanist",
+                "accompanist-systemuicontroller").versionRef("accompanist")
+            alias("accompanist-insets").to("com.google.accompanist", "accompanist-insets")
+                .versionRef("accompanist")
+            bundle("accompanist",
+                listOf("accompanist-coil",
+                    "accompanist-pager",
+                    "accompanist-systemuicontroller",
+                    "accompanist-insets"))
+
             alias("timber").to("com.jakewharton.timber:timber:4.+")
             alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.7")
-            alias("accompanist-coil").to("dev.chrisbanes.accompanist:accompanist-coil:0.6.2")
             alias("mavericks").to("com.airbnb.android:mavericks-compose:2.1.0-alpha01")
             alias("junit").to("junit:junit:4.+")
         }

@@ -1,32 +1,31 @@
 package com.caldeirasoft.outcast.ui.screen.store.topcharts
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.ui.components.foundation.LocalViewPagerController
-import com.caldeirasoft.outcast.ui.components.foundation.ViewPager
-import com.caldeirasoft.outcast.ui.components.foundation.ViewPagerController
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartEpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartPodcastScreen
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
+import com.google.accompanist.pager.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 @FlowPreview
@@ -39,7 +38,6 @@ fun TopChartsScreen(
 ) {
     val viewModel: TopChartsViewModel = mavericksViewModel(initialArgument = storeItemType)
     val state by viewModel.collectAsState()
-    val viewPagerController = remember { ViewPagerController() }
     val selectedChartTab = remember { state.selectedChartTab }
 
     Scaffold(
@@ -63,79 +61,104 @@ fun TopChartsScreen(
             )
         }
     ) {
-        Column {
-            TopChartsTabRow(
-                selectedChartTab = state.selectedChartTab,
-                onChartSelected = viewModel::onTabSelected,
-                pagerController = viewPagerController
-            )
-            Surface(modifier = Modifier
-                .weight(1f)
-            ) {
-                CompositionLocalProvider(LocalViewPagerController provides viewPagerController) {
-                    TopChartsTabContent(
-                        selectedChartTab = selectedChartTab,
-                        onChartSelected = viewModel::onTabSelected,
-                        navigateTo = navigateTo,
-                    )
-                }
-            }
-        }
+        TopChartsTabs(
+            selectedChartTab = state.selectedChartTab,
+            onChartSelected = viewModel::onTabSelected,
+            navigateTo = navigateTo)
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-private fun TopChartsTabRow(
-    selectedChartTab: StoreItemType,
-    onChartSelected: (StoreItemType) -> Unit,
-    pagerController: ViewPagerController,
-) {
-    TabRow(
-        selectedTabIndex = selectedChartTab.ordinal,
-        backgroundColor = Color.Transparent
-    )
-    {
-        StoreItemType.values().forEachIndexed { index, tab ->
-            Tab(
-                selected = (index == selectedChartTab.ordinal),
-                onClick = {
-                    onChartSelected(tab)
-                    pagerController.moveTo(tab.ordinal)
-                },
-                text = {
-                    Text(
-                        text = stringResource(id = when (tab) {
-                            StoreItemType.PODCAST -> R.string.store_podcasts
-                            StoreItemType.EPISODE -> R.string.store_episodes
-                        }),
-                        style = MaterialTheme.typography.body2)
-                }
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun TopChartsTabContent(
+private fun TopChartsTabs(
     selectedChartTab: StoreItemType,
     onChartSelected: (StoreItemType) -> Unit,
     navigateTo: (Screen) -> Unit,
 ) {
-    ViewPager(
-        modifier = Modifier.fillMaxSize(),
-        range = 0..1,
-        initialPage = selectedChartTab.ordinal,
-        onPageChanged = { onChartSelected(StoreItemType.values()[Math.floorMod(it, 2)]) }
-    ) {
-        val page = Math.floorMod(this.index, 2)
-        val itemType = StoreItemType.values()[page]
-        Box(modifier = Modifier.fillMaxSize()) {
-            when (itemType) {
-                StoreItemType.PODCAST -> TopChartPodcastScreen(navigateTo = navigateTo)
-                StoreItemType.EPISODE -> TopChartEpisodeScreen(navigateTo = navigateTo)
+    val coroutineScope = rememberCoroutineScope()
+    // Remember a PagerState with our tab count
+    val pagerState = rememberPagerState(pageCount = 2)
+
+    LaunchedEffect(pagerState) {
+        pagerState.pageChanges.collect { page ->
+            onChartSelected(StoreItemType.values()[page])
+        }
+    }
+
+    Column {
+        TabRow(
+            selectedTabIndex = selectedChartTab.ordinal,
+            backgroundColor = Color.Transparent,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                )
+            }
+        )
+        {
+            StoreItemType.values().forEachIndexed { index, tab ->
+                Tab(
+                    selected = (index == selectedChartTab.ordinal),
+                    onClick = {
+                        onChartSelected(tab)
+                        // Animate to the selected page when clicked
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(tab.ordinal)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = when (tab) {
+                                StoreItemType.PODCAST -> R.string.store_podcasts
+                                StoreItemType.EPISODE -> R.string.store_episodes
+                            }),
+                            style = MaterialTheme.typography.body2)
+                    }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) { page ->
+            val itemType = StoreItemType.values()[page]
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (itemType) {
+                    StoreItemType.PODCAST -> TopChartPodcastScreen(navigateTo = navigateTo)
+                    StoreItemType.EPISODE -> TopChartEpisodeScreen(navigateTo = navigateTo)
+                }
             }
         }
     }
 }
 
+/**
+ * This indicator syncs up the tab indicator with the [HorizontalPager] position.
+ * We may add this in the library at some point.
+ */
+@OptIn(ExperimentalPagerApi::class)
+fun Modifier.pagerTabIndicatorOffset(
+    pagerState: PagerState,
+    tabPositions: List<TabPosition>,
+): Modifier = composed {
+    val targetIndicatorOffset: Dp
+    val indicatorWidth: Dp
+
+    val currentTab = tabPositions[pagerState.currentPage]
+    val nextTab = tabPositions.getOrNull(pagerState.currentPage + 1)
+    if (nextTab != null) {
+        // If we have a next tab, lerp between the size and offset
+        targetIndicatorOffset = lerp(currentTab.left, nextTab.left, pagerState.currentPageOffset)
+        indicatorWidth = lerp(currentTab.width, nextTab.width, pagerState.currentPageOffset)
+    } else {
+        // Otherwise we just use the current tab/page
+        targetIndicatorOffset = currentTab.left
+        indicatorWidth = currentTab.width
+    }
+
+    fillMaxWidth()
+        .wrapContentSize(Alignment.BottomStart)
+        .offset(x = targetIndicatorOffset)
+        .width(indicatorWidth)
+}
