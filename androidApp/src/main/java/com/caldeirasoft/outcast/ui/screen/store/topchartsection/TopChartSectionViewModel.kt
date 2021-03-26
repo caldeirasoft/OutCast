@@ -4,10 +4,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.StoreTopCharts
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
-import com.caldeirasoft.outcast.domain.util.tryCast
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -41,14 +39,7 @@ abstract class TopChartSectionViewModel(
                     genreId = selectedGenre, // genre
                     storeFront = storeFront,
                     storeItemType = storeItemType, // item type
-                    dataLoadedCallback = { page ->
-                        page.tryCast<StoreTopCharts> {
-                            val topCharts = this
-                            setState {
-                                copy(categories = topCharts.categories)
-                            }
-                        }
-                    })
+                )
             }
             .flattenMerge()
             .cachedIn(viewModelScope)
