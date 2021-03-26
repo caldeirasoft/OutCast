@@ -21,7 +21,6 @@ import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.ChipButton
-import com.caldeirasoft.outcast.ui.components.LazyListLayout
 import com.caldeirasoft.outcast.ui.components.PodcastListItem
 import com.caldeirasoft.outcast.ui.components.StoreEpisodeItem
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
@@ -64,7 +63,7 @@ private fun TopChartSectionScreen(
     val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = viewModel.topCharts.collectAsLazyPagingItems()
 
-    LazyListLayout(lazyListItems = lazyPagingItems) {
+    //LazyListLayout(lazyListItems = lazyPagingItems) {
         val listState = rememberLazyListState(0)
 
         LazyColumn(
@@ -100,6 +99,20 @@ private fun TopChartSectionScreen(
                     }
                 }
             }
+            /*
+            item {
+                FilterChipGroup(
+                    modifier = Modifier.height(48.dp),
+                    selectedValue = StoreGenreItem.values().firstOrNull { it.genreId == selectedGenre },
+                    values = StoreGenreItem.values(),
+                    onClick = { viewModel.onGenreSelected(it?.genreId) }) {
+                    Text(
+                        text = stringResource(id = it.titleId),
+                        maxLines = 1
+                    )
+                }
+            }
+            */
 
             itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
                 when (item) {
@@ -144,7 +157,7 @@ private fun TopChartSectionScreen(
                 Spacer(modifier = Modifier.height(56.dp))
             }
         }
-    }
+    //}
 }
 
 //private val emptyTabIndicator: @Composable (List<TabPosition>) -> Unit = {}
