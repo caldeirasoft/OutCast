@@ -253,6 +253,13 @@ fun StoreCollectionFeaturedContent(
                 modifier = Modifier
                     .fillMaxSize(0.95f)
                     .padding(horizontal = 4.dp)
+                    .clickable {
+                        when (item) {
+                            is StoreRoom -> navigateTo(Screen.Room(item))
+                            is StorePodcast -> navigateTo(Screen.StorePodcastScreen(item))
+                            is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                        }
+                    }
             )
             {
                 CoilImage(

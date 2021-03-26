@@ -37,6 +37,8 @@ data class StorePodcast(
     override val storeFront: String,
 ) : StoreItemWithArtwork, StoreItemFeatured {
 
+    override var featuredArtwork: Artwork? = null
+
     @Transient
     val podcast: Podcast =
         Podcast(

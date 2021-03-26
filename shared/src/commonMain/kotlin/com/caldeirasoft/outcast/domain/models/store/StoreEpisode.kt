@@ -40,6 +40,8 @@ class StoreEpisode(override val id: Long,
                    val isComplete: Boolean = false,
                    val podcast: StorePodcast,
 ) : StoreItemWithArtwork, StoreItemFeatured {
+    override var featuredArtwork: Artwork? = null
+
     override fun getArtworkUrl(): String =
         StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
 

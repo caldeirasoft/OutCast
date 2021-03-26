@@ -162,32 +162,12 @@ class StoreRepository (
                                         val id = elementChild.link.contentId
                                         if (lockupResult.containsKey(id)) {
                                             lockupResult[id]?.let {
-                                                yield(
-                                                    StorePodcast(
-                                                        id = it.id?.toLong() ?: 0,
-                                                        name = it.name.orEmpty(),
-                                                        url = it.url.orEmpty(),
-                                                        artistName = it.artistName.orEmpty(),
-                                                        artistId = it.artistId?.toLong(),
-                                                        artistUrl = it.artistUrl,
-                                                        description = it.description?.standard,
-                                                        feedUrl = it.feedUrl.orEmpty(),
-                                                        releaseDate = it.releaseDateTime
-                                                            ?: Clock.System.now(),
-                                                        releaseDateTime = it.releaseDateTime
-                                                            ?: Clock.System.now(),
-                                                        artwork = elementChild.artwork?.toArtwork(),
-                                                        trackCount = it.trackCount ?: 0,
-                                                        podcastWebsiteUrl = it.podcastWebsiteUrl,
-                                                        copyright = it.copyright,
-                                                        contentAdvisoryRating = it.contentRatingsBySystem?.riaa?.name,
-                                                        userRating = it.userRating?.value?.toFloat()
-                                                            ?: 0f,
-                                                        genre = it.genres.firstOrNull()
-                                                            ?.toGenre(),
-                                                        storeFront = storeFront
-                                                    )
-                                                )
+                                                getStoreItemFromLookupResultItem(it,
+                                                    storeFront)?.apply {
+                                                    featuredArtwork =
+                                                        elementChild.artwork?.toArtwork()
+                                                    yield(this)
+                                                }
                                             }
                                         }
                                     }

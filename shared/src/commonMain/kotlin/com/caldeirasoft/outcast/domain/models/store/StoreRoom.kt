@@ -8,9 +8,7 @@ import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 @Serializable
@@ -25,6 +23,8 @@ data class StoreRoom(
     val itemType: StoreItemType = StoreItemType.PODCAST,
     val isIndexed: Boolean = false,
 ) : StoreFeatured {
+    override var featuredArtwork: Artwork? = artwork
+
     override fun getArtworkUrl(): String =
         StoreItemWithArtwork.artworkUrl(artwork, 400, 196, crop = "fa")
 

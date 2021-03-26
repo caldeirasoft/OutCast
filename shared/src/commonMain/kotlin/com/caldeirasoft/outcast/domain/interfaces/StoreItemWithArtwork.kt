@@ -4,11 +4,12 @@ import com.caldeirasoft.outcast.domain.models.Artwork
 
 interface StoreItemWithArtwork : StoreItem {
     val artwork: Artwork?
+    var featuredArtwork: Artwork?
 
     fun getArtworkUrl(): String
 
     fun getArtworkFeaturedUrl(): String =
-        artworkUrl(artwork, 1060, 520, crop = "fa")
+        artworkUrl(featuredArtwork, 1060, 520, crop = "fa")
 
     companion object {
         fun artworkUrl(artwork: Artwork?, width:Int, height: Int, crop:String = "bb", format:String = "jpg"): String {
