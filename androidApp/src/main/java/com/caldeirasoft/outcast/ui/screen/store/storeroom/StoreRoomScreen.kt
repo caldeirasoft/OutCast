@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -237,14 +236,7 @@ fun StoreRoomScreen(
                                 )
                             }
                         },
-                        actions = {
-                            IconButton(onClick = { }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Search,
-                                    contentDescription = null,
-                                )
-                            }
-                        },
+                        actions = { },
                         backgroundColor = Color.Transparent,
                         contentColor = contentColor,
                         elevation = if (listState.firstVisibleItemIndex > 0) 1.dp else 0.dp

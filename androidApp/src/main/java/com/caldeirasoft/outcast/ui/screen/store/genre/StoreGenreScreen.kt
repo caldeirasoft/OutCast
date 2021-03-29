@@ -39,7 +39,7 @@ fun StoreGenreScreen(
     val state by viewModel.collectAsState()
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
 
-    ReachableScaffold { headerHeight ->
+    ReachableScaffold(headerRatio = 1 / 6f) { headerHeight ->
         val spacerHeight = headerHeight - 56.px
 
         LazyListLayout(lazyListItems = lazyPagingItems) {
