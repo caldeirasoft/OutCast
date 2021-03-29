@@ -95,7 +95,7 @@ fun StoreSearchScreen(
 
         ReachableAppBarWithSearchBar(
             title = {
-                Text(text = stringResource(id = R.string.store_tab_discover))
+                Text(text = stringResource(id = R.string.screen_search))
             },
             actions = {
                 IconButton(onClick = { /*TODO*/ }) {

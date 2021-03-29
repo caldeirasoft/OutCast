@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.ui.screen.store.directory
 
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreGroupingPage
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
@@ -49,10 +48,4 @@ class StoreDirectoryViewModel(
                     })
             }
             .cachedIn(viewModelScope)
-
-    fun onTabSelected(tab: StoreItemType) {
-        setState {
-            copy(selectedChartTab = tab)
-        }
-    }
 }
