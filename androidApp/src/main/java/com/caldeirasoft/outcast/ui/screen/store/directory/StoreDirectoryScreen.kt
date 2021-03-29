@@ -146,13 +146,6 @@ fun StoreDirectoryScreen(
                                     onChartSelected = viewModel::onTabSelected
                                 )
                             }
-                            is StoreCollectionGenres -> {
-                                // genres
-                                StoreCollectionGenresContent(
-                                    storeCollection = collection,
-                                    navigateTo = navigateTo
-                                )
-                            }
                             is StoreCollectionRooms -> {
                                 // genres
                                 StoreCollectionRoomsContent(

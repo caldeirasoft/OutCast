@@ -21,7 +21,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
@@ -174,60 +173,6 @@ fun StoreCollectionRoomsContent(
         }
     }
 }
-
-@Composable
-fun StoreCollectionGenresContent(
-    storeCollection: StoreCollectionGenres,
-    navigateTo: (Screen) -> Unit
-)
-{
-    val columns = 4
-    val maxLines = 2
-    val genreMore = Genre(-1, "More", "")
-    val genresToDisplay =
-        storeCollection.genres.let {
-            if (it.size > columns * maxLines) it.take(columns * maxLines - 1).plus(genreMore)
-            else it
-        }
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // header
-        StoreHeadingSectionWithLink(
-            title = storeCollection.label,
-            onClick = { navigateTo(Screen.StoreCategories(storeCollection)) }
-        )
-
-        Surface(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
-            border = ButtonDefaults.outlinedBorder,
-            shape = RoundedCornerShape(8.dp)) {
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Grid(
-                    mainAxisSpacing = 0.dp,
-                    contentPadding = PaddingValues(0.dp),
-                    items = genresToDisplay,
-                    columns = columns,
-                    rowHeight = 96.dp
-                ) { item, _ ->
-                    when (item.id) {
-                        -1 ->
-                            GenreGridItemMore(
-                                genre = item,
-                                howManyMore = storeCollection.genres.size - (columns * maxLines - 1),
-                                onGenreClick = { navigateTo(Screen.StoreCategories(storeCollection)) })
-                        else ->
-                            GenreGridItem(
-                                genre = item,
-                                onGenreClick = { navigateTo(Screen.GenreScreen(item)) })
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable

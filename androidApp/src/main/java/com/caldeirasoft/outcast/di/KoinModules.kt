@@ -103,7 +103,6 @@ internal val networkModule = module {
             }
             polymorphic(StoreCollection::class) {
                 subclass(StoreCollectionRooms::class)
-                subclass(StoreCollectionGenres::class)
                 subclass(StoreCollectionFeatured::class)
                 subclass(StoreCollectionPodcasts::class)
                 subclass(StoreCollectionEpisodes::class)

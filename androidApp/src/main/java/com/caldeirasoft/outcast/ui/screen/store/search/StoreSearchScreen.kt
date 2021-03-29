@@ -14,26 +14,21 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.ui.components.GenreCardItem
 import com.caldeirasoft.outcast.ui.components.ReachableScaffold
-import com.caldeirasoft.outcast.ui.components.ShimmerStoreCollectionsList
 import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
 import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
@@ -45,14 +40,7 @@ import kotlin.math.log10
 fun StoreSearchScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: StoreSearchViewModel = mavericksViewModel()
-    val state by viewModel.collectAsState()
     val listState = rememberLazyListState(0)
-
-    LaunchedEffect(state)  {
-        if (state.storeGenreData is Uninitialized)
-            viewModel.getGenres()
-    }
 
     ReachableScaffold { headerHeight ->
         val spacerHeight = headerHeight - 36.px
@@ -67,52 +55,40 @@ fun StoreSearchScreen(
                 Spacer(modifier = Modifier.height(spacerHeight.toDp()))
             }
 
-            when (val storeGenre = state.storeGenreData)
-            {
-                is Loading ->
-                    item {
-                        ShimmerStoreCollectionsList()
+            item {
+                // header
+                StoreHeadingSection(title = stringResource(id = R.string.store_tab_charts))
+            }
+            gridItems(
+                items = StoreItemType.values().toList(),
+                contentPadding = PaddingValues(16.dp),
+                horizontalInnerPadding = 8.dp,
+                verticalInnerPadding = 8.dp,
+                columns = 2
+            ) { itemType ->
+                TopChartCardItem(
+                    itemType = itemType,
+                    navigateToTopChart = { navigateTo(Screen.Charts(itemType)) }
+                )
+            }
+            item {
+                // header
+                StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
+            }
+            gridItems(
+                items = StoreGenreItem.values().toList(),
+                contentPadding = PaddingValues(16.dp),
+                horizontalInnerPadding = 8.dp,
+                verticalInnerPadding = 8.dp,
+                columns = 2
+            ) { item ->
+                val genre = Genre(id = item.genreId, name = stringResource(item.titleId), url = "")
+                GenreCardItem(
+                    genre = genre,
+                    navigateToGenre = {
+                        navigateTo(Screen.GenreScreen(genre))
                     }
-                is Success -> {
-                    val genreItems = storeGenre.invoke().genres
-                    item {
-                        // header
-                        StoreHeadingSection(title = stringResource(id = R.string.store_tab_charts))
-                    }
-                    gridItems(
-                        items = StoreItemType.values().toList(),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalInnerPadding = 8.dp,
-                        verticalInnerPadding = 8.dp,
-                        columns = 2
-                    ) { itemType ->
-                        TopChartCardItem(
-                            itemType = itemType,
-                            navigateToTopChart = { navigateTo(Screen.Charts(itemType)) }
-                        )
-                    }
-                    item {
-                        // header
-                        StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
-                    }
-                    gridItems(
-                        items = genreItems,
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalInnerPadding = 8.dp,
-                        verticalInnerPadding = 8.dp,
-                        columns = 2
-                    ) { genre ->
-                        /*
-                        GenreCardItem(
-                            genre = genre,
-                            navigateToGenre = {
-                                navigateTo(Screen.GenreScreen(genre))
-                            }
-                        )
-                         */
-                    }
-                }
-                else -> {}
+                )
             }
         }
 

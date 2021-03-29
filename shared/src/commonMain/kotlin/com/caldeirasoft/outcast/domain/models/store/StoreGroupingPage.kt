@@ -18,7 +18,6 @@ class StoreGroupingPage(
     override val timestamp: Instant,
     var fetchedAt: Instant = Clock.System.now()
 ) : StorePageWithCollection {
-    val genres = storeData.genres
     override val storeList: MutableList<StoreCollection>
         get() = storeData.storeList
 

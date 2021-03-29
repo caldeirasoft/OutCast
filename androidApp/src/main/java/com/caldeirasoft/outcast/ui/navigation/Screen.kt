@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Genre
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionGenres
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
@@ -52,7 +51,6 @@ sealed class Screen (val id: ScreenName) {
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)
-    data class StoreCategories(val genres: StoreCollectionGenres) : Screen(ScreenName.STORE_CATEGORIES)
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
     data class StorePodcastScreen(val podcast: StorePodcast) : Screen(ScreenName.STORE_PODCAST)
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
