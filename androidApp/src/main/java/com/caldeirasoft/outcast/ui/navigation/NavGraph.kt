@@ -67,10 +67,10 @@ fun MainNavHost(startScreen: ScreenName) {
                 SetupBottomNavBar(
                     navController = navController,
                     items = listOf(
-                        BottomNavigationScreen.Queue,
                         BottomNavigationScreen.Inbox,
                         BottomNavigationScreen.Library,
                         BottomNavigationScreen.Discover,
+                        BottomNavigationScreen.Search,
                         BottomNavigationScreen.More,
                     ),
                     navigateTo = actions.selectBottomNav
@@ -81,9 +81,6 @@ fun MainNavHost(startScreen: ScreenName) {
                 navController = navController,
                 startDestination = startScreen.name,
             ) {
-                composable(ScreenName.QUEUE.name) {
-                    Text(text = "Queue")
-                }
                 composable(ScreenName.INBOX.name) {
                     InboxScreen(
                         navigateTo = actions.select,

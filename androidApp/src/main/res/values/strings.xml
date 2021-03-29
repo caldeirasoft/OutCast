@@ -45,6 +45,7 @@
     <string name="screen_inbox">Inbox</string>
     <string name="screen_library">Library</string>
     <string name="screen_discover">Discover</string>
+    <string name="screen_search">Search</string>
     <string name="screen_more">More</string>
     <string name="screen_profile">Profile</string>
     <string name="screen_favorites">Favorites</string>

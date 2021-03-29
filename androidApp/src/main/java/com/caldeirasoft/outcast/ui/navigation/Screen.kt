@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Inbox
-import androidx.compose.material.icons.outlined.Queue
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
@@ -72,11 +72,6 @@ sealed class BottomNavigationScreen(
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 ) {
-    object Queue : BottomNavigationScreen(ScreenName.QUEUE,
-        R.string.screen_queue,
-        Icons.Outlined.Queue,
-        Icons.Filled.Queue)
-
     object Inbox : BottomNavigationScreen(ScreenName.INBOX,
         R.string.screen_inbox,
         Icons.Outlined.Inbox,
@@ -89,7 +84,14 @@ sealed class BottomNavigationScreen(
 
     object Discover : BottomNavigationScreen(ScreenName.STORE_DISCOVER,
         R.string.screen_discover,
-        Icons.Default.Search)
+        Icons.Default.Explore,
+        Icons.Filled.Explore
+    )
+
+    object Search : BottomNavigationScreen(ScreenName.STORE_SEARCH,
+        R.string.screen_search,
+        Icons.Outlined.Search,
+        Icons.Filled.Search)
 
     object More :
         BottomNavigationScreen(ScreenName.MORE, R.string.screen_more, Icons.Default.MoreHoriz)
