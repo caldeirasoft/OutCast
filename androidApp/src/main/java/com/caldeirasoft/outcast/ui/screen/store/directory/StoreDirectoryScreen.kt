@@ -24,8 +24,6 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.foundation.ViewPager
-import com.caldeirasoft.outcast.ui.components.foundation.ViewPagerController
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.pagerTabIndicatorOffset
@@ -181,6 +179,14 @@ private fun StoreCollectionChartsContent(
     var heights by remember { mutableStateOf(mapOf<Int, Int>()) }
 
     Column {
+        StoreHeadingSectionWithLink(
+            title = stringResource(id = R.string.store_tab_charts),
+            onClick = {
+                val selectedTab = StoreItemType.values()[pagerState.currentPage]
+                navigateTo(Screen.Charts(selectedTab))
+            }
+        )
+
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             backgroundColor = Color.Transparent,
@@ -255,91 +261,6 @@ private fun StoreCollectionChartsContent(
                             )
                             Divider()
                         }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TopChartsTabRow(
-    selectedChartTab: StoreItemType,
-    onChartSelected: (StoreItemType) -> Unit,
-    pagerController: ViewPagerController,
-) {
-    TabRow(
-        selectedTabIndex = selectedChartTab.ordinal,
-        backgroundColor = Color.Transparent
-    )
-    {
-        StoreItemType.values().forEachIndexed { index, tab ->
-            Tab(
-                selected = (index == selectedChartTab.ordinal),
-                onClick = {
-                    onChartSelected(tab)
-                    pagerController.moveTo(tab.ordinal)
-                },
-                text = {
-                    Text(
-                        text = stringResource(id = when (tab) {
-                            StoreItemType.PODCAST -> R.string.store_podcasts
-                            StoreItemType.EPISODE -> R.string.store_episodes
-                        }),
-                        style = MaterialTheme.typography.body2)
-                }
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun TopChartsTabContent(
-    storeCollection: StoreCollectionCharts,
-    state: StoreDirectoryViewState,
-    selectedChartTab: StoreItemType,
-    onChartSelected: (StoreItemType) -> Unit,
-    navigateTo: (Screen) -> Unit,
-    onSubscribeClick: (StorePodcast) -> Unit = { },
-) {
-    ViewPager(
-        modifier = Modifier.fillMaxWidth(),
-        range = 0..1,
-        initialPage = selectedChartTab.ordinal,
-        onPageChanged = { onChartSelected(StoreItemType.values()[it]) }
-    ) {
-        val page = this.index
-        val topCharts: List<StoreItem> = when (page) {
-            0 -> storeCollection.topPodcasts
-            else -> storeCollection.topEpisodes
-        }
-        Column {
-            topCharts.forEachIndexed { index, storeItem ->
-                when (storeItem) {
-                    is StorePodcast -> {
-                        PodcastListItem(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(onClick = {
-                                    navigateTo(Screen.StorePodcastScreen(storeItem))
-                                }),
-                            storePodcast = storeItem,
-                            index = index + 1,
-                            followingStatus = state.followingStatus[storeItem.id],
-                            onSubscribeClick = onSubscribeClick
-                        )
-                        Divider()
-                    }
-                    is StoreEpisode -> {
-                        StoreEpisodeItem(
-                            episode = storeItem.episode,
-                            modifier = Modifier.fillMaxWidth(),
-                            onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast)) },
-                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
-                            index = index + 1
-                        )
-                        Divider()
                     }
                 }
             }

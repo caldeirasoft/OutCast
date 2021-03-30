@@ -4,7 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -13,20 +14,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
-import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartEpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartPodcastScreen
-import com.caldeirasoft.outcast.ui.util.mavericksViewModel
-import com.google.accompanist.pager.*
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalPagerApi::class)
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
@@ -35,9 +38,9 @@ fun TopChartsScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: TopChartsViewModel = mavericksViewModel(initialArgument = storeItemType)
-    val state by viewModel.collectAsState()
-    val selectedChartTab = remember { state.selectedChartTab }
+    val coroutineScope = rememberCoroutineScope()
+    // Remember a PagerState with our tab count
+    val pagerState = rememberPagerState(pageCount = 2, initialPage = storeItemType.ordinal)
 
     Scaffold(
         topBar = {
@@ -57,8 +60,8 @@ fun TopChartsScreen(
         }
     ) {
         TopChartsTabs(
-            selectedChartTab = state.selectedChartTab,
-            onChartSelected = viewModel::onTabSelected,
+            coroutineScope = coroutineScope,
+            pagerState = pagerState,
             navigateTo = navigateTo)
     }
 }
@@ -66,23 +69,14 @@ fun TopChartsScreen(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun TopChartsTabs(
-    selectedChartTab: StoreItemType,
-    onChartSelected: (StoreItemType) -> Unit,
+    coroutineScope: CoroutineScope,
+    pagerState: PagerState,
     navigateTo: (Screen) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    // Remember a PagerState with our tab count
-    val pagerState = rememberPagerState(pageCount = 2)
-
-    LaunchedEffect(pagerState) {
-        pagerState.pageChanges.collect { page ->
-            onChartSelected(StoreItemType.values()[page])
-        }
-    }
 
     Column {
         TabRow(
-            selectedTabIndex = selectedChartTab.ordinal,
+            selectedTabIndex = pagerState.currentPage,
             backgroundColor = Color.Transparent,
             indicator = { tabPositions ->
                 TabRowDefaults.Indicator(
@@ -93,9 +87,8 @@ private fun TopChartsTabs(
         {
             StoreItemType.values().forEachIndexed { index, tab ->
                 Tab(
-                    selected = (index == selectedChartTab.ordinal),
+                    selected = (index == pagerState.currentPage),
                     onClick = {
-                        onChartSelected(tab)
                         // Animate to the selected page when clicked
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(tab.ordinal)
