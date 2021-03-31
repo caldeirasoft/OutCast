@@ -5,9 +5,11 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.usecase.*
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinApiExtension
@@ -35,7 +37,10 @@ class StorePodcastViewModel(
 
         // fetch local podcast data subscription
         loadPodcastUseCase.execute(initialState.podcastId)
-            .setOnEach { copy(isSubscribed = it?.isSubscribed ?: false) }
+            .setOnEach {
+                copy(followingStatus = if (it?.isSubscribed == true) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
+                    showAllEpisodes = it?.isSubscribed ?: this.showAllEpisodes)
+            }
 
         //loadFollowedPodcastsUseCase.execute()
         //    .setOnEach { list -> copy(isSubscribed = list.map { it.podcastId }.contains(initialState.podcastId)) }
@@ -47,7 +52,6 @@ class StorePodcastViewModel(
     private suspend fun fetchPodcast() {
         withState { state ->
             state.podcastPageAsync.invoke()?.let { podcastPage ->
-
                 // fetch remote podcast data
                 suspend {
                     val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
@@ -84,9 +88,9 @@ class StorePodcastViewModel(
             state.podcastPageAsync.invoke()?.let { podcastPage ->
                 subscribeUseCase.execute(podcastPage, NewEpisodesAction.INBOX)
                     .onStart {
-                        setState { copy(isSubscribing = true) }
+                        setState { copy(followingStatus = FollowStatus.FOLLOWING) }
                     }
-                    .setOnEach { copy(isSubscribing = false) }
+                    .launchIn(viewModelScope)
             }
         }
     }

@@ -14,6 +14,7 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
@@ -52,7 +53,7 @@ sealed class Screen (val id: ScreenName) {
     object Statistics : Screen(ScreenName.STATISTICS)
     object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
-    data class StorePodcastScreen(val podcast: StorePodcast) : Screen(ScreenName.STORE_PODCAST)
+    data class StorePodcastScreen(val podcast: StorePodcastArg) : Screen(ScreenName.STORE_PODCAST)
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
     data class GenreScreen(val genre: Genre) : Screen(ScreenName.STORE_GENRE)
     data class Room(val room: StoreRoom) : Screen(ScreenName.STORE_ROOM)

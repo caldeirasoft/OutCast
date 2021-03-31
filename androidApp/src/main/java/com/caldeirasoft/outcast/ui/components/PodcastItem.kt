@@ -27,7 +27,6 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.skydoves.landscapist.coil.CoilImage
-import timber.log.Timber
 
 
 @Composable
@@ -210,9 +209,7 @@ fun FollowPodcastGridIconButton(
     followingStatus: FollowStatus? = null,
     onSubscribeClick: () -> Unit = { },
 ) {
-    Timber.d("recompose FollowPodcastGridIconButton")
     var currentStatus by remember {
-        Timber.d("recompose currentStatus")
         mutableStateOf(FollowStatus.UNFOLLOWED)
     }
     currentStatus = followingStatus ?: FollowStatus.UNFOLLOWED

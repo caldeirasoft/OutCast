@@ -25,6 +25,7 @@ pluginManagement {
         kotlin("multiplatform") version kotlinVersion apply false
         kotlin("kapt") version kotlinVersion apply false
         kotlin("plugin.serialization") version kotlinVersion apply false
+        kotlin("plugin.parcelize") version kotlinVersion apply false
         id("com.squareup.sqldelight") apply false
     }
 

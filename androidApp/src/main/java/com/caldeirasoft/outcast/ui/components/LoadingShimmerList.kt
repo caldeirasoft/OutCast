@@ -129,7 +129,7 @@ fun ShimmerPodcastListItem(
 }
 
 @Composable
-private fun LoadingListShimmer(innerContent: @Composable (List<Color>, Float) -> Unit) {
+fun LoadingListShimmer(innerContent: @Composable (List<Color>, Float) -> Unit) {
     val infiniteTransition = rememberInfiniteTransition()
     val shimmerTranslate by infiniteTransition.animateFloat(
         initialValue = 100.dp.value,

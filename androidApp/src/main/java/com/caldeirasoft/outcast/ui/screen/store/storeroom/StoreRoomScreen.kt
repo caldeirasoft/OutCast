@@ -29,6 +29,7 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -119,7 +120,7 @@ fun StoreRoomScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable(onClick = {
-                                                navigateTo(Screen.StorePodcastScreen(item))
+                                                navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
                                             }),
                                         storePodcast = item,
                                         followingStatus = state.followingStatus[item.id],
@@ -134,7 +135,7 @@ fun StoreRoomScreen(
                                         },
                                         onPodcastClick = {
                                             navigateTo(Screen.StorePodcastScreen(
-                                                item.podcast))
+                                                item.podcast.toStorePodcastArg()))
                                         },
                                         episode = item.episode,
                                     )

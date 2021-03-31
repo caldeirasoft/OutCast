@@ -12,8 +12,11 @@ class Actions(navController: NavController) {
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcastArg)}")
             is EpisodeScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.episodeArg)}")
-            is StorePodcastScreen ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcast)}")
+            is StorePodcastScreen -> {
+                navController.currentBackStackEntry?.arguments?.putParcelable("podcast",
+                    screen.podcast)
+                navController.navigate(screen.id.name)
+            }
             is Room ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.room)}")
             is Charts ->

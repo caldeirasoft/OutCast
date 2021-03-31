@@ -25,6 +25,7 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
@@ -59,7 +60,7 @@ fun StoreCollectionPodcastsContent(
                 modifier = Modifier
                     .width(150.dp)
                     .clickable(onClick = {
-                        navigateTo(Screen.StorePodcastScreen(item))
+                        navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
                     }),
                 podcast = item,
                 index = if (storeCollection.sortByPopularity) index + 1 else null,
@@ -114,7 +115,7 @@ fun StoreCollectionEpisodesContent(
                     StoreEpisodeItem(
                         episode = storeItem.episode,
                         modifier = Modifier.fillMaxWidth(),
-                        onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast)) },
+                        onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast.toStorePodcastArg())) },
                         onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
                         index = if (storeCollection.sortByPopularity) (index + 1) else null
                     )
@@ -201,7 +202,7 @@ fun StoreCollectionFeaturedContent(
                     .clickable {
                         when (item) {
                             is StoreRoom -> navigateTo(Screen.Room(item))
-                            is StorePodcast -> navigateTo(Screen.StorePodcastScreen(item))
+                            is StorePodcast -> navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
                             is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                         }
                     }

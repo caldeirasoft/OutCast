@@ -24,6 +24,7 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetConten
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import com.caldeirasoft.outcast.ui.util.ifLoadingMore
 import kotlinx.coroutines.FlowPreview
 
@@ -116,7 +117,7 @@ private fun TopChartSectionScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(onClick = {
-                                    navigateTo(Screen.StorePodcastScreen(item))
+                                    navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
                                 }),
                             storePodcast = item,
                             index = index + 1,
@@ -129,7 +130,7 @@ private fun TopChartSectionScreen(
                         StoreEpisodeItem(
                             episode = item.episode,
                             onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
-                            onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast)) },
+                            onPodcastClick = { navigateTo(Screen.StorePodcastScreen(item.podcast.toStorePodcastArg())) },
                             index = index + 1
                         )
                         Divider()

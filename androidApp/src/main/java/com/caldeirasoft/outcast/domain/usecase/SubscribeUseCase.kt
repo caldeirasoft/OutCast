@@ -15,6 +15,7 @@ class SubscribeUseCase(
 ) {
     fun execute(podcastPage: PodcastPage, newEpisodesAction: NewEpisodesAction): Flow<Boolean> =
         flow {
+            delay(1500)
             libraryRepository.updatePodcastAndEpisodes(podcastPage)
             libraryRepository.subscribeToPodcast(
                 podcastId = podcastPage.podcast.podcastId,
@@ -30,7 +31,6 @@ class SubscribeUseCase(
         libraryRepository.subscribeToPodcast(
             podcastId = podcastPage.podcast.podcastId,
             newEpisodeAction = NewEpisodesAction.INBOX)
-        delay(250)
         emit(true)
     }
 }

@@ -39,6 +39,7 @@
     <string name="podcast_podcastsByArtist">More by %1$s</string>
     <string name="podcast_podcastsListenersAlsoFollow">Listeners Also Subscribed To</string>
     <string name="podcast_topPodcastsInGenre">Top Podcasts in %1$s</string>
+    <string name="podcast_x_episodes">%1$s Episodes</string>
 
     <!-- screen -->
     <string name="screen_queue">Queue</string>
@@ -54,6 +55,10 @@
     <!-- actions -->
     <string name="action_subscribe">Subscribe</string>
     <string name="action_subscribed">Subscribed</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_follow">Follow</string>
+    <string name="action_following">Following</string>
+    <string name="action_subscribing">Subscribing</string>
     <string name="action_show_more">Show more ▼</string>
     <string name="action_show_all_episodes">Show all episodes</string>
 </resources>

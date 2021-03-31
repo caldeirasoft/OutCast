@@ -488,7 +488,7 @@ class StoreRepository (
         // get missing lookup ids
         val moreByArtist =
             storePageDto.pageData?.moreByArtist?.map { it.toLong() }?.toSet() ?: emptySet()
-        val listenersAlsoBought =
+        val listenersAlsoFollow =
             storePageDto.pageData?.listenersAlsoBought?.map { it.toLong() }?.toSet()
                 ?: emptySet()
         val topPodcastsInGenre =
@@ -514,12 +514,12 @@ class StoreRepository (
                                 )
                             )
                         }
-                        if (listenersAlsoBought.isEmpty().not()) {
+                        if (listenersAlsoFollow.isEmpty().not()) {
                             yield(
                                 StoreCollectionPodcasts(
                                     0L,
                                     "podcastsListenersAlsoFollow",
-                                    itemsIds = listenersAlsoBought.toList(),
+                                    itemsIds = listenersAlsoFollow.toList(),
                                     storeFront = storeFront
                                 )
                             )

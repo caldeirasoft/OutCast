@@ -93,7 +93,8 @@ fun OverflowText(
     Box(modifier = modifier.fillMaxSize()) {
         Text(
             text,
-            modifier = modifier.then(if (didOverflowHeight) Modifier.padding(bottom = 36.dp) else Modifier),
+            modifier = modifier.then(if (didOverflowHeight) Modifier.padding(bottom = 36.dp) else Modifier.padding(
+                bottom = 16.dp)),
             color,
             fontSize,
             fontStyle,

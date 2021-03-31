@@ -26,6 +26,7 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.pagerTabIndicatorOffset
 import com.caldeirasoft.outcast.ui.util.ifLoadingMore
 import com.caldeirasoft.outcast.ui.util.px
@@ -240,7 +241,7 @@ private fun StoreCollectionChartsContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable(onClick = {
-                                        navigateTo(Screen.StorePodcastScreen(storeItem))
+                                        navigateTo(Screen.StorePodcastScreen(storeItem.toStorePodcastArg()))
                                     }),
                                 storePodcast = storeItem,
                                 index = index + 1,
@@ -254,7 +255,7 @@ private fun StoreCollectionChartsContent(
                                 episode = storeItem.episode,
                                 modifier = Modifier.fillMaxWidth(),
                                 onPodcastClick = {
-                                    navigateTo(Screen.StorePodcastScreen(storeItem.podcast))
+                                    navigateTo(Screen.StorePodcastScreen(storeItem.podcast.toStorePodcastArg()))
                                 },
                                 onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
                                 index = index + 1

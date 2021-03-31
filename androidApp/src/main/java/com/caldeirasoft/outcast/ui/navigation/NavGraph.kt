@@ -12,7 +12,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Genre
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
@@ -25,6 +24,7 @@ import com.caldeirasoft.outcast.ui.screen.podcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import kotlinx.coroutines.FlowPreview
@@ -137,13 +137,12 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
-                composable(
-                    route = "${ScreenName.STORE_PODCAST.name}/{podcast}",
-                    arguments = listOf(navArgument("podcast") { type = NavType.StringType })
-                ) { backStackEntry ->
-                    val podcast = backStackEntry.getObjectNotNull<StorePodcast>("podcast")
+                composable(ScreenName.STORE_PODCAST.name) {
+                    val podcast =
+                        requireNotNull(navController.previousBackStackEntry?.arguments?.getParcelable<StorePodcastArg>(
+                            "podcast"))
                     StorePodcastScreen(
-                        storePodcast = podcast,
+                        storePodcastArg = podcast,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

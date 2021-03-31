@@ -3,6 +3,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.serialization") apply true
+    kotlin("plugin.parcelize") apply true
 }
 
 // get compose version in gradle.properties file

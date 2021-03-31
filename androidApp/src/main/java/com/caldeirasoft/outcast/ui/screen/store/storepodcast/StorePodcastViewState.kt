@@ -7,7 +7,7 @@ import com.airbnb.mvrx.MavericksState
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.models.PodcastPage
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 
 data class StorePodcastViewState(
     val podcastId: Long,
@@ -15,10 +15,9 @@ data class StorePodcastViewState(
     val episodes: List<Episode> = emptyList(),
     val otherPodcasts: PagingData<StoreCollection> = PagingData.empty(),
     val showAllEpisodes: Boolean = false,
-    val isSubscribing: Boolean = false,
-    val isSubscribed: Boolean = false,
+    val followingStatus: FollowStatus = FollowStatus.UNFOLLOWED,
 ) : MavericksState {
-    constructor(arg: StorePodcast) :
-            this(podcastId = arg.podcast.podcastId, podcastPageAsync = Loading(arg.page))
+    constructor(arg: StorePodcastArg) :
+            this(podcastId = arg.id, podcastPageAsync = Loading(arg.toStorePodcast().page))
 
 }
