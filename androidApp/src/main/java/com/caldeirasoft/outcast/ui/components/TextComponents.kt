@@ -1,11 +1,13 @@
 package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,7 +64,7 @@ fun AutoSizedText(
         maxLines,
         onTextLayout = { result ->
             if (result.didOverflowHeight && fontSize > minFontSize) {
-                fontSize = fontSize * 0.9
+                fontSize *= 0.9
             }
         },
         style
@@ -90,11 +92,12 @@ fun OverflowText(
     var wasMeasured by remember { mutableStateOf(false) }
     var didOverflowHeight by remember { mutableStateOf(true) }
     var isExpanded by remember { mutableStateOf(false) }
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier
+        .fillMaxSize()
+        .clickable { isExpanded = isExpanded.not() }) {
         Text(
             text,
-            modifier = modifier.then(if (didOverflowHeight) Modifier.padding(bottom = 36.dp) else Modifier.padding(
-                bottom = 16.dp)),
+            modifier = Modifier,
             color,
             fontSize,
             fontStyle,
@@ -119,30 +122,23 @@ fun OverflowText(
         if (didOverflowHeight && isExpanded.not()) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.BottomEnd)
                     .background(
-                        brush = Brush.verticalGradient(
+                        brush = Brush.horizontalGradient(
                             0.0f to Color.Transparent,
                             0.4f to MaterialTheme.colors.background,
-                            startY = 0.0f,
-                            endY = Float.POSITIVE_INFINITY
+                            startX = 0.0f,
+                            endX = Float.POSITIVE_INFINITY
                         )
                     )
             )
             {
                 // text button "more..."
-                TextButton(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter),
-                    //contentPadding = ButtonDefaults.TextButtonContentPadding.copy(top = 0.dp, bottom = 0.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    onClick = { isExpanded = isExpanded.not() })
-                {
-                    Text(text = stringResource(id = R.string.action_show_more),
+                Text(
+                    modifier = Modifier.padding(start = 32.dp),
+                    text = stringResource(id = R.string.action_more),
                     style = typography.button.copy(letterSpacing = 0.25.sp))
-                }
+
             }
         }
     }

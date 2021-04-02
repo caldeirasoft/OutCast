@@ -39,7 +39,4 @@ class PodcastPage(
     override val lookup: Map<Long, StoreItemWithArtwork> = hashMapOf()
 
     fun getArtworkUrl() = StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
-
-    val storeEpisodeTrailer: Episode? = episodes.firstOrNull { it.podcastEpisodeType == "trailer" }
-    val recentEpisodes: List<Episode> = episodes.sortedByDescending { it.releaseDateTime }.take(5)
 }
