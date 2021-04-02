@@ -2,8 +2,8 @@ package com.caldeirasoft.outcast.ui.screen.podcast
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +17,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -114,105 +115,115 @@ fun StorePodcastScreen(
                     // buttons
                     item {
                         // buttons
-                        Row(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp,
-                                Alignment.CenterHorizontally),
-                            verticalAlignment = Alignment.CenterVertically) {
-
-                            val text = when (state.followingStatus) {
-                                FollowStatus.FOLLOWING -> stringResource(id = R.string.action_following)
-                                FollowStatus.FOLLOWED -> stringResource(id = R.string.action_following)
-                                else -> stringResource(id = R.string.action_follow)
-                            }
-                            val backgroundColor = when (state.followingStatus) {
-                                FollowStatus.FOLLOWED -> MaterialTheme.colors.surface
-                                else -> MaterialTheme.colors.primary
-                            }
-                            val contentColor = when (state.followingStatus) {
-                                FollowStatus.FOLLOWED -> MaterialTheme.colors.primary
-                                else -> contentColorFor(backgroundColor)
-                            }
-                            val border: BorderStroke? = when (state.followingStatus) {
-                                FollowStatus.FOLLOWED -> ButtonDefaults.outlinedBorder
-                                else -> null
-                            }
-
-                            // follow button
-                            Button(
-                                modifier = Modifier.width(150.dp),
-                                onClick = {
-                                    when (state.followingStatus) {
-                                        FollowStatus.FOLLOWED -> viewModel.unfollow()
-                                        FollowStatus.UNFOLLOWED -> viewModel.subscribe()
-                                        else -> Unit
-                                    }
-                                },
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            contentAlignment = Alignment.Center) {
+                            val fullWidth = constraints.maxWidth
+                            val buttonWidth = 150.dp.toPx()
+                            val twoButtonsWidth = 2 * buttonWidth + 20.dp.toPx()
+                            val edgePadding = (fullWidth - buttonWidth) / 2
+                            val edgePadding2Btns = (fullWidth - twoButtonsWidth) / 2
+                            // settings
+                            OutlinedButton(
+                                modifier = Modifier
+                                    .width(150.dp)
+                                    .graphicsLayer(
+                                        translationX = animateFloatAsState(
+                                            targetValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding - edgePadding2Btns else 0f,
+                                            animationSpec = tween(durationMillis = 750)
+                                        ).value,
+                                        alpha = animateFloatAsState(
+                                            targetValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                            animationSpec = tween(durationMillis = 750)
+                                        ).value
+                                    ),
+                                onClick = { },
                                 contentPadding = PaddingValues(start = 24.dp,
                                     end = 24.dp,
                                     top = 8.dp,
-                                    bottom = 8.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = animateColorAsState(targetValue = backgroundColor).value,
-                                    contentColor = animateColorAsState(targetValue = contentColor).value
-                                ),
-                                border = border
-                            ) {
+                                    bottom = 8.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Crossfade(targetState = state.followingStatus) { followStatus ->
-                                        when (followStatus) {
-                                            FollowStatus.FOLLOWING ->
-                                                LinearProgressIndicator(
-                                                    color = contentColor,
-                                                    modifier = Modifier
-                                                        .size(24.dp)
-                                                        .padding(end = 4.dp))
-                                            FollowStatus.FOLLOWED ->
-                                                Icon(
-                                                    imageVector = Icons.Default.CheckCircle,
-                                                    contentDescription = text,
-                                                    modifier = Modifier.padding(end = 4.dp)
-                                                )
-                                            FollowStatus.UNFOLLOWED ->
-                                                Icon(
-                                                    imageVector = Icons.Default.Add,
-                                                    contentDescription = text,
-                                                    modifier = Modifier.padding(end = 4.dp)
-                                                )
-                                        }
-                                    }
-                                    Text(text = text,
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = stringResource(id = R.string.action_settings),
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    )
+                                    Text(text = stringResource(id = R.string.action_settings),
                                         style = typography.button.copy(letterSpacing = 0.5.sp))
                                 }
                             }
 
+                            // following buttons
+                            OutlinedButton(
+                                modifier = Modifier
+                                    .width(150.dp)
+                                    .graphicsLayer(
+                                        translationX = animateFloatAsState(
+                                            targetValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
+                                            animationSpec = tween(durationMillis = 750)
+                                        ).value,
+                                        alpha = animateFloatAsState(
+                                            targetValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                            animationSpec = tween(durationMillis = 750)
+                                        ).value
+                                    ),
+                                onClick = { viewModel.unfollow() },
+                                contentPadding = PaddingValues(start = 24.dp,
+                                    end = 24.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = stringResource(id = R.string.action_following),
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    )
+                                    Text(text = stringResource(id = R.string.action_following),
+                                        style = typography.button.copy(letterSpacing = 0.5.sp))
+                                }
+                            }
+
+                            // follow button
                             AnimatedVisibility(
-                                visible = (state.followingStatus == FollowStatus.FOLLOWED),
-                                enter = expandHorizontally(animationSpec = tween(durationMillis = 250))
-                                        + fadeIn(animationSpec = tween(durationMillis = 250)),
-                                exit = shrinkHorizontally(animationSpec = tween(durationMillis = 250))
-                                        + fadeOut(animationSpec = tween(durationMillis = 250)))
+                                visible = (state.followingStatus != FollowStatus.FOLLOWED),
+                                enter = fadeIn(animationSpec = tween(durationMillis = 250)),
+                                exit = fadeOut(animationSpec = tween(durationMillis = 250)))
                             {
-                                // settings
-                                OutlinedButton(
-                                    modifier = Modifier.width(150.dp),
-                                    onClick = { },
+                                Button(
+                                    modifier = Modifier
+                                        .width(150.dp),
+                                    onClick = {
+                                        if (state.followingStatus == FollowStatus.UNFOLLOWED)
+                                            viewModel.subscribe()
+                                    },
                                     contentPadding = PaddingValues(start = 24.dp,
                                         end = 24.dp,
                                         top = 8.dp,
-                                        bottom = 8.dp)) {
+                                        bottom = 8.dp),
+                                ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Settings,
-                                            contentDescription = stringResource(id = R.string.action_settings),
-                                            modifier = Modifier.padding(end = 4.dp)
-                                        )
-                                        Text(text = stringResource(id = R.string.action_settings),
+                                        Crossfade(targetState = state.followingStatus) { followStatus ->
+                                            when (followStatus) {
+                                                FollowStatus.FOLLOWING ->
+                                                    LinearProgressIndicator(
+                                                        color = contentColorFor(MaterialTheme.colors.primary),
+                                                        modifier = Modifier
+                                                            .size(24.dp)
+                                                            .padding(end = 4.dp))
+                                                FollowStatus.UNFOLLOWED ->
+                                                    Icon(
+                                                        imageVector = Icons.Default.Add,
+                                                        contentDescription = stringResource(id = R.string.action_follow),
+                                                        modifier = Modifier.padding(end = 4.dp)
+                                                    )
+                                            }
+                                        }
+                                        Text(text = stringResource(id = R.string.action_follow),
                                             style = typography.button.copy(letterSpacing = 0.5.sp))
                                     }
                                 }
-
                             }
                         }
                     }
