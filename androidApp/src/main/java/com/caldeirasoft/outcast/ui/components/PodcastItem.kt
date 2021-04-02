@@ -4,12 +4,13 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -209,39 +210,33 @@ fun FollowPodcastGridIconButton(
     followingStatus: FollowStatus? = null,
     onSubscribeClick: () -> Unit = { },
 ) {
-    var currentStatus by remember {
-        mutableStateOf(FollowStatus.UNFOLLOWED)
-    }
-    currentStatus = followingStatus ?: FollowStatus.UNFOLLOWED
-    Crossfade(
+    IconButton(
         modifier = modifier,
-        targetState = currentStatus,
-        animationSpec = tween(500))
-    { followStatus ->
-        when (followStatus) {
-            FollowStatus.FOLLOWING -> {
-                Box(modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        color = MaterialTheme.colors.surface.copy(0.38f)
-                    )) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colors.surface,
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .requiredSize(24.dp)
-                            .align(Alignment.Center))
+        onClick = { if (followingStatus == null) onSubscribeClick.invoke() })
+    {
+        Crossfade(
+            modifier = Modifier,
+            targetState = followingStatus,
+            animationSpec = tween(500)) { followStatus ->
+            when (followStatus) {
+                FollowStatus.FOLLOWING -> {
+                    Box(modifier = Modifier
+                        .size(24.dp)
+                        .background(
+                            color = Color.White,
+                            shape = CircleShape
+                        )) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
                 }
-            }
-            FollowStatus.FOLLOWED ->
-                IconButton(
-                    modifier = Modifier,
-                    enabled = false,
-                    onClick = { })
-                {
+                FollowStatus.FOLLOWED ->
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(id = R.string.action_subscribed),
+                        contentDescription = stringResource(id = R.string.action_following),
                         modifier = Modifier
                             .shadow(
                                 elevation = 0.dp,
@@ -252,16 +247,10 @@ fun FollowPodcastGridIconButton(
                                 color = MaterialTheme.colors.surface.copy(0.38f)
                             )
                     )
-                }
-            else ->
-                IconButton(
-                    modifier = Modifier,
-                    enabled = true,
-                    onClick = onSubscribeClick)
-                {
+                else ->
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(id = R.string.action_subscribe),
+                        contentDescription = stringResource(id = R.string.action_follow),
                         modifier = Modifier
                             .shadow(
                                 elevation = 2.dp,
@@ -272,7 +261,7 @@ fun FollowPodcastGridIconButton(
                                 color = Color.White
                             )
                     )
-                }
+            }
         }
     }
 }
@@ -282,30 +271,38 @@ fun FollowPodcastListIconButton(
     followingStatus: FollowStatus? = null,
     onSubscribeClick: () -> Unit = { },
 ) {
-    when (followingStatus) {
-        FollowStatus.FOLLOWING -> {
-            Box(modifier = Modifier
-                .size(48.dp)
-                .padding(6.dp)) {
-                CircularProgressIndicator()
+    Crossfade(
+        targetState = followingStatus,
+        animationSpec = tween(500)) { followStatus ->
+        when (followStatus) {
+            FollowStatus.FOLLOWING -> {
+                Box(modifier = Modifier
+                    .size(48.dp)) {
+                    CircularProgressIndicator(modifier = Modifier.padding(8.dp))
+                }
             }
+            FollowStatus.FOLLOWED ->
+                IconButton(
+                    onClick = { })
+                {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(id = R.string.action_following),
+                    )
+                }
+            else ->
+                IconButton(
+                    onClick = onSubscribeClick)
+                {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(id = R.string.action_follow),
+                    )
+                }
         }
-        FollowStatus.FOLLOWED ->
-            IconButton(onClick = { }) {
-                Icon(
-                    Icons.Default.Check,
-                    contentDescription = stringResource(id = R.string.action_subscribed),
-                )
-            }
-        else ->
-            IconButton(onClick = onSubscribeClick) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = stringResource(id = R.string.action_subscribe),
-                )
-            }
     }
 }
+
 
 object PodcastDefaults {
     /**
