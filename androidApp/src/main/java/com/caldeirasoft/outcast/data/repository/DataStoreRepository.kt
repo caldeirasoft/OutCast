@@ -16,17 +16,13 @@ import java.security.InvalidKeyException
 import java.util.*
 
 class DataStoreRepository(val context: Context) {
-    companion object {
-        const val DATA_STORE_FILE_NAME = "user_prefs"
-    }
-
     private object PreferenceKeys {
         val STOREFRONT_REGION = stringPreferencesKey("store_front")
         val LAST_SYNC = longPreferencesKey("last_sync")
     }
 
     // Build the DataStore
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATA_STORE_FILE_NAME)
+    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
     val storeCountry: Flow<String> = context.dataStore.data
         .map { preferences ->
