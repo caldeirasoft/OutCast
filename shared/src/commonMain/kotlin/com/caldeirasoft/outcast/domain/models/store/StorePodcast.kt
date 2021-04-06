@@ -1,6 +1,7 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
+import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
@@ -38,6 +39,12 @@ data class StorePodcast(
 ) : StoreItemWithArtwork, StoreItemFeatured {
 
     override var featuredArtwork: Artwork? = null
+    var moreByArtist: List<Long>? = null
+    var listenersAlsoBought: List<Long>? = null
+    var topPodcastsInGenre: List<Long>? = null
+
+    @Transient
+    var episodes: List<Episode> = mutableListOf()
 
     @Transient
     val podcast: Podcast =
@@ -61,7 +68,7 @@ data class StorePodcast(
             updatedAt = releaseDateTime,
             userRating = userRating.toDouble(),
             isSubscribed = false,
-            newEpisodeAction = NewEpisodesAction.CLEAR
+            newEpisodeAction = NewEpisodesAction.CLEAR,
         )
 
     @Transient

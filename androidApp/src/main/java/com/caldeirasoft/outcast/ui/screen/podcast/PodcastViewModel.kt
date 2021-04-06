@@ -36,7 +36,7 @@ class PodcastViewModel(
                 .setOnEach { copy(podcast = it) }
 
             loadPodcastEpisodesUseCase
-                .execute(state.podcast)
+                .execute(state.podcast.podcastId)
                 .setOnEach { copy(episodes = it) }
         }
     }

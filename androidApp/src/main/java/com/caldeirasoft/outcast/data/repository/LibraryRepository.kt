@@ -5,7 +5,6 @@ import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
-import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -57,7 +56,8 @@ class LibraryRepository(
     fun getEpisodesByPodcastIdPagingSourceFactory(podcastId: Long): () -> PagingSource<Int, Episode> =
         QueryDataSourceFactory(
             queryProvider = { limit, offset ->
-                database.episodeQueries.getAllPagedByPodcastId(podcastId = podcastId,
+                database.episodeQueries.getAllPagedByPodcastId(
+                    podcastId = podcastId,
                     limit = limit,
                     offset = offset)
             },
@@ -120,7 +120,7 @@ class LibraryRepository(
     /**
      * updatePodcastAndEpisodes
      */
-    fun updatePodcastAndEpisodes(remotePodcast: PodcastPage) {
+    fun updatePodcastAndEpisodes(remotePodcast: StorePodcast) {
         database.transaction {
             database.podcastQueries.insert(remotePodcast.podcast)
             remotePodcast.episodes.onEach {

@@ -3,10 +3,13 @@
 package com.caldeirasoft.outcast.ui.screen.store.storepodcast
 
 import android.os.Parcelable
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.UseSerializers
 
@@ -45,6 +48,32 @@ data class StorePodcastArg(
             userRating = userRating,
             genre = null,
             storeFront = storeFront
+        )
+
+    fun toPodcast() =
+        Podcast(
+            podcastId = id,
+            name = name,
+            url = url,
+            artistName = artistName,
+            artistId = artistId,
+            artistUrl = artistUrl,
+            description = null,
+            feedUrl = "",
+            releaseDateTime = Clock.System.now(),
+            artwork = artwork?.run {
+                Artwork(url, width, height, textColor1, textColor2, bgColor)
+            },
+            trackCount = 0,
+            copyright = "",
+            contentAdvisoryRating = "",
+            userRating = userRating.toDouble(),
+            genre = null,
+            isSubscribed = false,
+            genreId = null,
+            podcastWebsiteURL = null,
+            newEpisodeAction = NewEpisodesAction.CLEAR,
+            updatedAt = Instant.DISTANT_PAST,
         )
 
     companion object {

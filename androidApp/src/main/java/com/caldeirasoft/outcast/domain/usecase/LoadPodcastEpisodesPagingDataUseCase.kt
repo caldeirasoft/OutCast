@@ -18,7 +18,8 @@ class LoadPodcastEpisodesPagingDataUseCase(
     @OptIn(ExperimentalPagingApi::class)
     fun execute(podcast: Podcast, storeFront: String): Flow<PagingData<Episode>> {
         val mediator = PodcastRemoteMediator(
-            podcast = podcast,
+            podcastId = podcast.podcastId,
+            podcastUrl = podcast.url,
             storeFront = storeFront,
             storeRepository = storeRepository,
             libraryRepository = libraryRepository

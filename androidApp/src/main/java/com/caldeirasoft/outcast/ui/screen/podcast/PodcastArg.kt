@@ -48,7 +48,7 @@ data class PodcastArg(
             updatedAt = releaseDateTime,
             userRating = null,
             isSubscribed = false,
-            newEpisodeAction = NewEpisodesAction.CLEAR
+            newEpisodeAction = NewEpisodesAction.CLEAR,
         )
 
     companion object {

@@ -23,13 +23,24 @@ fun createDatabase(driver: SqlDriver): Database {
     }
 
     val genreAdapter = object : ColumnAdapter<Genre, String> {
-        override fun decode(databaseValue: String): Genre = Json.decodeFromString(Genre.serializer(), databaseValue)
-        override fun encode(value: Genre): String =  Json.encodeToString(Genre.serializer(), value)
+        override fun decode(databaseValue: String): Genre =
+            Json.decodeFromString(Genre.serializer(), databaseValue)
+
+        override fun encode(value: Genre): String = Json.encodeToString(Genre.serializer(), value)
     }
 
     val genreListAdapter = object : ColumnAdapter<List<Int>, String> {
-        override fun decode(databaseValue: String): List<Int> = databaseValue.split(',').map { it.toInt() }
-        override fun encode(value: List<Int>): String =  value.joinToString()
+        override fun decode(databaseValue: String): List<Int> =
+            databaseValue.split(',').map { it.toInt() }
+
+        override fun encode(value: List<Int>): String = value.joinToString()
+    }
+
+    val podcastListAdapter = object : ColumnAdapter<List<Long>, String> {
+        override fun decode(databaseValue: String): List<Long> =
+            databaseValue.split(',').map { it.toLong() }
+
+        override fun encode(value: List<Long>): String = value.joinToString()
     }
 
     val podcastAdapter = Podcast.Adapter(

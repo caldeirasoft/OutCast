@@ -14,7 +14,6 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
 import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.models.store.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -478,7 +477,7 @@ class StoreRepository (
     /**
      * getPodcastDataAsync
      */
-    suspend fun getPodcastDataAsync(url: String, storeFront: String): PodcastPage {
+    suspend fun getPodcastDataAsync(url: String, storeFront: String): StorePodcast {
         // get grouping data
         val storeResponse = itunesAPI.storeData(storeFront = storeFront, url = url)
         if (storeResponse.isSuccessful.not())
@@ -486,56 +485,20 @@ class StoreRepository (
         val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
 
         // get missing lookup ids
-        val moreByArtist =
-            storePageDto.pageData?.moreByArtist?.map { it.toLong() }?.toSet() ?: emptySet()
-        val listenersAlsoFollow =
-            storePageDto.pageData?.listenersAlsoBought?.map { it.toLong() }?.toSet()
-                ?: emptySet()
-        val topPodcastsInGenre =
-            storePageDto.pageData?.topPodcastsInGenre?.map { it.toLong() }?.toSet()
-                ?: emptySet()
+        val moreByArtist = storePageDto.pageData?.moreByArtist?.map { it.toLong() }
+        val listenersAlsoFollow = storePageDto.pageData?.listenersAlsoBought?.map { it.toLong() }
+        val topPodcastsInGenre = storePageDto.pageData?.topPodcastsInGenre?.map { it.toLong() }
 
         // parse podcast
-        storePageDto.storePlatformData?.producDv?.results?.entries?.firstOrNull()
+        return storePageDto.storePlatformData?.producDv?.results?.entries?.firstOrNull()
             ?.let { (_, podcastEntry) ->
                 val podcastData =
                     getStoreItemFromLookupResultItem(podcastEntry, storeFront) as StorePodcast
-                val podcastPage = PodcastPage(
-                    podcast = podcastData.podcast,
-                    storeFront = storeFront,
-                    otherPodcasts = sequence<StoreCollection> {
-                        if (moreByArtist.isEmpty().not()) {
-                            yield(
-                                StoreCollectionPodcasts(
-                                    0L,
-                                    "podcastsByArtist",
-                                    itemsIds = moreByArtist.toList(),
-                                    storeFront = storeFront
-                                )
-                            )
-                        }
-                        if (listenersAlsoFollow.isEmpty().not()) {
-                            yield(
-                                StoreCollectionPodcasts(
-                                    0L,
-                                    "podcastsListenersAlsoFollow",
-                                    itemsIds = listenersAlsoFollow.toList(),
-                                    storeFront = storeFront
-                                )
-                            )
-                        }
-                        if (topPodcastsInGenre.isEmpty().not()) {
-                            yield(
-                                StoreCollectionPodcasts(
-                                    0L,
-                                    "topPodcastsInGenre",
-                                    itemsIds = topPodcastsInGenre.toList(),
-                                    storeFront = storeFront
-                                )
-                            )
-                        }
-                    }.toMutableList(),
-                    episodes = podcastEntry.children.map { (key, episodeEntry) ->
+                podcastData.also {
+                    it.moreByArtist = moreByArtist
+                    it.listenersAlsoBought = listenersAlsoFollow
+                    it.topPodcastsInGenre = topPodcastsInGenre
+                    it.episodes = podcastEntry.children.map { (key, episodeEntry) ->
                         Episode(
                             episodeId = key.toLong(),
                             name = episodeEntry.name.orEmpty(),
@@ -545,7 +508,8 @@ class StoreRepository (
                             artistName = episodeEntry.artistName.orEmpty(),
                             artistId = episodeEntry.artistId?.toLong(),
                             description = episodeEntry.description?.standard,
-                            genreId = episodeEntry.genres.map { it.toGenre() }.firstOrNull()?.id ?: DEFAULT_GENRE,
+                            genreId = episodeEntry.genres.map { it.toGenre() }.firstOrNull()?.id
+                                ?: DEFAULT_GENRE,
                             feedUrl = episodeEntry.feedUrl.orEmpty(),
                             releaseDateTime = episodeEntry.releaseDateTime
                                 ?: Clock.System.now(),
@@ -565,11 +529,10 @@ class StoreRepository (
                             isFavorite = false,
                             playbackPosition = null
                         )
-                    }.sortedByDescending { it.releaseDateTime },
-                    timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
-                )
+                    }.sortedByDescending { it.releaseDateTime }
+                }
 
-                return podcastPage
+                //timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
             }
             ?: throw Exception("missing podcast entry")
     }

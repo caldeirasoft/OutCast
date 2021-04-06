@@ -53,7 +53,7 @@ inline fun <ResponseType: Any> networkCall(
  */
 inline fun <ResultType, RequestedType> networkBoundResource(
     crossinline loadFromDb: () -> Flow<ResultType?>,
-    crossinline shouldFetch: (ResultType?) -> Boolean = { true },
+    crossinline shouldFetch: suspend (ResultType?) -> Boolean = { true },
     crossinline fetchFromRemote: suspend () -> RequestedType,
     crossinline saveRemoteData: suspend (RequestedType) -> Unit,
 ) = flow<Resource<ResultType>> {
