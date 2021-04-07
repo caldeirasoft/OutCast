@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -22,7 +23,9 @@ class DataStoreRepository(val context: Context) {
     }
 
     // Build the DataStore
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+    val dataStore: DataStore<Preferences> = context.dataStore
 
     val storeCountry: Flow<String> = context.dataStore.data
         .map { preferences ->
@@ -43,6 +46,13 @@ class DataStoreRepository(val context: Context) {
     suspend fun saveLastSyncDate() {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.LAST_SYNC] = Calendar.getInstance().timeInMillis
+        }
+    }
+
+    suspend fun savePodcastSetting(podcastId: Long, newEpisodeAction: NewEpisodesAction) {
+        val prefNewEpisodesKey = stringPreferencesKey("$podcastId:pref_new_episodes")
+        context.dataStore.edit { preferences ->
+            preferences[prefNewEpisodesKey] = newEpisodeAction.name
         }
     }
 

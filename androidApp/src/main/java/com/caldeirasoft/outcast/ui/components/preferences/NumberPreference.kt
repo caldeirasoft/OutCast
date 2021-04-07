@@ -10,15 +10,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import com.caldeirasoft.outcast.domain.model.IntPreferenceItem
+import com.caldeirasoft.outcast.domain.model.NumberPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.lang.Integer.parseInt
 
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
-fun IntPreference(
-    item: IntPreferenceItem,
+fun NumberPreference(
+    item: NumberPreferenceItem,
     value: Int?,
     onValueChanged: (Int) -> Unit,
 ) {

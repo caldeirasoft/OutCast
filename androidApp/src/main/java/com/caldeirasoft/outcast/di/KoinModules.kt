@@ -159,11 +159,15 @@ internal val usecaseModule = module {
     single { FetchEpisodesHistoryUseCase(libraryRepository = get()) }
     single { FetchInboxUseCase(inboxRepository = get()) }
     single { FetchQueueUseCase(queueRepository = get()) }
-    single { SubscribeUseCase(libraryRepository = get(), storeRepository = get()) }
-    single { UnsubscribeUseCase(podcastRepository = get()) }
+    single {
+        SubscribeUseCase(libraryRepository = get(),
+            storeRepository = get(),
+            dataStoreRepository = get())
+    }
+    single { UnsubscribeUseCase(podcastRepository = get(), dataStoreRepository = get()) }
     single { LoadPodcastUseCase(podcastRepository = get()) }
     single { LoadStoreGenreDataUseCase(storeRepository = get()) }
-    single { LoadStoreDirectoryUseCase(storeRepository = get())}
+    single { LoadStoreDirectoryUseCase(storeRepository = get()) }
     single { LoadStoreDirectoryPagingDataUseCase(storeRepository = get()) }
     single { LoadPodcastEpisodesUseCase(libraryRepository = get()) }
     single {
@@ -178,6 +182,7 @@ internal val usecaseModule = module {
     single { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
     single { LoadStoreTopChartsPagingDataUseCase(storeRepository = get()) }
     single { GetStoreItemsUseCase(storeRepository = get()) }
+    single { LoadSettingsUseCase(dataStoreRepository = get()) }
 }
 
 @OptIn(ExperimentalSerializationApi::class)

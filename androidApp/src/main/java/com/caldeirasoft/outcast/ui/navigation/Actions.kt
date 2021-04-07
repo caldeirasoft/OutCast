@@ -23,6 +23,8 @@ class Actions(navController: NavController) {
                 navController.navigate("${screen.id.name}/${screen.itemType}")
             is GenreScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.genre)}")
+            is PodcastSettings ->
+                navController.navigate("${screen.id.name}/${screen.podcastId}")
             else ->
                 navController.navigate(screen.id.name)
         }

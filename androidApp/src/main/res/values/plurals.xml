@@ -1,0 +1,12 @@
+<resources>
+    <plurals name="settings_episode_limit_x_episodes">
+        <item quantity="other">%d most recent episodes</item>
+        <item quantity="zero">No limit</item>
+        <item quantity="one">%d most recent episode</item>
+    </plurals>
+    <plurals name="settings_skip_x_seconds">
+        <item quantity="other">%s seconds</item>
+        <item quantity="zero">%s second</item>
+        <item quantity="one">%s second</item>
+    </plurals>
+</resources>

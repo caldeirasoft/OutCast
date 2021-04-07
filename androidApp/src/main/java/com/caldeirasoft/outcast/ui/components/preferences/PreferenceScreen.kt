@@ -1,5 +1,7 @@
 package com.caldeirasoft.outcast.ui.components.preferences
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
@@ -15,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalAnimationApi::class)
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
@@ -27,32 +30,38 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
         items(items = items) { item ->
             when (item) {
                 is SwitchPreferenceItem -> {
-                    SwitchPreference(
-                        item = item,
-                        value = prefs?.get(item.prefKey),
-                        onValueChanged = { newValue ->
-                            scope.launch(Dispatchers.IO) {
-                                dataStore.edit { it[item.prefKey] = newValue }
+                    AnimatedVisibility(visible = item.visible) {
+                        SwitchPreference(
+                            item = item,
+                            value = prefs?.get(item.prefKey),
+                            onValueChanged = { newValue ->
+                                scope.launch(Dispatchers.IO) {
+                                    dataStore.edit { it[item.prefKey] = newValue }
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
                 is SingleListPreferenceItem -> {
-                    ListPreference(
-                        item = item,
-                        value = prefs?.get(item.prefKey),
-                        onValueChanged = { newValue ->
-                            scope.launch { dataStore.edit { it[item.prefKey] = newValue } }
-                        })
+                    AnimatedVisibility(visible = item.visible) {
+                        ListPreference(
+                            item = item,
+                            value = prefs?.get(item.prefKey),
+                            onValueChanged = { newValue ->
+                                scope.launch { dataStore.edit { it[item.prefKey] = newValue } }
+                            })
+                    }
                 }
                 is MultiListPreferenceItem -> {
-                    MultiSelectListPreference(
-                        item = item,
-                        values = prefs?.get(item.prefKey),
-                        onValuesChanged = { newValues ->
-                            scope.launch { dataStore.edit { it[item.prefKey] = newValues } }
-                        }
-                    )
+                    AnimatedVisibility(visible = item.visible) {
+                        MultiSelectListPreference(
+                            item = item,
+                            values = prefs?.get(item.prefKey),
+                            onValuesChanged = { newValues ->
+                                scope.launch { dataStore.edit { it[item.prefKey] = newValues } }
+                            }
+                        )
+                    }
                 }
                 is SeekbarPreferenceItem -> {
                     SeekBarPreference(
@@ -64,6 +73,37 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                             }
                         },
                     )
+                }
+                is NumberPreferenceItem -> {
+                    NumberPreference(
+                        item = item,
+                        value = prefs?.get(item.prefKey),
+                        onValueChanged = { newValue ->
+                            scope.launch {
+                                dataStore.edit { it[item.prefKey] = newValue }
+                            }
+                        },
+                    )
+                }
+                is NumberRangePreferenceItem -> {
+                    AnimatedVisibility(visible = item.visible) {
+                        NumberRangePreference(
+                            item = item,
+                            value = prefs?.get(item.prefKey),
+                            onValueChanged = { newValue ->
+                                scope.launch {
+                                    dataStore.edit { it[item.prefKey] = newValue }
+                                }
+                            },
+                        )
+                    }
+                }
+                is ActionPreferenceItem -> {
+                    AnimatedVisibility(visible = item.visible) {
+                        ActionPreference(
+                            item = item,
+                            onClick = { item.action() })
+                    }
                 }
             }
         }

@@ -42,6 +42,7 @@
     <string name="podcast_youMayAlsoLike">You may also like</string>
     <string name="podcast_episodes">Episodes</string>
     <string name="podcast_x_episodes">%1$s Episodes</string>
+    <string name="podcast_settings">Settings for this podcast</string>
 
     <!-- screen -->
     <string name="screen_queue">Queue</string>
@@ -53,6 +54,27 @@
     <string name="screen_profile">Profile</string>
     <string name="screen_favorites">Favorites</string>
     <string name="screen_history">History</string>
+    <string name="screen_settings">Settings</string>
+
+    <string name="settings_new_episodes">New episodes</string>
+    <string name="settings_new_episodes_desc">When a new episode is released</string>
+    <string name="settings_new_episodes_inbox">Add to inbox</string>
+    <string name="settings_new_episodes_queue_next">Queue next</string>
+    <string name="settings_new_episodes_queue_last">Queue last</string>
+    <string name="settings_new_episodes_archive">Archive</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_notifications_desc">Get notified of new episodes</string>
+    <string name="settings_episode_limit">Episode limit</string>
+    <string name="settings_episode_limit_desc">Limit what number of episodes of each podcast to keep</string>
+    <string name="settings_episode_no_limit">No limit</string>
+    <string name="settings_playback_effects">Playback effects</string>
+    <string name="settings_playback_effects_desc">Set custom playback effects</string>
+    <string name="settings_playback_speed">Playback speed</string>
+    <string name="settings_playback_speed_desc">Set custom playback effects</string>
+    <string name="settings_trim_silence">Trim silence</string>
+    <string name="settings_skip_intro">Skip intro</string>
+    <string name="settings_skip_ending">Skip ending</string>
+    <string name="settings_unfollow">Unfollow this podcast</string>
 
     <!-- actions -->
     <string name="action_subscribe">Subscribe</string>

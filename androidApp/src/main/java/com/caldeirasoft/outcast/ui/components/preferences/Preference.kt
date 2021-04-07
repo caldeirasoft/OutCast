@@ -24,7 +24,13 @@ fun Preference(
                 Text(text = item.title,
                     maxLines = if (item.singleLineTitle) 1 else Int.MAX_VALUE)
             },
-            secondaryText = { Text(text = summary ?: item.summary) },
+            secondaryText = {
+                (summary ?: item.summary)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        Text(text = it)
+                    }
+            },
             icon = {
                 Icon(imageVector = item.icon,
                     null,

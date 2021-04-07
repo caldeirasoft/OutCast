@@ -39,6 +39,7 @@ enum class ScreenName {
     HISTORY,
     FILES,
     SETTINGS,
+    PODCAST_SETTINGS,
     STATISTICS,
 }
 
@@ -48,6 +49,7 @@ sealed class Screen (val id: ScreenName) {
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
     data class PodcastScreen(val podcastArg: PodcastArg) : Screen(ScreenName.PODCAST)
+    data class PodcastSettings(val podcastId: Long) : Screen(ScreenName.PODCAST_SETTINGS)
     data class EpisodeScreen(val episodeArg: EpisodeArg) : Screen(ScreenName.EPISODE)
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)

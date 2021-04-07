@@ -1,5 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModel
@@ -28,12 +30,15 @@ class StorePodcastViewModel(
     private val unsubscribeUseCase: UnsubscribeUseCase by inject()
     private val loadPodcastEpisodesPagingDataUseCase: LoadPodcastEpisodesPagingDataUseCase by inject()
     private val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase by inject()
+    private val loadSettingsUseCase: LoadSettingsUseCase by inject()
 
     @OptIn(FlowPreview::class)
     val episodes: Flow<PagingData<Episode>> =
         loadPodcastEpisodesUseCase.execute(initialState.podcast.podcastId)
             .map { PagingData.from(it) }
             .cachedIn(viewModelScope)
+
+    val dataStore: DataStore<Preferences> = loadSettingsUseCase.settings
 
     init {
         viewModelScope.launch {
@@ -87,6 +92,8 @@ class StorePodcastViewModel(
     }
 
     fun unfollow() {
-        unsubscribeUseCase.execute(initialState.podcast.podcastId)
+        viewModelScope.launch {
+            unsubscribeUseCase.execute(initialState.podcast.podcastId)
+        }
     }
 }
