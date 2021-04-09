@@ -6,25 +6,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import com.caldeirasoft.outcast.domain.model.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
-fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferenceItem>) {
-    val scope = rememberCoroutineScope()
-
-    val prefs by dataStore.data.collectAsState(initial = null)
+fun PreferenceScreen(
+    prefs: Preferences?,
+    viewModel: PreferenceViewModel,
+    items: List<BasePreferenceItem>,
+) {
+    //val prefs by dataStore.data.collectAsState(initial = null)
 
     LazyColumn {
         items(items = items) { item ->
@@ -35,9 +30,7 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                             item = item,
                             value = prefs?.get(item.prefKey),
                             onValueChanged = { newValue ->
-                                scope.launch(Dispatchers.IO) {
-                                    dataStore.edit { it[item.prefKey] = newValue }
-                                }
+                                viewModel.updatePreference(item.prefKey, newValue)
                             }
                         )
                     }
@@ -48,7 +41,7 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                             item = item,
                             value = prefs?.get(item.prefKey),
                             onValueChanged = { newValue ->
-                                scope.launch { dataStore.edit { it[item.prefKey] = newValue } }
+                                viewModel.updatePreference(item.prefKey, newValue)
                             })
                     }
                 }
@@ -58,7 +51,7 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                             item = item,
                             values = prefs?.get(item.prefKey),
                             onValuesChanged = { newValues ->
-                                scope.launch { dataStore.edit { it[item.prefKey] = newValues } }
+                                viewModel.updatePreference(item.prefKey, newValues)
                             }
                         )
                     }
@@ -68,9 +61,7 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                         item = item,
                         value = prefs?.get(item.prefKey),
                         onValueChanged = { newValue ->
-                            scope.launch {
-                                dataStore.edit { it[item.prefKey] = newValue }
-                            }
+                            viewModel.updatePreference(item.prefKey, newValue)
                         },
                     )
                 }
@@ -79,9 +70,7 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                         item = item,
                         value = prefs?.get(item.prefKey),
                         onValueChanged = { newValue ->
-                            scope.launch {
-                                dataStore.edit { it[item.prefKey] = newValue }
-                            }
+                            viewModel.updatePreference(item.prefKey, newValue)
                         },
                     )
                 }
@@ -91,9 +80,7 @@ fun PreferenceScreen(dataStore: DataStore<Preferences>, items: List<BasePreferen
                             item = item,
                             value = prefs?.get(item.prefKey),
                             onValueChanged = { newValue ->
-                                scope.launch {
-                                    dataStore.edit { it[item.prefKey] = newValue }
-                                }
+                                viewModel.updatePreference(item.prefKey, newValue)
                             },
                         )
                     }

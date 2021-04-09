@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -49,10 +50,33 @@ class DataStoreRepository(val context: Context) {
         }
     }
 
-    suspend fun savePodcastSetting(podcastId: Long, newEpisodeAction: NewEpisodesAction) {
-        val prefNewEpisodesKey = stringPreferencesKey("$podcastId:pref_new_episodes")
+    suspend fun savePodcastSettings(podcastId: Long, newEpisodeAction: NewEpisodesAction) {
+        val podcastPreferenceKeys = PodcastPreferenceKeys(podcastId = podcastId)
         context.dataStore.edit { preferences ->
-            preferences[prefNewEpisodesKey] = newEpisodeAction.name
+            preferences[podcastPreferenceKeys.newEpisodes] = newEpisodeAction.name
+            preferences[podcastPreferenceKeys.notifications] = true
+            preferences[podcastPreferenceKeys.episodeLimit] = "0"
+            preferences[podcastPreferenceKeys.customPlaybackEffects] = false
+        }
+    }
+
+    suspend fun removePodcastSettings(podcastId: Long) {
+        val podcastPreferenceKeys = PodcastPreferenceKeys(podcastId = podcastId)
+        context.dataStore.edit { preferences ->
+            preferences.remove(podcastPreferenceKeys.newEpisodes)
+            preferences.remove(podcastPreferenceKeys.notifications)
+            preferences.remove(podcastPreferenceKeys.episodeLimit)
+            preferences.remove(podcastPreferenceKeys.customPlaybackEffects)
+            preferences.remove(podcastPreferenceKeys.customPlaybackSpeed)
+            preferences.remove(podcastPreferenceKeys.trimSilence)
+            preferences.remove(podcastPreferenceKeys.skipIntro)
+            preferences.remove(podcastPreferenceKeys.skipEnding)
+        }
+    }
+
+    suspend fun <T> updatePreference(key: Preferences.Key<T>, value: T) {
+        context.dataStore.edit { preferences ->
+            preferences[key] = value
         }
     }
 

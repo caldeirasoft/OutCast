@@ -64,15 +64,15 @@ inline fun <ResultType, RequestedType> networkBoundResource(
             emitAll(loadFromDb()
                 .filterNotNull()
                 .map {
-                Resource.Success(it)
-            })
+                    Resource.Success(it)
+                })
         }
     } else {
         emitAll(loadFromDb()
             .filterNotNull()
             .map {
-            Resource.Success(it)
-        })
+                Resource.Success(it)
+            })
     }
 }.onStart { emit(Resource.Loading()) }
     .catch { emit(Resource.Error(it)) }

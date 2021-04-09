@@ -6,21 +6,8 @@ import com.caldeirasoft.outcast.domain.models.Genre;
 PRAGMA foreign_keys = 1;
 CREATE TABLE inbox (
     episodeId INTEGER NOT NULL UNIQUE PRIMARY KEY,
-
     FOREIGN KEY (`episodeId`) REFERENCES `episode` (`episodeId`) ON DELETE CASCADE
 );
-
-CREATE TRIGGER add_episode_into_inbox
-AFTER INSERT ON episode
-BEGIN
-    INSERT OR REPLACE INTO inbox (episodeId)
-    SELECT episodeId
-    FROM episode e
-    INNER JOIN podcast p ON (e.podcastId = p.podcastId)
-    WHERE e.episodeId = new.episodeId
-      AND p.newEpisodeAction == 'INBOX';
-END;
-
 
 selectAll:
 SELECT e.*
@@ -46,6 +33,33 @@ ORDER BY e.releaseDateTime DESC;
 addToInbox:
 INSERT INTO inbox (episodeId)
 VALUES (?);
+
+addMostRecentEpisodeToInbox:
+INSERT OR REPLACE INTO inbox (episodeId)
+SELECT episodeId
+FROM episode e
+INNER JOIN podcast p ON (e.podcastId = p.podcastId)
+WHERE e.podcastId = :podcastId
+  ORDER BY e.releaseDateTime DESC
+LIMIT 1;
+
+addRecentEpisodesIntoInbox:
+INSERT OR REPLACE INTO inbox (episodeId)
+SELECT episodeId
+FROM episode e
+INNER JOIN podcast p ON (e.podcastId = p.podcastId)
+WHERE p.podcastId = :podcastId
+  AND e.releaseDateTime > :releaseDateTime;
+
+updateInboxEpisodeLimit:
+DELETE FROM inbox
+WHERE episodeId IN (
+    SELECT episodeId
+    FROM episode
+    WHERE podcastId = ?
+    ORDER BY releaseDateTime DESC
+    LIMIT -1 OFFSET :offset
+);
 
 removeFromInbox:
 DELETE FROM inbox

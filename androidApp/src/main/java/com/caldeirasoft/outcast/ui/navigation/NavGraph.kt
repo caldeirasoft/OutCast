@@ -21,7 +21,6 @@ import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.StorePodcastScreen
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsScreen
 import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
 import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
@@ -164,16 +163,6 @@ fun MainNavHost(startScreen: ScreenName) {
                     val episodeArg = backStackEntry.getObjectNotNull<EpisodeArg>("episode")
                     EpisodeScreen(
                         episodeArg = episodeArg,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up)
-                }
-                composable(
-                    route = "${ScreenName.PODCAST_SETTINGS.name}/{podcastId}",
-                    arguments = listOf(navArgument("podcastId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val podcastId = requireNotNull(backStackEntry.arguments?.getLong("podcastId"))
-                    PodcastSettingsScreen(
-                        podcastId = podcastId,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

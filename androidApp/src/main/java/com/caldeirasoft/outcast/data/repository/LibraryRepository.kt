@@ -11,6 +11,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.Instant
 
 class LibraryRepository(
     val database: Database
@@ -39,7 +40,7 @@ class LibraryRepository(
         newEpisodeAction: NewEpisodesAction,
     ) {
         database.podcastQueries
-            .subscribe(newEpisodeAction = newEpisodeAction, podcastId = podcastId)
+            .subscribe(podcastId = podcastId)
     }
 
     fun unsubscribeFromPodcast(podcastId: Long) {
@@ -109,7 +110,8 @@ class LibraryRepository(
                 database.podcastQueries.updateLastAccess(podcastDb.podcastId)
                 false
             } else {
-                database.podcastQueries.updateMetadata(podcastLookup.releaseDateTime,
+                database.podcastQueries.updateMetadata(
+                    podcastLookup.releaseDateTime,
                     podcastLookup.trackCount.toLong(),
                     podcastId)
                 true
@@ -127,5 +129,57 @@ class LibraryRepository(
                 database.episodeQueries.insert(it)
             }
         }
+    }
+
+    /**
+     * addMostRecentEpisodeToInbox
+     */
+    fun addMostRecentEpisodeToInbox(podcastId: Long) {
+        database.inboxQueries.addMostRecentEpisodeToInbox(podcastId = podcastId)
+    }
+
+    /**
+     * addRecentEpisodesIntoInbox
+     */
+    fun addRecentEpisodesIntoInbox(podcastId: Long, releaseDateTime: Instant) {
+        database.inboxQueries.addRecentEpisodesIntoInbox(
+            podcastId = podcastId,
+            releaseDateTime = releaseDateTime)
+    }
+
+    /**
+     * addRecentEpisodesIntoQueueFirst
+     */
+    fun addRecentEpisodesIntoQueueFirst(podcastId: Long, releaseDateTime: Instant) {
+        database.queueQueries.addRecentEpisodesIntoQueueFirst(
+            podcastId = podcastId,
+            releaseDateTime = releaseDateTime)
+    }
+
+    /**
+     * addRecentEpisodesIntoQueueLast
+     */
+    fun addRecentEpisodesIntoQueueLast(podcastId: Long, releaseDateTime: Instant) {
+        database.queueQueries.addRecentEpisodesIntoQueueLast(
+            podcastId = podcastId,
+            releaseDateTime = releaseDateTime)
+    }
+
+    /**
+     * updateInboxEpisodeLimit
+     */
+    fun updateInboxEpisodeLimit(podcastId: Long, limit: Int) {
+        database.inboxQueries.updateInboxEpisodeLimit(
+            podcastId = podcastId,
+            offset = limit.toLong())
+    }
+
+    /**
+     * addRecentEpisodesIntoQueueLast
+     */
+    fun updateQueueEpisodeLimit(podcastId: Long, limit: Int) {
+        database.queueQueries.updateQueueEpisodeLimit(
+            podcastId = podcastId,
+            offset = limit.toLong())
     }
 }

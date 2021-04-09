@@ -18,7 +18,8 @@ class SubscribeUseCase(
             libraryRepository.subscribeToPodcast(
                 podcastId = podcastId,
                 newEpisodeAction = newEpisodesAction)
-            dataStoreRepository.savePodcastSetting(podcastId, NewEpisodesAction.INBOX)
+            dataStoreRepository.savePodcastSettings(podcastId, NewEpisodesAction.INBOX)
+            libraryRepository.addMostRecentEpisodeToInbox(podcastId)
             emit(true)
         }
 
@@ -31,7 +32,8 @@ class SubscribeUseCase(
         libraryRepository.subscribeToPodcast(
             podcastId = storePodcast.podcast.podcastId,
             newEpisodeAction = NewEpisodesAction.INBOX)
-        dataStoreRepository.savePodcastSetting(storePodcast.id, NewEpisodesAction.INBOX)
+        dataStoreRepository.savePodcastSettings(storePodcast.id, NewEpisodesAction.INBOX)
+        libraryRepository.addMostRecentEpisodeToInbox(storePodcast.id)
         emit(true)
     }
 }

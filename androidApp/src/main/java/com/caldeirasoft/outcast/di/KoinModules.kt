@@ -177,12 +177,17 @@ internal val usecaseModule = module {
     single { FetchStoreGroupingPagingDataUseCase(storeRepository = get()) }
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     single { FetchStoreRoomPagingDataUseCase(storeRepository = get()) }
-    single { FetchStorePodcastDataUseCase(storeRepository = get(), libraryRepository = get()) }
+    single {
+        FetchStorePodcastDataUseCase(storeRepository = get(),
+            libraryRepository = get(),
+            dataStoreRepository = get())
+    }
     single { FetchStoreEpisodeDataUseCase(storeRepository = get(), libraryRepository = get()) }
     single { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
     single { LoadStoreTopChartsPagingDataUseCase(storeRepository = get()) }
     single { GetStoreItemsUseCase(storeRepository = get()) }
     single { LoadSettingsUseCase(dataStoreRepository = get()) }
+    single { UpdateSettingsUseCase(dataStoreRepository = get()) }
 }
 
 @OptIn(ExperimentalSerializationApi::class)
