@@ -1,19 +1,8 @@
 package com.caldeirasoft.outcast.ui.theme
 
 import androidx.annotation.FloatRange
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.graphics.drawable.toBitmap
-import androidx.palette.graphics.Palette
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
-import kotlinx.coroutines.launch
 
 val purple200 = Color(0xFFBB86FC)
 val purple500 = Color(0xFF6200EE)
@@ -52,28 +41,58 @@ fun Color.Companion.blendARGB(
     return Color(red = r, green = g, blue = b, alpha = a)
 }
 
-@Composable
-fun FetchDominantColorFromPoster(
-    posterUrl: String,
-    colorState: MutableState<Color>,
-    defaultColor: Color = Color.randomColor()
-) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    LaunchedEffect(posterUrl) {
-        scope.launch {
-            val loader = ImageLoader(context)
-            val request = ImageRequest.Builder(context)
-                .data(posterUrl)
-                .size(128, 128)
-                .allowHardware(false)
-                .build()
+fun Color.toHsv(): FloatArray {
+    val result = floatArrayOf(0f, 0f, 0f)
+    android.graphics.Color.colorToHSV(toArgb(), result)
+    return result
+}
 
-            val bitmap = (loader.execute(request) as? SuccessResult)?.drawable?.toBitmap()
-                ?: return@launch
-            val dominantColor =
-                Palette.from(bitmap).generate().getVibrantColor(defaultColor.toArgb())
-            colorState.value = Color(dominantColor)
-        }
+fun hsvToColor(hue: Float, saturation: Float, value: Float): Color {
+    val f = floatArrayOf(hue, saturation, value)
+    return Color(android.graphics.Color.HSVToColor(f))
+}
+
+fun Color.toxyY(): FloatArray {
+    val X = red * 0.4124f + green * 0.3576f + blue * 0.1805f
+    val Y = red * 0.2126f + green * 0.7152f + blue * 0.0722f
+    val Z = red * 0.0193f + green * 0.1192f + blue * 0.9505f
+    val L = (X + Y + Z)
+    val x = X / L
+    val y = Y / L
+    val result = floatArrayOf(x, y, Y)
+    return result
+}
+
+fun xyYtoColor(x: Float, y: Float, Y: Float): Color {
+    // Convert from xyY to XYZ
+    val x1 = x * Y / y
+    val y1 = Y
+    val z1 = (1 - x - y) * (Y / y)
+
+    // Convert from XYZ to RGB
+    var r = x1 * 3.2406f + y1 * -1.5372f + z1 * -0.4986f
+    var g = x1 * -0.9689f + y1 * 1.8758f + z1 * 0.0415f
+    var b = x1 * 0.0557f + y1 * -0.2040f + z1 * 1.0570f
+
+    // assume sRGB
+    if (r > 0.0031308) {
+        r = (1.055f * Math.pow(r.toDouble(), 1.0 / 2.4) - 0.055f).toFloat()
+    } else {
+        r = r * 12.92f
     }
+    if (g > 0.0031308) {
+        g = (1.055f * Math.pow(g.toDouble(), 1.0 / 2.4) - 0.055f).toFloat()
+    } else {
+        g = g * 12.92f
+    }
+    if (b > 0.0031308) {
+        b = (1.055f * Math.pow(b.toDouble(), 1.0 / 2.4) - 0.055f).toFloat()
+    } else {
+        b = b * 12.92f
+    }
+
+    return Color(
+        red = r.coerceIn(0f, 1f),
+        green = g.coerceIn(0f, 1f),
+        blue = b.coerceIn(0f, 1f))
 }

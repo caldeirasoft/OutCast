@@ -21,9 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -47,16 +45,17 @@ import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewState
-import com.caldeirasoft.outcast.ui.theme.blendARGB
-import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.theme.*
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toPx
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
+
+val LocalVibrantColor = compositionLocalOf<Color> { error("No vibrant color") }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @ExperimentalCoroutinesApi
@@ -74,6 +73,8 @@ fun StorePodcastScreen(
 
     val episodesLazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
     val podcastData = state.podcast
+    val dominantColor = remember(podcastData) { GetPodcastVibrantColor(podcastData = podcastData) }
+    val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
 
     LaunchedEffect(key1 = drawerContent) {
         drawerContent.updateContent {
@@ -84,218 +85,188 @@ fun StorePodcastScreen(
         }
     }
 
-    ReachableScaffold(headerRatio = 2 / 5f) { headerHeight ->
-        //
-        val listState = rememberLazyListState(0)
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()) {
+    CompositionLocalProvider(LocalVibrantColor provides dominantColorOrDefault) {
+        ReachableScaffold(headerRatio = 2 / 5f) { headerHeight ->
+            //
+            val listState = rememberLazyListState(0)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()) {
 
-            item {
-                StorePodcastExpandedHeader(
-                    state = state,
-                    listState = listState,
-                    headerHeight = headerHeight,
-                    navigateTo = navigateTo
-                )
-            }
+                item {
+                    StorePodcastExpandedHeader(
+                        state = state,
+                        listState = listState,
+                        headerHeight = headerHeight,
+                        navigateTo = navigateTo
+                    )
+                }
 
-            when {
-                state.isLoading ->
-                    item {
-                        StorePodcastLoadingScreen()
-                    }
-                state.error != null ->
-                    state.error?.let {
+                when {
+                    state.isLoading ->
                         item {
-                            ErrorScreen(t = it)
+                            StorePodcastLoadingScreen()
                         }
-                    }
-                else -> {
-                    // buttons
-                    item {
+                    state.error != null ->
+                        state.error?.let {
+                            item {
+                                ErrorScreen(t = it)
+                            }
+                        }
+                    else -> {
                         // buttons
-                        BoxWithConstraints(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            contentAlignment = Alignment.Center) {
-                            val fullWidth = constraints.maxWidth
-                            val buttonWidth = 150.dp.toPx()
-                            val twoButtonsWidth = 2 * buttonWidth + 20.dp.toPx()
-                            val edgePadding = (fullWidth - buttonWidth) / 2
-                            val edgePadding2Btns = (fullWidth - twoButtonsWidth) / 2
-                            // settings
-                            FollowingButton(
-                                textContent = stringResource(id = R.string.action_settings),
-                                imageVector = Icons.Default.Settings,
-                                translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding - edgePadding2Btns else 0f,
-                                alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
-                                onClick = {
-                                    coroutineScope.launch {
-                                        drawerState.show()
-                                    }
-                                }
-                            )
-
-                            // following buttons
-                            FollowingButton(
-                                textContent = stringResource(id = R.string.action_following),
-                                imageVector = Icons.Default.Check,
-                                translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
-                                alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
-                                onClick = { viewModel.unfollow() }
-                            )
-
-                            // follow button
-                            AnimatedVisibility(
-                                visible = (state.followingStatus != FollowStatus.FOLLOWED),
-                                enter = fadeIn(animationSpec = tween(durationMillis = 250)),
-                                exit = fadeOut(animationSpec = tween(durationMillis = 250)))
-                            {
-                                Button(
-                                    modifier = Modifier
-                                        .width(150.dp),
-                                    onClick = {
-                                        if (state.followingStatus == FollowStatus.UNFOLLOWED)
-                                            viewModel.subscribe()
-                                    },
-                                    contentPadding = PaddingValues(start = 24.dp,
-                                        end = 24.dp,
-                                        top = 8.dp,
-                                        bottom = 8.dp),
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Crossfade(targetState = state.followingStatus) { followStatus ->
-                                            when (followStatus) {
-                                                FollowStatus.FOLLOWING ->
-                                                    LinearProgressIndicator(
-                                                        color = contentColorFor(MaterialTheme.colors.primary),
-                                                        modifier = Modifier
-                                                            .size(24.dp)
-                                                            .padding(end = 4.dp))
-                                                FollowStatus.UNFOLLOWED ->
-                                                    Icon(
-                                                        imageVector = Icons.Default.Add,
-                                                        contentDescription = stringResource(id = R.string.action_follow),
-                                                        modifier = Modifier.padding(end = 4.dp)
-                                                    )
-                                            }
-                                        }
-                                        Text(text = stringResource(id = R.string.action_follow),
-                                            style = typography.button.copy(letterSpacing = 0.5.sp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    /* description if present */
-                    item {
-                        podcastData.description?.let { description ->
-                            PodcastDescriptionContent(description = description)
-                        }
-                    }
-
-                    // genre
-                    item {
-                        podcastData.genre?.let { genre ->
-                            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                ChipButton(selected = false,
-                                    onClick = { navigateTo(Screen.GenreScreen(genre)) }) {
-                                    Text(text = genre.name)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
-                    // episodes
-                    item {
-                        StoreHeadingSection(
-                            title = stringResource(id = R.string.podcast_x_episodes,
-                                episodesLazyPagingItems.itemCount))
-                    }
-                    if (state.showAllEpisodes || episodesLazyPagingItems.itemCount < 5) {
-                        items(lazyPagingItems = episodesLazyPagingItems) { episode ->
-                            episode?.let {
-                                EpisodeItem(
-                                    episode = episode,
-                                    onEpisodeClick = {
-                                        navigateTo(Screen.EpisodeScreen(episode.toEpisodeArg()))
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Divider()
-                            }
-                        }
-                    } else {
-                        // show first, last and "show more" button
                         item {
-                            // most recent episode
-                            episodesLazyPagingItems[0]?.let { firstEpisode ->
-                                EpisodeItem(
-                                    episode = firstEpisode,
-                                    onEpisodeClick = {
-                                        navigateTo(Screen.EpisodeScreen(firstEpisode.toEpisodeArg()))
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Divider()
-                            }
-                        }
-
-                        item {
-                            // text button "show more episodes"
-                            TextButton(
+                            // buttons
+                            BoxWithConstraints(
                                 modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .align(Alignment.Center),
-                                onClick = viewModel::showAllEpisodes)
-                            {
-                                Text(text = stringResource(id = R.string.action_show_all_episodes),
-                                    style = typography.button.copy(letterSpacing = 0.25.sp))
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                contentAlignment = Alignment.Center) {
+                                val fullWidth = constraints.maxWidth
+                                val buttonWidth = 150.dp.toPx()
+                                val twoButtonsWidth = 2 * buttonWidth + 20.dp.toPx()
+                                val edgePadding = (fullWidth - buttonWidth) / 2
+                                val edgePadding2Btns = (fullWidth - twoButtonsWidth) / 2
+                                // settings
+                                FollowingButton(
+                                    textContent = stringResource(id = R.string.action_settings),
+                                    imageVector = Icons.Default.Settings,
+                                    translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding - edgePadding2Btns else 0f,
+                                    alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            drawerState.show()
+                                        }
+                                    }
+                                )
+
+                                // following buttons
+                                FollowingButton(
+                                    textContent = stringResource(id = R.string.action_following),
+                                    imageVector = Icons.Default.Check,
+                                    translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
+                                    alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                    onClick = { viewModel.unfollow() }
+                                )
+
+                                // follow button
+                                FollowButton(
+                                    state = state,
+                                    onClick = viewModel::subscribe
+                                )
                             }
-                            Divider()
+                        }
+
+                        /* description if present */
+                        item {
+                            podcastData.description?.let { description ->
+                                PodcastDescriptionContent(description = description)
+                            }
+                        }
+
+                        // genre
+                        item {
+                            podcastData.genre?.let { genre ->
+                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    ChipButton(selected = false,
+                                        onClick = { navigateTo(Screen.GenreScreen(genre)) }) {
+                                        Text(text = genre.name)
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // episodes
+                        item {
+                            StoreHeadingSection(
+                                title = stringResource(id = R.string.podcast_x_episodes,
+                                    episodesLazyPagingItems.itemCount))
+                        }
+                        if (state.showAllEpisodes || episodesLazyPagingItems.itemCount < 5) {
+                            items(lazyPagingItems = episodesLazyPagingItems) { episode ->
+                                episode?.let {
+                                    EpisodeItem(
+                                        episode = episode,
+                                        onEpisodeClick = {
+                                            navigateTo(Screen.EpisodeScreen(episode.toEpisodeArg()))
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Divider()
+                                }
+                            }
+                        } else {
+                            // show first, last and "show more" button
+                            item {
+                                // most recent episode
+                                episodesLazyPagingItems[0]?.let { firstEpisode ->
+                                    EpisodeItem(
+                                        episode = firstEpisode,
+                                        onEpisodeClick = {
+                                            navigateTo(Screen.EpisodeScreen(firstEpisode.toEpisodeArg()))
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Divider()
+                                }
+                            }
+
+                            item {
+                                // text button "show more episodes"
+                                TextButton(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .align(Alignment.Center),
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = LocalVibrantColor.current
+                                    ),
+                                    onClick = viewModel::showAllEpisodes)
+                                {
+                                    Text(text = stringResource(id = R.string.action_show_all_episodes),
+                                        style = typography.button.copy(letterSpacing = 0.25.sp))
+                                }
+                                Divider()
+                            }
+
+                            item {
+                                // oldest episode
+                                val size = episodesLazyPagingItems.itemCount - 1
+                                episodesLazyPagingItems.peek(size)?.let { lastEpisode ->
+                                    EpisodeItem(
+                                        episode = lastEpisode,
+                                        onEpisodeClick = {
+                                            navigateTo(Screen.EpisodeScreen(lastEpisode.toEpisodeArg()))
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Divider()
+                                }
+                            }
                         }
 
                         item {
-                            // oldest episode
-                            val size = episodesLazyPagingItems.itemCount - 1
-                            episodesLazyPagingItems.peek(size)?.let { lastEpisode ->
-                                EpisodeItem(
-                                    episode = lastEpisode,
-                                    onEpisodeClick = {
-                                        navigateTo(Screen.EpisodeScreen(lastEpisode.toEpisodeArg()))
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Divider()
-                            }
+                            // bottom app bar spacer
+                            Spacer(modifier = Modifier.height(56.dp))
                         }
-                    }
-
-                    item {
-                        // bottom app bar spacer
-                        Spacer(modifier = Modifier.height(56.dp))
                     }
                 }
             }
+
+
+            ReachableAppBar(
+                collapsedContent = {
+                    StorePodcastCollapsedHeader(
+                        podcastData = podcastData,
+                        listState = listState,
+                        headerHeight = headerHeight,
+                        navigateUp = navigateBack)
+                },
+                state = listState,
+                headerHeight = headerHeight)
         }
-
-
-        ReachableAppBar(
-            collapsedContent = {
-                StorePodcastCollapsedHeader(
-                    podcastData = podcastData,
-                    listState = listState,
-                    headerHeight = headerHeight,
-                    navigateUp = navigateBack)
-            },
-            state = listState,
-            headerHeight = headerHeight)
     }
 }
 
@@ -308,6 +279,10 @@ private fun StorePodcastExpandedHeader(
 ) {
     val podcastData = state.podcast
     val artistRoom = state.artistRoom
+    val dominantColor =
+        podcastData.artwork?.bgColor
+            ?.let { Color.getColor(it).takeUnless { it == Color.White } }
+
     val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -391,7 +366,8 @@ private fun StorePodcastExpandedHeader(
                     .then(clickableArtistMod),
                 style = MaterialTheme.typography.body1,
                 maxLines = 2,
-                color = artistRoom?.let { MaterialTheme.colors.primary } ?: Color.Unspecified,
+                color = artistRoom?.let { dominantColor /*MaterialTheme.colors.primary*/ }
+                    ?: Color.Unspecified,
                 textAlign = TextAlign.Center
             )
         }
@@ -543,6 +519,9 @@ fun FollowingButton(
                 ).value
             ),
         onClick = onClick,
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = LocalVibrantColor.current
+        ),
         contentPadding = PaddingValues(start = 24.dp,
             end = 24.dp,
             top = 8.dp,
@@ -558,3 +537,76 @@ fun FollowingButton(
         }
     }
 }
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun FollowButton(state: StorePodcastViewState, onClick: () -> Unit) {
+    AnimatedVisibility(
+        visible = (state.followingStatus != FollowStatus.FOLLOWED),
+        enter = fadeIn(animationSpec = tween(durationMillis = 250)),
+        exit = fadeOut(animationSpec = tween(durationMillis = 250)))
+    {
+        Button(
+            modifier = Modifier
+                .width(150.dp),
+            onClick = {
+                if (state.followingStatus == FollowStatus.UNFOLLOWED)
+                    onClick()
+            },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = LocalVibrantColor.current,
+                contentColor = contentColorForExtended(LocalVibrantColor.current)
+            ),
+            contentPadding = PaddingValues(start = 24.dp,
+                end = 24.dp,
+                top = 8.dp,
+                bottom = 8.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Crossfade(targetState = state.followingStatus) { followStatus ->
+                    when (followStatus) {
+                        FollowStatus.FOLLOWING ->
+                            LinearProgressIndicator(
+                                color = contentColorForExtended(LocalVibrantColor.current),
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(end = 4.dp))
+                        FollowStatus.UNFOLLOWED ->
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(id = R.string.action_follow),
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                    }
+                }
+                Text(text = stringResource(id = R.string.action_follow),
+                    style = typography.button.copy(letterSpacing = 0.5.sp))
+            }
+        }
+    }
+}
+
+fun GetPodcastVibrantColor(podcastData: Podcast): Color? =
+    podcastData.artwork
+        ?.bgColor
+        ?.let { Color.getColor(it).takeUnless { it == Color.White || it == Color.Black } }
+        ?.let { color ->
+            Timber.d(String.format("color : #%06X", (0xFFFFFF and color.toArgb())))
+            if (color.luminance() > 0.7)
+                color.toxyY().let { xyYtoColor(it[0], it[1], 0.5f) }
+                    .also {
+                        Timber.d(String.format("Dim color : #%06X", (0xFFFFFF and it.toArgb())))
+                    }
+            else color
+        }
+
+@Composable
+@ReadOnlyComposable
+fun contentColorForExtended(backgroundColor: Color): Color =
+    when (backgroundColor) {
+        MaterialTheme.colors.primary -> MaterialTheme.colors.onPrimary
+        else -> {
+            if (backgroundColor.luminance() > 0.5) Color.Black
+            else Color.White
+        }
+    }
