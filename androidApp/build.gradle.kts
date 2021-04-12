@@ -67,7 +67,7 @@ android {
 dependencies {
     implementation(project(":shared"))
     // Android
-    implementation("com.google.android.material:material:1.3.+")
+    implementation("com.google.android.material:material:1.3.0")
     // AndroidX
     api(libs.bundles.kotlin)
     api(libs.bundles.stetho)
@@ -93,5 +93,5 @@ dependencies {
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.1")
+    coreLibraryDesugaring(libs.desugarJdkLibs)
 }

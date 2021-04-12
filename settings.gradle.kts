@@ -3,7 +3,7 @@ include(":shared")
 include(":androidApp")
 include(":js")
 include(":jvm")
-enableFeaturePreview("GRADLE_METADATA")
+enableFeaturePreview("VERSION_CATALOGS")
 
 pluginManagement {
     val kotlinVersion: String by settings
@@ -40,113 +40,5 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            val kotlinVersion: String by settings
-            val sqldelightVersion: String by settings
-            val composeVersion: String by settings
-            version("kotlin", kotlinVersion)
-            version("desugar_jdk_libs","1.1.1")
-            version("leakcanary","2.6")
-
-            alias("coroutines-core").to("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.+")
-            alias("coroutines-android").to("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.+")
-            alias("kotlinx-datetime").to("org.jetbrains.kotlinx","kotlinx-datetime").version("0.1.1")
-            alias("kotlinx-serialization").to("org.jetbrains.kotlinx","kotlinx-serialization-json").version("1.1.+")
-            bundle("kotlin", listOf("coroutines-android", "kotlinx-datetime", "kotlinx-serialization"))
-
-            alias("core-ktx").to("androidx.core:core-ktx:1.+")
-            alias("appcompat").to("androidx.appcompat:appcompat:1.3.+")
-            alias("palette").to("androidx.palette:palette:1.0.+")
-            alias("runtime-ktx").to("androidx.lifecycle:lifecycle-runtime-ktx:2.3.+")
-            alias("datastore-preferences").to("androidx.datastore:datastore-preferences:1.0.0-alpha08")
-
-            version("compose", composeVersion)
-            alias("compose-runtime").to("androidx.compose.runtime", "runtime").versionRef("compose")
-            alias("compose-foundation").to("androidx.compose.foundation", "foundation").versionRef("compose")
-            alias("compose-layout").to("androidx.compose.foundation", "foundation-layout").versionRef("compose")
-            alias("compose-ui").to("androidx.compose.ui", "ui").versionRef("compose")
-            alias("compose-tooling").to("androidx.compose.ui", "ui-tooling").versionRef("compose")
-            alias("compose-material").to("androidx.compose.material", "material").versionRef("compose")
-            alias("compose-iconsExtended").to("androidx.compose.material", "material-icons-extended").versionRef("compose")
-            bundle("compose", listOf(
-                "compose-runtime",
-                "compose-foundation",
-                "compose-layout",
-                "compose-ui",
-                "compose-tooling",
-                "compose-material",
-                "compose-iconsExtended",
-            ))
-
-            alias("activity-compose").to("androidx.activity:activity-compose:1.3.0-alpha03")
-            alias("viewmodel-compose").to("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha02")
-            alias("navigation-compose").to("androidx.navigation:navigation-compose:1.0.0-alpha09")
-            alias("paging-compose").to("androidx.paging:paging-compose:1.0.0-alpha08")
-
-            version("koin", "2+")
-            alias("koin-androidx").to("org.koin", "koin-androidx-scope").versionRef("koin")
-            alias("koin-ext").to("org.koin", "koin-androidx-ext").versionRef("koin")
-            alias("koin-workmanager").to("org.koin", "koin-androidx-workmanager").versionRef("koin")
-            alias("koin-compose").to("org.koin", "koin-androidx-compose").versionRef("koin")
-            bundle("koin", listOf(
-                "koin-androidx",
-                "koin-ext",
-                "koin-workmanager",
-                "koin-compose",
-            ))
-
-            version("okhttp", "4.+")
-            alias("okhttp-okhttp").to("com.squareup.okhttp3", "okhttp").versionRef("okhttp")
-            alias("okhttp-interceptor").to("com.squareup.okhttp3", "logging-interceptor").versionRef("okhttp")
-            alias("okhttp-dnsoverhttps").to("com.squareup.okhttp3", "okhttp-dnsoverhttps").versionRef("okhttp")
-            // bundle is basically an alias for several dependencies
-            bundle("okhttp", listOf("okhttp-okhttp", "okhttp-interceptor", "okhttp-dnsoverhttps"))
-
-            version("retrofit", "2.+")
-            alias("retrofit-core").to("com.squareup.retrofit2", "retrofit").versionRef("retrofit")
-            alias("retrofit-kotlinx-serialization").to("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
-            bundle("retrofit", listOf("retrofit-core", "retrofit-kotlinx-serialization"))
-
-            version("sqldelight", sqldelightVersion)
-            alias("sqldelight-runtime").to("com.squareup.sqldelight", "runtime").versionRef("sqldelight")
-            alias("sqldelight-android").to("com.squareup.sqldelight", "android-driver").versionRef("sqldelight")
-            alias("sqldelight-coroutines").to("com.squareup.sqldelight", "coroutines-extensions").versionRef("sqldelight")
-            alias("sqldelight-paging").to("com.squareup.sqldelight:android-paging-extensions:1.2.1")
-            bundle("sqldelight",
-                listOf("sqldelight-android", "sqldelight-coroutines", "sqldelight-paging"))
-
-            version("chucker", "3.4.+")
-            alias("chucker-debug").to("com.github.chuckerteam.chucker", "library")
-                .versionRef("chucker")
-            alias("chucker-release").to("com.github.chuckerteam.chucker", "library-no-op")
-                .versionRef("chucker")
-
-            version("stetho", "1.5.0") // 1.5.1 has critical bug
-            alias("stetho-core").to("com.facebook.stetho", "stetho").versionRef("stetho")
-            alias("stetho-okhttp3").to("com.facebook.stetho", "stetho-okhttp3").versionRef("stetho")
-            bundle("stetho", listOf("stetho-core", "stetho-okhttp3"))
-
-            version("accompanist", "0.7.0")
-            alias("accompanist-coil").to("com.google.accompanist", "accompanist-coil")
-                .versionRef("accompanist")
-            alias("accompanist-pager").to("com.google.accompanist", "accompanist-pager")
-                .versionRef("accompanist")
-            alias("accompanist-systemuicontroller").to("com.google.accompanist",
-                "accompanist-systemuicontroller").versionRef("accompanist")
-            alias("accompanist-insets").to("com.google.accompanist", "accompanist-insets")
-                .versionRef("accompanist")
-            bundle("accompanist",
-                listOf("accompanist-coil",
-                    "accompanist-pager",
-                    "accompanist-systemuicontroller",
-                    "accompanist-insets"))
-
-            alias("timber").to("com.jakewharton.timber:timber:4.+")
-            alias("landscapist-coil").to("com.github.skydoves:landscapist-coil:1.1.7")
-            alias("mavericks").to("com.airbnb.android:mavericks-compose:2.1.0-alpha01")
-            alias("junit").to("junit:junit:4.+")
-        }
-    }
 }
 
