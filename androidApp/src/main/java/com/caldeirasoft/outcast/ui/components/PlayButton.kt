@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 
 
 @Composable
@@ -37,20 +38,23 @@ fun PlayButton(
     ) {
         Row {
             Box(modifier = Modifier.padding(end = 4.dp)) {
-                Box(modifier = Modifier.size(24.dp)) {
+                Box(modifier = Modifier.size(20.dp)) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
+                        val playbackAdvanceRatio = episode.playbackPosition
+                            ?.let { it.toFloat() / episode.duration * 360f }
+                            ?: 0f
                         drawCircle(
                             color = Color.Blue,
                             radius = this.size.width / 2.0f)
                         drawArc(
                             color = Color.LightGray,
                             startAngle = -90f,
-                            sweepAngle = 105f,
+                            sweepAngle = playbackAdvanceRatio,
                             useCenter = true,
                             size = Size(this.size.width, this.size.height))
                         drawCircle(
                             color = Color.White,
-                            radius = this.size.width / 2.0f * 0.75f)
+                            radius = this.size.width / 2.0f * 0.85f)
                     }
                 }
                 Icon(
@@ -63,7 +67,7 @@ fun PlayButton(
                 )
             }
             Text(
-                text = "text2",
+                text = episode.duration.formatDuration(),
                 modifier = Modifier
                     .align(alignment = Alignment.CenterVertically),
                 style = TextStyle(
@@ -89,7 +93,7 @@ fun QueueButton(
 
 private object PlayButtonDefaults {
     // List item related defaults.
-    val Height = 32.dp
+    val Height = 28.dp
 
     // Icon related defaults.
     val IconMinPaddedWidth = 40.dp

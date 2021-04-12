@@ -2,16 +2,19 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.models.getArtworkUrl
@@ -20,6 +23,7 @@ import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
 import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
+import com.skydoves.landscapist.coil.CoilImage
 
 
 @Composable
@@ -148,6 +152,65 @@ fun EpisodeItem(
         }
     )
 }
+
+@Composable
+fun EpisodeGridItem(
+    modifier: Modifier = Modifier,
+    episode: Episode,
+) {
+    Column(modifier = modifier
+        .height(300.dp)) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            border = ButtonDefaults.outlinedBorder,
+            elevation = 0.dp,
+            modifier = modifier.fillMaxSize()
+        ) {
+            Column {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f))
+                {
+                    CoilImage(
+                        imageModel = episode.getArtworkUrl(),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth())
+                }
+                Column(modifier = Modifier
+                    .padding(vertical = 8.dp, horizontal = 8.dp)
+                    .weight(1f)) {
+                    Text(
+                        text = episode.name,
+                        modifier = Modifier.fillMaxWidth(),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 3,
+                        style = MaterialTheme.typography.body2
+                    )
+                    Text(
+                        text = with(AnnotatedString.Builder()) {
+                            append(episode.podcastName)
+                            append(" — ")
+                            append(episode.artistName)
+                            toAnnotatedString()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.caption
+                    )
+                }
+                Row(modifier = Modifier
+                    .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    PlayButton(episode = episode)
+                    QueueButton(episode = episode)
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun EpisodeTrailerItem(

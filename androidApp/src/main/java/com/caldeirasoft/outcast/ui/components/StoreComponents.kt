@@ -11,9 +11,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -79,6 +76,30 @@ fun StoreCollectionEpisodesContent(
     onHeaderLinkClick: () -> Unit = { navigateTo(Screen.Room(storeCollection.room)) },
     showIndex: Boolean = false,
 ) {
+    // header
+    StoreHeadingSectionWithLink(
+        title = storeCollection.label,
+        onClick = onHeaderLinkClick
+    )
+    // content
+    LazyRow(
+        contentPadding = PaddingValues(start = 16.dp,
+            end = 0.dp,
+            bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        itemsIndexed(items = storeCollection.items) { index, item ->
+            EpisodeGridItem(
+                modifier = Modifier
+                    .width(180.dp)
+                    .clickable(onClick = {
+                        navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                    }),
+                episode = item.episode,
+            )
+        }
+    }
+    /*
     val indexedItems =
         storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
     val chunkedItems = indexedItems.chunked(numRows)
@@ -123,6 +144,7 @@ fun StoreCollectionEpisodesContent(
             }
         }
     }
+     */
 }
 
 @Composable
