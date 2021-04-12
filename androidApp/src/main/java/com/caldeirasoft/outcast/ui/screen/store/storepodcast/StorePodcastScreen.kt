@@ -194,7 +194,6 @@ fun StorePodcastScreen(
                                             navigateTo(Screen.EpisodeScreen(episode.toEpisodeArg()))
                                         }
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
                                     Divider()
                                 }
                             }
@@ -209,7 +208,6 @@ fun StorePodcastScreen(
                                             navigateTo(Screen.EpisodeScreen(firstEpisode.toEpisodeArg()))
                                         }
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
                                     Divider()
                                 }
                             }
@@ -241,7 +239,6 @@ fun StorePodcastScreen(
                                             navigateTo(Screen.EpisodeScreen(lastEpisode.toEpisodeArg()))
                                         }
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
                                     Divider()
                                 }
                             }

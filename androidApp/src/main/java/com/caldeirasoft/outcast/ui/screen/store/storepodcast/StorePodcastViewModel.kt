@@ -34,6 +34,7 @@ class StorePodcastViewModel(
     @OptIn(FlowPreview::class)
     val episodes: Flow<PagingData<Episode>> =
         loadPodcastEpisodesUseCase.execute(initialState.podcast.podcastId)
+            .map { it.sortedByDescending { it.releaseDateTime } }
             .map { PagingData.from(it) }
             .cachedIn(viewModelScope)
 

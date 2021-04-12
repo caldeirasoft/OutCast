@@ -1,6 +1,5 @@
 package com.caldeirasoft.outcast.ui.util
 
-import java.lang.StringBuilder
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -14,16 +13,17 @@ object DurationFormatter {
                 val hasMinutes = minutes != 0 || (hasSeconds && hasHours)
                 if (hasHours) {
                     append(hours)
-                    append('h')
+                    append(" h ")
                 }
                 if (hasMinutes) {
                     append(minutes.toString().padStart(2, '0'))
-                    append('m')
+                    append(" min ")
                 }
-                if ((hasSeconds && minutes < 2) || (!hasHours && !hasMinutes)) {
+                if ((hasSeconds && !hasHours && minutes < 2) || (!hasHours && !hasMinutes)) {
                     append(seconds.toString().padStart(2, '0'))
-                    append('s')
+                    append(" s")
                 }
+                trim()
                 toString()
             }
         }

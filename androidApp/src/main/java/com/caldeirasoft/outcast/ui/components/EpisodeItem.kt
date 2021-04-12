@@ -89,7 +89,9 @@ fun QueueEpisodeItem(
     onEpisodeClick: () -> Unit,
 ) {
     EpisodeDefaults.EpisodeItem(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onEpisodeClick() },
         icon = {
             PodcastThumbnail(
                 imageModel = episode.getArtworkUrl(),
@@ -109,7 +111,6 @@ fun QueueEpisodeItem(
                 QueueButton(episode = episode)
             }
         },
-        onEpisodeClick = onEpisodeClick
     )
 }
 
@@ -119,6 +120,40 @@ fun EpisodeItem(
     episode: Episode,
     onEpisodeClick: () -> Unit,
 ) {
+    EpisodeDefaults.EpisodeItem(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onEpisodeClick() },
+        icon = {
+            PodcastThumbnail(
+                imageModel = episode.getArtworkUrl(),
+                modifier = Modifier
+                    .size(EpisodeDefaults.SmallThumbnailSize)
+                    .clickable(onClick = { })
+            )
+        },
+        text = {
+            Text(text = episode.name, maxLines = 2)
+        },
+        releasedTimeText = { },
+        actionButtons = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
+            }
+        },
+        overlineText = {
+            val context = LocalContext.current
+            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+        },
+        descriptionText = {
+            episode.description?.let {
+                Text(text = it, maxLines = 2)
+            }
+        }
+    )
+
+    /*
     ListItem(
         modifier = modifier
             .fillMaxWidth()
@@ -151,6 +186,8 @@ fun EpisodeItem(
             )
         }
     )
+    */
+
 }
 
 @Composable
@@ -219,7 +256,9 @@ fun EpisodeTrailerItem(
     onEpisodeClick: () -> Unit,
 ) {
     EpisodeDefaults.EpisodeItem(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onEpisodeClick() },
         icon = {
             PodcastThumbnail(
                 imageModel = episode.getArtworkUrl(),
@@ -240,7 +279,6 @@ fun EpisodeTrailerItem(
             }
         },
         releasedTimeText = { },
-        onEpisodeClick = onEpisodeClick
     )
 }
 
@@ -259,6 +297,7 @@ private object EpisodeDefaults {
     private val ContentRightPadding = 16.dp
     private val ContentInnerPadding = 8.dp
     private val ContentTopPadding = 16.dp
+    private val ContentBottomPadding = 8.dp
 
     @Composable
     fun CardItem(
@@ -284,9 +323,6 @@ private object EpisodeDefaults {
         text: @Composable () -> Unit,
         releasedTimeText: @Composable () -> Unit,
         actionButtons: @Composable (() -> Unit),
-        showActionButtonsOnTap: Boolean = true,
-        showActionButtons: Boolean = false,
-        onEpisodeClick: () -> Unit,
     ) {
         val typography = MaterialTheme.typography
 
@@ -302,9 +338,11 @@ private object EpisodeDefaults {
             applyTextStyleNullable(typography.body2, ContentAlpha.high, descriptionText)
 
         Row(modifier = modifier
-            .clickable { onEpisodeClick() }
             .fillMaxWidth()
-            .padding(bottom = ContentInnerPadding))
+            .padding(start = ContentLeftPadding,
+                top = ContentTopPadding,
+                bottom = ContentInnerPadding,
+                end = ContentRightPadding))
         {
             icon()
 
@@ -316,13 +354,13 @@ private object EpisodeDefaults {
                     it()
                 }
                 styledText()
-                styledReleasedTimeText()
+                //styledReleasedTimeText()
                 styledDescriptionText?.let {
                     it()
                 }
+                actionButtons()
             }
 
-            //actionButtons()
         }
     }
 
