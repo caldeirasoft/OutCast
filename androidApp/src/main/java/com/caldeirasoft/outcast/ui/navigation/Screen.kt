@@ -10,10 +10,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
+import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
+import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg.Companion.toStoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -26,12 +28,9 @@ enum class ScreenName {
     PROFILE,
     PODCAST,
     EPISODE,
-    STORE_DISCOVER,
+    DISCOVER,
     STORE_SEARCH,
     STORE_CHARTS,
-    STORE_GENRE,
-    STORE_ROOM,
-    STORE_CATEGORIES,
     STORE_PODCAST,
     STORE_EPISODES,
     MORE,
@@ -53,12 +52,14 @@ sealed class Screen (val id: ScreenName) {
     data class EpisodeScreen(val episodeArg: EpisodeArg) : Screen(ScreenName.EPISODE)
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
-    object StoreDiscover : Screen(ScreenName.STORE_DISCOVER)
+    data class Discover(val storeDataArg: StoreDataArg?) : Screen(ScreenName.DISCOVER) {
+        constructor(storeData: StoreData) : this(storeDataArg = storeData.toStoreDataArg())
+        constructor(genre: Genre) : this(storeDataArg = genre.toStoreDataArg())
+    }
+
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
     data class StorePodcastScreen(val podcast: StorePodcastArg) : Screen(ScreenName.STORE_PODCAST)
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
-    data class GenreScreen(val genre: Genre) : Screen(ScreenName.STORE_GENRE)
-    data class Room(val room: StoreRoom) : Screen(ScreenName.STORE_ROOM)
     data class StoreEpisodesScreen(val podcast: StorePodcast) : Screen(ScreenName.STORE_EPISODES)
 
     companion object {
@@ -83,7 +84,7 @@ sealed class BottomNavigationScreen(
         Icons.Outlined.Subscriptions,
         Icons.Filled.Subscriptions)
 
-    object Discover : BottomNavigationScreen(ScreenName.STORE_DISCOVER,
+    object Discover : BottomNavigationScreen(ScreenName.DISCOVER,
         R.string.screen_discover,
         Icons.Default.Explore,
         Icons.Filled.Explore

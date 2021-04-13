@@ -28,7 +28,7 @@ import com.caldeirasoft.outcast.ui.components.ReachableScaffold
 import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
 import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.store.directory.StoreGenreItem
+import com.caldeirasoft.outcast.ui.screen.store.categories.StoreGenreItem
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
@@ -85,9 +85,7 @@ fun StoreSearchScreen(
                 val genre = Genre(id = item.genreId, name = stringResource(item.titleId), url = "")
                 GenreCardItem(
                     genre = genre,
-                    navigateToGenre = {
-                        navigateTo(Screen.GenreScreen(genre))
-                    }
+                    navigateToGenre = { navigateTo(Screen.Discover(genre)) }
                 )
             }
         }

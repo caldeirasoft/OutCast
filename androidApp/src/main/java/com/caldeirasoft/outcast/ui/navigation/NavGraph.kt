@@ -11,8 +11,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.models.Genre
-import com.caldeirasoft.outcast.domain.models.store.StoreRoom
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
@@ -21,11 +19,10 @@ import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.StorePodcastScreen
-import com.caldeirasoft.outcast.ui.screen.store.directory.StoreDirectoryScreen
-import com.caldeirasoft.outcast.ui.screen.store.genre.StoreGenreScreen
+import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverScreen
+import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
-import com.caldeirasoft.outcast.ui.screen.store.storeroom.StoreRoomScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import kotlinx.coroutines.FlowPreview
 import kotlinx.serialization.json.Json
@@ -91,27 +88,26 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateBack = actions.up)
                 }
                 composable(ScreenName.PROFILE.name) { Text(text = "Profile") }
-                composable(ScreenName.STORE_DISCOVER.name) {
-                    StoreDirectoryScreen(
+                composable(ScreenName.DISCOVER.name) {
+                    DiscoverScreen(
+                        storeDataArg = null,
+                        navigateTo = actions.select
+                    )
+                }
+                composable(route = "${ScreenName.DISCOVER.name}/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.LongType })) {
+                    val storeDataArg =
+                        navController.previousBackStackEntry
+                            ?.arguments
+                            ?.getParcelable<StoreDataArg>("storeData")
+                    DiscoverScreen(
+                        storeDataArg = storeDataArg,
                         navigateTo = actions.select
                     )
                 }
                 composable(ScreenName.STORE_SEARCH.name) {
                     StoreSearchScreen(
                         navigateTo = actions.select)
-                }
-                composable(
-                    route = "${ScreenName.STORE_GENRE.name}/{genre}",
-                    arguments = listOf(
-                        navArgument("genre") { type = NavType.StringType },
-                    )
-                ) { backStackEntry ->
-                    val genre = backStackEntry.getObjectNotNull<Genre>("genre")
-                    StoreGenreScreen(
-                        genre = genre,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up
-                    )
                 }
                 composable(
                     route = "${ScreenName.STORE_CHARTS.name}/{itemType}",
@@ -124,16 +120,6 @@ fun MainNavHost(startScreen: ScreenName) {
                             ?: StoreItemType.PODCAST
                     TopChartsScreen(
                         storeItemType = itemType,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up)
-                }
-                composable(
-                    route = "${ScreenName.STORE_ROOM.name}/{room}",
-                    arguments = listOf(navArgument("room") { type = NavType.StringType })
-                ) { backStackEntry ->
-                    val storeRoom = backStackEntry.getObjectNotNull<StoreRoom>("room")
-                    StoreRoomScreen(
-                        storeRoom = storeRoom,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

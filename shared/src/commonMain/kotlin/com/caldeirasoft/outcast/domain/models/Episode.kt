@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.domain.models
 
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 
 fun Episode.getArtworkUrl(): String =
-    StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
+    StoreItemArtwork.artworkUrl(artwork, 200, 200)

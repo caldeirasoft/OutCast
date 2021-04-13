@@ -6,18 +6,20 @@ import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.models.store.StoreRoom
+import com.caldeirasoft.outcast.domain.models.store.StoreData
+import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-class FetchStoreRoomPagingDataUseCase(
-    val storeRepository: StoreRepository
+class LoadStorePagingDataUseCase(
+    val storeRepository: StoreRepository,
 ) {
     fun executeAsync(
         scope: CoroutineScope,
-        storeRoom: StoreRoom,
-        dataLoadedCallback: ((StorePage) -> Unit)?
+        storeData: StoreData,
+        storeFront: String,
+        newVersionAvailable: (() -> Unit)? = null,
+        dataLoadedCallback: ((StorePage) -> Unit)? = null,
     ): Flow<PagingData<StoreItem>> =
         Pager(
             config = PagingConfig(
@@ -28,8 +30,17 @@ class FetchStoreRoomPagingDataUseCase(
                 StoreDataPagingSource(
                     scope = scope,
                     loadDataFromNetwork = {
-                        if (storeRoom.url.isEmpty()) storeRoom.getPage()
-                        else storeRepository.getStoreDataAsync(storeRoom.url, storeRoom.storeFront)
+                        when {
+                            storeData.genreId != null -> storeRepository.getGroupingDataAsync(
+                                scope,
+                                storeData.genreId,
+                                storeFront,
+                                newVersionAvailable)
+                            storeData.url.isNotEmpty() -> storeRepository.getStoreDataAsync(
+                                storeData.url,
+                                storeFront)
+                            else -> storeData.getPage()
+                        }
                     },
                     dataLoadedCallback = dataLoadedCallback,
                     getStoreItems = storeRepository::getListStoreItemDataAsync

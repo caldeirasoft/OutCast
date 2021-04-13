@@ -3,14 +3,11 @@ package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemFeatured
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
-import com.caldeirasoft.outcast.domain.models.PodcastPage
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -36,9 +33,11 @@ data class StorePodcast(
     val userRating: Float,
     val genre: Genre?,
     override val storeFront: String,
-) : StoreItemWithArtwork, StoreItemFeatured {
+) : StoreItemArtwork {
 
     override var featuredArtwork: Artwork? = null
+    override var editorialArtwork: Artwork? = null
+
     var moreByArtist: List<Long>? = null
     var listenersAlsoBought: List<Long>? = null
     var topPodcastsInGenre: List<Long>? = null
@@ -71,15 +70,6 @@ data class StorePodcast(
             newEpisodeAction = NewEpisodesAction.CLEAR,
         )
 
-    @Transient
-    val page: PodcastPage =
-        PodcastPage(
-            podcast = this.podcast,
-            storeFront = this.storeFront,
-            timestamp = Clock.System.now(),
-            episodes = listOf(),
-        )
-
     override fun getArtworkUrl():String =
-        StoreItemWithArtwork.artworkUrl(artwork, 200, 200)
+        StoreItemArtwork.artworkUrl(artwork, 200, 200)
 }

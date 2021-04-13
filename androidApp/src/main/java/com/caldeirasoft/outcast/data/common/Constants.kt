@@ -2,6 +2,9 @@ package com.caldeirasoft.outcast.data.common
 
 class Constants {
     companion object {
+        // Genre
+        const val DEFAULT_GENRE = 26
+
         // Preferences keys
         const val DATASTORE_NAME = "datastore_settings"
         const val PREFERENCES_STOREFRONT_REGION = "store_front"

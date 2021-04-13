@@ -12,17 +12,26 @@ class Actions(navController: NavController) {
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcastArg)}")
             is EpisodeScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.episodeArg)}")
+            is Discover -> {
+                val storeData = screen.storeDataArg
+                if (storeData != null) {
+                    navController
+                        .currentBackStackEntry
+                        ?.arguments
+                        ?.putParcelable("storeData", storeData)
+                    navController.navigate("${screen.id.name}/${storeData.id}")
+                } else {
+                    navController.navigate(screen.id.name)
+                }
+            }
             is StorePodcastScreen -> {
-                navController.currentBackStackEntry?.arguments?.putParcelable("podcast",
-                    screen.podcast)
+                navController.currentBackStackEntry
+                    ?.arguments
+                    ?.putParcelable("podcast", screen.podcast)
                 navController.navigate(screen.id.name)
             }
-            is Room ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.room)}")
             is Charts ->
                 navController.navigate("${screen.id.name}/${screen.itemType}")
-            is GenreScreen ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.genre)}")
             is PodcastSettings ->
                 navController.navigate("${screen.id.name}/${screen.podcastId}")
             else ->

@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             OutCastTheme {
-                MainNavHost(ScreenName.STORE_DISCOVER)
+                MainNavHost(ScreenName.DISCOVER)
             }
         }
     }

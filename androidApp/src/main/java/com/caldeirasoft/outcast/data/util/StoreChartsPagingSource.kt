@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.data.util
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
 

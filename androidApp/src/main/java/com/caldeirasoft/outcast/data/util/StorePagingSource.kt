@@ -1,7 +1,12 @@
 package com.caldeirasoft.outcast.data.util
 
-import com.caldeirasoft.outcast.domain.interfaces.*
-import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionData
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
+import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
+import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -33,30 +38,20 @@ interface StorePagingSource
     suspend fun getCollections(
         startPosition: Int,
         endPosition: Int,
-        storePage: StorePageWithCollection) : List<StoreCollection>
-    {
+        storePage: StorePage,
+    ): List<StoreCollection> {
         val ids: MutableSet<Long> = mutableSetOf()
-        val subList = storePage
+
+        storePage
             .storeList
             .subList(startPosition, endPosition)
-
-        subList
-            .filterIsInstance<StoreCollectionPodcasts>()
+            .filterIsInstance<StoreCollectionItems>()
             .flatMap { it.itemsIds.take(8) }
-            .let { list -> ids.addAll(list) }
-
-        subList
-            .filterIsInstance<StoreCollectionEpisodes>()
-            .flatMap { it.itemsIds.take(12) }
-            .let { list -> ids.addAll(list) }
-
-        subList.filterIsInstance<StoreCollectionCharts>()
-            .flatMap { it.topPodcastsIds + it.topEpisodesIds }
             .let { list -> ids.addAll(list) }
 
         val fetchItems = getItemsFromIds(ids.toList(), storePage)
         val storeItemsMap = fetchItems
-            .filterIsInstance<StoreItemWithArtwork>()
+            .filterIsInstance<StoreItemArtwork>()
             .map { it.id to it }
             .toMap()
 
@@ -64,41 +59,17 @@ interface StorePagingSource
             for (i in startPosition until endPosition) {
                 when (val collection = storePage.storeList[i]) {
                     is StoreCollectionFeatured,
-                    is StoreCollectionRooms,
+                    is StoreCollectionData,
                     ->
                         yield(collection)
-                    is StoreCollectionPodcasts -> {
-                        collection.itemsIds
+                    is StoreCollectionItems -> {
+                        val newCollection = collection.itemsIds
                             .filter { storeItemsMap.contains(it) }
                             .mapNotNull { storeItemsMap[it] }
-                            .filterIsInstance<StorePodcast>()
                             .let {
-                                collection.items += it
+                                collection.copy(items = it)
                             }
-                        yield(collection)
-                    }
-                    is StoreCollectionEpisodes -> {
-                        collection.itemsIds
-                            .filter { storeItemsMap.contains(it) }
-                            .mapNotNull { storeItemsMap[it] }
-                            .filterIsInstance<StoreEpisode>()
-                            .let {
-                                collection.items += it
-                            }
-                        yield(collection)
-                    }
-                    is StoreCollectionCharts -> {
-                        collection.topPodcasts +=
-                            collection.topPodcastsIds
-                                .filter { storeItemsMap.contains(it) }
-                                .mapNotNull { storeItemsMap[it] }
-                                .filterIsInstance<StorePodcast>()
-                        collection.topEpisodes +=
-                            collection.topEpisodesIds
-                                .filter { storeItemsMap.contains(it) }
-                                .mapNotNull { storeItemsMap[it] }
-                                .filterIsInstance<StoreEpisode>()
-                        yield(collection)
+                        yield(newCollection)
                     }
                 }
             }

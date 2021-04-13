@@ -22,6 +22,7 @@ abstract class TopChartSectionViewModel(
     initialState: TopChartSectionState,
     val storeItemType: StoreItemType,
 ) : FollowViewModel<TopChartSectionState>(initialState), KoinComponent {
+
     private val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase by inject()
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
 

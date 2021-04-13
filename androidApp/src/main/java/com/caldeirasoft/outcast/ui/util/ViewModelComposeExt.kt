@@ -13,7 +13,7 @@ import com.airbnb.mvrx.*
 @OptIn(InternalMavericksApi::class)
 @Composable
 inline fun <reified VM : MavericksViewModel<S>, reified S : MavericksState> mavericksViewModel(
-    initialArgument: Any,
+    initialArgument: Any?,
     scope: LifecycleOwner = LocalLifecycleOwner.current,
     noinline keyFactory: (() -> String)? = null,
 ): VM {

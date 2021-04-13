@@ -1,28 +1,26 @@
 package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
+import androidx.datastore.dataStore
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
-import com.caldeirasoft.outcast.data.util.local.DiskCache
-import com.caldeirasoft.outcast.data.util.local.MemoryCache
-import com.caldeirasoft.outcast.data.util.local.Source
+import com.caldeirasoft.outcast.data.util.local.StorePageSerializer
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.domain.dto.GenreResult
+import com.caldeirasoft.outcast.domain.dto.LockupResult
+import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
-import timber.log.Timber
-import kotlin.time.days
 
 class StoreRepository (
     val itunesAPI: ItunesAPI,
@@ -36,13 +34,14 @@ class StoreRepository (
         const val DEFAULT_GENRE = 26
         const val DIRECTORY_CACHE_KEY = "directory"
         const val TOP_CHARTS_CACHE_KEY = "charts"
+        const val GENRE_URL = "https://podcasts.apple.com/genre/id{genre}"
     }
 
     // Setup datacache
-    private val cache = MemoryCache(DiskCache(json, context.cacheDir))
+    val Context.dataStore by dataStore("my_file.json", serializer = StorePageSerializer(json))
 
     /**
-     * getStoreDataAsync{
+     * getStoreDataAsync
      */
     suspend fun getStoreDataAsync(
         url: String,
@@ -55,54 +54,43 @@ class StoreRepository (
         return getStoreData(storePageDto)
     }
 
-
     /**
      * getGroupingDataAsync
      */
-    suspend fun getGroupingDataAsync(genre: Int?, storeFront: String): StoreGroupingPage {
-        val storeResponse =
-            itunesAPI.groupingData(storeFront = storeFront, genre = genre ?: DEFAULT_GENRE)
-        if (storeResponse.isSuccessful.not())
-            throw HttpException(storeResponse)
-        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
-        val storePage = getStoreData(storePageDto)
-        if (storePage !is StoreGroupingPage)
-            throw NullPointerException("DBG - Invalid cast to StoreGroupingPage")
-        return storePage
-    }
-
-    /**
-     * loadGroupingData
-     */
-    suspend fun loadStoreDirectoryData(
+    suspend fun getGroupingDataAsync(
         scope: CoroutineScope,
+        genre: Int?,
         storeFront: String,
-        newVersionAvailable: (() -> Unit)?
-    ): StoreGroupingPage {
-        val groupingPageCacheEntry = cache.getEntry("${DIRECTORY_CACHE_KEY}${storeFront}", useEntryEvenIfExpired = true, timeLimit = 1.days) {
-            getGroupingDataAsync(null, storeFront)
-        }
+        newVersionAvailable: (() -> Unit)?,
+    ): StorePage {
+        val url = GENRE_URL.replace("{genre}", (genre ?: DEFAULT_GENRE).toString())
+        return when (genre) {
+            DEFAULT_GENRE -> {
+                val groupingPageCache = context.dataStore.data.firstOrNull()
+                val groupingPage = groupingPageCache
+                    .takeUnless { it?.timestamp == Instant.DISTANT_PAST }
+                    ?: getStoreDataAsync(url, storeFront)
 
-        return newVersionAvailable?.let {
-            val groupingPageCache = groupingPageCacheEntry.data
-            if (groupingPageCacheEntry.source != Source.ORIGIN && groupingPageCacheEntry.isExpired)
-            {
-                scope.launch {
-                    val newGroupingPage = getGroupingDataAsync(null, storeFront)
-                    // if network version is newer/different than cached version -> notify
-                    if ((newGroupingPage.timestamp != groupingPageCache.timestamp)
-                    ) {
-                        cache.set("${DIRECTORY_CACHE_KEY}${storeFront}", newGroupingPage)
-                        newVersionAvailable.invoke()
-                    } else {
-                        //groupingPageCache.fetchedAt = now
-                        cache.set("${DIRECTORY_CACHE_KEY}${storeFront}", groupingPageCache)
+                newVersionAvailable?.let {
+                    groupingPageCache?.let {
+                        scope.launch {
+                            val newGroupingPage = getStoreDataAsync(url, storeFront)
+                            // if network version is newer/different than cached version -> notify
+                            if ((newGroupingPage.timestamp != groupingPageCache.timestamp)) {
+                                context.dataStore.updateData { newGroupingPage }
+                                newVersionAvailable.invoke()
+                            }
+                        }
+                    } ?: let {
+                        context.dataStore.updateData { groupingPage }
                     }
-                }
+                    null
+                } ?: groupingPage
             }
-            groupingPageCache
+            else -> {
+                getStoreDataAsync(url, storeFront)
+            }
         }
-            ?: groupingPageCacheEntry.data
     }
 
     /**
@@ -138,7 +126,7 @@ class StoreRepository (
     /**
      * getGroupingDataAsync
      */
-    private fun getGroupingDataAsync(storePageDto: StorePageDto): StoreGroupingPage {
+    private fun getGroupingDataAsync(storePageDto: StorePageDto): StorePage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
@@ -154,25 +142,25 @@ class StoreRepository (
             entries?.forEach { element ->
                 when (element.fcKind) {
                     258 -> { // parse header collection
-                        val sequence: Sequence<StoreItemWithArtwork> = sequence {
+                        val sequence: Sequence<StoreItemArtwork> = sequence {
                             element.children.forEach { elementChild ->
                                 when (elementChild.link.type) {
                                     "content" -> {
                                         val id = elementChild.link.contentId
                                         if (lockupResult.containsKey(id)) {
                                             lockupResult[id]?.let {
-                                                getStoreItemFromLookupResultItem(it,
-                                                    storeFront)?.apply {
-                                                    featuredArtwork =
-                                                        elementChild.artwork?.toArtwork()
-                                                    yield(this)
-                                                }
+                                                getStoreItemFromLookupResultItem(it, storeFront)
+                                                    ?.apply {
+                                                        featuredArtwork =
+                                                            elementChild.artwork?.toArtwork()
+                                                        yield(this)
+                                                    }
                                             }
                                         }
                                     }
                                     "link" -> {
                                         yield(
-                                            StoreRoom(
+                                            StoreData(
                                                 id = elementChild.adamId,
                                                 label = elementChild.link.label,
                                                 url = elementChild.link.url,
@@ -198,7 +186,7 @@ class StoreRepository (
                                 elementChild.content.map { content -> content.contentId }
                             when (elementChild.type) {
                                 "popularity" -> { // top podcasts // top episodes
-                                    when (elementChild.fcKind) {
+                                    /*when (elementChild.fcKind) {
                                         // podcast
                                         16 -> topPodcastsIds = ids.take(5)
                                         186 -> topEpisodesIds = ids.take(5)
@@ -213,23 +201,13 @@ class StoreRepository (
                                                 storeFront = storeFront
                                             )
                                         )
-                                    }
+                                    }*/
                                 }
                                 "normal" -> {
                                     when (elementChild.content.first().kindIds.first()) {
-                                        4 -> // podcast
+                                        4, 15 -> // podcast, episodes
                                             yield(
-                                                StoreCollectionPodcasts(
-                                                    id = elementChild.adamId,
-                                                    label = elementChild.name,
-                                                    url = elementChild.seeAllUrl,
-                                                    itemsIds = ids,
-                                                    storeFront = storeFront,
-                                                )
-                                            )
-                                        15 -> // episodes
-                                            yield(
-                                                StoreCollectionEpisodes(
+                                                StoreCollectionItems(
                                                     id = elementChild.adamId,
                                                     label = elementChild.name,
                                                     url = elementChild.seeAllUrl,
@@ -245,7 +223,7 @@ class StoreRepository (
                         }
                     }
                     261 -> { // parse rooms collections / providers collections
-                        val roomSequence: Sequence<StoreRoom> = sequence {
+                        val roomSequence: Sequence<StoreData> = sequence {
                             element.children.forEach { elementChild ->
                                 when (elementChild.link.type) {
                                     "content" -> {
@@ -253,7 +231,7 @@ class StoreRepository (
                                         if (lockupResult.containsKey(id)) {
                                             val artist = lockupResult[id]
                                             yield(
-                                                StoreRoom(
+                                                StoreData(
                                                     id = id,
                                                     label = artist?.name.orEmpty(),
                                                     url = artist?.url.orEmpty(),
@@ -265,7 +243,7 @@ class StoreRepository (
                                     }
                                     "link" -> {
                                         yield(
-                                            StoreRoom(
+                                            StoreData(
                                                 id = elementChild.adamId,
                                                 label = elementChild.link.label,
                                                 url = elementChild.link.url,
@@ -280,7 +258,7 @@ class StoreRepository (
 
                         if (roomSequence.toList().isNotEmpty()) {
                             yield(
-                                StoreCollectionRooms(
+                                StoreCollectionData(
                                     id = element.adamId,
                                     label = element.name,
                                     items = roomSequence.toList(),
@@ -293,17 +271,16 @@ class StoreRepository (
             }
         }
 
-        return StoreGroupingPage(
-            storeData = StoreGroupingData(
-                id = storePageDto.pageData?.contentId.orEmpty(),
+        return StorePage(
+            storeData = StoreData(
+                id = storePageDto.pageData?.contentId?.toLong() ?: 0L,
                 label = storePageDto.pageData?.categoryList?.name.orEmpty(),
                 storeFront = storeFront,
                 storeList = collectionSequence.toMutableList(),
             ),
             storeFront = storeFront,
             lookup = storeLookup,
-            timestamp = timestamp,
-            fetchedAt = Clock.System.now()
+            timestamp = timestamp
         )
     }
 
@@ -311,35 +288,38 @@ class StoreRepository (
     /**
      * getArtistPodcastDataAsync
      */
-    private fun getArtistPodcastDataAsync(storePageDto: StorePageDto): StoreRoomPage {
+    private fun getArtistPodcastDataAsync(storePageDto: StorePageDto): StorePage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val ids = storePageDto.pageData?.contentData?.first()?.adamIds?.map { id -> id.toLong() }
             ?: emptyList()
 
-        val storeData = StoreRoom(
+        val storeData = StoreData(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
-            artwork = storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
+            artwork = storePageDto.pageData?.artist
+                ?.editorialArtwork?.storeFlowcase
+                ?.firstOrNull()
                 ?.toArtwork(),
             storeFront = storeFront,
             storeIds = ids,
         )
 
-        return StoreRoomPage(
-            storeRoom = storeData,
+        return StorePage(
+            storeData = storeData,
             storeFront = storeFront,
             timestamp = timestamp,
-            lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup,
-                storeFront)
+            lookup = getStoreLookupFromLookupResult(
+                lockupResult = storePageDto.storePlatformData?.lockup,
+                storeFront = storeFront)
         )
     }
 
     /**
      * getArtistProviderDataAsync
      */
-    private fun getArtistProviderDataAsync(storePageDto: StorePageDto): StoreMultiRoomPage {
+    private fun getArtistProviderDataAsync(storePageDto: StorePageDto): StorePage {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val collectionSequence: Sequence<StoreCollection> = sequence {
@@ -349,23 +329,11 @@ class StoreRepository (
                 val dkId = contentData.dkId
                 val chunkId = contentData.chunkId
                 when {
-                    dkId != null -> {
+                    dkId != null || chunkId.isNullOrEmpty() -> {
                         // popular episodes
                         yield(
-                            StoreCollectionEpisodes(
-                                id = dkId.toLong(),
-                                label = contentData.title,
-                                itemsIds = ids,
-                                storeFront = storeFront,
-                                sortByPopularity = true,
-                            )
-                        )
-                    }
-                    chunkId.isNullOrEmpty() -> {
-                        // popular podcasts
-                        yield(
-                            StoreCollectionPodcasts(
-                                id = 0L,
+                            StoreCollectionItems(
+                                id = dkId?.toLong() ?: 0L,
                                 label = contentData.title,
                                 itemsIds = ids,
                                 storeFront = storeFront,
@@ -376,7 +344,7 @@ class StoreRepository (
                     else -> {
                         // regular podcasts
                         yield(
-                            StoreCollectionPodcasts(
+                            StoreCollectionItems(
                                 id = chunkId.toLong(),
                                 label = contentData.title,
                                 itemsIds = ids,
@@ -387,58 +355,65 @@ class StoreRepository (
                 }
             }
         }
+        val uberArtwork = storePageDto.pageData?.uber?.toArtwork()
+        val editorialArtwork =
+            storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
+                ?.toArtwork()
 
-        val storeData = StoreMultiRoom(
+        val storeData = StoreData(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
-            artwork = storePageDto.pageData?.uber?.toArtwork(),
+            artwork = editorialArtwork ?: uberArtwork,
             storeFront = storeFront,
             storeList = collectionSequence.toMutableList(),
         )
 
-        return StoreMultiRoomPage(
-            storeRoom = storeData,
+        return StorePage(
+            storeData = storeData,
             storeFront = storeFront,
             timestamp = timestamp,
-            lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup,
-                storeFront)
+            lookup = getStoreLookupFromLookupResult(
+                lockupResult = storePageDto.storePlatformData?.lockup,
+                storeFront = storeFront)
         )
     }
 
     /**
      * getRoomPodcastDataAsync
      */
-    private fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StoreRoomPage {
+    private fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StorePage {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val ids = storePageDto.pageData?.adamIds?.map { id -> id.toLong() } ?: emptyList()
-        val isIndexed = (storePageDto.pageData?.defaultSort == 18)
-        Timber.d("defaultSort: ${storePageDto.pageData?.defaultSort}")
+        val uberArtwork = storePageDto.pageData?.uber?.toArtwork()
+        val editorialArtwork =
+            storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
+                ?.toArtwork()
 
-        val storeData = StoreRoom(
-            id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
-            label = storePageDto.pageData?.artist?.name.orEmpty(),
-            artwork = storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
-                ?.toArtwork(),
+        val storeData = StoreData(
+            id = storePageDto.pageData?.adamId?.toLong() ?: 0,
+            label = storePageDto.pageData?.pageTitle.orEmpty(),
+            description = storePageDto.pageData?.description,
+            artwork = editorialArtwork ?: uberArtwork,
             storeFront = storeFront,
             storeIds = ids,
-            isIndexed = isIndexed
         )
 
-        return StoreRoomPage(
-            storeRoom = storeData,
+        return StorePage(
+            storeData = storeData,
             storeFront = storeFront,
             timestamp = timestamp,
-            lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup,
-                storeFront)
+            lookup = getStoreLookupFromLookupResult(
+                lockupResult = storePageDto.storePlatformData?.lockup,
+                storeFront = storeFront)
         )
     }
 
     /**
      * getMultiRoomDataAsync
      */
-    private fun getMultiRoomDataAsync(storePageDto: StorePageDto): StoreMultiRoomPage {
+    private fun getMultiRoomDataAsync(storePageDto: StorePageDto): StorePage {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val collectionSequence: Sequence<StoreCollection> = sequence {
@@ -446,7 +421,7 @@ class StoreRepository (
             entries?.forEach { segmentData ->
                 val ids = segmentData.adamIds
                 yield(
-                    StoreCollectionPodcasts(
+                    StoreCollectionItems(
                         id = segmentData.adamId.toLong(),
                         label = segmentData.title,
                         url = segmentData.seeAllUrl?.url,
@@ -456,21 +431,27 @@ class StoreRepository (
                 )
             }
         }
+        val uberArtwork = storePageDto.pageData?.uber?.toArtwork()
+        val editorialArtwork =
+            storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
+                ?.toArtwork()
 
-        val storeData = StoreMultiRoom(
-            id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
-            label = storePageDto.pageData?.artist?.name.orEmpty(),
-            artwork = storePageDto.pageData?.uber?.toArtwork(),
+        val storeData = StoreData(
+            id = storePageDto.pageData?.adamId?.toLong() ?: 0,
+            label = storePageDto.pageData?.pageTitle.orEmpty(),
+            description = storePageDto.pageData?.description,
+            artwork = editorialArtwork ?: uberArtwork,
             storeFront = storeFront,
             storeList = collectionSequence.toMutableList(),
         )
 
-        return StoreMultiRoomPage(
-            storeRoom = storeData,
+        return StorePage(
+            storeData = storeData,
             storeFront = storeFront,
             timestamp = timestamp,
-            lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup,
-                storeFront)
+            lookup = getStoreLookupFromLookupResult(
+                lockupResult = storePageDto.storePlatformData?.lockup,
+                storeFront = storeFront)
         )
     }
 
@@ -538,46 +519,6 @@ class StoreRepository (
     }
 
     /**
-     * getTopChartsAsync
-     */
-    suspend fun getTopChartsAsync(storeFront: String, genreId: Int?): StoreTopCharts
-    {
-        val podcastIds: MutableList<Long> = mutableListOf();
-        val episodeIds: MutableList<Long> = mutableListOf();
-
-        // get top charts data
-        val storeResponse = itunesAPI.topCharts(storeFront, genreId ?: DEFAULT_GENRE)
-        if (storeResponse.isSuccessful.not())
-            throw HttpException(storeResponse)
-        Timber.d("DBG - getTopChartsAsync body")
-        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
-        val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
-        storePageDto.pageData
-            ?.segmentedControl?.segments
-            ?.firstOrNull()
-            ?.pageData?.topCharts?.forEach {
-                if(it.kinds?.podcast == true) {
-                    podcastIds += it.adamIds
-                }
-                else if (it.kinds?.podcastEpisode == true) {
-                    episodeIds += it.adamIds
-                }
-            }
-
-        return StoreTopCharts(
-            id = 0,
-            label = storePageDto.pageData
-                ?.segmentedControl?.segments
-                ?.firstOrNull()?.title.orEmpty(),
-            storeFront = storeFront,
-            storeEpisodesIds = episodeIds,
-            storePodcastsIds = podcastIds,
-            lookup = getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront),
-            timestamp = timestamp
-        )
-    }
-
-    /**
      * getTopChartsPodcastsIdsAsync
      */
     suspend fun getTopChartsIdsAsync(
@@ -605,9 +546,9 @@ class StoreRepository (
      * getStoreItemFromLookupResultItem
      */
     private fun getStoreItemFromLookupResultItem(
-        item: com.caldeirasoft.outcast.domain.dto.LookupResultItem,
-        storeFront: String
-    ): StoreItemWithArtwork? =
+        item: LookupResultItem,
+        storeFront: String,
+    ): StoreItemArtwork? =
         when (item.kind) {
             "podcast" -> {
                 StorePodcast(
@@ -667,10 +608,10 @@ class StoreRepository (
      * getStoreLookupFromLookupResult
      */
     private fun getStoreLookupFromLookupResult(
-        lockupResult: com.caldeirasoft.outcast.domain.dto.LockupResult?,
-        storeFront: String
-    ): Map<Long, StoreItemWithArtwork> {
-        val resultMap: HashMap<Long, StoreItemWithArtwork> = hashMapOf()
+        lockupResult: LockupResult?,
+        storeFront: String,
+    ): Map<Long, StoreItemArtwork> {
+        val resultMap: HashMap<Long, StoreItemArtwork> = hashMapOf()
         lockupResult?.results
             ?.mapValues { it -> getStoreItemFromLookupResultItem(it.value, storeFront) }
             ?.forEach {
@@ -688,9 +629,9 @@ class StoreRepository (
     suspend fun getListStoreItemDataAsync(
         lookupIds: List<Long>,
         storeFront: String,
-        storePage: StorePage?
-    ): List<StoreItemWithArtwork> {
-        val newLookup: MutableMap<Long, StoreItemWithArtwork> = mutableMapOf()
+        storePage: StorePage?,
+    ): List<StoreItemArtwork> {
+        val newLookup: MutableMap<Long, StoreItemArtwork> = mutableMapOf()
         storePage?.lookup?.let { map ->
             newLookup.putAll(map)
         }
@@ -716,34 +657,5 @@ class StoreRepository (
         return lookupIds
             .filter { id -> newLookup.containsKey(id) }
             .mapNotNull { id -> newLookup.get(id) }
-    }
-
-    /**
-     * getGenresDataAsync
-     */
-    suspend fun getStoreGenreDataAsync(storeFront: String): StoreGenreData {
-        val storeResponse = itunesAPI.genres(storeFront)
-        if (storeResponse.isSuccessful.not())
-            throw HttpException(storeResponse)
-        val map: Map<Int, GenreResult> = storeResponse.body() ?: throw HttpException(storeResponse)
-
-        val rootEntry = map.values.first()
-        return StoreGenreData(
-            root = rootEntry.toStoreGenre(storeFront),
-            genres = rootEntry.subgenres.values.map { it.toStoreGenre(storeFront) }
-        )
-    }
-
-    /**
-     * getGenresDataAsync
-     */
-    suspend fun loadStoreGenreData(storeFront: String): StoreGenreData {
-        val storeDataCache = cache.get("genres") { getStoreGenreDataAsync(storeFront) }
-        if (storeDataCache.root.storeFront != storeFront) {
-            return getStoreGenreDataAsync(storeFront).also {
-                cache.set("genres", storeFront)
-            }
-        }
-        return storeDataCache
     }
 }

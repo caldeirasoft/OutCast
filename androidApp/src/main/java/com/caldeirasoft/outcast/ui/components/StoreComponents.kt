@@ -8,8 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lens
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,151 +30,59 @@ import com.google.accompanist.pager.rememberPagerState
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun StoreCollectionPodcastsContent(
-    storeCollection: StoreCollectionPodcasts,
+fun StoreCollectionItemsContent(
+    storeCollection: StoreCollectionItems,
     navigateTo: ScreenFn,
-    onHeaderLinkClick: () -> Unit = { navigateTo(Screen.Room(storeCollection.room)) },
-    showIndex: Boolean = false,
     followingStatus: Map<Long, FollowStatus> = mapOf(),
     onSubscribeClick: (StorePodcast) -> Unit = { },
 ) {
     StoreHeadingSectionWithLink(
         title = storeCollection.label,
-        onClick = onHeaderLinkClick
-    )
+        onClick = {
+            navigateTo(Screen.Discover(storeCollection.room))
+        })
 
     // content
     LazyRow(
         contentPadding = PaddingValues(start = 16.dp,
-            end = 0.dp,
+            end = 16.dp,
             bottom = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(items = storeCollection.items) { index, item ->
-            PodcastGridItem(
-                modifier = Modifier
-                    .width(150.dp)
-                    .clickable(onClick = {
-                        navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
-                    }),
-                podcast = item,
-                index = if (storeCollection.sortByPopularity) index + 1 else null,
-                followingStatus = followingStatus[item.id],
-                onSubscribeClick = onSubscribeClick
-            )
-        }
-    }
-}
-
-@Composable
-fun StoreCollectionEpisodesContent(
-    storeCollection: StoreCollectionEpisodes,
-    numRows: Int,
-    navigateTo: (Screen) -> Unit,
-    onHeaderLinkClick: () -> Unit = { navigateTo(Screen.Room(storeCollection.room)) },
-    showIndex: Boolean = false,
-) {
-    // header
-    StoreHeadingSectionWithLink(
-        title = storeCollection.label,
-        onClick = onHeaderLinkClick
-    )
-    // content
-    LazyRow(
-        contentPadding = PaddingValues(start = 16.dp,
-            end = 0.dp,
-            bottom = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        itemsIndexed(items = storeCollection.items) { index, item ->
-            EpisodeGridItem(
-                modifier = Modifier
-                    .width(180.dp)
-                    .clickable(onClick = {
-                        navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
-                    }),
-                episode = item.episode,
-            )
-        }
-    }
-    /*
-    val indexedItems =
-        storeCollection.items.mapIndexed { index, storeItem -> Pair(index, storeItem) }
-    val chunkedItems = indexedItems.chunked(numRows)
-    val pagerState: PagerState = remember { PagerState(pages = chunkedItems.size - 1) }
-    val selectedPage = remember { mutableStateOf(0) }
-
-    // header
-    StoreHeadingSectionWithLink(
-        title = storeCollection.label,
-        onClick = onHeaderLinkClick
-    )
-
-    Pager(
-        state = pagerState,
-        contentAlignment = Alignment.Start,
-        offscreenLimit = 2,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(280.dp)
-    )
-    {
-        if (chunkedItems.indices.contains(this.page)) {
-            val chartItems = chunkedItems[Math.floorMod(this.page, chunkedItems.size)]
-            selectedPage.value = pagerState.currentPage
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(280.dp)
-                //.padding(horizontal = 4.dp)
-            )
-            {
-                chartItems.forEach { (index, storeItem) ->
-                    StoreEpisodeItem(
-                        episode = storeItem.episode,
-                        modifier = Modifier.fillMaxWidth(),
-                        onPodcastClick = { navigateTo(Screen.StorePodcastScreen(storeItem.podcast.toStorePodcastArg())) },
-                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
-                        index = if (storeCollection.sortByPopularity) (index + 1) else null
+            when (item) {
+                is StorePodcast ->
+                    PodcastGridItem(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .clickable(onClick = {
+                                navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
+                            }),
+                        podcast = item,
+                        index = if (storeCollection.sortByPopularity) index + 1 else null,
+                        followingStatus = followingStatus[item.id],
+                        onSubscribeClick = onSubscribeClick
+                    )
+                is StoreEpisode -> {
+                    EpisodeGridItem(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .clickable(onClick = {
+                                navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                            }),
+                        episode = item.episode,
                     )
                 }
             }
         }
     }
-     */
 }
 
+
 @Composable
-fun StoreRoomItem(
-    room: StoreRoom,
+fun StoreCollectionDataContent(
+    storeCollection: StoreCollectionData,
     navigateTo: (Screen) -> Unit,
-) {
-    Card(
-        backgroundColor = colors[0],
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .width(200.dp)
-            .clickable(onClick = {
-                navigateTo(Screen.Room(room))
-            })
-    )
-    {
-        CoilImage(
-            imageModel = room.getArtworkUrl(),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(18 / 9f)
-        )
-    }
-}
-
-@Composable
-fun StoreCollectionRoomsContent(
-    storeCollection: StoreCollectionRooms,
-    navigateTo: (Screen) -> Unit
 ) {
     // header
     StoreHeadingSection(title = storeCollection.label)
@@ -189,8 +95,24 @@ fun StoreCollectionRoomsContent(
     ) {
         items(items = storeCollection.items) { item ->
             when (item) {
-                is StoreRoom -> {
-                    StoreRoomItem(room = item, navigateTo = navigateTo)
+                is StoreData -> {
+                    Card(
+                        backgroundColor = colors[0],
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .width(200.dp)
+                            .clickable(onClick = { navigateTo(Screen.Discover(item)) })
+                    )
+                    {
+                        CoilImage(
+                            imageModel = item.getArtworkUrl(),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(18 / 9f)
+                        )
+                    }
                 }
             }
         }
@@ -223,7 +145,7 @@ fun StoreCollectionFeaturedContent(
                     .padding(horizontal = 4.dp)
                     .clickable {
                         when (item) {
-                            is StoreRoom -> navigateTo(Screen.Room(item))
+                            is StoreData -> navigateTo(Screen.Discover(item))
                             is StorePodcast -> navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
                             is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                         }
@@ -241,17 +163,6 @@ fun StoreCollectionFeaturedContent(
     }
 }
 
-@Composable
-fun CarouselDot(selected: Boolean, color: Color) {
-    Icon(
-        imageVector = Icons.Filled.Lens,
-        contentDescription = null,
-        modifier = Modifier
-            .padding(4.dp)
-            .size(12.dp),
-        tint = if (selected) color else Color.Gray
-    )
-}
 
 @Composable
 fun ChoiceChipTab(

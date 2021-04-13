@@ -2,9 +2,7 @@ package com.caldeirasoft.outcast.data.util
 
 import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
-import com.caldeirasoft.outcast.domain.interfaces.StorePageWithCollection
-import com.caldeirasoft.outcast.domain.models.store.StoreRoomPage
+import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
 
@@ -21,8 +19,8 @@ class StoreDataPagingSource(
         Timber.d("DBG - got new Grouping data : use it to Paging (2)")
         dataLoadedCallback?.invoke(storePage)
         val items = mutableListOf<StoreItem>()
-        when (storePage) {
-            is StorePageWithCollection -> {
+        when {
+            storePage.isMultiRoom -> {
                 val endPosition =
                     Integer.min(
                         storePage.storeList.size,
@@ -33,8 +31,8 @@ class StoreDataPagingSource(
                         getCollections(position, endPosition, storePage)
                     else emptyList()
             }
-            is StoreRoomPage -> {
-                val ids = storePage.storeRoom.storeIds
+            else -> {
+                val ids = storePage.storeIds
                 val endPosition = Integer.min(ids.size, position + params.loadSize)
                 val subset = ids.subList(position, endPosition)
                 items += getItemsFromIds(subset, storePage)

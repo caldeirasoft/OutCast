@@ -16,9 +16,7 @@ import com.caldeirasoft.outcast.data.util.network.GzipRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteResponseInterceptor
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
-import com.caldeirasoft.outcast.domain.interfaces.StoreFeatured
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemWithArtwork
-import com.caldeirasoft.outcast.domain.interfaces.StorePage
+import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.chuckerteam.chucker.api.ChuckerCollector
@@ -92,24 +90,13 @@ internal val networkModule = module {
     single<CoroutineDispatcher>(mainDispatcherQualifier) { Dispatchers.Main }
     single<Json> {
         val serializer = SerializersModule {
-            polymorphic(StoreFeatured::class) {
-                subclass(StoreRoom::class)
-                subclass(StoreMultiRoom::class)
-            }
-            polymorphic(StorePage::class) {
-                subclass(StoreGroupingPage::class)
-                subclass(StoreRoomPage::class)
-                subclass(StoreMultiRoomPage::class)
-            }
             polymorphic(StoreCollection::class) {
-                subclass(StoreCollectionRooms::class)
+                subclass(StoreCollectionData::class)
                 subclass(StoreCollectionFeatured::class)
-                subclass(StoreCollectionPodcasts::class)
-                subclass(StoreCollectionEpisodes::class)
-                subclass(StoreCollectionCharts::class)
+                subclass(StoreCollectionItems::class)
             }
-            polymorphic(StoreItemWithArtwork::class) {
-                subclass(StoreRoom::class)
+            polymorphic(StoreItemArtwork::class) {
+                subclass(StoreData::class)
                 subclass(StorePodcast::class)
                 subclass(StoreEpisode::class)
             }
@@ -166,17 +153,13 @@ internal val usecaseModule = module {
     }
     single { UnsubscribeUseCase(podcastRepository = get(), dataStoreRepository = get()) }
     single { LoadPodcastUseCase(podcastRepository = get()) }
-    single { LoadStoreGenreDataUseCase(storeRepository = get()) }
-    single { LoadStoreDirectoryUseCase(storeRepository = get()) }
-    single { LoadStoreDirectoryPagingDataUseCase(storeRepository = get()) }
+    single { LoadStorePagingDataUseCase(storeRepository = get()) }
     single { LoadPodcastEpisodesUseCase(libraryRepository = get()) }
     single {
         LoadPodcastEpisodesPagingDataUseCase(storeRepository = get(),
             libraryRepository = get())
     }
-    single { FetchStoreGroupingPagingDataUseCase(storeRepository = get()) }
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
-    single { FetchStoreRoomPagingDataUseCase(storeRepository = get()) }
     single {
         FetchStorePodcastDataUseCase(storeRepository = get(),
             libraryRepository = get(),
@@ -185,7 +168,6 @@ internal val usecaseModule = module {
     single { FetchStoreEpisodeDataUseCase(storeRepository = get(), libraryRepository = get()) }
     single { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
     single { LoadStoreTopChartsPagingDataUseCase(storeRepository = get()) }
-    single { GetStoreItemsUseCase(storeRepository = get()) }
     single { LoadSettingsUseCase(dataStoreRepository = get()) }
     single { UpdateSettingsUseCase(dataStoreRepository = get()) }
 }

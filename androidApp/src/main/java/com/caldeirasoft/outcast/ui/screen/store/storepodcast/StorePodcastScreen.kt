@@ -170,7 +170,8 @@ fun StorePodcastScreen(
                             podcastData.genre?.let { genre ->
                                 Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     ChipButton(selected = false,
-                                        onClick = { navigateTo(Screen.GenreScreen(genre)) }) {
+                                        onClick = { navigateTo(Screen.Discover(genre)) })
+                                    {
                                         Text(text = genre.name)
                                     }
                                 }
@@ -275,10 +276,10 @@ private fun StorePodcastExpandedHeader(
     headerHeight: Int,
 ) {
     val podcastData = state.podcast
-    val artistRoom = state.artistRoom
+    val artistData = state.artistData
     val dominantColor =
         podcastData.artwork?.bgColor
-            ?.let { Color.getColor(it).takeUnless { it == Color.White } }
+            ?.let { Color.getColor(it).takeUnless { color -> color == Color.White } }
 
     val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
     Box(modifier = Modifier
@@ -345,14 +346,14 @@ private fun StorePodcastExpandedHeader(
             )
 
             // artist name + link
-            val clickableArtistMod = artistRoom?.let {
-                Modifier.clickable { navigateTo(Screen.Room(it)) }
+            val clickableArtistMod = artistData?.let {
+                Modifier.clickable { navigateTo(Screen.Discover(it)) }
             } ?: Modifier
 
             Text(
                 text = with(AnnotatedString.Builder()) {
                     append(podcastData.artistName)
-                    artistRoom?.let {
+                    artistData?.let {
                         append(" ›")
                     }
                     toAnnotatedString()
@@ -363,7 +364,7 @@ private fun StorePodcastExpandedHeader(
                     .then(clickableArtistMod),
                 style = MaterialTheme.typography.body1,
                 maxLines = 2,
-                color = artistRoom?.let { dominantColor /*MaterialTheme.colors.primary*/ }
+                color = artistData?.let { dominantColor /*MaterialTheme.colors.primary*/ }
                     ?: Color.Unspecified,
                 textAlign = TextAlign.Center
             )
