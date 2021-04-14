@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import coil.request.ImageRequest
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
@@ -44,8 +42,8 @@ import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
+import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -218,10 +216,8 @@ fun DiscoverScreen(
                                         .fillMaxWidth()
                                         .height(computedHeight)
                                         .alpha(alphaLargeHeader),
-                                    imageRequest = ImageRequest.Builder(LocalContext.current)
-                                        .data(artworkUrl)
-                                        .crossfade(true)
-                                        .build(),
+                                    data = artworkUrl,
+                                    contentDescription = state.storePage.label,
                                     contentScale = ContentScale.FillWidth,
                                     loading = {
                                         Box(modifier = Modifier

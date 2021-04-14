@@ -24,10 +24,10 @@ import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Com
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
+import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
 fun StoreCollectionItemsContent(
@@ -106,7 +106,8 @@ fun StoreCollectionDataContent(
                     )
                     {
                         CoilImage(
-                            imageModel = item.getArtworkUrl(),
+                            data = item.getArtworkUrl(),
+                            contentDescription = item.label,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -153,7 +154,8 @@ fun StoreCollectionFeaturedContent(
             )
             {
                 CoilImage(
-                    imageModel = item.getArtworkFeaturedUrl(),
+                    data = item.getArtworkFeaturedUrl(),
+                    contentDescription = null,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
                         .fillMaxSize()

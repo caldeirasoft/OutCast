@@ -33,7 +33,7 @@ import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisode
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*
-import com.skydoves.landscapist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
@@ -200,7 +200,8 @@ private fun PodcastExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 CoilImage(
-                    imageModel = state.podcast.artwork?.getArtworkPodcast().orEmpty(),
+                    data = state.podcast.artwork?.getArtworkPodcast().orEmpty(),
+                    contentDescription = state.podcast.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxHeight()

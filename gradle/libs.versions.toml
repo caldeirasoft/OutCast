@@ -63,7 +63,6 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 accompanist-insets = { module = "com.google.accompanist:accompanist-insets", version.ref = "accompanist" }
 
 timber = "com.jakewharton.timber:timber:4.+"
-landscapist-coil = "com.github.skydoves:landscapist-coil:1.1.9"
 mavericks = "com.airbnb.android:mavericks-compose:2.1.0-alpha01"
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.1"
 

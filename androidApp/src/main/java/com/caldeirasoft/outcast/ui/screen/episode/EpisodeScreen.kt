@@ -27,7 +27,7 @@ import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
-import com.skydoves.landscapist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
 
 @Composable
 fun EpisodeScreen(
@@ -151,7 +151,8 @@ private fun EpisodeExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 CoilImage(
-                    imageModel = state.episode.artwork?.getArtworkPodcast().orEmpty(),
+                    data = state.episode.artwork?.getArtworkPodcast().orEmpty(),
+                    contentDescription = state.episode.podcastName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxHeight()

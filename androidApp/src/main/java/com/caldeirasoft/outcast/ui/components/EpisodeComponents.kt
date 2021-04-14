@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.skydoves.landscapist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
 
 
 @Composable
@@ -40,7 +40,8 @@ fun StoreEpisodeListItem(episode: StoreEpisode)
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     CoilImage(
-                        imageModel = episode.getArtworkUrl(),
+                        data = episode.getArtworkUrl(),
+                        contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(56.dp)
@@ -59,7 +60,9 @@ fun StoreEpisodeListItem(episode: StoreEpisode)
                     modifier = Modifier.height(32.dp)
                 ) {
                     Row {
-                        Box(modifier = Modifier.size(24.dp).padding(end = 4.dp)) {
+                        Box(modifier = Modifier
+                            .size(24.dp)
+                            .padding(end = 4.dp)) {
                             Canvas(modifier = Modifier.fillMaxSize()) {
                                 drawCircle(
                                     color = Color.Blue,
@@ -111,7 +114,8 @@ fun StoreEpisodeSmallListItemIndexed(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     CoilImage(
-                        imageModel = episode.getArtworkUrl(),
+                        data = episode.getArtworkUrl(),
+                        contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(40.dp)
@@ -143,7 +147,8 @@ fun StoreEpisodeSmallListItemIndexed(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     CoilImage(
-                        imageModel = episode.getArtworkUrl(),
+                        data = episode.getArtworkUrl(),
+                        contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(40.dp)

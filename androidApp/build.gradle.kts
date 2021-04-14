@@ -87,7 +87,6 @@ dependencies {
     api(libs.viewmodel.compose)
     api(libs.navigation.compose)
     api(libs.paging.compose)
-    api(libs.landscapist.coil)
     api(libs.timber)
     api(libs.mavericks)
     releaseImplementation(libs.chucker.release)

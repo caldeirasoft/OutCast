@@ -49,7 +49,7 @@ import com.caldeirasoft.outcast.ui.theme.*
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toPx
-import com.skydoves.landscapist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -326,7 +326,8 @@ private fun StorePodcastExpandedHeader(
                     .align(Alignment.CenterHorizontally)
             ) {
                 CoilImage(
-                    imageModel = podcastData.artwork?.getArtworkPodcast().orEmpty(),
+                    data = podcastData.artwork?.getArtworkPodcast().orEmpty(),
+                    contentDescription = podcastData.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxHeight()

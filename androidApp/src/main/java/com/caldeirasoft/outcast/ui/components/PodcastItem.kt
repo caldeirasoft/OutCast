@@ -27,7 +27,7 @@ import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.skydoves.landscapist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
 
 
 @Composable
@@ -58,7 +58,7 @@ fun PodcastListItem(
         secondaryText = { Text(storePodcast.artistName) },
         icon = {
             PodcastThumbnail(
-                imageModel = storePodcast.getArtworkUrl(),
+                data = storePodcast.getArtworkUrl(),
                 modifier = iconModifier
             )
         },
@@ -87,7 +87,7 @@ fun SmallPodcastListItemIndexed(
 @Composable
 fun PodcastThumbnail(
     modifier: Modifier = Modifier,
-    imageModel: Any,
+    data: Any,
     backgroundColor: Color = MaterialTheme.colors.surface,
 ) {
     Card(
@@ -95,7 +95,8 @@ fun PodcastThumbnail(
         shape = RoundedCornerShape(8.dp)
     ) {
         CoilImage(
-            imageModel = imageModel,
+            data = data,
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
         )
@@ -123,7 +124,8 @@ fun PodcastGridItem(
                 .aspectRatio(1f))
             {
                 CoilImage(
-                    imageModel = podcast.getArtworkUrl(),
+                    data = podcast.getArtworkUrl(),
+                    contentDescription = podcast.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth())
@@ -174,7 +176,8 @@ fun PodcastGridItem(
         )
         {
             CoilImage(
-                imageModel = podcast.getArtworkUrl(),
+                data = podcast.getArtworkUrl(),
+                contentDescription = podcast.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
