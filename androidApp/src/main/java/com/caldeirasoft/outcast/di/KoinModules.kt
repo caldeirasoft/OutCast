@@ -48,6 +48,8 @@ fun KoinApplication.initKoinModules() {
 }
 
 internal val mainDispatcherQualifier = named("MainDispatcher")
+internal val mainDispatcher: CoroutineDispatcher
+    get() = Dispatchers.Main
 
 internal val networkModule = module {
     fun provideCache(application: Application): Cache {
@@ -132,7 +134,7 @@ internal val repositoryModule = module {
             searchAPI = get(),
             context = get(),
             json = get(),
-            database = get()
+            mainDispatcher = mainDispatcher
         )
     }
     single<InboxDataSource> { InboxDataSource(database = get()) }

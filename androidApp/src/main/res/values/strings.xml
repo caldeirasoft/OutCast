@@ -84,6 +84,7 @@
     <string name="action_following">Following</string>
     <string name="action_subscribing">Subscribing</string>
     <string name="action_show_more">Show more ▼</string>
+    <string name="action_tap_to_refresh">Tap to refresh</string>
     <string name="action_more">MORE</string>
     <string name="action_show_all_episodes">Show all episodes</string>
 </resources>

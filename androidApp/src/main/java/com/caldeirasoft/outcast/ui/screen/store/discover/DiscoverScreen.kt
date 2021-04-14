@@ -2,12 +2,16 @@
 
 package com.caldeirasoft.outcast.ui.screen.store.discover
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,12 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.request.ImageRequest
@@ -37,14 +43,15 @@ import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Com
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.ifLoadingMore
-import com.caldeirasoft.outcast.ui.util.mavericksViewModel
-import com.caldeirasoft.outcast.ui.util.px
-import com.caldeirasoft.outcast.ui.util.toDp
+import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import org.koin.core.component.KoinApiExtension
 import timber.log.Timber
 
@@ -69,7 +76,7 @@ fun DiscoverScreen(
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
             val screenWidth = constraints.maxWidth
-            val headerRatio: Float = 1 / 6f
+            val headerRatio: Float = 1 / 5f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
             val spacerHeight = headerHeight.value - 56.px
 
@@ -188,6 +195,7 @@ fun DiscoverScreen(
                     }
                 }
 
+                // collapsing app bar
                 ReachableAppBar(
                     expandedContent = {
                         val scrollRatioHeaderHeight =
@@ -277,7 +285,73 @@ fun DiscoverScreen(
                     },
                     state = listState,
                     headerHeight = headerHeight.value)
+
+                // refresh button
+                RefreshButton(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 72.dp),
+                    discoverState = state,
+                    listState = listState,
+                    onClick = {
+                        viewModel.clearNewVersionButton()
+                        lazyPagingItems.refresh()
+                    })
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class, InternalCoroutinesApi::class)
+@Composable
+fun RefreshButton(
+    modifier: Modifier,
+    discoverState: DiscoverState,
+    listState: LazyListState,
+    onClick: () -> Unit,
+) {
+    val offsetY = remember { mutableStateOf(0) }
+    val oldIndex = remember { mutableStateOf(0) }
+    val searchOffsetY = remember { mutableStateOf(0) }
+    val isButtonHidden = remember { mutableStateOf(false) }
+
+    //listState.layoutInfo.visibleItemsInfo.first().size
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .filter { discoverState.newVersionAvailable }
+            .filter { listState.isScrollInProgress }
+            .debounce(100)
+            .collect {
+                val indexOffset = oldIndex.value - listState.firstVisibleItemIndex
+                val scrollOffset = offsetY.value - listState.firstVisibleItemScrollOffset
+                if ((indexOffset > 0) || (indexOffset == 0 && scrollOffset > 0)) {
+                    isButtonHidden.value = false
+                } else if ((indexOffset < 0) || (indexOffset == 0 && scrollOffset < 0)) {
+                    isButtonHidden.value = true
+                }
+                offsetY.value = listState.firstVisibleItemScrollOffset
+                oldIndex.value = listState.firstVisibleItemIndex
+            }
+    }
+
+    val translationValue = if (isButtonHidden.value) 72.dp.toPx() else 0f
+    // refresh button
+    AnimatedVisibility(
+        modifier = modifier
+            .graphicsLayer(
+                translationY = animateFloatAsState(
+                    targetValue = translationValue,
+                    animationSpec = tween(durationMillis = 750)
+                ).value,
+            ),
+        visible = discoverState.newVersionAvailable)
+    {
+        Button(
+            onClick = onClick,
+        ) {
+            Text(text = stringResource(id = R.string.action_tap_to_refresh),
+                style = typography.button.copy(letterSpacing = 0.5.sp))
         }
     }
 }

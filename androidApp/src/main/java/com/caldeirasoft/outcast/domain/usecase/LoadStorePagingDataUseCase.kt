@@ -8,14 +8,12 @@ import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePage
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 class LoadStorePagingDataUseCase(
     val storeRepository: StoreRepository,
 ) {
     fun executeAsync(
-        scope: CoroutineScope,
         storeData: StoreData,
         storeFront: String,
         newVersionAvailable: (() -> Unit)? = null,
@@ -28,11 +26,9 @@ class LoadStorePagingDataUseCase(
             ),
             pagingSourceFactory = {
                 StoreDataPagingSource(
-                    scope = scope,
                     loadDataFromNetwork = {
                         when {
                             storeData.genreId != null -> storeRepository.getGroupingDataAsync(
-                                scope,
                                 storeData.genreId,
                                 storeFront,
                                 newVersionAvailable)

@@ -4,15 +4,16 @@ import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 
 class StoreDataPagingSource(
-    override val scope: CoroutineScope,
     private val loadDataFromNetwork: suspend () -> StorePage,
     override val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem>,
     private val dataLoadedCallback: ((StorePage) -> Unit)?
-) : BasePagingSource<StoreItem>(), StorePagingSource
-{
+) : BasePagingSource<StoreItem>(), StorePagingSource {
+    override val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+
     override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {
         Timber.d("DBG - got new Grouping data : use it to Paging")
         val storePage = loadDataFromNetwork()

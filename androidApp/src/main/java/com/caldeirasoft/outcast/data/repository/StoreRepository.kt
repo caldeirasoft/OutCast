@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
 import androidx.datastore.dataStore
-import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.data.util.local.StorePageSerializer
@@ -14,20 +13,24 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 
-class StoreRepository (
+class StoreRepository(
     val itunesAPI: ItunesAPI,
     val searchAPI: ItunesSearchAPI,
     val context: Context,
     val json: Json,
-    val database: Database,
+    mainDispatcher: CoroutineDispatcher,
 ) {
 
     companion object {
@@ -37,6 +40,8 @@ class StoreRepository (
         const val GENRE_URL = "https://podcasts.apple.com/genre/id{genre}"
     }
 
+    private val scope = CoroutineScope(Dispatchers.Main)
+
     // Setup datacache
     val Context.dataStore by dataStore("my_file.json", serializer = StorePageSerializer(json))
 
@@ -45,7 +50,7 @@ class StoreRepository (
      */
     suspend fun getStoreDataAsync(
         url: String,
-        storeFront: String
+        storeFront: String,
     ): StorePage {
         val storeResponse = itunesAPI.storeData(storeFront = storeFront, url = url)
         if (storeResponse.isSuccessful.not())
@@ -58,7 +63,6 @@ class StoreRepository (
      * getGroupingDataAsync
      */
     suspend fun getGroupingDataAsync(
-        scope: CoroutineScope,
         genre: Int?,
         storeFront: String,
         newVersionAvailable: (() -> Unit)?,
@@ -67,25 +71,34 @@ class StoreRepository (
         return when (genre) {
             DEFAULT_GENRE -> {
                 val groupingPageCache = context.dataStore.data.firstOrNull()
-                val groupingPage = groupingPageCache
                     .takeUnless { it?.timestamp == Instant.DISTANT_PAST }
-                    ?: getStoreDataAsync(url, storeFront)
+                    .takeUnless { it?.storeFront != storeFront }
+
+                val groupingPage = groupingPageCache ?: getStoreDataAsync(url, storeFront)
 
                 newVersionAvailable?.let {
-                    groupingPageCache?.let {
+                    if (groupingPageCache != null) {
                         scope.launch {
-                            val newGroupingPage = getStoreDataAsync(url, storeFront)
-                            // if network version is newer/different than cached version -> notify
-                            if ((newGroupingPage.timestamp != groupingPageCache.timestamp)) {
-                                context.dataStore.updateData { newGroupingPage }
-                                newVersionAvailable.invoke()
+                            val now =
+                                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                            val today = now.date
+                            if (groupingPageCache.fetchedAt.toLocalDateTime(TimeZone.currentSystemDefault()).date != today) {
+                                val newGroupingPage = getStoreDataAsync(url, storeFront)
+                                if (newGroupingPage.timestamp.toLocalDateTime(TimeZone.currentSystemDefault()).date !=
+                                    groupingPageCache.timestamp.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                ) {
+                                    context.dataStore.updateData { newGroupingPage }
+                                    newVersionAvailable.invoke()
+                                } else {
+                                    context.dataStore.updateData { groupingPageCache.copy(fetchedAt = Clock.System.now()) }
+                                }
                             }
                         }
-                    } ?: let {
+                    } else {
                         context.dataStore.updateData { groupingPage }
                     }
-                    null
-                } ?: groupingPage
+                }
+                groupingPage
             }
             else -> {
                 getStoreDataAsync(url, storeFront)

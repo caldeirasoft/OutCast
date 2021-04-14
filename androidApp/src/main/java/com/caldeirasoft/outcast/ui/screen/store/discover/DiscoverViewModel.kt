@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import timber.log.Timber
 
 @OptIn(KoinApiExtension::class)
 @ExperimentalCoroutinesApi
@@ -35,10 +34,13 @@ class DiscoverViewModel(
         fetchStoreFrontUseCase.getStoreFront()
             .map { storeFront ->
                 loadStorePagingDataUseCase.executeAsync(
-                    scope = viewModelScope,
                     storeData = initialState.storeData,
                     storeFront = storeFront,
-                    newVersionAvailable = { Timber.d("DBG - New version available") },
+                    newVersionAvailable = {
+                        setState {
+                            copy(newVersionAvailable = true)
+                        }
+                    },
                     dataLoadedCallback = { page ->
                         setState {
                             copy(storePage = page, title = page.label)
@@ -47,4 +49,10 @@ class DiscoverViewModel(
             }
             .flattenMerge()
             .cachedIn(viewModelScope)
+
+    fun clearNewVersionButton() {
+        setState {
+            copy(newVersionAvailable = false)
+        }
+    }
 }
