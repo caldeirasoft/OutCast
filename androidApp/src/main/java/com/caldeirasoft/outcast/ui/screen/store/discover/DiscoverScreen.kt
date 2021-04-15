@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,9 +42,15 @@ import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Com
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.*
+import com.caldeirasoft.outcast.ui.util.ifLoadingMore
+import com.caldeirasoft.outcast.ui.util.mavericksViewModel
+import com.caldeirasoft.outcast.ui.util.toDp
+import com.caldeirasoft.outcast.ui.util.toPx
 import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -66,17 +73,15 @@ fun DiscoverScreen(
     val viewModel: DiscoverViewModel = mavericksViewModel(initialArgument = storeDataArg)
     val state by viewModel.collectAsState()
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
-    val coroutineScope = rememberCoroutineScope()
     val title = state.takeUnless { it.storeData == StoreData.Default }?.title
         ?: stringResource(id = R.string.store_tab_discover)
 
     Scaffold {
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
-            val screenWidth = constraints.maxWidth
-            val headerRatio: Float = 1 / 5f
+            val headerRatio: Float = 1 / 4f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
-            val spacerHeight = headerHeight.value - 56.px
+            val spacerHeight = headerHeight.value
 
             LazyListLayout(lazyListItems = lazyPagingItems) {
                 val listState = rememberLazyListState()
@@ -84,14 +89,21 @@ fun DiscoverScreen(
                     state = listState,
                     //verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
-                        .padding(top = 56.dp)
+                        .navigationBarsPadding()
                         .fillMaxSize())
                 {
                     // header
                     item {
-                        Spacer(modifier = Modifier
-                            .height(spacerHeight.toDp())
-                            .animateContentSize())
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(height = spacerHeight.toDp()))
+                        {
+                            DiscoverScreenHeader(
+                                title = title,
+                                state = state,
+                                listState = listState
+                            )
+                        }
                     }
 
                     // label
@@ -194,99 +206,17 @@ fun DiscoverScreen(
                 }
 
                 // collapsing app bar
-                ReachableAppBar(
-                    expandedContent = {
-                        val scrollRatioHeaderHeight =
-                            getScrollRatioHeaderHeight(listState, headerHeight.value)
-                        val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight.value)
-                        val minimumHeight = 56.dp
-                        val computedHeight =
-                            (scrollRatioHeaderHeight * headerHeight.value).toDp()
-                                .coerceAtLeast(minimumHeight)
-                        val artwork = state.storePage.artwork
-                        if (artwork != null) {
-                            val artworkUrl =
-                                StoreItemArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
-                            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                val boxWidth = constraints.maxWidth
-                                val artworkRatio: Float = 13 / 32f
-                                headerHeight.value = (boxWidth * artworkRatio).toInt()
-                                CoilImage(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(computedHeight)
-                                        .alpha(alphaLargeHeader),
-                                    data = artworkUrl,
-                                    contentDescription = state.storePage.label,
-                                    contentScale = ContentScale.FillWidth,
-                                    loading = {
-                                        Box(modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.DarkGray))
-                                    }
-                                )
-                            }
-                        } else {
-                            // large title
-                            Box(modifier = Modifier
-                                .padding(
-                                    start = 16.dp,
-                                    end = 16.dp)
-                                .align(Alignment.Center)
-                                .alpha(alphaLargeHeader)) {
-                                ProvideTextStyle(typography.h4) {
-                                    Text(text = title, textAlign = TextAlign.Center)
-                                }
-                            }
-                        }
-                    },
-                    collapsedContent = {
-                        val collapsedHeaderAlpha =
-                            getCollapsedHeaderAlpha(listState, headerHeight.value)
-                        // top app bar
-                        val artwork = state.storePage.artwork
-                        val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
-                        val contentColor: Color =
-                            artwork?.textColor1
-                                ?.let {
-                                    val contentStartColor = Color.getColor(it)
-                                    Color.blendARGB(contentStartColor,
-                                        contentEndColor,
-                                        collapsedHeaderAlpha)
-                                }
-                                ?: contentEndColor
-
-                        TopAppBar(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomStart),
-                            title = {
-                                CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
-                                    Text(text = title)
-                                }
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { }) {
-                                    Icon(
-                                        Icons.Filled.ArrowBack,
-                                        contentDescription = null,
-                                    )
-                                }
-                            },
-                            actions = { },
-                            backgroundColor = Color.Transparent,
-                            contentColor = contentColor,
-                            elevation = if (listState.firstVisibleItemIndex > 0) 1.dp else 0.dp
-                        )
-                    },
-                    state = listState,
-                    headerHeight = headerHeight.value)
+                DiscoverTopAppBar(
+                    title = title,
+                    state = state,
+                    listState = listState)
 
                 // refresh button
                 RefreshButton(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 72.dp),
+                        .padding(bottom = 72.dp)
+                        .navigationBarsPadding(),
                     discoverState = state,
                     listState = listState,
                     onClick = {
@@ -297,6 +227,124 @@ fun DiscoverScreen(
         }
     }
 }
+
+@Composable
+fun DiscoverScreenHeader(
+    title: String,
+    state: DiscoverState,
+    listState: LazyListState,
+) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val artwork = state.storePage.artwork
+        if (artwork != null) {
+            // Get the current SystemUiController
+            val systemUiController = LocalSystemUiController.current
+            val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
+            val contentColor =
+                artwork.textColor1
+                    ?.let {
+                        val contentStartColor = Color.getColor(it)
+                        Color.blendARGB(contentStartColor,
+                            contentEndColor,
+                            listState.topAppBarAlpha)
+                    } ?: contentEndColor
+            val useDarkIcons = contentColor.luminance() < 0.5f
+            SideEffect {
+                // Update all of the system bar colors to be transparent, and use
+                // dark icons if we're in light artwork
+                systemUiController.setStatusBarColor(
+                    color = Color.Transparent,
+                    darkIcons = useDarkIcons
+                )
+            }
+
+            val artworkUrl =
+                StoreItemArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
+            CoilImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(listState.expandedHeaderAlpha),
+                data = artworkUrl,
+                contentDescription = state.storePage.label,
+                contentScale = ContentScale.FillHeight,
+                loading = {
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.DarkGray))
+                }
+            )
+        } else {
+            // large title
+            Box(modifier = Modifier
+                .padding(
+                    top = AppBarHeight,
+                    start = 16.dp,
+                    end = 16.dp)
+                .statusBarsPadding()
+                .navigationBarsPadding(bottom = false)
+                .align(Alignment.Center)
+                .alpha(listState.expandedHeaderAlpha)) {
+                ProvideTextStyle(typography.h4) {
+                    Text(text = title, textAlign = TextAlign.Center)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DiscoverTopAppBar(
+    title: String,
+    state: DiscoverState,
+    listState: LazyListState,
+) {
+    val appBarAlpha = listState.topAppBarAlpha
+    val backgroundColor: Color = Color.blendARGB(
+        MaterialTheme.colors.surface.copy(alpha = 0f),
+        MaterialTheme.colors.surface,
+        appBarAlpha)
+
+    // top app bar
+    val artwork = state.storePage.artwork
+    val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
+    val contentColor: Color =
+        artwork?.textColor1
+            ?.let {
+                val contentStartColor = Color.getColor(it)
+                Color.blendARGB(contentStartColor,
+                    contentEndColor,
+                    appBarAlpha)
+            }
+            ?: contentEndColor
+
+    Column(
+        modifier = Modifier
+            .background(backgroundColor)
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false)
+    ) {
+        TopAppBar(
+            modifier = Modifier,
+            title = {
+                CompositionLocalProvider(LocalContentAlpha provides appBarAlpha) {
+                    Text(text = title)
+                }
+            },
+            navigationIcon = {
+                IconButton(onClick = { }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                }
+            },
+            actions = { },
+            backgroundColor = Color.Transparent,
+            contentColor = contentColor,
+            elevation = 0.dp
+        )
+        Divider(modifier = Modifier.alpha(appBarAlpha))
+    }
+}
+
 
 @OptIn(ExperimentalAnimationApi::class, InternalCoroutinesApi::class)
 @Composable

@@ -15,9 +15,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.toDp
-import kotlin.math.log10
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
+import kotlin.math.ln
 
 @Composable
 fun ReachableScaffold(
@@ -101,11 +104,67 @@ fun ReachableAppBar(
                 ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
                     .coerceAtLeast(0f)
             else 1f
-        val minimumHeight = 56.dp
-        val computedHeight = (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
+        val minimumHeight = AppBarHeight
+        val computedHeight =
+            (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
+        val collapsedHeaderAlpha = getCollapsedHeaderAlpha(state, headerHeight)
+        val backgroundColor: Color = Color.blendARGB(
+            MaterialTheme.colors.surface.copy(alpha = 0f),
+            MaterialTheme.colors.surface,
+            collapsedHeaderAlpha)
+
         Box(modifier = Modifier
+            .background(backgroundColor)
             .fillMaxWidth()
-            .heightIn(max = computedHeight)
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false)
+            .height(computedHeight)) {
+
+            // expanded content
+            this.expandedContent()
+
+            // collapsed content
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopStart))
+            {
+                this.collapsedContent()
+            }
+        }
+
+    }
+}
+
+@Composable
+fun CustomTopAppBar(
+    expandedContent: @Composable BoxScope.() -> Unit = {},
+    collapsedContent: @Composable BoxScope.() -> Unit = {},
+    state: LazyListState,
+    headerHeight: Int,
+) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(headerHeight.toDp()))
+    {
+        val scrollRatioHeaderHeight =
+            if (headerHeight != 0)
+                ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
+                    .coerceAtLeast(0f)
+            else 1f
+        val minimumHeight = AppBarHeight
+        val computedHeight =
+            (scrollRatioHeaderHeight * headerHeight).toDp().coerceAtLeast(minimumHeight)
+        val collapsedHeaderAlpha = getCollapsedHeaderAlpha(state, headerHeight)
+        val backgroundColor: Color = Color.blendARGB(
+            MaterialTheme.colors.surface.copy(alpha = 0f),
+            MaterialTheme.colors.surface,
+            collapsedHeaderAlpha)
+
+        Box(modifier = Modifier
+            .background(backgroundColor)
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false)
             .height(computedHeight)) {
 
             // expanded content
@@ -128,8 +187,8 @@ fun ReachableAppBar(
 fun TopHeaderExpanded(
     state: LazyListState,
     headerHeight: Int,
-    expandedContent: @Composable BoxScope.() -> Unit = {})
-{
+    expandedContent: @Composable BoxScope.() -> Unit = {},
+) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(headerHeight.toDp()))
@@ -153,15 +212,39 @@ fun TopHeaderExpanded(
     }
 }
 
-fun getScrollRatioHeaderHeight(state: LazyListState, headerHeight: Int) =
-    if (headerHeight != 0)
+val LazyListState.headerScrollRatio: Float
+    get() =
+        when {
+            layoutInfo.visibleItemsInfo.isEmpty() -> 1f
+            firstVisibleItemIndex > 0 -> 0f
+            else -> {
+                val headerHeight = layoutInfo.visibleItemsInfo[0].size
+                if (headerHeight != 0)
+                    ((headerHeight - firstVisibleItemScrollOffset).toFloat() / headerHeight)
+                        .coerceAtLeast(0f)
+                else 1f
+            }
+        }
+
+val LazyListState.expandedHeaderAlpha: Float
+    get() = (ln(x = headerScrollRatio.toDouble()) + 1).toFloat().coerceIn(0f, 1f)
+
+val LazyListState.topAppBarAlpha: Float
+    get() = (1.3 * ln(1 - headerScrollRatio.toDouble()) + 1.9).toFloat().coerceIn(0f, 1f)
+
+fun getScrollRatioHeaderHeight(state: LazyListState, headerHeight: Int = 0): Float {
+    return if (headerHeight != 0)
         ((headerHeight - (state.firstVisibleItemIndex * headerHeight.toFloat() + state.firstVisibleItemScrollOffset)) / headerHeight)
             .coerceAtLeast(0f)
     else 1f
+}
 
-fun getExpandedHeaderAlpha(state: LazyListState, headerHeight: Int) =
-    (3 * log10(getScrollRatioHeaderHeight(state, headerHeight).toDouble()) + 1).toFloat().coerceIn(0f, 1f)
+fun getExpandedHeaderAlpha(state: LazyListState, headerHeight: Int = 0) =
+    (ln(x = getScrollRatioHeaderHeight(state, headerHeight).toDouble()) + 1).toFloat()
+        .coerceIn(0f, 1f)
 
-fun getCollapsedHeaderAlpha(state: LazyListState, headerHeight: Int) =
-    (3 * log10(1-getScrollRatioHeaderHeight(state, headerHeight).toDouble()) + 1).toFloat().coerceIn(0f, 1f)
+fun getCollapsedHeaderAlpha(state: LazyListState, headerHeight: Int = 0) =
+    (1.3 * ln(1 - getScrollRatioHeaderHeight(state, headerHeight).toDouble()) + 1.9).toFloat()
+        .coerceIn(0f, 1f)
 
+val AppBarHeight = 56.dp

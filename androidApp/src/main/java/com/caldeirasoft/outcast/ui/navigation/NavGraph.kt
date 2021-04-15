@@ -5,6 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -24,6 +25,7 @@ import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
+import com.google.accompanist.insets.navigationBarsPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -58,6 +60,7 @@ fun MainNavHost(startScreen: ScreenName) {
 
     ModalBottomSheetHost() {
         Scaffold(
+            modifier = Modifier.navigationBarsPadding(),
             bottomBar = {
                 SetupBottomNavBar(
                     navController = navController,
