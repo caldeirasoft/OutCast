@@ -167,7 +167,7 @@ fun DiscoverScreen(
                                                     navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
                                                 }),
                                             storePodcast = item,
-                                            followingStatus = state.followingStatus[item.id],
+                                            followingStatus = state.followingStatus[item.feedUrl],
                                             onSubscribeClick = viewModel::subscribeToPodcast
                                         )
                                     }

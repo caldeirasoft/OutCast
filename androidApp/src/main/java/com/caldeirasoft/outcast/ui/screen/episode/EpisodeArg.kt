@@ -2,50 +2,41 @@
 
 package com.caldeirasoft.outcast.ui.screen.episode
 
+import android.os.Parcelable
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.UseSerializers
 
 
-@Serializable
+@Parcelize
 data class EpisodeArg(
-    val episodeId: Long,
+    val guid: String,
     val name: String,
     val url: String,
-    val podcastId: Long,
     val podcastName: String,
     val artistName: String,
-    val artistId: Long?,
-    @Serializable(with = InstantSerializer::class)
-    val releaseDateTime: Instant,
-    val genreId: Int,
     val feedUrl: String,
-    val description: String?,
-    val artwork: Artwork?,
-    val mediaUrl: String,
-    val mediaType: String,
+    val artworkUrl: String,
     val duration: Int,
-) {
+) : Parcelable {
     fun toEpisode() = Episode(
-        episodeId = episodeId,
+        guid = guid,
         name = name,
         url = url,
-        podcastId = podcastId,
+        podcastId = null,
         podcastName = podcastName,
         artistName = artistName,
-        artistId = artistId,
-        releaseDateTime = releaseDateTime,
-        genreId = genreId,
+        artistId = null,
+        releaseDateTime = Instant.DISTANT_PAST,
         feedUrl = feedUrl,
-        description = description,
-        contentAdvisoryRating = null,
-        artwork = artwork,
-        mediaUrl = mediaUrl,
-        mediaType = mediaType,
+        description = null,
+        isExplicit = false,
+        artworkUrl = artworkUrl,
+        mediaUrl = "",
+        mediaType = "",
         duration = duration,
         podcastEpisodeSeason = null,
         podcastEpisodeNumber = null,
@@ -60,38 +51,24 @@ data class EpisodeArg(
 
     companion object {
         fun Episode.toEpisodeArg() = EpisodeArg(
-            episodeId = episodeId,
+            guid = guid,
             name = name,
             url = url,
-            podcastId = podcastId,
             podcastName = podcastName,
             artistName = artistName,
-            artistId = artistId,
-            releaseDateTime = releaseDateTime,
-            genreId = genreId,
             feedUrl = feedUrl,
-            description = description,
-            artwork = artwork,
-            mediaUrl = mediaUrl,
-            mediaType = mediaType,
+            artworkUrl = artworkUrl,
             duration = duration,
         )
 
         fun StoreEpisode.toEpisodeArg(): EpisodeArg = EpisodeArg(
-            episodeId = id,
+            guid = guid,
             name = name,
             url = url,
-            podcastId = podcastId,
             podcastName = podcastName,
             artistName = artistName,
-            artistId = artistId,
-            releaseDateTime = releaseDateTime,
-            genreId = genres.first().id,
             feedUrl = feedUrl,
-            description = description,
-            artwork = artwork,
-            mediaUrl = mediaUrl,
-            mediaType = mediaType,
+            artworkUrl = artwork?.getArtworkPodcast().orEmpty(),
             duration = duration,
         )
     }

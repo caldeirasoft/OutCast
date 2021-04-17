@@ -165,7 +165,7 @@ private fun PodcastExpandedHeader(
         ) {
             BoxWithConstraints {
                 val bgDominantColor =
-                    Color.getColor(state.podcast.artwork?.bgColor!!)
+                    Color.getColor(state.podcast.artworkDominantColor!!)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -200,7 +200,7 @@ private fun PodcastExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 CoilImage(
-                    data = state.podcast.artwork?.getArtworkPodcast().orEmpty(),
+                    data = state.podcast.artworkUrl.orEmpty(),
                     contentDescription = state.podcast.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

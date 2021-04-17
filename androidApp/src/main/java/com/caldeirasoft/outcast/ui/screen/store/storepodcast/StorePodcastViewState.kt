@@ -35,5 +35,5 @@ data class StorePodcastViewState(
         }
 
     val podcastPreferenceKeys: PodcastPreferenceKeys =
-        PodcastPreferenceKeys(podcast.podcastId)
+        PodcastPreferenceKeys(podcast.feedUrl)
 }

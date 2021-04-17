@@ -4,14 +4,11 @@ import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Instant
 
 class LibraryRepository(
     val database: Database
@@ -29,40 +26,39 @@ class LibraryRepository(
             .asFlow()
             .mapToList()
 
-    fun loadPodcast(podcastId: Long): Flow<Podcast?> =
+    fun loadPodcast(feedUrl: String): Flow<Podcast?> =
         database.podcastQueries
-            .getById(podcastId = podcastId)
+            .getByUrl(feedUrl = feedUrl)
             .asFlow()
             .mapToOneOrNull()
 
     fun subscribeToPodcast(
-        podcastId: Long,
-        newEpisodeAction: NewEpisodesAction,
+        feedUrl: String,
     ) {
         database.podcastQueries
-            .subscribe(podcastId = podcastId)
+            .subscribe(feedUrl = feedUrl)
     }
 
-    fun unsubscribeFromPodcast(podcastId: Long) {
+    fun unsubscribeFromPodcast(feedUrl: String) {
         database.podcastQueries
-            .unsubscribe(podcastId = podcastId)
+            .unsubscribe(feedUrl = feedUrl)
     }
 
-    fun loadEpisodesByPodcastId(podcastId: Long): Flow<List<Episode>> =
+    fun loadEpisodesByFeedUrl(feedUrl: String): Flow<List<Episode>> =
         database.episodeQueries
-            .getAllByPodcastId(podcastId = podcastId)
+            .getAllByUrl(feedUrl = feedUrl)
             .asFlow()
             .mapToList()
 
-    fun getEpisodesByPodcastIdPagingSourceFactory(podcastId: Long): () -> PagingSource<Int, Episode> =
+    fun getEpisodesByPodcastIdPagingSourceFactory(feedUrl: String): () -> PagingSource<Int, Episode> =
         QueryDataSourceFactory(
             queryProvider = { limit, offset ->
-                database.episodeQueries.getAllPagedByPodcastId(
-                    podcastId = podcastId,
+                database.episodeQueries.getAllPagedByUrl(
+                    feedUrl = feedUrl,
                     limit = limit,
                     offset = offset)
             },
-            countQuery = database.episodeQueries.countAllByPodcastId(podcastId = podcastId),
+            countQuery = database.episodeQueries.countAllByUrl(feedUrl = feedUrl),
         ).asPagingSourceFactory()
 
     fun loadEpisodesFavorites(): Flow<List<Episode>> =
@@ -77,109 +73,39 @@ class LibraryRepository(
             .asFlow()
             .mapToList()
 
-    fun loadEpisode(episodeId: Long): Flow<Episode?> =
+    fun loadEpisode(episode: Episode): Flow<Episode?> =
         database.episodeQueries
-            .getById(episodeId = episodeId)
+            .getByGuid(feedUrl = episode.feedUrl, guid = episode.guid)
             .asFlow()
             .mapToOneOrNull()
 
-    fun markEpisodeAsPlayed(episodeId: Long) {
+    fun markEpisodeAsPlayed(episode: Episode) {
         database.episodeQueries
-            .markEpisodeAsPlayed(episodeId = episodeId)
+            .markEpisodeAsPlayed(feedUrl = episode.feedUrl, guid = episode.guid)
     }
 
-    fun updateEpisodeFavoriteStatus(episodeId: Long, isFavorite: Boolean) {
-        when(isFavorite) {
-            true -> database.episodeQueries.addToFavorites(episodeId)
-            else -> database.episodeQueries.removeFromFavorites(episodeId)
+    fun updateEpisodeFavoriteStatus(episode: Episode, isFavorite: Boolean) {
+        when (isFavorite) {
+            true -> database.episodeQueries.addToFavorites(feedUrl = episode.feedUrl,
+                guid = episode.guid)
+            else -> database.episodeQueries.removeFromFavorites(feedUrl = episode.feedUrl,
+                guid = episode.guid)
         }
     }
 
-    fun updateEpisodePlaybackPosition(episodeId: Long, playbackPosition: Int?) {
-        database.episodeQueries.addToHistory(playbackPosition = playbackPosition,
-            episodeId = episodeId)
+    fun updateEpisodePlaybackPosition(episode: Episode, playbackPosition: Int?) {
+        database.episodeQueries.addToHistory(
+            playbackPosition = playbackPosition,
+            feedUrl = episode.feedUrl, guid = episode.guid)
     }
 
-    /**
-     * doesPodcastNeedUpdate
-     */
-    fun doesPodcastNeedUpdate(podcastId: Long, podcastLookup: StorePodcast): Boolean {
-        val podcastDb = database.podcastQueries.getById(podcastId).executeAsOneOrNull()
-        return podcastDb?.let {
-            if (podcastLookup.releaseDateTime == podcastDb.releaseDateTime) {
-                database.podcastQueries.updateLastAccess(podcastDb.podcastId)
-                false
-            } else {
-                database.podcastQueries.updateMetadata(
-                    podcastLookup.releaseDateTime,
-                    podcastLookup.trackCount.toLong(),
-                    podcastId)
-                true
-            }
-        } ?: true
-    }
-
-    /**
-     * updatePodcastAndEpisodes
-     */
-    fun updatePodcastAndEpisodes(remotePodcast: StorePodcast) {
-        database.transaction {
-            database.podcastQueries.insert(remotePodcast.podcast)
-            remotePodcast.episodes.onEach {
-                database.episodeQueries.insert(it)
-            }
-        }
-    }
-
-    /**
-     * addMostRecentEpisodeToInbox
-     */
-    fun addMostRecentEpisodeToInbox(podcastId: Long) {
-        database.inboxQueries.addMostRecentEpisodeToInbox(podcastId = podcastId)
-    }
-
-    /**
-     * addRecentEpisodesIntoInbox
-     */
-    fun addRecentEpisodesIntoInbox(podcastId: Long, releaseDateTime: Instant) {
-        database.inboxQueries.addRecentEpisodesIntoInbox(
-            podcastId = podcastId,
-            releaseDateTime = releaseDateTime)
-    }
-
-    /**
-     * addRecentEpisodesIntoQueueFirst
-     */
-    fun addRecentEpisodesIntoQueueFirst(podcastId: Long, releaseDateTime: Instant) {
-        database.queueQueries.addRecentEpisodesIntoQueueFirst(
-            podcastId = podcastId,
-            releaseDateTime = releaseDateTime)
-    }
 
     /**
      * addRecentEpisodesIntoQueueLast
      */
-    fun addRecentEpisodesIntoQueueLast(podcastId: Long, releaseDateTime: Instant) {
-        database.queueQueries.addRecentEpisodesIntoQueueLast(
-            podcastId = podcastId,
-            releaseDateTime = releaseDateTime)
-    }
-
-    /**
-     * updateInboxEpisodeLimit
-     */
-    fun updateInboxEpisodeLimit(podcastId: Long, limit: Int) {
-        database.inboxQueries.updateInboxEpisodeLimit(
-            podcastId = podcastId,
-            offset = limit.toLong())
-    }
-
-    /**
-     * addRecentEpisodesIntoQueueLast
-     */
-    fun updateQueueEpisodeLimit(podcastId: Long, limit: Int) {
+    fun updateQueueEpisodeLimit(feedUrl: String, limit: Int) {
         database.queueQueries.updateQueueEpisodeLimit(
-            podcastId = podcastId,
+            feedUrl = feedUrl,
             offset = limit.toLong())
     }
 }

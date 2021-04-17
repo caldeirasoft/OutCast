@@ -1,11 +1,11 @@
-@file:UseSerializers(InstantSerializer::class)
+@file:UseSerializers(InstantSerializer::class, DurationSerializer::class)
 
 package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.serializers.DurationSerializer
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -16,6 +16,8 @@ import kotlinx.serialization.UseSerializers
 @Serializable
 class StoreEpisode(
     override val id: Long,
+    val feedUrl: String,
+    val guid: String,
     val name: String,
     val url: String,
     val podcastId: Long,
@@ -23,10 +25,7 @@ class StoreEpisode(
     val artistName: String,
     val artistId: Long? = null,
     val releaseDateTime: Instant,
-    val genres: List<Genre>,
-    val feedUrl: String,
     val description: String? = null,
-    val contentAdvisoryRating: String? = null,
     val mediaUrl: String,
     val mediaType: String,
     val duration: Int,
@@ -37,6 +36,7 @@ class StoreEpisode(
     val podcastEpisodeType: String = "",
     override val storeFront: String = "",
     override val artwork: Artwork? = null,
+    val isExplicit: Boolean = false,
     val isComplete: Boolean = false,
     val podcast: StorePodcast,
 ) : StoreItemArtwork {
@@ -49,7 +49,8 @@ class StoreEpisode(
     @Transient
     val episode: Episode =
         Episode(
-            episodeId = this.id,
+            feedUrl = this.feedUrl,
+            guid = this.guid,
             name = this.name,
             url = this.url,
             podcastId = this.podcastId,
@@ -57,11 +58,8 @@ class StoreEpisode(
             artistName = this.artistName,
             artistId = this.artistId,
             description = this.description,
-            genreId = this.genres.first().id,
-            feedUrl = this.feedUrl,
             releaseDateTime = this.releaseDateTime,
-            artwork = this.artwork,
-            contentAdvisoryRating = this.contentAdvisoryRating,
+            artworkUrl = getArtworkUrl(),
             mediaUrl = this.mediaUrl,
             mediaType = this.mediaType,
             duration = this.duration,
@@ -69,6 +67,7 @@ class StoreEpisode(
             podcastEpisodeSeason = this.podcastEpisodeSeason,
             podcastEpisodeType = this.podcastEpisodeType,
             podcastEpisodeWebsiteUrl = this.podcastEpisodeWebsiteUrl,
+            isExplicit = false,
             updatedAt = Clock.System.now(),
             playbackPosition = null,
             isPlayed = false,

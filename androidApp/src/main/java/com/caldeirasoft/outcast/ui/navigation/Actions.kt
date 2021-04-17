@@ -27,7 +27,7 @@ class Actions(navController: NavController) {
             is StorePodcastScreen -> {
                 navController.currentBackStackEntry
                     ?.arguments
-                    ?.putParcelable("podcast", screen.podcast)
+                    ?.putParcelable("podcast", screen.podcastArg)
                 navController.navigate(screen.id.name)
             }
             is Charts ->

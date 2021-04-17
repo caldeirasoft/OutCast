@@ -2,15 +2,15 @@ package com.caldeirasoft.outcast.di
 
 import android.app.Application
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
-import com.caldeirasoft.outcast.data.db.InboxDataSource
 import com.caldeirasoft.outcast.data.db.createDatabase
-import com.caldeirasoft.outcast.data.repository.DataStoreRepository
-import com.caldeirasoft.outcast.data.repository.LibraryRepository
-import com.caldeirasoft.outcast.data.repository.QueueRepository
-import com.caldeirasoft.outcast.data.repository.StoreRepository
+import com.caldeirasoft.outcast.data.repository.*
+import com.caldeirasoft.outcast.data.util.PodcastsFetcher
 import com.caldeirasoft.outcast.data.util.network.DnsProviders
 import com.caldeirasoft.outcast.data.util.network.GzipRequestInterceptor
 import com.caldeirasoft.outcast.data.util.network.RewriteOfflineRequestInterceptor
@@ -47,6 +47,7 @@ fun KoinApplication.initKoinModules() {
     modules(networkModule, databaseModule, repositoryModule, usecaseModule)
 }
 
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 internal val mainDispatcherQualifier = named("MainDispatcher")
 internal val mainDispatcher: CoroutineDispatcher
     get() = Dispatchers.Main
@@ -120,6 +121,12 @@ internal val networkModule = module {
     }
     single<ItunesAPI> { provideRetrofit(client = get(named("cacheControl"))) }
     single<ItunesSearchAPI> { provideRetrofit(client = get(named("cacheControl"))) }
+    single<PodcastsFetcher> {
+        PodcastsFetcher(
+            okHttpClient = get(),
+            ioDispatcher = Dispatchers.IO
+        )
+    }
 }
 
 internal val databaseModule = module {
@@ -137,9 +144,24 @@ internal val repositoryModule = module {
             mainDispatcher = mainDispatcher
         )
     }
-    single<InboxDataSource> { InboxDataSource(database = get()) }
+    single<PodcastsRepository> {
+        PodcastsRepository(itunesAPI = get(),
+            searchAPI = get(),
+            context = get(),
+            json = get(),
+            database = get(),
+            podcastsFetcher = get(),
+            dataStore = androidContext().dataStore
+        )
+    }
+    single<InboxRepository> { InboxRepository(database = get()) }
     single<QueueRepository> { QueueRepository(database = get()) }
-    single<DataStoreRepository> { DataStoreRepository(context = get()) }
+    single<DataStoreRepository> {
+        DataStoreRepository(
+            context = get(),
+            dataStore = androidContext().dataStore
+        )
+    }
 }
 
 internal val usecaseModule = module {
@@ -149,26 +171,28 @@ internal val usecaseModule = module {
     single { FetchInboxUseCase(inboxRepository = get()) }
     single { FetchQueueUseCase(queueRepository = get()) }
     single {
-        SubscribeUseCase(libraryRepository = get(),
+        SubscribeUseCase(podcastsRepository = get(),
             storeRepository = get(),
             dataStoreRepository = get())
     }
-    single { UnsubscribeUseCase(podcastRepository = get(), dataStoreRepository = get()) }
+    single { UnsubscribeUseCase(podcastRepository = get()) }
     single { LoadPodcastUseCase(podcastRepository = get()) }
     single { LoadStorePagingDataUseCase(storeRepository = get()) }
     single { LoadPodcastEpisodesUseCase(libraryRepository = get()) }
-    single {
-        LoadPodcastEpisodesPagingDataUseCase(storeRepository = get(),
-            libraryRepository = get())
-    }
     single { FetchStoreFrontUseCase(dataStoreRepository = get()) }
     single {
         FetchStorePodcastDataUseCase(storeRepository = get(),
-            libraryRepository = get(),
+            podcastsRepository = get(),
             dataStoreRepository = get())
     }
-    single { FetchStoreEpisodeDataUseCase(storeRepository = get(), libraryRepository = get()) }
-    single { FetchStoreTopChartsIdsUseCase(storeRepository = get())}
+    single {
+        FetchStoreEpisodeDataUseCase(
+            storeRepository = get(),
+            libraryRepository = get(),
+            podcastsRepository = get(),
+        )
+    }
+    single { FetchStoreTopChartsIdsUseCase(storeRepository = get()) }
     single { LoadStoreTopChartsPagingDataUseCase(storeRepository = get()) }
     single { LoadSettingsUseCase(dataStoreRepository = get()) }
     single { UpdateSettingsUseCase(dataStoreRepository = get()) }

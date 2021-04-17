@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
 import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
@@ -73,7 +72,7 @@ fun StoreEpisodeItem(
         },
         icon = {
             PodcastThumbnail(
-                data = episode.getArtworkUrl(),
+                data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.ThumbnailSize)
                     .clickable(onClick = { })
@@ -94,7 +93,7 @@ fun QueueEpisodeItem(
             .clickable { onEpisodeClick() },
         icon = {
             PodcastThumbnail(
-                data = episode.getArtworkUrl(),
+                data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.ThumbnailSize)
                     .clickable(onClick = { })
@@ -126,7 +125,7 @@ fun EpisodeItem(
             .clickable { onEpisodeClick() },
         icon = {
             PodcastThumbnail(
-                data = episode.getArtworkUrl(),
+                data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.SmallThumbnailSize)
                     .clickable(onClick = { })
@@ -209,7 +208,7 @@ fun EpisodeGridItem(
                     .aspectRatio(1f))
                 {
                     CoilImage(
-                        data = episode.getArtworkUrl(),
+                        data = episode.artworkUrl,
                         contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -262,7 +261,7 @@ fun EpisodeTrailerItem(
             .clickable { onEpisodeClick() },
         icon = {
             PodcastThumbnail(
-                data = episode.getArtworkUrl(),
+                data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.ThumbnailSize)
                     .clickable(onClick = { })

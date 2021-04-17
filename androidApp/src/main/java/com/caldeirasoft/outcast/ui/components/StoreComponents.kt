@@ -33,7 +33,7 @@ import com.google.accompanist.pager.rememberPagerState
 fun StoreCollectionItemsContent(
     storeCollection: StoreCollectionItems,
     navigateTo: ScreenFn,
-    followingStatus: Map<Long, FollowStatus> = mapOf(),
+    followingStatus: Map<String, FollowStatus> = mapOf(),
     onSubscribeClick: (StorePodcast) -> Unit = { },
 ) {
     StoreHeadingSectionWithLink(
@@ -60,7 +60,7 @@ fun StoreCollectionItemsContent(
                             }),
                         podcast = item,
                         index = if (storeCollection.sortByPopularity) index + 1 else null,
-                        followingStatus = followingStatus[item.id],
+                        followingStatus = followingStatus[item.feedUrl],
                         onSubscribeClick = onSubscribeClick
                     )
                 is StoreEpisode -> {

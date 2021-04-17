@@ -6,10 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -17,18 +14,16 @@ import timber.log.Timber
 import java.security.InvalidKeyException
 import java.util.*
 
-class DataStoreRepository(val context: Context) {
+class DataStoreRepository(
+    val context: Context,
+    val dataStore: DataStore<Preferences>,
+) {
     private object PreferenceKeys {
         val STOREFRONT_REGION = stringPreferencesKey("store_front")
         val LAST_SYNC = longPreferencesKey("last_sync")
     }
 
-    // Build the DataStore
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-    val dataStore: DataStore<Preferences> = context.dataStore
-
-    val storeCountry: Flow<String> = context.dataStore.data
+    val storeCountry: Flow<String> = dataStore.data
         .map { preferences ->
             Timber.d("DBG - storeCountry")
             preferences[PreferenceKeys.STOREFRONT_REGION] ?: "FR"
@@ -36,46 +31,23 @@ class DataStoreRepository(val context: Context) {
         }
 
     suspend fun saveStoreCountryPreference(country: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[PreferenceKeys.STOREFRONT_REGION] = country
         }
     }
 
-    val lastSyncDate: Flow<Long> = context.dataStore.data
+    val lastSyncDate: Flow<Long> = dataStore.data
         .map { preferences -> preferences[PreferenceKeys.LAST_SYNC] ?: -1 }
 
     suspend fun saveLastSyncDate() {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[PreferenceKeys.LAST_SYNC] = Calendar.getInstance().timeInMillis
         }
     }
 
-    suspend fun savePodcastSettings(podcastId: Long, newEpisodeAction: NewEpisodesAction) {
-        val podcastPreferenceKeys = PodcastPreferenceKeys(podcastId = podcastId)
-        context.dataStore.edit { preferences ->
-            preferences[podcastPreferenceKeys.newEpisodes] = newEpisodeAction.name
-            preferences[podcastPreferenceKeys.notifications] = true
-            preferences[podcastPreferenceKeys.episodeLimit] = "0"
-            preferences[podcastPreferenceKeys.customPlaybackEffects] = false
-        }
-    }
-
-    suspend fun removePodcastSettings(podcastId: Long) {
-        val podcastPreferenceKeys = PodcastPreferenceKeys(podcastId = podcastId)
-        context.dataStore.edit { preferences ->
-            preferences.remove(podcastPreferenceKeys.newEpisodes)
-            preferences.remove(podcastPreferenceKeys.notifications)
-            preferences.remove(podcastPreferenceKeys.episodeLimit)
-            preferences.remove(podcastPreferenceKeys.customPlaybackEffects)
-            preferences.remove(podcastPreferenceKeys.customPlaybackSpeed)
-            preferences.remove(podcastPreferenceKeys.trimSilence)
-            preferences.remove(podcastPreferenceKeys.skipIntro)
-            preferences.remove(podcastPreferenceKeys.skipEnding)
-        }
-    }
 
     suspend fun <T> updatePreference(key: Preferences.Key<T>, value: T) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[key] = value
         }
     }
@@ -117,7 +89,7 @@ class DataStoreRepository(val context: Context) {
         val storeLanguageId = currentLanguage ?: defaultLanguage ?: throw InvalidKeyException("language not found")
         val storeFront = "${selectedCountry.id}-${storeLanguageId},29"
 
-        return "143441-1,29"
+        return "143442-3,29"
         return storeFront
     }
 

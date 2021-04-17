@@ -6,19 +6,17 @@ import kotlin.collections.List;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE episode (
-    episodeId INTEGER NOT NULL UNIQUE PRIMARY KEY ASC,
+    feedUrl TEXT NOT NULL,
+    guid TEXT NOT NULL,
     name TEXT NOT NULL,
     url TEXT NOT NULL,
-    podcastId INTEGER NOT NULL,
     podcastName TEXT NOT NULL,
     artistName TEXT NOT NULL,
+    podcastId INTEGER,
     artistId INTEGER,
     releaseDateTime TEXT as Instant NOT NULL,
-    genreId INTEGER AS Int NOT NULL,
-    feedUrl TEXT NOT NULL,
     description TEXT,
-    contentAdvisoryRating TEXT,
-    artwork TEXT AS Artwork,
+    artworkUrl TEXT NOT NULL,
     mediaUrl TEXT NOT NULL,
     mediaType TEXT NOT NULL,
     duration INTEGER AS Int NOT NULL,
@@ -27,34 +25,36 @@ CREATE TABLE episode (
     podcastEpisodeWebsiteUrl TEXT,
     podcastEpisodeType TEXT,
     playbackPosition INTEGER AS Int,
+    isExplicit INTEGER AS Boolean NOT NULL DEFAULT 0,
     isPlayed INTEGER as Boolean NOT NULL DEFAULT 0,
     isFavorite INTEGER as Boolean NOT NULL DEFAULT 0,
     playedAt TEXT AS Instant,
     updatedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-    FOREIGN KEY (`podcastId`) REFERENCES `podcast` (`podcastId`)
+    PRIMARY KEY (feedUrl, guid),
+    FOREIGN KEY (`feedUrl`) REFERENCES `podcast` (`feedUrl`)
 );
 
-getById:
+getByGuid:
 SELECT e.*
 FROM episode e
-WHERE episodeId = ?;
+WHERE feedUrl = ? AND guid = ?;
 
-getAllByPodcastId:
+getAllByUrl:
 SELECT *
 FROM episode
-WHERE podcastId = ?
+WHERE feedUrl = ?
 ;
 
-getAllPagedByPodcastId:
+getAllPagedByUrl:
 SELECT *
 FROM episode
-WHERE podcastId = ?
+WHERE feedUrl = ?
 LIMIT :limit OFFSET :offset;
 
-countAllByPodcastId:
+countAllByUrl:
 SELECT COUNT(*)
 FROM episode
-WHERE podcastId = ?
+WHERE feedUrl = ?
 ;
 
 getFavorites:
@@ -69,25 +69,21 @@ WHERE playbackPosition != NULL OR isPlayed = 1;
 
 insert:
 INSERT INTO episode
-(episodeId, name, url, podcastId, podcastName, artistName, artistId,
- releaseDateTime, genreId, feedUrl, description, contentAdvisoryRating, artwork,
-  mediaUrl, mediaType, duration, podcastEpisodeSeason, podcastEpisodeNumber, podcastEpisodeWebsiteUrl, podcastEpisodeType)
+(feedUrl, guid, name, url, podcastId, podcastName, artistName, artistId,
+ releaseDateTime, description, artworkUrl, isExplicit, mediaUrl, mediaType, duration,
+  podcastEpisodeSeason, podcastEpisodeNumber, podcastEpisodeWebsiteUrl, podcastEpisodeType)
 VALUES
 ?
-ON CONFLICT(episodeId)
+ON CONFLICT(feedUrl, guid)
 DO UPDATE SET
     name = excluded.name,
     url = excluded.url,
-    podcastId = excluded.podcastId,
     podcastName = excluded.podcastName,
     artistName = excluded.artistName,
-    artistId = excluded.artistId,
     releaseDateTime = excluded.releaseDateTime,
-    genreId = excluded.genreId,
-    feedUrl = excluded.feedUrl,
     description = excluded.description,
-    contentAdvisoryRating = excluded.contentAdvisoryRating,
-    artwork = excluded.artwork,
+    isExplicit = excluded.isExplicit,
+    artworkUrl = excluded.artworkUrl,
     mediaUrl = excluded.mediaUrl,
     mediaType = excluded.mediaType,
     duration = excluded.duration,
@@ -95,36 +91,36 @@ DO UPDATE SET
     podcastEpisodeNumber = excluded.podcastEpisodeNumber,
     podcastEpisodeWebsiteUrl = excluded.podcastEpisodeWebsiteUrl,
     updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE episodeId = excluded.episodeId;
+WHERE feedUrl = excluded.feedUrl AND guid = excluded.guid;
 
 
 addToFavorites:
 UPDATE episode
 SET isFavorite = 1, updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE episodeId = ?
+WHERE feedUrl = ? AND guid = ?
 ;
 
 removeFromFavorites:
 UPDATE episode
 SET isFavorite = 0, updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE episodeId = ?
+WHERE feedUrl = ? AND guid = ?
 ;
 
 addToHistory:
 UPDATE episode
 SET playbackPosition = ?, playedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE episodeId = ?
+WHERE feedUrl = ? AND guid = ?
 ;
 
 markEpisodeAsPlayed:
 UPDATE episode
 SET playbackPosition = NULL, isPlayed = 1, playedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE episodeId = ?
+WHERE feedUrl = ? AND guid = ?
 ;
 
 deleteById:
 DELETE FROM episode
-WHERE episodeId = ?;
+WHERE feedUrl = ? AND guid = ?;
 
 deleteAll:
 DELETE FROM episode;

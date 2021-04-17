@@ -8,6 +8,4 @@ data class PodcastViewState(
     val podcast: Podcast,
     val episodes: List<Episode> = emptyList(),
 ) : MavericksState {
-    constructor(arg: PodcastArg) :
-            this(podcast = arg.toPodcast())
 }

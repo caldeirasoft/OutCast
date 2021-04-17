@@ -1,6 +1,6 @@
 package com.caldeirasoft.outcast.domain.dto
 
-import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import kotlinx.serialization.Serializable
 
@@ -14,13 +14,8 @@ class GenreDto (
     val name: String = "",
     val url: String = "",
 ) {
-
-    fun toGenre() =
-        Genre(
-            id = genreId,
-            name = name,
-            url = url
-        )
+    val category
+        get() = Category.fromId(id = genreId)
 
     fun toStoreGenre(storeFront: String) =
         StoreGenre(

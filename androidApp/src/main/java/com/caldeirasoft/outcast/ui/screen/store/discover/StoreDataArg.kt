@@ -3,6 +3,7 @@
 package com.caldeirasoft.outcast.ui.screen.store.discover
 
 import android.os.Parcelable
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
@@ -46,6 +47,14 @@ data class StoreDataArg(
             id = id.toLong(),
             label = name,
             url = url,
+            genreId = id,
+            storeFront = "",
+        )
+
+        fun Category.toStoreDataArg() = StoreDataArg(
+            id = id.toLong(),
+            label = text,
+            url = "",
             genreId = id,
             storeFront = "",
         )

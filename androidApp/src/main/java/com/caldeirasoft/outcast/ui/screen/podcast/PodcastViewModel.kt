@@ -30,13 +30,13 @@ class PodcastViewModel(
         val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
         withState { state ->
             loadPodcastUseCase
-                .execute(state.podcast.podcastId)
+                .execute(state.podcast.feedUrl)
                 .filterNotNull()
                 .distinctUntilChanged()
                 .setOnEach { copy(podcast = it) }
 
             loadPodcastEpisodesUseCase
-                .execute(state.podcast.podcastId)
+                .execute(state.podcast.feedUrl)
                 .setOnEach { copy(episodes = it) }
         }
     }

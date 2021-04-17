@@ -167,7 +167,7 @@ fun StorePodcastScreen(
 
                         // genre
                         item {
-                            podcastData.genre?.let { genre ->
+                            podcastData.category?.let { genre ->
                                 Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     ChipButton(selected = false,
                                         onClick = { navigateTo(Screen.Discover(genre)) })
@@ -278,7 +278,7 @@ private fun StorePodcastExpandedHeader(
     val podcastData = state.podcast
     val artistData = state.artistData
     val dominantColor =
-        podcastData.artwork?.bgColor
+        podcastData.artworkDominantColor
             ?.let { Color.getColor(it).takeUnless { color -> color == Color.White } }
 
     val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
@@ -292,7 +292,7 @@ private fun StorePodcastExpandedHeader(
                 .fillMaxSize()
         ) {
             val bgDominantColor =
-                Color.getColor(podcastData.artwork?.bgColor!!)
+                Color.getColor(podcastData.artworkDominantColor) ?: MaterialTheme.colors.surface
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -326,7 +326,7 @@ private fun StorePodcastExpandedHeader(
                     .align(Alignment.CenterHorizontally)
             ) {
                 CoilImage(
-                    data = podcastData.artwork?.getArtworkPodcast().orEmpty(),
+                    data = podcastData.artworkUrl,
                     contentDescription = podcastData.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -586,8 +586,7 @@ fun FollowButton(state: StorePodcastViewState, onClick: () -> Unit) {
 }
 
 fun GetPodcastVibrantColor(podcastData: Podcast): Color? =
-    podcastData.artwork
-        ?.bgColor
+    podcastData.artworkDominantColor
         ?.let { Color.getColor(it).takeUnless { it == Color.White || it == Color.Black } }
         ?.let { color ->
             Timber.d(String.format("color : #%06X", (0xFFFFFF and color.toArgb())))

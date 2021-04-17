@@ -4,7 +4,6 @@ package com.caldeirasoft.outcast.ui.screen.store.storepodcast
 
 import android.os.Parcelable
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
@@ -19,37 +18,14 @@ data class StorePodcastArg(
     val id: Long,
     val name: String,
     val url: String,
+    val feedUrl: String,
     val artistName: String,
     val artistId: Long? = null,
     val artistUrl: String? = null,
-    val artwork: ArtworkArg?,
-    val userRating: Float,
+    val artworkUrl: String,
+    val artworkDominantColor: String? = null,
     val storeFront: String,
 ) : Parcelable {
-    fun toStorePodcast() =
-        StorePodcast(
-            id = id,
-            name = name,
-            url = url,
-            artistName = artistName,
-            artistId = artistId,
-            artistUrl = artistUrl,
-            description = null,
-            feedUrl = "",
-            releaseDate = Clock.System.now(),
-            releaseDateTime = Clock.System.now(),
-            artwork = artwork?.run {
-                Artwork(url, width, height, textColor1, textColor2, bgColor)
-            },
-            trackCount = 0,
-            podcastWebsiteUrl = "",
-            copyright = "",
-            contentAdvisoryRating = "",
-            userRating = userRating,
-            genre = null,
-            storeFront = storeFront
-        )
-
     fun toPodcast() =
         Podcast(
             podcastId = id,
@@ -59,46 +35,48 @@ data class StorePodcastArg(
             artistId = artistId,
             artistUrl = artistUrl,
             description = null,
-            feedUrl = "",
+            feedUrl = feedUrl,
             releaseDateTime = Clock.System.now(),
-            artwork = artwork?.run {
-                Artwork(url, width, height, textColor1, textColor2, bgColor)
-            },
+            artworkUrl = artworkUrl,
+            artworkDominantColor = artworkDominantColor,
             trackCount = 0,
             copyright = "",
-            contentAdvisoryRating = "",
-            userRating = userRating.toDouble(),
-            genre = null,
+            isExplicit = false,
+            category = null,
+            newFeedUrl = null,
+            isComplete = false,
             isSubscribed = false,
-            genreId = null,
             podcastWebsiteURL = null,
+            userRating = 0.0,
             newEpisodeAction = NewEpisodesAction.CLEAR,
             updatedAt = Instant.DISTANT_PAST,
         )
 
     companion object {
+        fun Podcast.toStorePodcastArg() = StorePodcastArg(
+            id = 0L,
+            name = name,
+            url = url,
+            feedUrl = feedUrl,
+            artistId = artistId,
+            artistName = artistName,
+            artistUrl = artistUrl,
+            artworkUrl = artworkUrl,
+            artworkDominantColor = artworkDominantColor,
+            storeFront = "",
+        )
+
         fun StorePodcast.toStorePodcastArg() = StorePodcastArg(
             id = id,
             name = name,
             url = url,
+            feedUrl = feedUrl,
             artistId = artistId,
             artistName = artistName,
             artistUrl = artistUrl,
-            artwork = artwork?.run {
-                ArtworkArg(url, width, height, textColor1, textColor2, bgColor)
-            },
-            userRating = userRating,
+            artworkUrl = artwork?.getArtworkPodcast().orEmpty(),
+            artworkDominantColor = artwork?.bgColor,
             storeFront = storeFront,
         )
     }
-
-    @Parcelize
-    class ArtworkArg(
-        val url: String,
-        val width: Int,
-        val height: Int,
-        val textColor1: String? = null,
-        val textColor2: String? = null,
-        val bgColor: String? = null,
-    ) : Parcelable
 }

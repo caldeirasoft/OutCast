@@ -80,12 +80,12 @@ class StoreRepository(
                     if (groupingPageCache != null) {
                         scope.launch {
                             val now =
-                                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                                Clock.System.now().toLocalDateTime(TimeZone.UTC)
                             val today = now.date
-                            if (groupingPageCache.fetchedAt.toLocalDateTime(TimeZone.currentSystemDefault()).date != today) {
+                            if (groupingPageCache.fetchedAt.toLocalDateTime(TimeZone.UTC).date != today) {
                                 val newGroupingPage = getStoreDataAsync(url, storeFront)
-                                if (newGroupingPage.timestamp.toLocalDateTime(TimeZone.currentSystemDefault()).date !=
-                                    groupingPageCache.timestamp.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                if (newGroupingPage.timestamp.toLocalDateTime(TimeZone.UTC).date !=
+                                    groupingPageCache.timestamp.toLocalDateTime(TimeZone.UTC).date
                                 ) {
                                     context.dataStore.updateData { newGroupingPage }
                                     newVersionAvailable.invoke()
@@ -494,7 +494,7 @@ class StoreRepository(
                     it.topPodcastsInGenre = topPodcastsInGenre
                     it.episodes = podcastEntry.children.map { (key, episodeEntry) ->
                         Episode(
-                            episodeId = key.toLong(),
+                            guid = episodeEntry.podcastEpisodeGuid.orEmpty(),
                             name = episodeEntry.name.orEmpty(),
                             url = episodeEntry.url.orEmpty(),
                             podcastId = episodeEntry.collectionId?.toLong() ?: 0,
@@ -502,13 +502,12 @@ class StoreRepository(
                             artistName = episodeEntry.artistName.orEmpty(),
                             artistId = episodeEntry.artistId?.toLong(),
                             description = episodeEntry.description?.standard,
-                            genreId = episodeEntry.genres.map { it.toGenre() }.firstOrNull()?.id
-                                ?: DEFAULT_GENRE,
                             feedUrl = episodeEntry.feedUrl.orEmpty(),
                             releaseDateTime = episodeEntry.releaseDateTime
                                 ?: Clock.System.now(),
-                            artwork = podcastEntry.artwork?.toArtwork(),
-                            contentAdvisoryRating = episodeEntry.contentRatingsBySystem?.riaa?.name,
+                            artworkUrl = podcastEntry.artwork?.toArtwork()?.getArtworkPodcast()
+                                .orEmpty(),
+                            isExplicit = episodeEntry.contentRatingsBySystem?.riaa?.rank == 2,
                             mediaUrl = episodeEntry.offers.firstOrNull()?.download?.url.orEmpty(),
                             mediaType = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.fileExtension.orEmpty(),
                             duration = episodeEntry.offers.firstOrNull()?.assets?.firstOrNull()?.duration
@@ -579,9 +578,9 @@ class StoreRepository(
                     trackCount = item.trackCount ?: 0,
                     podcastWebsiteUrl = item.podcastWebsiteUrl,
                     copyright = item.copyright,
-                    contentAdvisoryRating = item.contentRatingsBySystem?.riaa?.name,
+                    isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
                     userRating = item.userRating?.value?.toFloat() ?: 0f,
-                    genre = item.genres.firstOrNull()?.toGenre(),
+                    category = item.genres.first().category,
                     storeFront = storeFront
                 )
             }
@@ -595,11 +594,10 @@ class StoreRepository(
                     artistName = item.artistName.orEmpty(),
                     artistId = item.artistId?.toLong(),
                     description = item.description?.standard,
-                    genres = item.genres.map { it.toGenre() },
                     feedUrl = item.feedUrl.orEmpty(),
+                    guid = item.podcastEpisodeGuid.orEmpty(),
                     releaseDateTime = item.releaseDateTime ?: Clock.System.now(),
                     artwork = item.artwork?.toArtwork(),
-                    contentAdvisoryRating = item.contentRatingsBySystem?.riaa?.name,
                     mediaUrl = item.offers.firstOrNull()?.download?.url.orEmpty(),
                     mediaType = item.offers.firstOrNull()?.assets?.firstOrNull()?.fileExtension.orEmpty(),
                     duration = item.offers.firstOrNull()?.assets?.firstOrNull()?.duration ?: 0,
@@ -608,6 +606,7 @@ class StoreRepository(
                     podcastEpisodeType = item.podcastEpisodeType.orEmpty(),
                     podcastEpisodeWebsiteUrl = item.podcastEpisodeWebsiteUrl,
                     storeFront = storeFront,
+                    isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
                     isComplete = false,
                     podcast = requireNotNull(
                         getStoreItemFromLookupResultItem(item.collection.values.first(),

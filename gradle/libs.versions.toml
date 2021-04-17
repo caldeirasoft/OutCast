@@ -39,6 +39,8 @@ koin-ext = { module = "org.koin:koin-androidx-ext", version.ref = "koin" }
 koin-workmanager = { module = "org.koin:koin-androidx-workmanager", version.ref = "koin" }
 koin-compose = { module = "org.koin:koin-androidx-compose", version.ref = "koin" }
 
+ktrssreader = "com.github.ivanisidrowu.KtRssReader:android:v2.1.1"
+
 okhttp-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttp" }

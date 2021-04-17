@@ -25,7 +25,6 @@ import com.caldeirasoft.outcast.ui.components.ReachableAppBar
 import com.caldeirasoft.outcast.ui.components.ReachableScaffold
 import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg.Companion.toPodcastArg
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,7 +80,7 @@ private fun LibraryScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = {
-                            navigateTo(Screen.PodcastScreen(item.toPodcastArg()))
+                            navigateTo(Screen.StorePodcastScreen(item))
                         }),
                     podcast = item
                 )

@@ -18,12 +18,12 @@ abstract class FollowViewModel<S : MavericksState>(initialState: S) :
     private val followUseCase: SubscribeUseCase by inject()
     private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase by inject()
 
-    val followingStatus: MutableStateFlow<Map<Long, FollowStatus>> =
+    val followingStatus: MutableStateFlow<Map<String, FollowStatus>> =
         MutableStateFlow(emptyMap())
 
     init {
         loadFollowedPodcastsUseCase.execute()
-            .map { it.map { it.podcastId } }
+            .map { it.map { it.feedUrl } }
             .map { ids ->
                 val mapStatus = followingStatus.value.filter { it.value == FollowStatus.FOLLOWING }
                     .plus(ids.map { it to FollowStatus.FOLLOWED })
@@ -45,10 +45,10 @@ abstract class FollowViewModel<S : MavericksState>(initialState: S) :
     }
 
     suspend fun setPodcastFollowing(item: StorePodcast) {
-        followingStatus.emit(followingStatus.value.plus(item.podcast.podcastId to FollowStatus.FOLLOWING))
+        followingStatus.emit(followingStatus.value.plus(item.podcast.feedUrl to FollowStatus.FOLLOWING))
     }
 
     suspend fun setPodcastUnfollowed(item: StorePodcast) {
-        followingStatus.emit(followingStatus.value.filter { (it.key == item.podcast.podcastId && it.value == FollowStatus.FOLLOWING).not() })
+        followingStatus.emit(followingStatus.value.filter { (it.key == item.podcast.feedUrl && it.value == FollowStatus.FOLLOWING).not() })
     }
 }

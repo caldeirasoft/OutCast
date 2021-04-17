@@ -5,7 +5,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
@@ -33,7 +32,7 @@ class StorePodcastViewModel(
 
     @OptIn(FlowPreview::class)
     val episodes: Flow<PagingData<Episode>> =
-        loadPodcastEpisodesUseCase.execute(initialState.podcast.podcastId)
+        loadPodcastEpisodesUseCase.execute(initialState.podcast.feedUrl)
             .map { it.sortedByDescending { it.releaseDateTime } }
             .map { PagingData.from(it) }
             .cachedIn(viewModelScope)
@@ -86,7 +85,7 @@ class StorePodcastViewModel(
 
     fun subscribe() {
         withState { state ->
-            subscribeUseCase.execute(state.podcast.podcastId, NewEpisodesAction.INBOX)
+            subscribeUseCase.execute(state.podcast.feedUrl)
                 .onStart {
                     setState { copy(followingStatus = FollowStatus.FOLLOWING) }
                 }
@@ -96,7 +95,7 @@ class StorePodcastViewModel(
 
     fun unfollow() {
         viewModelScope.launch {
-            unsubscribeUseCase.execute(initialState.podcast.podcastId)
+            unsubscribeUseCase.execute(initialState.podcast.feedUrl)
         }
     }
 

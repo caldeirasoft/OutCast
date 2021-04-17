@@ -89,5 +89,14 @@ sqldelight {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
+        freeCompilerArgs += listOf(
+            "-Xopt-in=androidx.compose.foundation.lazy.ExperimentalLazyDsl",
+            "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-Xopt-in=androidx.compose.runtime.ExperimentalComposeApi",
+            "-Xopt-in=dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets",
+            "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xopt-in=kotlin.time.ExperimentalTime",
+            "-Xopt-in=kotlin.RequiresOptIn"
+        )
     }
 }

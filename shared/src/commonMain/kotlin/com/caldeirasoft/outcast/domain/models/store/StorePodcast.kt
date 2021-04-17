@@ -5,7 +5,7 @@ import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
@@ -29,9 +29,9 @@ data class StorePodcast(
     val trackCount: Int,
     val podcastWebsiteUrl: String? = null,
     val copyright: String? = null,
-    val contentAdvisoryRating: String? = null,
+    val isExplicit: Boolean = false,
     val userRating: Float,
-    val genre: Genre?,
+    val category: Category,
     override val storeFront: String,
 ) : StoreItemArtwork {
 
@@ -52,12 +52,11 @@ data class StorePodcast(
             name = name,
             artistName = artistName,
             url = url,
-            genreId = genre?.id,
-            genre = genre,
-            artwork = artwork,
+            category = category,
+            artworkUrl = getArtworkUrl(),
+            artworkDominantColor = artwork?.bgColor,
             artistId = artistId,
             artistUrl = artistUrl,
-            contentAdvisoryRating = contentAdvisoryRating,
             copyright = copyright,
             description = description,
             feedUrl = feedUrl,
@@ -66,6 +65,9 @@ data class StorePodcast(
             trackCount = trackCount.toLong(),
             updatedAt = releaseDateTime,
             userRating = userRating.toDouble(),
+            isExplicit = isExplicit,
+            newFeedUrl = null,
+            isComplete = false,
             isSubscribed = false,
             newEpisodeAction = NewEpisodesAction.CLEAR,
         )

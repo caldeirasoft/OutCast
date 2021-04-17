@@ -1,14 +1,11 @@
 package com.caldeirasoft.outcast.domain.usecase
 
-import com.caldeirasoft.outcast.data.repository.DataStoreRepository
-import com.caldeirasoft.outcast.data.repository.LibraryRepository
+import com.caldeirasoft.outcast.data.repository.PodcastsRepository
 
 class UnsubscribeUseCase constructor(
-    val podcastRepository: LibraryRepository,
-    val dataStoreRepository: DataStoreRepository,
+    val podcastRepository: PodcastsRepository,
 ) {
-    suspend fun execute(podcastId: Long) {
-        podcastRepository.unsubscribeFromPodcast(podcastId = podcastId)
-        dataStoreRepository.removePodcastSettings(podcastId = podcastId)
+    suspend fun execute(feedUrl: String) {
+        podcastRepository.unsubscribeFromPodcast(feedUrl = feedUrl)
     }
 }

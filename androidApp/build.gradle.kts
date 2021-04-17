@@ -10,7 +10,6 @@ plugins {
 val composeVersion: String by project
 
 android {
-
     compileSdkVersion(30)
     defaultConfig {
         applicationId = "com.caldeirasoft.outcast.androidApp"
@@ -89,6 +88,7 @@ dependencies {
     api(libs.paging.compose)
     api(libs.timber)
     api(libs.mavericks)
+    api(libs.ktrssreader)
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support

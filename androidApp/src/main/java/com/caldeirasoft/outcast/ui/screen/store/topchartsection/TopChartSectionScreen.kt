@@ -121,7 +121,7 @@ private fun TopChartSectionScreen(
                                 }),
                             storePodcast = item,
                             index = index + 1,
-                            followingStatus = state.followingStatus[item.id],
+                            followingStatus = state.followingStatus[item.feedUrl],
                             onSubscribeClick = viewModel::subscribeToPodcast
                         )
                         Divider()

@@ -24,7 +24,6 @@ import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
-import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.coil.CoilImage
@@ -116,7 +115,7 @@ private fun EpisodeExpandedHeader(
         ) {
             BoxWithConstraints {
                 val bgDominantColor =
-                    Color.getColor(state.episode.artwork?.bgColor) ?: Color.Red
+                    Color.Red
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -151,7 +150,7 @@ private fun EpisodeExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 CoilImage(
-                    data = state.episode.artwork?.getArtworkPodcast().orEmpty(),
+                    data = state.episode.artworkUrl,
                     contentDescription = state.episode.podcastName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

@@ -8,7 +8,9 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -17,6 +19,7 @@ import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg.Companion.toStoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
+import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
@@ -55,12 +58,17 @@ sealed class Screen (val id: ScreenName) {
     data class Discover(val storeDataArg: StoreDataArg?) : Screen(ScreenName.DISCOVER) {
         constructor(storeData: StoreData) : this(storeDataArg = storeData.toStoreDataArg())
         constructor(genre: Genre) : this(storeDataArg = genre.toStoreDataArg())
+        constructor(category: Category) : this(storeDataArg = category.toStoreDataArg())
     }
 
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
-    data class StorePodcastScreen(val podcast: StorePodcastArg) : Screen(ScreenName.STORE_PODCAST)
+    data class StorePodcastScreen(val podcastArg: StorePodcastArg) :
+        Screen(ScreenName.STORE_PODCAST) {
+        constructor(storePodcast: StorePodcast) : this(podcastArg = storePodcast.toStorePodcastArg())
+        constructor(podcast: Podcast) : this(podcastArg = podcast.toStorePodcastArg())
+    }
+
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
-    data class StoreEpisodesScreen(val podcast: StorePodcast) : Screen(ScreenName.STORE_EPISODES)
 
     companion object {
         inline fun <reified T> encodeObject(item: T): String =

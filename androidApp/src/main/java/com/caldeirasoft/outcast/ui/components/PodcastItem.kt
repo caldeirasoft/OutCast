@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.models.getArtworkUrl
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
@@ -176,7 +175,7 @@ fun PodcastGridItem(
         )
         {
             CoilImage(
-                data = podcast.getArtworkUrl(),
+                data = podcast.artworkUrl,
                 contentDescription = podcast.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

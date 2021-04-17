@@ -13,15 +13,15 @@ import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_SKIP
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_SKIP_INTROS
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_TRIM_SILENCE
 
-class PodcastPreferenceKeys(val podcastId: Long) {
-    val newEpisodes = stringPreferencesKey("$podcastId:$PREFERENCES_NEW_EPISODES")
-    val notifications = booleanPreferencesKey("$podcastId:$PREFERENCES_NOTIFICATIONS")
-    val episodeLimit = stringPreferencesKey("$podcastId:$PREFERENCES_EPISODE_LIMIT")
+class PodcastPreferenceKeys(val feedUrl: String) {
+    val newEpisodes = stringPreferencesKey("$feedUrl:$PREFERENCES_NEW_EPISODES")
+    val notifications = booleanPreferencesKey("$feedUrl:$PREFERENCES_NOTIFICATIONS")
+    val episodeLimit = stringPreferencesKey("$feedUrl:$PREFERENCES_EPISODE_LIMIT")
     val customPlaybackEffects =
-        booleanPreferencesKey("$podcastId:$PREFERENCES_CUSTOM_PLAYBACK_EFFECTS")
+        booleanPreferencesKey("$feedUrl:$PREFERENCES_CUSTOM_PLAYBACK_EFFECTS")
     val customPlaybackSpeed =
-        floatPreferencesKey("$podcastId:$PREFERENCES_CUSTOM_PLAYBACK_SPEED")
-    val trimSilence = booleanPreferencesKey("$podcastId:$PREFERENCES_TRIM_SILENCE")
-    val skipIntro = intPreferencesKey("$podcastId:$PREFERENCES_SKIP_INTROS")
-    val skipEnding = intPreferencesKey("$podcastId:$PREFERENCES_SKIP_ENDING")
+        floatPreferencesKey("$feedUrl:$PREFERENCES_CUSTOM_PLAYBACK_SPEED")
+    val trimSilence = booleanPreferencesKey("$feedUrl:$PREFERENCES_TRIM_SILENCE")
+    val skipIntro = intPreferencesKey("$feedUrl:$PREFERENCES_SKIP_INTROS")
+    val skipEnding = intPreferencesKey("$feedUrl:$PREFERENCES_SKIP_ENDING")
 }

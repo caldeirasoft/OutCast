@@ -1,28 +1,30 @@
-import kotlinx.datetime.Instant;
 import com.caldeirasoft.outcast.domain.models.Artwork;
-import com.caldeirasoft.outcast.domain.models.Genre;
+import com.caldeirasoft.outcast.domain.models.Category;
 import com.caldeirasoft.outcast.domain.models.NewEpisodesAction;
 import java.lang.Integer;
 import kotlin.collections.List;
+import kotlinx.datetime.Instant;
 
 CREATE TABLE podcast (
-    podcastId INTEGER NOT NULL UNIQUE PRIMARY KEY ASC,
+    feedUrl TEXT NOT NULL UNIQUE PRIMARY KEY,
     name TEXT NOT NULL,
     url TEXT NOT NULL,
+    podcastId INTEGER,
     artistName TEXT NOT NULL,
     artistId INTEGER,
     artistUrl TEXT,
     description TEXT,
-    feedUrl TEXT NOT NULL,
     releaseDateTime TEXT as Instant NOT NULL,
-    artwork TEXT AS Artwork,
+    artworkUrl TEXT NOT NULL,
+    artworkDominantColor TEXT,
     trackCount INTEGER NOT NULL,
     podcastWebsiteURL TEXT,
     copyright TEXT,
-    contentAdvisoryRating TEXT,
     userRating REAL,
-    genreId INTEGER AS Int,
-    genre TEXT AS Genre,
+    category TEXT AS Category,
+    newFeedUrl TEXT,
+    isComplete INTEGER AS Boolean NOT NULL DEFAULT 0,
+    isExplicit INTEGER AS Boolean NOT NULL DEFAULT 0,
     isSubscribed INTEGER AS Boolean NOT NULL DEFAULT 0,
     newEpisodeAction TEXT AS NewEpisodesAction NOT NULL,
     updatedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
@@ -34,27 +36,26 @@ CREATE INDEX podcast_url ON podcast(url);
 PRAGMA foreign_keys = 1;
 
 insert:
-INSERT INTO podcast (podcastId, name, url, artistName, artistId, artistUrl, description, feedUrl, releaseDateTime, artwork, trackCount, podcastWebsiteURL, copyright, contentAdvisoryRating, userRating, genreId, genre, isSubscribed, newEpisodeAction, updatedAt)
+INSERT INTO podcast (feedUrl, name, url, artistName, podcastId, artistId, artistUrl, description
+    , releaseDateTime, artworkUrl, artworkDominantColor, trackCount, podcastWebsiteURL, copyright
+    , category, newFeedUrl, isComplete, isExplicit, userRating
+    , isSubscribed, newEpisodeAction, updatedAt)
 VALUES ?
-ON CONFLICT (podcastId)
+ON CONFLICT (feedUrl)
 DO UPDATE SET
-  podcastId = excluded.podcastId,
   name = excluded.name,
   url = excluded.url,
   artistName = excluded.artistName,
-  artistId = excluded.artistName,
-  artistUrl = excluded.artistUrl,
   description = excluded.description,
-  feedUrl = excluded.feedUrl,
   releaseDateTime = excluded.releaseDateTime,
-  artwork = excluded.artwork,
+  artworkUrl = excluded.artworkUrl,
   trackCount = excluded.trackCount,
   podcastWebsiteURL = excluded.podcastWebsiteURL,
   copyright = excluded.copyright,
-  contentAdvisoryRating = excluded.contentAdvisoryRating,
-  userRating = excluded.userRating,
-  genreId = excluded.genreId,
-  genre = excluded.genre,
+  category = excluded.category,
+  newFeedUrl = excluded.newFeedUrl,
+  isComplete = excluded.isComplete,
+  isExplicit = excluded.isExplicit,
   updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
 ;
 
@@ -73,43 +74,55 @@ SELECT *
 FROM podcast
 WHERE podcastId = ?;
 
+getByUrl:
+SELECT *
+FROM podcast
+WHERE feedUrl = ?;
+
+updateId:
+UPDATE podcast
+SET podcastId = ?,
+ artistId = ?
+WHERE feedUrl = ?
+;
+
 updateMetadata:
 UPDATE podcast
 SET releaseDateTime = ?,
  trackCount = ?,
  updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE podcastId = ?
+WHERE feedUrl = ?
 ;
 
 updateLastAccess:
 UPDATE podcast
 SET updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-WHERE podcastId = ?
+WHERE feedUrl = ?
 ;
 
 subscribe :
 UPDATE podcast
 SET isSubscribed = 1
-WHERE podcastId = :podcastId
+WHERE feedUrl = ?
 ;
 
 unsubscribe {
     UPDATE podcast
     SET isSubscribed = 0
-    WHERE podcastId = :podcastId
+    WHERE feedUrl = :feedUrl
     ;
 
     DELETE FROM inbox
-    WHERE episodeId IN (
-        SELECT episodeId
-        FROM episode e
-        WHERE e.podcastId = :podcastId
+    WHERE EXISTS (
+        SELECT feedUrl, guid
+        FROM episode
+        WHERE (episode.feedUrl = inbox.feedUrl AND episode.guid = inbox.guid)
     );
 }
 
-deleteById:
+deleteByUrl:
 DELETE FROM podcast
-WHERE podcastId = ?;
+WHERE feedUrl = ?;
 
 deleteAll:
 DELETE FROM podcast;
