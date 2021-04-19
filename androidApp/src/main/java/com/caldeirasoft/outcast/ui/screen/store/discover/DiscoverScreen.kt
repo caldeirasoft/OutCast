@@ -1,4 +1,3 @@
-
 package com.caldeirasoft.outcast.ui.screen.store.discover
 
 import androidx.compose.animation.AnimatedVisibility

@@ -63,10 +63,11 @@ accompanist-pager = { module = "com.google.accompanist:accompanist-pager", versi
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 accompanist-insets = { module = "com.google.accompanist:accompanist-insets", version.ref = "accompanist" }
 
-timber = "com.jakewharton.timber:timber:4.+"
-mavericks = "com.airbnb.android:mavericks-compose:2.1.0-alpha01"
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.1"
 javax-inject = "javax.inject:javax.inject:1"
+jsoup = "org.jsoup:jsoup:1.13.1"
+mavericks = "com.airbnb.android:mavericks-compose:2.1.0-alpha01"
+timber = "com.jakewharton.timber:timber:4.+"
 
 junit = "junit:junit:4.+"
 

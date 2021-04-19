@@ -422,9 +422,9 @@ private fun PodcastDescriptionContent(description: String) {
             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
             .animateContentSize()
     ) {
-        OverflowText(text = description,
+        OverflowHtmlText(text = description,
             overflow = TextOverflow.Clip,
-            textAlign = TextAlign.Justify,
+            textAlign = TextAlign.Start,
             maxLines = 3)
     }
 }

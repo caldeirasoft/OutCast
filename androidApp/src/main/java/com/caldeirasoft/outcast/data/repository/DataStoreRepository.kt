@@ -90,7 +90,7 @@ class DataStoreRepository @Inject constructor(
         val storeLanguageId = currentLanguage ?: defaultLanguage ?: throw InvalidKeyException("language not found")
         val storeFront = "${selectedCountry.id}-${storeLanguageId},29"
 
-        return "143442-3,29"
+        return "143441-1,29"
         return storeFront
     }
 
