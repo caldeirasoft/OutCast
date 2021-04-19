@@ -1,4 +1,3 @@
-@file:OptIn(KoinApiExtension::class)
 
 package com.caldeirasoft.outcast.ui.screen.store.discover
 
@@ -57,8 +56,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
-import org.koin.core.component.KoinApiExtension
-import timber.log.Timber
 
 @OptIn(ExperimentalPagerApi::class)
 @ExperimentalAnimationApi
@@ -69,12 +66,13 @@ fun DiscoverScreen(
     storeDataArg: StoreDataArg?,
     navigateTo: (Screen) -> Unit,
 ) {
-    Timber.d("DBG - StoreDirectoryScreen recompose")
     val viewModel: DiscoverViewModel = mavericksViewModel(initialArgument = storeDataArg)
     val state by viewModel.collectAsState()
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
     val title = state.takeUnless { it.storeData == StoreData.Default }?.title
         ?: stringResource(id = R.string.store_tab_discover)
+
+    RestoreStatusBarColorOnDispose()
 
     Scaffold {
         BoxWithConstraints {
@@ -396,6 +394,24 @@ fun RefreshButton(
         ) {
             Text(text = stringResource(id = R.string.action_tap_to_refresh),
                 style = typography.button.copy(letterSpacing = 0.5.sp))
+        }
+    }
+}
+
+@Composable
+fun RestoreStatusBarColorOnDispose()
+{
+    // Get the current SystemUiController
+    val systemUiController = LocalSystemUiController.current
+    val useDarkIcons = MaterialTheme.colors.isLight
+    DisposableEffect(Unit) {
+        // Update all of the system bar colors to be transparent, and use
+        // dark icons if we're in light theme
+        onDispose {
+            systemUiController.setStatusBarColor(
+                color = Color.Transparent,
+                darkIcons = useDarkIcons
+            )
         }
     }
 }
