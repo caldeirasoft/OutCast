@@ -16,6 +16,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.text.HtmlCompat
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
@@ -147,7 +148,10 @@ fun EpisodeItem(
         },
         descriptionText = {
             episode.description?.let {
-                Text(text = it, maxLines = 2)
+                Text(text = HtmlCompat.fromHtml(
+                    it,
+                    HtmlCompat.FROM_HTML_MODE_COMPACT
+                ).toString(), maxLines = 2)
             }
         }
     )
