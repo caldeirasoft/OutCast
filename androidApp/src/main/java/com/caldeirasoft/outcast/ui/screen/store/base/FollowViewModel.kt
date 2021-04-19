@@ -41,10 +41,10 @@ abstract class FollowViewModel<S : MavericksState>(
     }
 
     suspend fun setPodcastFollowing(item: StorePodcast) {
-        followingStatus.emit(followingStatus.value.plus(item.podcast.feedUrl to FollowStatus.FOLLOWING))
+        followingStatus.emit(followingStatus.value.plus(item.feedUrl to FollowStatus.FOLLOWING))
     }
 
     suspend fun setPodcastUnfollowed(item: StorePodcast) {
-        followingStatus.emit(followingStatus.value.filter { (it.key == item.podcast.feedUrl && it.value == FollowStatus.FOLLOWING).not() })
+        followingStatus.emit(followingStatus.value.filter { (it.key == item.feedUrl && it.value == FollowStatus.FOLLOWING).not() })
     }
 }

@@ -9,9 +9,9 @@ import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg

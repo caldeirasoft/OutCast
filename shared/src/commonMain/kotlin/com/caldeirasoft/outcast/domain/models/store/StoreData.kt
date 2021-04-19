@@ -4,7 +4,6 @@ package com.caldeirasoft.outcast.domain.models.store
 import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
@@ -25,7 +24,7 @@ data class StoreData(
     override var featuredArtwork: Artwork? = artwork
     override var editorialArtwork: Artwork? = null
 
-    val isMultiRoom: Boolean = storeList.isNotEmpty()
+    fun isMultiRoom() = storeList.isNotEmpty()
 
     override fun getArtworkUrl(): String =
         StoreItemArtwork.artworkUrl(artwork, 400, 196, crop = "fa")

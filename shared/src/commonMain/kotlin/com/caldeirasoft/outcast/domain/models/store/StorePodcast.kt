@@ -1,12 +1,8 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -43,34 +39,7 @@ data class StorePodcast(
     var topPodcastsInGenre: List<Long>? = null
 
     @Transient
-    var episodes: List<Episode> = mutableListOf()
-
-    @Transient
-    val podcast: Podcast =
-        Podcast(
-            podcastId = id,
-            name = name,
-            artistName = artistName,
-            url = url,
-            category = category,
-            artworkUrl = getArtworkUrl(),
-            artworkDominantColor = artwork?.bgColor,
-            artistId = artistId,
-            artistUrl = artistUrl,
-            copyright = copyright,
-            description = description,
-            feedUrl = feedUrl,
-            podcastWebsiteURL = podcastWebsiteUrl,
-            releaseDateTime = releaseDateTime,
-            trackCount = trackCount.toLong(),
-            updatedAt = releaseDateTime,
-            userRating = userRating.toDouble(),
-            isExplicit = isExplicit,
-            newFeedUrl = null,
-            isComplete = false,
-            isSubscribed = false,
-            newEpisodeAction = NewEpisodesAction.CLEAR,
-        )
+    var episodes: List<StoreEpisode> = mutableListOf()
 
     override fun getArtworkUrl():String =
         StoreItemArtwork.artworkUrl(artwork, 200, 200)

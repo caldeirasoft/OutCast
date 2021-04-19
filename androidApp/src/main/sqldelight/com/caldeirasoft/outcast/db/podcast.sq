@@ -1,6 +1,5 @@
-import com.caldeirasoft.outcast.domain.models.Artwork;
 import com.caldeirasoft.outcast.domain.models.Category;
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction;
+import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction;
 import java.lang.Integer;
 import kotlin.collections.List;
 import kotlinx.datetime.Instant;

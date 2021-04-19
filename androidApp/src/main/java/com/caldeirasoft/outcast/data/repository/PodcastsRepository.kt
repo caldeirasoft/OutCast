@@ -11,7 +11,7 @@ import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
+import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList

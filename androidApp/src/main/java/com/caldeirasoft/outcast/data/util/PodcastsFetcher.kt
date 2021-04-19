@@ -19,7 +19,7 @@ package com.caldeirasoft.outcast.data.util;
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
+import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow

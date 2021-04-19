@@ -1,7 +1,7 @@
 [versions]
 leakcanary = "2.6"
 compose = "1.0.0-beta04"
-hilt = "2.33-beta"
+hilt = "2.34.1-beta"
 okhttp = "4.+"
 retrofit = "2.+"
 sqldelight = "1.4.4"

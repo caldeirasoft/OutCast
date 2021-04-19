@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.domain.models
+package com.caldeirasoft.outcast.domain.enums
 
 enum class NewEpisodesAction {
         QUEUE_FIRST,

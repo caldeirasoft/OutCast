@@ -4,7 +4,7 @@ package com.caldeirasoft.outcast.ui.screen.store.discover
 
 import android.os.Parcelable
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.parcelize.Parcelize

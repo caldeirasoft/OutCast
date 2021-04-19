@@ -1,7 +1,6 @@
 package com.caldeirasoft.outcast.data.api
 
 import com.caldeirasoft.outcast.domain.dto.ResultIdsResult
-import com.caldeirasoft.outcast.domain.dto.StorePageDto
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -17,7 +16,7 @@ interface ItunesSearchAPI {
     suspend fun search(
         @Header("X-Apple-Store-Front") storeFront: String,
         @Query("term") term: String,
-    ): Response<com.caldeirasoft.outcast.domain.dto.ResultIdsResult>
+    ): Response<ResultIdsResult>
 
     @GET("/WebObjects/MZSearchHints.woa/wa/hints?clientApplication=Podcasts&f=json")
     @Headers(
@@ -26,5 +25,5 @@ interface ItunesSearchAPI {
     suspend fun searchHints(
         @Header("X-Apple-Store-Front") storeFront: String,
         @Query("term") term: String,
-    ): Response<com.caldeirasoft.outcast.domain.dto.ResultIdsResult>
+    ): Response<ResultIdsResult>
 }

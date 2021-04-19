@@ -9,7 +9,7 @@ import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
@@ -493,6 +493,7 @@ class StoreRepository @Inject constructor(
                     it.moreByArtist = moreByArtist
                     it.listenersAlsoBought = listenersAlsoFollow
                     it.topPodcastsInGenre = topPodcastsInGenre
+                    /*
                     it.episodes = podcastEntry.children.map { (key, episodeEntry) ->
                         Episode(
                             guid = episodeEntry.podcastEpisodeGuid.orEmpty(),
@@ -524,6 +525,7 @@ class StoreRepository @Inject constructor(
                             playbackPosition = null
                         )
                     }.sortedByDescending { it.releaseDateTime }
+                     */
                 }
 
                 //timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
@@ -611,7 +613,8 @@ class StoreRepository @Inject constructor(
                     isComplete = false,
                     podcast = requireNotNull(
                         getStoreItemFromLookupResultItem(item.collection.values.first(),
-                            storeFront) as StorePodcast)
+                            storeFront) as StorePodcast
+                    )
                 )
             }
             else -> null

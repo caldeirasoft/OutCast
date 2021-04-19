@@ -2,7 +2,6 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") apply true
     id("com.android.library")
-    id("com.squareup.sqldelight") apply true
 }
 
 android {
@@ -75,14 +74,6 @@ android {
         getByName("release") {
             isMinifyEnabled = false
         }
-    }
-}
-
-sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
-        schemaOutputDirectory = file("build/dbs")
-        dialect = "sqlite:3.24"
     }
 }
 

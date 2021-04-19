@@ -23,5 +23,5 @@ data class StorePage(
     val artwork = storeData.artwork
     val storeIds: List<Long> = storeData.storeIds
     val storeList: MutableList<StoreCollection> = storeData.storeList
-    val isMultiRoom: Boolean = storeData.isMultiRoom
+    val isMultiRoom: Boolean = storeData.isMultiRoom()
 }

@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization") apply true
     kotlin("plugin.parcelize") apply true
     id("dagger.hilt.android.plugin")
+    id("com.squareup.sqldelight") apply true
 }
 
 // get compose version in gradle.properties file
@@ -45,7 +46,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
-        useIR = true
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-Xopt-in=androidx.compose.foundation.lazy.ExperimentalLazyDsl",
             "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi",
@@ -97,4 +97,12 @@ dependencies {
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support
     coreLibraryDesugaring(libs.desugarJdkLibs)
+}
+
+sqldelight {
+    database("Database") {
+        packageName = "com.caldeirasoft.outcast"
+        schemaOutputDirectory = file("build/dbs")
+        dialect = "sqlite:3.24"
+    }
 }

@@ -1,6 +1,6 @@
 package com.caldeirasoft.outcast.domain.dto
 
-import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.store.Artwork
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,7 +22,8 @@ class ArtworkDto (
             url = url,
             bgColor = bgColor,
             textColor1 = textColor2,
-            textColor2 = textColor4)
+            textColor2 = textColor4
+        )
 
     companion object {
         fun toArtwork(dto: ArtworkDto) =
@@ -32,6 +33,7 @@ class ArtworkDto (
                 url = dto.url,
                 bgColor = dto.bgColor,
                 textColor1 = dto.textColor1,
-                textColor2 = dto.textColor4)
+                textColor2 = dto.textColor4
+            )
     }
 }

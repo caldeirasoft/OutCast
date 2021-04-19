@@ -1,7 +1,6 @@
-@file:UseSerializers(InstantSerializer::class)
+@file:UseSerializers(com.caldeirasoft.outcast.domain.serializers.InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 

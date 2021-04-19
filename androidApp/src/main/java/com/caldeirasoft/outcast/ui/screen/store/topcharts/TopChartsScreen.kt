@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartEpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartPodcastScreen

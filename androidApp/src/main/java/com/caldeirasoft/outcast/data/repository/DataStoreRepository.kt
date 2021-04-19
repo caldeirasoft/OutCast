@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -97,13 +98,13 @@ class DataStoreRepository @Inject constructor(
     /**
      * getStoreFront
      */
-    private fun getStoreFronts(): com.caldeirasoft.outcast.domain.dto.StoreFrontDto {
+    private fun getStoreFronts(): StoreFrontDto {
         val text = context.resources
             .openRawResource(R.raw.store_fronts)
             .bufferedReader()
             .use { it.readText() }
 
         val nonStrictJson = Json { isLenient = true; ignoreUnknownKeys = true }
-        return nonStrictJson.decodeFromString(com.caldeirasoft.outcast.domain.dto.StoreFrontDto.serializer(), text)
+        return nonStrictJson.decodeFromString(StoreFrontDto.serializer(), text)
     }
 }

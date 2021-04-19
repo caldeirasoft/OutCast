@@ -5,7 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.data.util.StoreChartsPagingSource
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

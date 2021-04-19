@@ -1,6 +1,6 @@
 package com.caldeirasoft.outcast.domain.interfaces
 
-import com.caldeirasoft.outcast.domain.models.Artwork
+import com.caldeirasoft.outcast.domain.models.store.Artwork
 
 interface StoreItemArtwork : StoreItem {
     val artwork: Artwork?

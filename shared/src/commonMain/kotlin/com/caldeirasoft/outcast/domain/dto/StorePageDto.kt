@@ -1,8 +1,7 @@
 @file:UseSerializers(InstantStringSerializer::class, LocalDateStringSerializer::class)
 package com.caldeirasoft.outcast.domain.dto
 
-import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.store.StoreGenre
+import com.caldeirasoft.outcast.domain.models.store.Artwork
 import com.caldeirasoft.outcast.domain.serializers.InstantStringSerializer
 import com.caldeirasoft.outcast.domain.serializers.LocalDateStringSerializer
 import kotlinx.datetime.Instant
@@ -222,7 +221,8 @@ class UberListResult(
                 },
                 bgColor = backgroundColor,
                 textColor1 = titleTextColor,
-                textColor2 = primaryTextColor)
+                textColor2 = primaryTextColor
+            )
         }
         else null
 }
@@ -345,15 +345,6 @@ class GenreResult (
     val chartUrls: GenreChartUrlsResult? = null,
     val subgenres: Map<Int, GenreResult> = hashMapOf()
 ) {
-    fun toStoreGenre(storeFront: String): StoreGenre =
-        StoreGenre(
-            id = this.id,
-            name = this.name,
-            storeFront = storeFront,
-            url = this.url,
-            //topChartPodcastsUrl = this.chartUrls?.podcasts.orEmpty(),
-            //topChartEpisodesUrl = this.chartUrls?.podcastEpisodes.orEmpty()
-        )
 }
 
 @Serializable

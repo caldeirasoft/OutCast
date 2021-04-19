@@ -2,9 +2,7 @@
 
 package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
-import com.caldeirasoft.outcast.domain.models.Artwork
 import com.caldeirasoft.outcast.domain.serializers.DurationSerializer
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
@@ -45,33 +43,4 @@ class StoreEpisode(
 
     override fun getArtworkUrl(): String =
         StoreItemArtwork.artworkUrl(artwork, 200, 200)
-
-    @Transient
-    val episode: Episode =
-        Episode(
-            feedUrl = this.feedUrl,
-            guid = this.guid,
-            name = this.name,
-            url = this.url,
-            podcastId = this.podcastId,
-            podcastName = this.podcastName,
-            artistName = this.artistName,
-            artistId = this.artistId,
-            description = this.description,
-            releaseDateTime = this.releaseDateTime,
-            artworkUrl = getArtworkUrl(),
-            mediaUrl = this.mediaUrl,
-            mediaType = this.mediaType,
-            duration = this.duration,
-            podcastEpisodeNumber = this.podcastEpisodeNumber,
-            podcastEpisodeSeason = this.podcastEpisodeSeason,
-            podcastEpisodeType = this.podcastEpisodeType,
-            podcastEpisodeWebsiteUrl = this.podcastEpisodeWebsiteUrl,
-            isExplicit = false,
-            updatedAt = Clock.System.now(),
-            playbackPosition = null,
-            isPlayed = false,
-            isFavorite = false,
-            playedAt = null,
-        )
 }

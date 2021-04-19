@@ -2,7 +2,7 @@ package com.caldeirasoft.outcast.ui.screen.store.topchartsection
 
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase

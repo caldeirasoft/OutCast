@@ -1,7 +1,5 @@
 import kotlinx.datetime.Instant;
 import kotlin.collections.List;
-import com.caldeirasoft.outcast.domain.models.Artwork;
-import com.caldeirasoft.outcast.domain.models.Genre;
 
 PRAGMA foreign_keys = 1;
 CREATE TABLE inbox (

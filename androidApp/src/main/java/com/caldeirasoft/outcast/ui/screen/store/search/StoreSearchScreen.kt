@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.enum.StoreItemType
-import com.caldeirasoft.outcast.domain.models.Genre
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
+import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.ui.components.GenreCardItem
 import com.caldeirasoft.outcast.ui.components.ReachableScaffold
 import com.caldeirasoft.outcast.ui.components.StoreHeadingSection

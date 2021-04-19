@@ -1,6 +1,5 @@
-package com.caldeirasoft.outcast.domain.enum
+package com.caldeirasoft.outcast.domain.enums
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
