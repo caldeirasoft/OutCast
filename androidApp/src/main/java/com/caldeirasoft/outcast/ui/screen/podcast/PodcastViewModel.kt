@@ -1,39 +1,119 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
+import androidx.datastore.preferences.core.Preferences
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModel
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadPodcastEpisodesUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadPodcastUseCase
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
+import com.airbnb.mvrx.MavericksViewModelFactory
+import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
+import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
+import com.caldeirasoft.outcast.domain.usecase.*
+import com.caldeirasoft.outcast.domain.util.Resource
+import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
+import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
-class PodcastViewModel(
-    initialState: PodcastViewState,
-    val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    val loadPodcastUseCase: LoadPodcastUseCase,
-    val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase,
-) : MavericksViewModel<PodcastViewState>(initialState) {
+class PodcastViewModel @AssistedInject constructor(
+    @Assisted val initialState: PodcastState,
+    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
+    private val loadPodcastUseCase: LoadPodcastUseCase,
+    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
+    private val subscribeUseCase: SubscribeUseCase,
+    private val unsubscribeUseCase: UnsubscribeUseCase,
+    private val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase,
+    private val loadSettingsUseCase: LoadSettingsUseCase,
+    private val updateSettingsUseCase: UpdateSettingsUseCase,
+) : MavericksViewModel<PodcastState>(initialState), PreferenceViewModel {
+
+    @OptIn(FlowPreview::class)
+    val episodes: Flow<PagingData<Episode>> =
+        loadPodcastEpisodesUseCase.execute(initialState.podcast.feedUrl)
+            .map { it.sortedByDescending { it.releaseDateTime } }
+            .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it.size} episodes") }
+            .map { PagingData.from(it) }
+            .cachedIn(viewModelScope)
 
     init {
         viewModelScope.launch {
-            loadPodcast()
+            fetchPodcast()
         }
+
+        loadSettingsUseCase.settings
+            .setOnEach {
+                copy(prefs = it)
+            }
     }
 
-    private suspend fun loadPodcast() {
+    private suspend fun fetchPodcast() {
         val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
-        withState { state ->
-            loadPodcastUseCase
-                .execute(state.podcast.feedUrl)
-                .filterNotNull()
-                .distinctUntilChanged()
-                .setOnEach { copy(podcast = it) }
 
-            loadPodcastEpisodesUseCase
-                .execute(state.podcast.feedUrl)
-                .setOnEach { copy(episodes = it) }
+        setState {
+            copy(storeFront = storeFront)
+        }
+
+        // fetch local podcast data subscription
+        fetchStorePodcastDataUseCase
+            .execute(podcast = initialState.podcast, storeFront = storeFront)
+            .filterNotNull()
+            .setOnEach {
+                when (it) {
+                    is Resource.Loading ->
+                        copy(isLoading = true)
+                    is Resource.Success ->
+                        copy(
+                            isLoading = false,
+                            podcast = it.data,
+                            followingStatus =
+                            if (it.data.isSubscribed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
+                            showAllEpisodes = it.data.isSubscribed
+                        )
+                    else ->
+                        copy()
+                }
+            }
+    }
+
+    fun showAllEpisodes() {
+        setState {
+            copy(showAllEpisodes = true)
         }
     }
+
+    fun subscribe() {
+        withState { state ->
+            subscribeUseCase.execute(state.podcast.feedUrl)
+                .onStart {
+                    setState { copy(followingStatus = FollowStatus.FOLLOWING) }
+                }
+                .launchIn(viewModelScope)
+        }
+    }
+
+    fun unfollow() {
+        viewModelScope.launch {
+            unsubscribeUseCase.execute(initialState.podcast.feedUrl)
+        }
+    }
+
+    override fun <T> updatePreference(key: Preferences.Key<T>, value: T) {
+        viewModelScope.launch {
+            updateSettingsUseCase.updatePreference(key, value)
+        }
+    }
+
+    @AssistedFactory
+    interface Factory : AssistedViewModelFactory<PodcastViewModel, PodcastState> {
+        override fun create(initialState: PodcastState): PodcastViewModel
+    }
+
+    companion object :
+        MavericksViewModelFactory<PodcastViewModel, PodcastState> by hiltMavericksViewModelFactory()
 }

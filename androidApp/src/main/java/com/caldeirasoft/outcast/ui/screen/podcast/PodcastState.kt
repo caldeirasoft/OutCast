@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store.storepodcast
+package com.caldeirasoft.outcast.ui.screen.podcast
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.paging.PagingData
@@ -9,7 +9,7 @@ import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 
-data class StorePodcastViewState(
+data class PodcastState(
     val podcast: Podcast,
     val isLoading: Boolean = false,
     val error: Throwable? = null,
@@ -19,7 +19,7 @@ data class StorePodcastViewState(
     val followingStatus: FollowStatus = FollowStatus.UNFOLLOWED,
     val prefs: Preferences? = null,
 ) : MavericksState {
-    constructor(arg: StorePodcastArg) :
+    constructor(arg: PodcastArg) :
             this(podcast = arg.toPodcast(), isLoading = true)
 
     val artistData: StoreData? =

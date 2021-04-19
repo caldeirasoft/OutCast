@@ -2,27 +2,81 @@
 
 package com.caldeirasoft.outcast.ui.screen.podcast
 
-import com.caldeirasoft.outcast.domain.models.Artwork
-import com.caldeirasoft.outcast.domain.models.Genre
+import android.os.Parcelable
+import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.domain.models.NewEpisodesAction
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.UseSerializers
 
 
-@Serializable
+@Parcelize
 data class PodcastArg(
     val id: Long,
     val name: String,
     val url: String,
+    val feedUrl: String,
     val artistName: String,
     val artistId: Long? = null,
     val artistUrl: String? = null,
-    val description: String? = null,
-    @Serializable(with = InstantSerializer::class)
-    val releaseDateTime: Instant,
-    val artwork: Artwork?,
-    val trackCount: Int,
-    val genre: Genre?,
-) {
+    val artworkUrl: String,
+    val artworkDominantColor: String? = null,
+    val storeFront: String,
+) : Parcelable {
+    fun toPodcast() =
+        Podcast(
+            podcastId = id,
+            name = name,
+            url = url,
+            artistName = artistName,
+            artistId = artistId,
+            artistUrl = artistUrl,
+            description = null,
+            feedUrl = feedUrl,
+            releaseDateTime = Clock.System.now(),
+            artworkUrl = artworkUrl,
+            artworkDominantColor = artworkDominantColor,
+            trackCount = 0,
+            copyright = "",
+            isExplicit = false,
+            category = null,
+            newFeedUrl = null,
+            isComplete = false,
+            isSubscribed = false,
+            podcastWebsiteURL = null,
+            userRating = 0.0,
+            newEpisodeAction = NewEpisodesAction.CLEAR,
+            updatedAt = Instant.DISTANT_PAST,
+        )
+
+    companion object {
+        fun Podcast.toPodcastArg() = PodcastArg(
+            id = 0L,
+            name = name,
+            url = url,
+            feedUrl = feedUrl,
+            artistId = artistId,
+            artistName = artistName,
+            artistUrl = artistUrl,
+            artworkUrl = artworkUrl,
+            artworkDominantColor = artworkDominantColor,
+            storeFront = "",
+        )
+
+        fun StorePodcast.toPodcastArg() = PodcastArg(
+            id = id,
+            name = name,
+            url = url,
+            feedUrl = feedUrl,
+            artistId = artistId,
+            artistName = artistName,
+            artistUrl = artistUrl,
+            artworkUrl = artwork?.getArtworkPodcast().orEmpty(),
+            artworkDominantColor = artwork?.bgColor,
+            storeFront = storeFront,
+        )
+    }
 }

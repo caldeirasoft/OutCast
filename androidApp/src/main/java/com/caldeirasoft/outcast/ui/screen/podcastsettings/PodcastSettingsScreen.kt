@@ -19,14 +19,14 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResource
 import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResourceZero
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceScreen
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewModel
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastViewState
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastState
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @Composable
-fun PodcastSettingsBottomSheet(viewModel: StorePodcastViewModel, state: StorePodcastViewState) {
+fun PodcastSettingsBottomSheet(viewModel: PodcastViewModel, state: PodcastState) {
     val listState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current

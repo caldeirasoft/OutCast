@@ -19,11 +19,9 @@ import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
-import com.caldeirasoft.outcast.ui.screen.podcast.StorePodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverScreen
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import com.google.accompanist.insets.navigationBarsPadding
 import kotlinx.coroutines.FlowPreview
@@ -126,12 +124,13 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
-                composable(ScreenName.STORE_PODCAST.name) {
-                    val podcast =
-                        requireNotNull(navController.previousBackStackEntry?.arguments?.getParcelable<StorePodcastArg>(
-                            "podcast"))
-                    StorePodcastScreen(
-                        storePodcastArg = podcast,
+                composable(ScreenName.PODCAST.name) {
+                    val podcastArg =
+                        requireNotNull(navController.previousBackStackEntry
+                            ?.arguments
+                            ?.getParcelable<PodcastArg>("podcast"))
+                    PodcastScreen(
+                        podcastArg = podcastArg,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

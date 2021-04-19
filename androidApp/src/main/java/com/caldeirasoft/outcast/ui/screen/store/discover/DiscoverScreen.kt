@@ -37,7 +37,6 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -162,7 +161,7 @@ fun DiscoverScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
-                                                    navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
+                                                    navigateTo(Screen.PodcastScreen(item))
                                                 }),
                                             storePodcast = item,
                                             followingStatus = state.followingStatus[item.feedUrl],
@@ -176,8 +175,7 @@ fun DiscoverScreen(
                                                 navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                                             },
                                             onPodcastClick = {
-                                                navigateTo(Screen.StorePodcastScreen(
-                                                    item.podcast.toStorePodcastArg()))
+                                                navigateTo(Screen.PodcastScreen(item.podcast))
                                             },
                                             episode = item.episode,
                                         )

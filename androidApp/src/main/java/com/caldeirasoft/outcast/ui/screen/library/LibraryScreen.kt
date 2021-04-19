@@ -80,7 +80,7 @@ private fun LibraryScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = {
-                            navigateTo(Screen.StorePodcastScreen(item))
+                            navigateTo(Screen.PodcastScreen(item))
                         }),
                     podcast = item
                 )

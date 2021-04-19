@@ -20,7 +20,6 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
@@ -56,7 +55,7 @@ fun StoreCollectionItemsContent(
                         modifier = Modifier
                             .width(150.dp)
                             .clickable(onClick = {
-                                navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
+                                navigateTo(Screen.PodcastScreen(item))
                             }),
                         podcast = item,
                         index = if (storeCollection.sortByPopularity) index + 1 else null,
@@ -147,7 +146,7 @@ fun StoreCollectionFeaturedContent(
                     .clickable {
                         when (item) {
                             is StoreData -> navigateTo(Screen.Discover(item))
-                            is StorePodcast -> navigateTo(Screen.StorePodcastScreen(item.toStorePodcastArg()))
+                            is StorePodcast -> navigateTo(Screen.PodcastScreen(item))
                             is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
                         }
                     }

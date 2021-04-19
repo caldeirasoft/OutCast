@@ -16,10 +16,9 @@ import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg.Companion.toPodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg.Companion.toStoreDataArg
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg
-import com.caldeirasoft.outcast.ui.screen.store.storepodcast.StorePodcastArg.Companion.toStorePodcastArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
@@ -34,8 +33,6 @@ enum class ScreenName {
     DISCOVER,
     STORE_SEARCH,
     STORE_CHARTS,
-    STORE_PODCAST,
-    STORE_EPISODES,
     MORE,
     FAVORITES,
     HISTORY,
@@ -50,7 +47,12 @@ sealed class Screen (val id: ScreenName) {
     object Inbox : Screen(ScreenName.INBOX)
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
-    data class PodcastScreen(val podcastArg: PodcastArg) : Screen(ScreenName.PODCAST)
+    data class PodcastScreen private constructor(val podcastArg: PodcastArg) :
+        Screen(ScreenName.PODCAST) {
+        constructor(storePodcast: StorePodcast) : this(podcastArg = storePodcast.toPodcastArg())
+        constructor(podcast: Podcast) : this(podcastArg = podcast.toPodcastArg())
+    }
+
     data class PodcastSettings(val podcastId: Long) : Screen(ScreenName.PODCAST_SETTINGS)
     data class EpisodeScreen(val episodeArg: EpisodeArg) : Screen(ScreenName.EPISODE)
     object Settings : Screen(ScreenName.SETTINGS)
@@ -62,11 +64,6 @@ sealed class Screen (val id: ScreenName) {
     }
 
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
-    data class StorePodcastScreen(val podcastArg: StorePodcastArg) :
-        Screen(ScreenName.STORE_PODCAST) {
-        constructor(storePodcast: StorePodcast) : this(podcastArg = storePodcast.toStorePodcastArg())
-        constructor(podcast: Podcast) : this(podcastArg = podcast.toStorePodcastArg())
-    }
 
     data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
 

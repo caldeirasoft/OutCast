@@ -8,8 +8,12 @@ import com.caldeirasoft.outcast.ui.navigation.Screen.*
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
         when (screen) {
-            is PodcastScreen ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.podcastArg)}")
+            is PodcastScreen -> {
+                navController.currentBackStackEntry
+                    ?.arguments
+                    ?.putParcelable("podcast", screen.podcastArg)
+                navController.navigate(screen.id.name)
+            }
             is EpisodeScreen ->
                 navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.episodeArg)}")
             is Discover -> {
@@ -23,12 +27,6 @@ class Actions(navController: NavController) {
                 } else {
                     navController.navigate(screen.id.name)
                 }
-            }
-            is StorePodcastScreen -> {
-                navController.currentBackStackEntry
-                    ?.arguments
-                    ?.putParcelable("podcast", screen.podcastArg)
-                navController.navigate(screen.id.name)
             }
             is Charts ->
                 navController.navigate("${screen.id.name}/${screen.itemType}")

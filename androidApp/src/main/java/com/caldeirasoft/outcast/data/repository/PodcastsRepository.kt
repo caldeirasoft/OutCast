@@ -65,18 +65,6 @@ class PodcastsRepository @Inject constructor(
     }
 
     /**
-     * updatePodcastAndEpisodes
-     */
-    fun updatePodcastAndEpisodes(remotePodcast: StorePodcast) {
-        database.transaction {
-            database.podcastQueries.insert(remotePodcast.podcast)
-            remotePodcast.episodes.onEach {
-                database.episodeQueries.insert(it)
-            }
-        }
-    }
-
-    /**
      * addMostRecentEpisodeToInbox
      */
     fun addMostRecentEpisodeToInbox(feedUrl: String) {
