@@ -260,8 +260,7 @@ enum class Category(
             values().find { t -> t.text.equals(rawValue, ignoreCase = true) }
                 ?: throw IllegalArgumentException("Unknown Category name $rawValue")
 
-        fun fromId(id: Int): Category =
+        fun fromId(id: Int): Category? =
             values().find { t -> t.id == id }
-                ?: throw IllegalArgumentException("Unknown Category id $id")
     }
 }

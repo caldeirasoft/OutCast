@@ -24,8 +24,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import javax.inject.Inject
 
-class PodcastsRepository(
+class PodcastsRepository @Inject constructor(
     private val podcastsFetcher: PodcastsFetcher,
     val itunesAPI: ItunesAPI,
     val searchAPI: ItunesSearchAPI,

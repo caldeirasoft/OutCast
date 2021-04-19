@@ -24,8 +24,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
+import javax.inject.Inject
 
-class StoreRepository(
+class StoreRepository @Inject constructor(
     val itunesAPI: ItunesAPI,
     val searchAPI: ItunesSearchAPI,
     val context: Context,

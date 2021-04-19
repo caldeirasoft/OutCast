@@ -33,7 +33,7 @@ import kotlinx.coroutines.FlowPreview
 fun TopChartPodcastScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: TopChartPodcastViewModel = mavericksViewModel()
+    val viewModel: TopChartPodcastViewModel = mavericksViewModel(keyFactory = { "podcast" })
     TopChartSectionScreen(viewModel = viewModel, navigateTo = navigateTo)
 }
 
@@ -41,7 +41,7 @@ fun TopChartPodcastScreen(
 fun TopChartEpisodeScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: TopChartEpisodeViewModel = mavericksViewModel()
+    val viewModel: TopChartEpisodeViewModel = mavericksViewModel(keyFactory = { "episodes" })
     TopChartSectionScreen(viewModel = viewModel, navigateTo = navigateTo)
 }
 

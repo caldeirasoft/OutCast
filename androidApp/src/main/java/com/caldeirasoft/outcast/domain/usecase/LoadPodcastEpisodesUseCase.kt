@@ -1,8 +1,9 @@
 package com.caldeirasoft.outcast.domain.usecase
 
 import com.caldeirasoft.outcast.data.repository.LibraryRepository
+import javax.inject.Inject
 
-class LoadPodcastEpisodesUseCase(
+class LoadPodcastEpisodesUseCase @Inject constructor(
     private val libraryRepository: LibraryRepository,
 ) {
     fun execute(feedUrl: String) =

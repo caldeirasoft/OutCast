@@ -9,8 +9,9 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class LoadStorePagingDataUseCase(
+class LoadStorePagingDataUseCase @Inject constructor(
     val storeRepository: StoreRepository,
 ) {
     fun executeAsync(

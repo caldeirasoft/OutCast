@@ -9,7 +9,6 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     maven(url = uri("https://kotlin.bintray.com/kotlinx/")) // kotlinx datetime
-    maven(url = uri("https://dl.bintray.com/ekito/koin/")) // koin
 }
 dependencies {
     testImplementation(kotlin("test-junit"))

@@ -9,11 +9,11 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class LibraryRepository(
-    val database: Database
-)
-{
+class LibraryRepository @Inject constructor(
+    val database: Database,
+) {
     fun loadAllPodcasts(): Flow<List<Podcast>> =
         database.podcastQueries
             .getAll()

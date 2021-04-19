@@ -9,9 +9,10 @@ import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class LoadStoreTopChartsPagingDataUseCase(
-    private val storeRepository: StoreRepository
+class LoadStoreTopChartsPagingDataUseCase @Inject constructor(
+    private val storeRepository: StoreRepository,
 ) {
     fun execute(
         scope: CoroutineScope,

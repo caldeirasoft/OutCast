@@ -4,31 +4,33 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModel
+import com.airbnb.mvrx.MavericksViewModelFactory
 import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
+import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@OptIn(KoinApiExtension::class)
-class StorePodcastViewModel(
-    val initialState: StorePodcastViewState,
-) : MavericksViewModel<StorePodcastViewState>(initialState), KoinComponent, PreferenceViewModel {
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
-    private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase by inject()
-    private val loadPodcastUseCase: LoadPodcastUseCase by inject()
-    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase by inject()
-    private val subscribeUseCase: SubscribeUseCase by inject()
-    private val unsubscribeUseCase: UnsubscribeUseCase by inject()
-    private val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase by inject()
-    private val loadSettingsUseCase: LoadSettingsUseCase by inject()
-    private val updateSettingsUseCase: UpdateSettingsUseCase by inject()
+class StorePodcastViewModel @AssistedInject constructor(
+    @Assisted val initialState: StorePodcastViewState,
+    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
+    private val loadPodcastUseCase: LoadPodcastUseCase,
+    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
+    private val subscribeUseCase: SubscribeUseCase,
+    private val unsubscribeUseCase: UnsubscribeUseCase,
+    private val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase,
+    private val loadSettingsUseCase: LoadSettingsUseCase,
+    private val updateSettingsUseCase: UpdateSettingsUseCase,
+) : MavericksViewModel<StorePodcastViewState>(initialState), PreferenceViewModel {
 
     @OptIn(FlowPreview::class)
     val episodes: Flow<PagingData<Episode>> =
@@ -104,4 +106,12 @@ class StorePodcastViewModel(
             updateSettingsUseCase.updatePreference(key, value)
         }
     }
+
+    @AssistedFactory
+    interface Factory : AssistedViewModelFactory<StorePodcastViewModel, StorePodcastViewState> {
+        override fun create(initialState: StorePodcastViewState): StorePodcastViewModel
+    }
+
+    companion object :
+        MavericksViewModelFactory<StorePodcastViewModel, StorePodcastViewState> by hiltMavericksViewModelFactory()
 }

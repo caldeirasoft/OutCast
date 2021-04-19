@@ -13,8 +13,9 @@ import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.security.InvalidKeyException
 import java.util.*
+import javax.inject.Inject
 
-class DataStoreRepository(
+class DataStoreRepository @Inject constructor(
     val context: Context,
     val dataStore: DataStore<Preferences>,
 ) {

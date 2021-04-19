@@ -7,16 +7,12 @@ import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@OptIn(KoinApiExtension::class)
-abstract class FollowViewModel<S : MavericksState>(initialState: S) :
-    MavericksViewModel<S>(initialState), KoinComponent {
-
-    private val followUseCase: SubscribeUseCase by inject()
-    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase by inject()
+abstract class FollowViewModel<S : MavericksState>(
+    initialState: S,
+    private val followUseCase: SubscribeUseCase,
+    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
+) : MavericksViewModel<S>(initialState) {
 
     val followingStatus: MutableStateFlow<Map<String, FollowStatus>> =
         MutableStateFlow(emptyMap())

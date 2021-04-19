@@ -8,17 +8,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@OptIn(KoinApiExtension::class)
 class PodcastViewModel(
-    initialState: PodcastViewState
-) : MavericksViewModel<PodcastViewState>(initialState), KoinComponent {
-    val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
-    val loadPodcastUseCase: LoadPodcastUseCase by inject()
-    val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase by inject()
+    initialState: PodcastViewState,
+    val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    val loadPodcastUseCase: LoadPodcastUseCase,
+    val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase,
+) : MavericksViewModel<PodcastViewState>(initialState) {
 
     init {
         viewModelScope.launch {

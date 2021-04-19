@@ -5,26 +5,29 @@ import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.domain.enum.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
+import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
+import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.map
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@OptIn(KoinApiExtension::class)
 @ExperimentalCoroutinesApi
 abstract class TopChartSectionViewModel(
     initialState: TopChartSectionState,
     val storeItemType: StoreItemType,
-) : FollowViewModel<TopChartSectionState>(initialState), KoinComponent {
-
-    private val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase by inject()
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
+    followUseCase: SubscribeUseCase,
+    loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
+    val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
+    val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+) : FollowViewModel<TopChartSectionState>(
+    initialState,
+    followUseCase,
+    loadFollowedPodcastsUseCase
+) {
 
     init {
         followingStatus.setOnEach { copy(followingStatus = it) }

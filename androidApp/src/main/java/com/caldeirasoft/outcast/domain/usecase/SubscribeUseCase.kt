@@ -6,8 +6,9 @@ import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class SubscribeUseCase(
+class SubscribeUseCase @Inject constructor(
     private val podcastsRepository: PodcastsRepository,
     private val storeRepository: StoreRepository,
     private val dataStoreRepository: DataStoreRepository,

@@ -4,6 +4,7 @@ plugins {
     kotlin("kapt")
     kotlin("plugin.serialization") apply true
     kotlin("plugin.parcelize") apply true
+    id("dagger.hilt.android.plugin")
 }
 
 // get compose version in gradle.properties file
@@ -72,7 +73,7 @@ dependencies {
     api(libs.bundles.stetho)
     api(libs.bundles.retrofit)
     api(libs.bundles.okhttp)
-    api(libs.bundles.koin)
+    api(libs.bundles.hilt)
     api(libs.bundles.compose)
     api(libs.bundles.sqldelight)
     api(libs.bundles.accompanist)
@@ -89,6 +90,8 @@ dependencies {
     api(libs.timber)
     api(libs.mavericks)
     api(libs.ktrssreader)
+    api(libs.javax.inject)
+    kapt(libs.hilt.compiler)
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support

@@ -1,4 +1,3 @@
-@file:OptIn(KoinApiExtension::class)
 package com.caldeirasoft.outcast.ui.screen.store.search
 
 import androidx.compose.foundation.background
@@ -33,7 +32,6 @@ import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toIntPx
-import org.koin.core.component.KoinApiExtension
 import kotlin.math.log10
 
 @Composable

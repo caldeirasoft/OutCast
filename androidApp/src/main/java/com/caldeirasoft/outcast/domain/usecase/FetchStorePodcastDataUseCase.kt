@@ -8,9 +8,10 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
+import javax.inject.Inject
 import kotlin.time.hours
 
-class FetchStorePodcastDataUseCase constructor(
+class FetchStorePodcastDataUseCase @Inject constructor(
     val podcastsRepository: PodcastsRepository,
     val storeRepository: StoreRepository,
     val dataStoreRepository: DataStoreRepository,

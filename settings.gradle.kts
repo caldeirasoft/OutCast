@@ -9,6 +9,7 @@ pluginManagement {
     val kotlinVersion: String by settings
     val androidGradleVersion: String by settings
     val sqldelightVersion: String by settings
+    val hiltVersion: String by settings
 
     repositories {
         google()
@@ -27,6 +28,7 @@ pluginManagement {
         kotlin("plugin.serialization") version kotlinVersion apply false
         kotlin("plugin.parcelize") version kotlinVersion apply false
         id("com.squareup.sqldelight") apply false
+        id("dagger.hilt.android.plugin") apply false
     }
 
     resolutionStrategy {
@@ -34,6 +36,7 @@ pluginManagement {
             when (requested.id.id) {
                 "com.android.application", "com.android.library" -> useModule("com.android.tools.build:gradle:${androidGradleVersion}")
                 "com.squareup.sqldelight" -> useModule("com.squareup.sqldelight:gradle-plugin:${sqldelightVersion}")
+                "dagger.hilt.android.plugin" -> useModule("com.google.dagger:hilt-android-gradle-plugin:$hiltVersion")
             }
         }
     }

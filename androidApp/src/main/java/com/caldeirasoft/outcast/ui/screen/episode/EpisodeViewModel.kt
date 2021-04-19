@@ -7,23 +7,19 @@ import com.caldeirasoft.outcast.domain.util.Resource
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinApiExtension
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-@OptIn(KoinApiExtension::class)
 class EpisodeViewModel(
-    initialState: EpisodeViewState
-) : MavericksViewModel<EpisodeViewState>(initialState), KoinComponent
-{
-    private val fetchStoreEpisodeDataUseCase: FetchStoreEpisodeDataUseCase by inject()
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase by inject()
+    initialState: EpisodeViewState,
+    private val fetchStoreEpisodeDataUseCase: FetchStoreEpisodeDataUseCase,
+    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+) : MavericksViewModel<EpisodeViewState>(initialState) {
 
     init {
         viewModelScope.launch {
             getEpisodeInfo()
         }
     }
+
     // get episode data
     @OptIn(FlowPreview::class)
     suspend fun getEpisodeInfo() {

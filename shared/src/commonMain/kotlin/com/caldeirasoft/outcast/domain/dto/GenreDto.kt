@@ -14,7 +14,7 @@ class GenreDto (
     val name: String = "",
     val url: String = "",
 ) {
-    val category
+    val category: Category?
         get() = Category.fromId(id = genreId)
 
     fun toStoreGenre(storeFront: String) =
