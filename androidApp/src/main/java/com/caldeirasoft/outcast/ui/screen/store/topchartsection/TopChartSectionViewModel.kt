@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.ui.screen.store.topchartsection
 
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
@@ -23,10 +24,12 @@ abstract class TopChartSectionViewModel(
     loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
     val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    val podcastDao: PodcastDao
 ) : FollowViewModel<TopChartSectionState>(
     initialState,
     followUseCase,
-    loadFollowedPodcastsUseCase
+    loadFollowedPodcastsUseCase,
+    podcastDao
 ) {
 
     init {

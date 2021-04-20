@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.presentation.viewmodel
 
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
@@ -12,10 +13,10 @@ import dagger.assisted.AssistedInject
 
 class LibraryViewModel @AssistedInject constructor(
     @Assisted initialState: LibraryViewState,
-    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
+    val podcastDao: PodcastDao,
 ) : MavericksViewModel<LibraryViewState>(initialState) {
     init {
-        loadFollowedPodcastsUseCase.invoke()
+        podcastDao.getFollowedPodcasts()
             .setOnEach { copy(podcasts = it) }
     }
 

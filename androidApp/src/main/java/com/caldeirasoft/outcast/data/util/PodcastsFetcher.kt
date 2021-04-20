@@ -16,8 +16,8 @@
 
 package com.caldeirasoft.outcast.data.util;
 
-import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import kotlinx.coroutines.CoroutineDispatcher
@@ -133,11 +133,10 @@ private fun ITunesChannelData.toPodcastResponse(
         trackCount = 0,
         updatedAt = releaseDateTime,
         userRating = currentPodcast?.userRating,
-        isSubscribed = false,
+        isFollowed = false,
         isComplete = complete ?: false,
         isExplicit = explicit ?: false,
         newFeedUrl = newFeedUrl,
-        newEpisodeAction = NewEpisodesAction.CLEAR,
     )
 
     val episodes = items?.map { it.toEpisode(podcast) }.orEmpty()

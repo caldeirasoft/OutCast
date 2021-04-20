@@ -3,7 +3,7 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
 import android.os.Parcelable
-import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
@@ -45,10 +45,9 @@ data class PodcastArg(
             category = null,
             newFeedUrl = null,
             isComplete = false,
-            isSubscribed = false,
+            isFollowed = false,
             podcastWebsiteURL = null,
             userRating = 0.0,
-            newEpisodeAction = NewEpisodesAction.CLEAR,
             updatedAt = Instant.DISTANT_PAST,
         )
 

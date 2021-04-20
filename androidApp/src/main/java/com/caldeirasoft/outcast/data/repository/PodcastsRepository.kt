@@ -8,14 +8,17 @@ import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
+import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
+import com.caldeirasoft.outcast.data.db.dao.InboxDao
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
+import com.caldeirasoft.outcast.data.db.dao.QueueDao
+import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
-import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.Podcast
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -33,6 +36,10 @@ class PodcastsRepository @Inject constructor(
     val database: Database,
     val context: Context,
     val dataStore: DataStore<Preferences>,
+    val podcastDao: PodcastDao,
+    val episodeDao: EpisodeDao,
+    val inboxDao: InboxDao,
+    val queueDao: QueueDao,
     val json: Json,
 ) {
 
@@ -40,10 +47,7 @@ class PodcastsRepository @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.Main)
 
     fun loadPodcast(feedUrl: String): Flow<Podcast?> =
-        database.podcastQueries
-            .getByUrl(feedUrl = feedUrl)
-            .asFlow()
-            .mapToOneOrNull()
+        podcastDao.getPodcastWithUrl(feedUrl)
 
     /**
      * updatePodcastReleaseDate
@@ -136,7 +140,7 @@ class PodcastsRepository @Inject constructor(
         try {
             Timber.d("PodcastFetcher : $feedUrl")
             // Now fetch the podcasts, and add each to each store
-            podcastsFetcher(feedUrl, currentPodcast).collect { (podcast, episodes) ->
+            podcastsFetcher.invoke(feedUrl, currentPodcast).collect { (podcast, episodes) ->
                 insertPodcastAndEpisodes(podcast, episodes)
             }
         } catch (e: Throwable) {
@@ -150,12 +154,9 @@ class PodcastsRepository @Inject constructor(
      */
     private suspend fun insertPodcastAndEpisodes(podcast: Podcast, episodes: List<Episode>) {
         val cachedPodcast = loadPodcast(podcast.feedUrl).firstOrNull()
-        database.transaction {
-            database.podcastQueries.insert(podcast)
-            episodes.onEach {
-                database.episodeQueries.insert(it)
-            }
-        }
+        /*TODO: transaction */
+        podcastDao.upsert(podcast)
+        episodeDao.upsertAll(episodes)
 
         cachedPodcast?.let {
             val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = cachedPodcast.feedUrl)
@@ -171,30 +172,28 @@ class PodcastsRepository @Inject constructor(
                     ?.let { Integer.parseInt(it) }
                     ?: 0
 
-            database.transaction {
-                // add recent episodes to queue / inbox
-                when (settingsNewEpisodes) {
-                    NewEpisodesAction.INBOX.name -> {
-                        addRecentEpisodesIntoInbox(
+            // add recent episodes to queue / inbox
+            when (settingsNewEpisodes) {
+                NewEpisodesAction.INBOX.name -> {
+                    inboxDao.addRecentEpisodes(
+                        cachedPodcast.feedUrl,
+                        cachedPodcast.releaseDateTime)
+                    if (settingsEpisodeLimit != 0) {
+                        inboxDao.deleteEpisodesWithUrlAndLimit(
                             cachedPodcast.feedUrl,
-                            cachedPodcast.releaseDateTime)
-                        if (settingsEpisodeLimit != 0) {
-                            updateInboxEpisodeLimit(
-                                cachedPodcast.feedUrl,
-                                settingsEpisodeLimit
-                            )
-                        }
+                            settingsEpisodeLimit
+                        )
                     }
-                    NewEpisodesAction.QUEUE_FIRST.name ->
-                        addRecentEpisodesIntoQueueFirst(
-                            cachedPodcast.feedUrl,
-                            cachedPodcast.releaseDateTime)
-                    NewEpisodesAction.QUEUE_LAST.name ->
-                        addRecentEpisodesIntoQueueLast(
-                            cachedPodcast.feedUrl,
-                            cachedPodcast.releaseDateTime)
-
                 }
+                NewEpisodesAction.QUEUE_FIRST.name ->
+                    queueDao.addRecentEpisodesIntoQueueFirst(
+                        cachedPodcast.feedUrl,
+                        cachedPodcast.releaseDateTime)
+                NewEpisodesAction.QUEUE_LAST.name ->
+                    queueDao.addRecentEpisodesIntoQueueLast(
+                        cachedPodcast.feedUrl,
+                        cachedPodcast.releaseDateTime)
+
             }
         }
     }

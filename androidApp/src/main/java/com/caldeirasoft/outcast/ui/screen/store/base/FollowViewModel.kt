@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.ui.screen.store.base
 
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
@@ -12,6 +13,7 @@ abstract class FollowViewModel<S : MavericksState>(
     initialState: S,
     private val followUseCase: SubscribeUseCase,
     private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
+    private val podcastDao: PodcastDao
 ) : MavericksViewModel<S>(initialState) {
 
     val followingStatus: MutableStateFlow<Map<String, FollowStatus>> =

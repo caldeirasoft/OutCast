@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.store.discover
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
@@ -27,7 +28,8 @@ class DiscoverViewModel @AssistedInject constructor(
     private val loadStorePagingDataUseCase: LoadStorePagingDataUseCase,
     val followUseCase: SubscribeUseCase,
     val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
-) : FollowViewModel<DiscoverState>(initialState, followUseCase, loadFollowedPodcastsUseCase) {
+    val podcastDao: PodcastDao
+) : FollowViewModel<DiscoverState>(initialState, followUseCase, loadFollowedPodcastsUseCase, podcastDao) {
     init {
         followingStatus.setOnEach { copy(followingStatus = it) }
     }

@@ -72,8 +72,8 @@ class PodcastViewModel @AssistedInject constructor(
                             isLoading = false,
                             podcast = it.data,
                             followingStatus =
-                            if (it.data.isSubscribed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
-                            showAllEpisodes = it.data.isSubscribed
+                            if (it.data.isFollowed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
+                            showAllEpisodes = it.data.isFollowed
                         )
                     else ->
                         copy()

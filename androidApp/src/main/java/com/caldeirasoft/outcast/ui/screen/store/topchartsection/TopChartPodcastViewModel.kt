@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.store.topchartsection
 
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
@@ -18,13 +19,15 @@ class TopChartPodcastViewModel @AssistedInject constructor(
     loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    podcastDao: PodcastDao
 ) : TopChartSectionViewModel(
     initialState,
     StoreItemType.PODCAST,
     followUseCase,
     loadFollowedPodcastsUseCase,
     loadStoreTopChartsPagingDataUseCase,
-    fetchStoreFrontUseCase
+    fetchStoreFrontUseCase,
+    podcastDao
 ) {
     @AssistedFactory
     interface Factory : AssistedViewModelFactory<TopChartPodcastViewModel, TopChartSectionState> {

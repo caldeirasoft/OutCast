@@ -6,6 +6,10 @@ import androidx.datastore.preferences.core.Preferences
 import com.caldeirasoft.outcast.Database
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
+import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
+import com.caldeirasoft.outcast.data.db.dao.InboxDao
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
+import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
 import dagger.Module
@@ -27,6 +31,10 @@ class RepositoryModule {
         database: Database,
         @ApplicationContext context: Context,
         dataStore: DataStore<Preferences>,
+        podcastDao: PodcastDao,
+        episodeDao: EpisodeDao,
+        inboxDao: InboxDao,
+        queueDao: QueueDao,
         json: Json,
     ) =
         PodcastsRepository(podcastsFetcher,
@@ -35,6 +43,10 @@ class RepositoryModule {
             database,
             context,
             dataStore,
+            podcastDao,
+            episodeDao,
+            inboxDao,
+            queueDao,
             json)
 
     @Provides

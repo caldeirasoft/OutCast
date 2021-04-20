@@ -29,7 +29,7 @@ CREATE TABLE episode (
     playedAt TEXT AS Instant,
     updatedAt TEXT AS Instant NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
     PRIMARY KEY (feedUrl, guid),
-    FOREIGN KEY (`feedUrl`) REFERENCES `podcast` (`feedUrl`)
+    FOREIGN KEY (`feedUrl`) REFERENCES podcast (`feedUrl`)
 );
 
 getByGuid:
