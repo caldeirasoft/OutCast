@@ -140,7 +140,8 @@ fun DiscoverScreen(
                                             storeCollection = collection,
                                             navigateTo = navigateTo,
                                             followingStatus = state.followingStatus,
-                                            onSubscribeClick = viewModel::subscribeToPodcast,
+                                            followLoadingStatus = state.followLoadingStatus,
+                                            onSubscribeClick = viewModel::followPodcast,
                                         )
                                     }
                                     is StoreCollectionData -> {
@@ -164,8 +165,9 @@ fun DiscoverScreen(
                                                     navigateTo(Screen.PodcastScreen(item))
                                                 }),
                                             storePodcast = item,
-                                            followingStatus = state.followingStatus[item.feedUrl],
-                                            onSubscribeClick = viewModel::subscribeToPodcast
+                                            isFollowing = state.followingStatus.contains(item.id),
+                                            isFollowingLoading = state.followLoadingStatus.contains(item.id),
+                                            onSubscribeClick = viewModel::followPodcast
                                         )
                                     }
                                     is StoreEpisode -> {

@@ -8,7 +8,7 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
-import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
+import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 abstract class TopChartSectionViewModel(
     initialState: TopChartSectionState,
     val storeItemType: StoreItemType,
-    followUseCase: SubscribeUseCase,
+    followUseCase: FollowUseCase,
     loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
     val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
@@ -34,6 +34,7 @@ abstract class TopChartSectionViewModel(
 
     init {
         followingStatus.setOnEach { copy(followingStatus = it) }
+        followLoadingStatus.setOnEach { copy(followLoadingStatus = it) }
     }
 
     // paged list

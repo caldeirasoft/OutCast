@@ -3,7 +3,7 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
 import android.os.Parcelable
-import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant

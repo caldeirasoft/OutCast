@@ -611,10 +611,35 @@ class StoreRepository @Inject constructor(
                     storeFront = storeFront,
                     isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
                     isComplete = false,
-                    podcast = requireNotNull(
-                        getStoreItemFromLookupResultItem(item.collection.values.first(),
-                            storeFront) as StorePodcast
-                    )
+                    podcast = if (item.collection.values.isEmpty()) {
+                        StorePodcast(
+                            id = item.collectionId?.toLong() ?: 0,
+                            name = item.collectionName.orEmpty(),
+                            url = item.url.orEmpty(),
+                            artistName = item.artistName.orEmpty(),
+                            artistId = item.artistId?.toLong(),
+                            artistUrl = item.artistUrl,
+                            description = "",
+                            feedUrl = item.feedUrl.orEmpty(),
+                            releaseDate = item.releaseDateTime ?: Clock.System.now(),
+                            releaseDateTime = item.releaseDateTime ?: Clock.System.now(),
+                            artwork = item.artwork?.toArtwork(),
+                            trackCount = item.trackCount ?: 0,
+                            podcastWebsiteUrl = item.podcastWebsiteUrl,
+                            copyright = item.copyright,
+                            isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
+                            userRating = item.userRating?.value?.toFloat() ?: 0f,
+                            category = item.genres.first().category,
+                            storeFront = storeFront
+                        )
+                    } else {
+                        requireNotNull(
+                            getStoreItemFromLookupResultItem(
+                                item.collection.values.first(),
+                                storeFront
+                            ) as StorePodcast
+                        )
+                    }
                 )
             }
             else -> null

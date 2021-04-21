@@ -2,7 +2,7 @@
 
 package com.caldeirasoft.outcast.domain.models
 
-import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.DurationSerializer
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer

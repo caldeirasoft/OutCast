@@ -16,7 +16,12 @@ class FetchStorePodcastDataUseCase @Inject constructor(
     val storeRepository: StoreRepository,
     val dataStoreRepository: DataStoreRepository,
 ) {
-    fun execute(podcast: Podcast, storeFront: String): Flow<Resource<Podcast>> =
+    fun execute(podcast: Podcast): Flow<Boolean> = flow {
+        podcastsRepository.updatePodcast(podcast.feedUrl, podcast)
+        emit(true)
+    }
+
+    fun execute_old(podcast: Podcast, storeFront: String): Flow<Resource<Podcast>> =
         flow<Resource<Podcast>> {
             val cachedData = loadFromDb(podcast.feedUrl).firstOrNull()
             if (shouldFetch(cachedData, storeFront)) {

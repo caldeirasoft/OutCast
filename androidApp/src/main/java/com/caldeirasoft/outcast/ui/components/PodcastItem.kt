@@ -35,7 +35,8 @@ fun PodcastListItem(
     storePodcast: StorePodcast,
     index: Int? = null,
     nameMaxLines: Int = 2,
-    followingStatus: FollowStatus? = null,
+    isFollowing: Boolean = false,
+    isFollowingLoading: Boolean = false,
     onSubscribeClick: (StorePodcast) -> Unit = { },
     iconModifier: Modifier = Modifier.size(PodcastDefaults.ThumbnailSize),
 ) {
@@ -63,7 +64,8 @@ fun PodcastListItem(
         },
         trailing = {
             FollowPodcastListIconButton(
-                followingStatus = followingStatus,
+                isFollowing = isFollowing,
+                isFollowingLoading = isFollowing,
                 onSubscribeClick = { onSubscribeClick(storePodcast) }
             )
         }
@@ -107,8 +109,9 @@ fun PodcastGridItem(
     modifier: Modifier = Modifier,
     podcast: StorePodcast,
     index: Int? = null,
-    followingStatus: FollowStatus? = null,
-    onSubscribeClick: (StorePodcast) -> Unit = { },
+    isFollowing: Boolean = false,
+    isFollowingLoading: Boolean = false,
+    onFollowPodcast: (StorePodcast) -> Unit = { },
 )
 {
     Column(modifier = modifier) {
@@ -131,8 +134,9 @@ fun PodcastGridItem(
 
                 FollowPodcastGridIconButton(
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    followingStatus = followingStatus,
-                    onSubscribeClick = { onSubscribeClick(podcast) }
+                    isFollowing = isFollowing,
+                    isFollowingLoading = isFollowingLoading,
+                    onFollowClick = { onFollowPodcast(podcast) }
                 )
             }
         }
@@ -209,19 +213,21 @@ fun PodcastGridItem(
 @Composable
 fun FollowPodcastGridIconButton(
     modifier: Modifier,
-    followingStatus: FollowStatus? = null,
-    onSubscribeClick: () -> Unit = { },
+    isFollowing: Boolean = false,
+    isFollowingLoading: Boolean = false,
+    onFollowClick: () -> Unit = { },
 ) {
     IconButton(
         modifier = modifier,
-        onClick = { if (followingStatus == null) onSubscribeClick.invoke() })
+        onClick = { if (!isFollowing && !isFollowingLoading) onFollowClick.invoke() })
     {
+        val followingStatus = Pair(isFollowing, isFollowingLoading)
         Crossfade(
             modifier = Modifier,
             targetState = followingStatus,
             animationSpec = tween(500)) { followStatus ->
-            when (followStatus) {
-                FollowStatus.FOLLOWING -> {
+            when {
+                isFollowingLoading -> {
                     Box(modifier = Modifier
                         .size(24.dp)
                         .background(
@@ -230,12 +236,12 @@ fun FollowPodcastGridIconButton(
                         )) {
                         LinearProgressIndicator(
                             modifier = Modifier
-                                .size(20.dp)
+                                .width(20.dp)
                                 .align(Alignment.Center)
                         )
                     }
                 }
-                FollowStatus.FOLLOWED ->
+                isFollowing ->
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(id = R.string.action_following),
@@ -270,20 +276,22 @@ fun FollowPodcastGridIconButton(
 
 @Composable
 fun FollowPodcastListIconButton(
-    followingStatus: FollowStatus? = null,
+    isFollowing: Boolean = false,
+    isFollowingLoading: Boolean = false,
     onSubscribeClick: () -> Unit = { },
 ) {
+    val followingStatus = Pair(isFollowing, isFollowingLoading)
     Crossfade(
         targetState = followingStatus,
         animationSpec = tween(500)) { followStatus ->
-        when (followStatus) {
-            FollowStatus.FOLLOWING -> {
+        when {
+            isFollowingLoading -> {
                 Box(modifier = Modifier
                     .size(48.dp)) {
                     CircularProgressIndicator(modifier = Modifier.padding(8.dp))
                 }
             }
-            FollowStatus.FOLLOWED ->
+            isFollowing ->
                 IconButton(
                     onClick = { })
                 {

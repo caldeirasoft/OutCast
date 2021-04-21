@@ -86,11 +86,9 @@ class PodcastsFetcher(
             flow { emit(fetchPodcast(feedUrl)) }
         }
 
-    suspend fun fetchPodcast(url: String, currentPodcast: Podcast? = null): PodcastRssResponse {
-        return withContext(ioDispatcher) {
-            Reader.coRead<ITunesChannelData>(url).toPodcastResponse(url, currentPodcast)
-        }
-    }
+    suspend fun fetchPodcast(url: String, currentPodcast: Podcast? = null): PodcastRssResponse =
+        Reader.coRead<ITunesChannelData>(url).toPodcastResponse(url, currentPodcast)
+
 }
 
 data class PodcastRssResponse(

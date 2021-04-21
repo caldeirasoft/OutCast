@@ -8,14 +8,14 @@ import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
-import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
+import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 class TopChartPodcastViewModel @AssistedInject constructor(
     @Assisted initialState: TopChartSectionState,
-    followUseCase: SubscribeUseCase,
+    followUseCase: FollowUseCase,
     loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,

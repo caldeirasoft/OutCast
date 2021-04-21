@@ -4,6 +4,7 @@ import androidx.room.*
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.PodcastMetadata
 import com.caldeirasoft.outcast.data.db.entities.PodcastMetadata.Companion.metaData
+import com.caldeirasoft.outcast.data.db.entities.PodcastWithEpisodes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 
@@ -26,14 +27,20 @@ interface PodcastDao : EntityDao<Podcast> {
     @Query("SELECT p.* FROM podcast p WHERE isFollowed = 1")
     fun getFollowedPodcasts(): Flow<List<Podcast>>
 
-    @Query("SELECT p.podcastId FROM podcast p WHERE isFollowed = 1 AND podcastId != NULL")
+    @Query("SELECT p.podcastId FROM podcast p WHERE isFollowed = 1 AND podcastId IS NOT NULL")
     fun getFollowedPodcastIds(): Flow<List<Long>>
 
+    @Transaction
     @Query("SELECT * FROM podcast p WHERE podcastId = :id")
-    fun getPodcastWithId(id: Long): Flow<Podcast?>
+    fun getPodcastWithId(id: Long): Flow<PodcastWithEpisodes?>
 
+    @Transaction
     @Query("SELECT * FROM podcast p WHERE feedUrl = :feedUrl")
     fun getPodcastWithUrl(feedUrl: String): Flow<Podcast?>
+
+    @Transaction
+    @Query("SELECT * FROM podcast p WHERE feedUrl = :feedUrl")
+    fun getPodcastAndEpisodesWithUrl(feedUrl: String): Flow<PodcastWithEpisodes?>
 
     @Query("UPDATE podcast SET podcastId = :podcastId, artistId = :artistId WHERE feedUrl = :feedUrl")
     suspend fun updatePodcastItunesId(feedUrl: String, podcastId: Long?, artistId: Long?)

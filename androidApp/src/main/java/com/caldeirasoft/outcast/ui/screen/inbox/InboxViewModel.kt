@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.presentation.viewmodel
 
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.caldeirasoft.outcast.data.db.dao.InboxDao
 import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.usecase.FetchInboxUseCase
@@ -13,11 +14,12 @@ import dagger.assisted.AssistedInject
 class InboxViewModel @AssistedInject constructor(
     @Assisted initialState: InboxViewState,
     private val fetchInboxUseCase: FetchInboxUseCase,
+    private val inboxDao: InboxDao
 ) : MavericksViewModel<InboxViewState>(initialState) {
 
 
     init {
-        fetchInboxUseCase.invoke()
+        inboxDao.getEpisodes()
             .setOnEach { copy(episodes = it) }
     }
 

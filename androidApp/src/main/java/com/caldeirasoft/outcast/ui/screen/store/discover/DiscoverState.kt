@@ -11,7 +11,8 @@ data class DiscoverState(
     val storeData: StoreData,
     val title: String = "",
     val storePage: StorePage = storeData.getPage(),
-    val followingStatus: Map<String, FollowStatus> = emptyMap(),
+    val followingStatus: List<Long> = emptyList(),
+    val followLoadingStatus: List<Long> = emptyList(),
     val newVersionAvailable: Boolean = false,
 ) : MavericksState {
     constructor() : this(storeData = StoreData.Default)

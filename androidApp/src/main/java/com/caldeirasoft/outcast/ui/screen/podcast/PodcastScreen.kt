@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -67,7 +68,6 @@ fun PodcastScreen(
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
 
-    val episodesLazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
     val podcastData = state.podcast
     val dominantColor = remember(podcastData) { GetPodcastVibrantColor(podcastData = podcastData) }
     val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
@@ -180,10 +180,10 @@ fun PodcastScreen(
                         item {
                             StoreHeadingSection(
                                 title = stringResource(id = R.string.podcast_x_episodes,
-                                    episodesLazyPagingItems.itemCount))
+                                    state.episodes.size))
                         }
-                        if (state.showAllEpisodes || episodesLazyPagingItems.itemCount < 5) {
-                            items(lazyPagingItems = episodesLazyPagingItems) { episode ->
+                        if (state.showAllEpisodes || state.episodes.size < 5) {
+                            items(items = state.episodes) { episode ->
                                 episode?.let {
                                     EpisodeItem(
                                         episode = episode,
@@ -198,7 +198,7 @@ fun PodcastScreen(
                             // show first, last and "show more" button
                             item {
                                 // most recent episode
-                                episodesLazyPagingItems[0]?.let { firstEpisode ->
+                                state.episodes[0].let { firstEpisode ->
                                     EpisodeItem(
                                         episode = firstEpisode,
                                         onEpisodeClick = {
@@ -228,8 +228,8 @@ fun PodcastScreen(
 
                             item {
                                 // oldest episode
-                                val size = episodesLazyPagingItems.itemCount - 1
-                                episodesLazyPagingItems.peek(size)?.let { lastEpisode ->
+                                val size = state.episodes.size - 1
+                                state.episodes[size].let { lastEpisode ->
                                     EpisodeItem(
                                         episode = lastEpisode,
                                         onEpisodeClick = {

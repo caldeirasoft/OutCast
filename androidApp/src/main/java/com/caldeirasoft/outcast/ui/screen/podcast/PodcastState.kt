@@ -4,8 +4,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.paging.PagingData
 import com.airbnb.mvrx.MavericksState
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 
@@ -14,7 +14,7 @@ data class PodcastState(
     val isLoading: Boolean = false,
     val error: Throwable? = null,
     val storeFront: String? = null,
-    val episodes: PagingData<Episode> = PagingData.empty(),
+    val episodes: List<Episode> = emptyList(),
     val showAllEpisodes: Boolean = false,
     val followingStatus: FollowStatus = FollowStatus.UNFOLLOWED,
     val prefs: Preferences? = null,

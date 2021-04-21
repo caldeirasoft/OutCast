@@ -5,48 +5,43 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
-import com.caldeirasoft.outcast.domain.usecase.SubscribeUseCase
+import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
 abstract class FollowViewModel<S : MavericksState>(
     initialState: S,
-    private val followUseCase: SubscribeUseCase,
+    private val followUseCase: FollowUseCase,
     private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     private val podcastDao: PodcastDao
 ) : MavericksViewModel<S>(initialState) {
 
-    val followingStatus: MutableStateFlow<Map<String, FollowStatus>> =
-        MutableStateFlow(emptyMap())
+    val followingStatus: MutableStateFlow<List<Long>> =
+        MutableStateFlow(emptyList())
+    val followLoadingStatus: MutableStateFlow<List<Long>> =
+        MutableStateFlow(emptyList())
 
     init {
-        loadFollowedPodcastsUseCase.execute()
-            .map { it.map { it.feedUrl } }
-            .map { ids ->
-                val mapStatus = followingStatus.value.filter { it.value == FollowStatus.FOLLOWING }
-                    .plus(ids.map { it to FollowStatus.FOLLOWED })
-                mapStatus
-            }
+        podcastDao.getFollowedPodcastIds()
             .onEach { followingStatus.emit(it) }
             .launchIn(viewModelScope)
     }
 
-    fun subscribeToPodcast(item: StorePodcast) {
+    fun followPodcast(item: StorePodcast) {
         followUseCase.execute(item)
-            .onStart { setPodcastFollowing(item) }
-            .catch { setPodcastUnfollowed(item) }
+            .onStart { setPodcastFollowLoading(item, true) }
+            .catch { setPodcastFollowLoading(item, false) }
             .onEach {
                 delay(1000)
-                setPodcastUnfollowed(item)
+                setPodcastFollowLoading(item, false)
             }
             .launchIn(viewModelScope)
     }
 
-    suspend fun setPodcastFollowing(item: StorePodcast) {
-        followingStatus.emit(followingStatus.value.plus(item.feedUrl to FollowStatus.FOLLOWING))
-    }
-
-    suspend fun setPodcastUnfollowed(item: StorePodcast) {
-        followingStatus.emit(followingStatus.value.filter { (it.key == item.feedUrl && it.value == FollowStatus.FOLLOWING).not() })
+    private suspend fun setPodcastFollowLoading(item: StorePodcast, isLoading: Boolean) {
+        if (isLoading)
+            followLoadingStatus.emit(followLoadingStatus.value.plus(item.id))
+        else
+            followLoadingStatus.emit(followLoadingStatus.value.minus(item.id))
     }
 }

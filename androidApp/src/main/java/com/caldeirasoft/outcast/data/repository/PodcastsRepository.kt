@@ -19,10 +19,7 @@ import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
@@ -44,7 +41,7 @@ class PodcastsRepository @Inject constructor(
 ) {
 
     private var refreshingJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     fun loadPodcast(feedUrl: String): Flow<Podcast?> =
         podcastDao.getPodcastWithUrl(feedUrl)
@@ -137,16 +134,19 @@ class PodcastsRepository @Inject constructor(
      */
     @OptIn(InternalCoroutinesApi::class)
     suspend fun updatePodcast(feedUrl: String, currentPodcast: Podcast? = null) {
-        try {
-            Timber.d("PodcastFetcher : $feedUrl")
-            // Now fetch the podcasts, and add each to each store
-            podcastsFetcher.invoke(feedUrl, currentPodcast).collect { (podcast, episodes) ->
-                insertPodcastAndEpisodes(podcast, episodes)
+        val job = scope.async {
+            try {
+                Timber.d("PodcastFetcher : $feedUrl")
+                // Now fetch the podcasts, and add each to each store
+                podcastsFetcher.invoke(feedUrl, currentPodcast).collect { (podcast, episodes) ->
+                    insertPodcastAndEpisodes(podcast, episodes)
+                }
+            } catch (e: Throwable) {
+                Timber.d("PodcastsRepository : podcastsFetcher(SampleFeeds).collect error: $e")
+                throw e
             }
-        } catch (e: Throwable) {
-            Timber.d("PodcastsRepository : podcastsFetcher(SampleFeeds).collect error: $e")
-            throw e
         }
+        job.await()
     }
 
     /**
@@ -199,14 +199,14 @@ class PodcastsRepository @Inject constructor(
     }
 
     /**
-     * Subscribe to podcast
+     * Follow podcast
      */
-    suspend fun subscribe(feedUrl: String, updatePodcast: Boolean = false) {
+    suspend fun followPodcast(feedUrl: String, updatePodcast: Boolean = false) {
         // fetch remote podcast data
         if (updatePodcast)
             updatePodcast(feedUrl)
         // subscribe to podcast
-        database.podcastQueries.subscribe(feedUrl = feedUrl)
+        podcastDao.followPodcast(feedUrl = feedUrl)
         addMostRecentEpisodeToInbox(feedUrl)
         val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
         dataStore.edit { preferences ->
@@ -218,11 +218,10 @@ class PodcastsRepository @Inject constructor(
     }
 
     /**
-     * Unsubscribe from podcast
+     * Unfollow podcast
      */
-    suspend fun unsubscribeFromPodcast(feedUrl: String) {
-        database.podcastQueries
-            .unsubscribe(feedUrl = feedUrl)
+    suspend fun unfollowPodcast(feedUrl: String) {
+        podcastDao.unfollowPodcast(feedUrl = feedUrl)
         val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
         dataStore.edit { preferences ->
             preferences.remove(podcastPreferenceKeys.newEpisodes)

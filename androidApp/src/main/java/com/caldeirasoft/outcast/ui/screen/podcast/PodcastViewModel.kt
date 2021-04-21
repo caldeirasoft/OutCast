@@ -5,6 +5,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
@@ -24,60 +25,55 @@ class PodcastViewModel @AssistedInject constructor(
     @Assisted val initialState: PodcastState,
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
     private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
+    private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
+    private val updatePodcastDataUseCase: UpdatePodcastDataUseCase,
     private val loadPodcastUseCase: LoadPodcastUseCase,
     private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
-    private val subscribeUseCase: SubscribeUseCase,
-    private val unsubscribeUseCase: UnsubscribeUseCase,
+    private val followUseCase: FollowUseCase,
+    private val unfollowUseCase: UnfollowUseCase,
     private val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
+    private val podcastDao: PodcastDao,
 ) : MavericksViewModel<PodcastState>(initialState), PreferenceViewModel {
+
+    private var isInitialized: Boolean = false
 
     @OptIn(FlowPreview::class)
     val episodes: Flow<PagingData<Episode>> =
         loadPodcastEpisodesUseCase.execute(initialState.podcast.feedUrl)
-            .map { it.sortedByDescending { it.releaseDateTime } }
+            .map { it.sortedByDescending { episode ->  episode.releaseDateTime } }
             .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it.size} episodes") }
             .map { PagingData.from(it) }
             .cachedIn(viewModelScope)
 
     init {
-        viewModelScope.launch {
-            fetchPodcast()
-        }
+        podcastDao.getPodcastAndEpisodesWithUrl(initialState.podcast.feedUrl)
+            .onEach {
+                if (it == null) // 1rst launch
+                    fetchPodcastDataUseCase.execute(initialState.podcast)
+                        .onStart { setState { copy(isLoading = true) } }
+                        .launchIn(viewModelScope)
+                else if (!isInitialized) // podcast in db : update if necessary
+                    updatePodcastDataUseCase.execute(it.podcast)
+                        .launchIn(viewModelScope)
+                isInitialized = true
+            }
+            .filterNotNull()
+            .setOnEach {
+                copy(
+                    isLoading = false,
+                    podcast = it.podcast,
+                    followingStatus = if (it.podcast.isFollowed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
+                    episodes = it.episodes.sortedByDescending { episode ->  episode.releaseDateTime },
+                    showAllEpisodes = it.podcast.isFollowed
+                )
+            }
+
 
         loadSettingsUseCase.settings
             .setOnEach {
                 copy(prefs = it)
-            }
-    }
-
-    private suspend fun fetchPodcast() {
-        val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
-
-        setState {
-            copy(storeFront = storeFront)
-        }
-
-        // fetch local podcast data subscription
-        fetchStorePodcastDataUseCase
-            .execute(podcast = initialState.podcast, storeFront = storeFront)
-            .filterNotNull()
-            .setOnEach {
-                when (it) {
-                    is Resource.Loading ->
-                        copy(isLoading = true)
-                    is Resource.Success ->
-                        copy(
-                            isLoading = false,
-                            podcast = it.data,
-                            followingStatus =
-                            if (it.data.isFollowed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
-                            showAllEpisodes = it.data.isFollowed
-                        )
-                    else ->
-                        copy()
-                }
             }
     }
 
@@ -88,18 +84,14 @@ class PodcastViewModel @AssistedInject constructor(
     }
 
     fun subscribe() {
-        withState { state ->
-            subscribeUseCase.execute(state.podcast.feedUrl)
-                .onStart {
-                    setState { copy(followingStatus = FollowStatus.FOLLOWING) }
-                }
-                .launchIn(viewModelScope)
-        }
+        followUseCase.execute(initialState.podcast.feedUrl)
+            .onStart { setState { copy(followingStatus = FollowStatus.FOLLOWING) } }
+            .launchIn(viewModelScope)
     }
 
     fun unfollow() {
         viewModelScope.launch {
-            unsubscribeUseCase.execute(initialState.podcast.feedUrl)
+            unfollowUseCase.execute(feedUrl = initialState.podcast.feedUrl)
         }
     }
 

@@ -8,19 +8,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class SubscribeUseCase @Inject constructor(
+class FollowUseCase @Inject constructor(
     private val podcastsRepository: PodcastsRepository,
     private val storeRepository: StoreRepository,
     private val dataStoreRepository: DataStoreRepository,
 ) {
     fun execute(feedUrl: String): Flow<Boolean> = flow {
-        podcastsRepository.subscribe(feedUrl = feedUrl)
+        podcastsRepository.followPodcast(feedUrl = feedUrl)
         emit(true)
     }
 
     fun execute(storePodcast: StorePodcast): Flow<Boolean> = flow {
         // fetch remote podcast data
-        podcastsRepository.subscribe(feedUrl = storePodcast.feedUrl, updatePodcast = true)
+        podcastsRepository.followPodcast(feedUrl = storePodcast.feedUrl, updatePodcast = true)
         emit(true)
     }
 }

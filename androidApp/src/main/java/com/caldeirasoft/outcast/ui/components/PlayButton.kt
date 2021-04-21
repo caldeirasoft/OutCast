@@ -16,7 +16,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.caldeirasoft.outcast.db.Episode
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 
 
