@@ -3,24 +3,24 @@ package com.caldeirasoft.outcast.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
-import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
@@ -43,11 +43,12 @@ fun StoreCollectionItemsContent(
             navigateTo(Screen.Discover(storeCollection.room))
         })
 
+    val listState = rememberLazyListState()
     // content
     LazyRow(
-        contentPadding = PaddingValues(start = 16.dp,
-            end = 16.dp,
-            bottom = 16.dp),
+        state = listState,
+        modifier = Modifier.nestedScroll(listState.nestedScrollConnection),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(items = storeCollection.items) { index, item ->
@@ -91,9 +92,8 @@ fun StoreCollectionDataContent(
 
     // room content
     LazyRow(
-        contentPadding = PaddingValues(start = 8.dp,
-            end = 8.dp,
-            bottom = 16.dp)
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(items = storeCollection.items) { item ->
             when (item) {
@@ -102,7 +102,6 @@ fun StoreCollectionDataContent(
                         backgroundColor = colors[0],
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
                             .width(200.dp)
                             .clickable(onClick = { navigateTo(Screen.Discover(item)) })
                     )
@@ -216,3 +215,26 @@ fun ChoiceChipTab(
         }
     }
 }
+
+val LazyListState.nestedScrollConnection: NestedScrollConnection
+    get() {
+        return object : NestedScrollConnection {
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+
+                val firstVisibleItemInfo = layoutInfo.visibleItemsInfo.firstOrNull()
+                if (firstVisibleItemInfo != null) {
+                    val firstItemIndex = firstVisibleItemInfo.index
+                    val firstItemOffset = Math.abs(firstVisibleItemInfo.offset)
+                    val firstItemSize = firstVisibleItemInfo.size
+
+                    if (firstItemOffset <= firstItemSize / 2) {
+                        animateScrollToItem(firstItemIndex)
+                    } else {
+                        animateScrollToItem(firstItemIndex.plus(1))
+                    }
+                }
+
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }

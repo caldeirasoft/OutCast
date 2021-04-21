@@ -344,7 +344,7 @@ fun DiscoverTopAppBar(
 }
 
 
-@OptIn(ExperimentalAnimationApi::class, InternalCoroutinesApi::class)
+@OptIn(ExperimentalAnimationApi::class, InternalCoroutinesApi::class, FlowPreview::class)
 @Composable
 fun RefreshButton(
     modifier: Modifier,
