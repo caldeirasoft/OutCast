@@ -76,7 +76,7 @@ fun DiscoverScreen(
     Scaffold {
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
-            val headerRatio: Float = 1 / 4f
+            val headerRatio: Float = 1 / 3f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
             val spacerHeight = headerHeight.value
 
