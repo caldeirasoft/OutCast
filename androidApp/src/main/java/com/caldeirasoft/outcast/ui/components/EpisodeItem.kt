@@ -16,6 +16,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -26,6 +27,7 @@ import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
 import com.google.accompanist.coil.CoilImage
 
 
+@OptIn(ExperimentalStdlibApi::class)
 @Composable
 fun StoreEpisodeItem(
     modifier: Modifier = Modifier,
@@ -53,29 +55,25 @@ fun StoreEpisodeItem(
             )
         },
         overlineText = {
+            val context = LocalContext.current
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                ProvideTextStyle(typography.caption) {
-                    Text(text = episode.podcastName, maxLines = 1)
-                }
+                Text(
+                    text = episode.releaseDateTime.formatRelativeDisplay(context).uppercase(),
+                    style = MaterialTheme.typography.caption
+                )
             }
         },
         secondaryText = {
-            val context = LocalContext.current
-            Text(
-                text = with(AnnotatedString.Builder()) {
-                    append(episode.duration.formatDuration())
-                    append(" ● ")
-                    append(episode.releaseDateTime.formatRelativeDisplay(context))
-                    toAnnotatedString()
-                },
-                maxLines = 3,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlayButton(episode = episode)
+                QueueButton(episode = episode)
+            }
         },
         icon = {
             PodcastThumbnail(
                 data = episode.artworkUrl,
                 modifier = Modifier
-                    .size(EpisodeDefaults.ThumbnailSize)
+                    .size(EpisodeDefaults.LargeThumbnailSize)
                     .clickable(onClick = { })
             )
         }
@@ -119,6 +117,8 @@ fun EpisodeItem(
     modifier: Modifier = Modifier,
     episode: Episode,
     onEpisodeClick: () -> Unit,
+    onPodcastClick: (() -> Unit)? = null,
+    index: Int? = null,
 ) {
     EpisodeDefaults.EpisodeItem(
         modifier = modifier
@@ -129,11 +129,22 @@ fun EpisodeItem(
                 data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.SmallThumbnailSize)
-                    .clickable(onClick = { })
+                    .clickable(onClick = { onPodcastClick?.invoke() })
             )
         },
         text = {
-            Text(text = episode.name, maxLines = 2)
+            Text(
+                text = with(AnnotatedString.Builder()) {
+                    if (index != null) {
+                        pushStyle(SpanStyle(color = Color.Red))
+                        append("${index}. ")
+                        pop()
+                    }
+                    append(episode.name)
+                    toAnnotatedString()
+                },
+                maxLines = 2,
+            )
         },
         releasedTimeText = { },
         actionButtons = {
@@ -292,6 +303,9 @@ private object EpisodeDefaults {
 
     // Default thumbnail size
     val ThumbnailSize = 56.dp
+
+    // Default thumbnail size
+    val LargeThumbnailSize = 72.dp
 
     // Small thumbnail size
     val SmallThumbnailSize = 40.dp
