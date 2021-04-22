@@ -5,8 +5,7 @@ import com.caldeirasoft.outcast.di.hiltmavericks.MavericksViewModelComponent
 import com.caldeirasoft.outcast.di.hiltmavericks.ViewModelKey
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastViewModel
 import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverViewModel
-import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartEpisodeViewModel
-import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartPodcastViewModel
+import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartSectionViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,11 +18,9 @@ interface ViewModelsModule {
     fun DiscoverViewModelFactory(factory: DiscoverViewModel.Factory): AssistedViewModelFactory<*, *>
 
     @[Binds IntoMap ViewModelKey(PodcastViewModel::class)]
-    fun StorePodcastViewModelFactory(factory: PodcastViewModel.Factory): AssistedViewModelFactory<*, *>
+    fun PodcastViewModelFactory(factory: PodcastViewModel.Factory): AssistedViewModelFactory<*, *>
 
-    @[Binds IntoMap ViewModelKey(TopChartPodcastViewModel::class)]
-    fun TopChartPodcastViewModelFactory(factory: TopChartPodcastViewModel.Factory): AssistedViewModelFactory<*, *>
+    @[Binds IntoMap ViewModelKey(TopChartSectionViewModel::class)]
+    fun TopChartSectionViewModelFactory(factory: TopChartSectionViewModel.Factory): AssistedViewModelFactory<*, *>
 
-    @[Binds IntoMap ViewModelKey(TopChartEpisodeViewModel::class)]
-    fun TopChartEpisodeViewModelFactory(factory: TopChartEpisodeViewModel.Factory): AssistedViewModelFactory<*, *>
 }

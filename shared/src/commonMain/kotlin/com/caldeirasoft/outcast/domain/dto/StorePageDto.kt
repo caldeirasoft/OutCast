@@ -310,13 +310,13 @@ class OfferResult(
 
 @Serializable
 class DownloadResult(
-    val url: String = "",
-    val type: String = "",
+    val url: String? = null,
+    val type: String? = null,
 )
 
 @Serializable
 class AssetResult(
-    val fileExtension: String = "",
+    val fileExtension: String? = null,
     val flavor: String? = null,
     val isClosedCaption: Boolean? = null,
     val duration: Int? = null,

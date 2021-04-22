@@ -7,17 +7,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
+import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.ui.components.ChipButton
 import com.caldeirasoft.outcast.ui.components.LazyListLayout
 import com.caldeirasoft.outcast.ui.components.PodcastListItem
 import com.caldeirasoft.outcast.ui.components.StoreEpisodeItem
@@ -25,15 +29,20 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetConten
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
+import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.util.ifLoadingMore
+import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun TopChartPodcastScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: TopChartPodcastViewModel = mavericksViewModel(keyFactory = { "podcast" })
+    val viewModel: TopChartSectionViewModel = mavericksViewModel(
+        initialArgument = StoreItemType.PODCAST,
+        keyFactory = { StoreItemType.PODCAST.name })
     TopChartSectionScreen(viewModel = viewModel, navigateTo = navigateTo)
 }
 
@@ -41,7 +50,9 @@ fun TopChartPodcastScreen(
 fun TopChartEpisodeScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: TopChartEpisodeViewModel = mavericksViewModel(keyFactory = { "episodes" })
+    val viewModel: TopChartSectionViewModel = mavericksViewModel(
+        initialArgument = StoreItemType.EPISODE,
+        keyFactory = { StoreItemType.EPISODE.name })
     TopChartSectionScreen(viewModel = viewModel, navigateTo = navigateTo)
 }
 
@@ -52,9 +63,6 @@ private fun TopChartSectionScreen(
     navigateTo: (Screen) -> Unit,
 ) {
     val state by viewModel.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = viewModel.topCharts.collectAsLazyPagingItems()
 
     LazyListLayout(lazyListItems = lazyPagingItems) {
@@ -64,51 +72,6 @@ private fun TopChartSectionScreen(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()) {
-
-            /*
-            item {
-                LazyRow(contentPadding = PaddingValues(top = 8.dp, start = 16.dp, end = 16.dp)) {
-                    item {
-                        ChipButton(
-                            selected = (selectedGenre != null),
-                            onClick = {
-                                drawerContent.updateContent {
-                                    CategoriesListBottomSheet(
-                                        selectedGenre = selectedGenre,
-                                        onGenreSelected = viewModel::onGenreSelected
-                                    )
-                                }
-                                coroutineScope.launch {
-                                    drawerState.show()
-                                }
-                            })
-                        {
-                            Text(
-                                text = when (selectedGenre) {
-                                    null -> stringResource(id = R.string.store_tab_categories)
-                                    else -> stringResource(id = StoreGenreItem.values()
-                                        .first { it.genreId == selectedGenre }.titleId)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            */
-            /*
-            item {
-                FilterChipGroup(
-                    modifier = Modifier.height(48.dp),
-                    selectedValue = StoreGenreItem.values().firstOrNull { it.genreId == selectedGenre },
-                    values = StoreGenreItem.values(),
-                    onClick = { viewModel.onGenreSelected(it?.genreId) }) {
-                    Text(
-                        text = stringResource(id = it.titleId),
-                        maxLines = 1
-                    )
-                }
-            }
-            */
 
             itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
                 when (item) {

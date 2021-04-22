@@ -19,6 +19,8 @@ import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartEpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.store.topchartsection.TopChartPodcastScreen
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -43,6 +45,9 @@ fun TopChartsScreen(
     val pagerState = rememberPagerState(pageCount = 2, initialPage = storeItemType.ordinal)
 
     Scaffold(
+        modifier = Modifier
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false),
         topBar = {
             TopAppBar(
                 title = {

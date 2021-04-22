@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -53,8 +54,8 @@ enum class StoreGenreItem(
 @ExperimentalCoroutinesApi
 @Composable
 fun CategoriesListBottomSheet(
-    selectedGenre: Int?,
-    onGenreSelected: (Int?) -> Unit,
+    category: Category?,
+    onCategorySelected: (Category?) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState(0)
@@ -87,15 +88,19 @@ fun CategoriesListBottomSheet(
                 shape = RoundedCornerShape(8.dp)) {
                 Column {
                     // all
-                    GenreListItem(null, selectedGenre == null, onGenreSelected)
+                    CategoryListItem(null, category == null, onCategorySelected)
                     Divider()
 
-                    StoreGenreItem.values().toList().forEach { itemContent ->
-                        GenreListItem(itemContent,
-                            selectedGenre == itemContent.genreId,
-                            onGenreSelected)
-                        Divider()
-                    }
+                    Category.values()
+                        .filter { !it.nested }
+                        .forEach { itemContent ->
+                            CategoryListItem(
+                                itemContent,
+                                category == itemContent,
+                                onCategorySelected
+                            )
+                            Divider()
+                        }
                 }
             }
         }
@@ -103,10 +108,10 @@ fun CategoriesListBottomSheet(
 }
 
 @Composable
-fun GenreListItem(
-    storeGenreItem: StoreGenreItem?,
+fun CategoryListItem(
+    category: Category?,
     selected: Boolean = false,
-    onGenreSelected: (Int?) -> Unit)
+    onCategorySelected: (Category?) -> Unit)
 {
     val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
@@ -119,20 +124,20 @@ fun GenreListItem(
         else -> MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
     }
 
-    if (storeGenreItem != null) {
-        val name = stringResource(id = storeGenreItem.titleId)
+    if (category != null) {
+        val name = category.text //stringResource(id = category.titleId)
         ListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    onGenreSelected(storeGenreItem.genreId)
+                    onCategorySelected(category)
                     coroutineScope.launch {
                         drawerState.hide()
                     }
                 }),
             text = { Text(text = name, color = contentColor) },
             icon = {
-                Image(painter = painterResource(id = storeGenreItem.drawableId),
+                Image(painter = painterResource(id = category.drawableId),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp)
                 )
@@ -144,7 +149,7 @@ fun GenreListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    onGenreSelected(null)
+                    onCategorySelected(null)
                     coroutineScope.launch {
                         drawerState.hide()
                     }
@@ -155,3 +160,30 @@ fun GenreListItem(
         )
     }
 }
+
+// genre icon
+
+val Category.drawableId: Int
+    @DrawableRes
+    get() = when(this.id) {
+        1301 -> R.drawable.ic_color_palette
+        1321 -> R.drawable.ic_analytics
+        1303 -> R.drawable.ic_theater
+        1304 -> R.drawable.ic_mortarboard
+        1483 -> R.drawable.ic_fiction
+        1511 -> R.drawable.ic_city_hall
+        1512 -> R.drawable.ic_first_aid_kit
+        1487 -> R.drawable.ic_history
+        1305 -> R.drawable.ic_family
+        1502 -> R.drawable.ic_game_controller
+        1310 -> R.drawable.ic_guitar
+        1489 -> R.drawable.ic_news
+        1314 -> R.drawable.ic_religion
+        1533 -> R.drawable.ic_flasks
+        1324 -> R.drawable.ic_social_care
+        1545 -> R.drawable.ic_sport
+        1309 -> R.drawable.ic_video_camera
+        1318 -> R.drawable.ic_artificial_intelligence
+        1488 -> R.drawable.ic_handcuffs
+        else -> R.drawable.ic_analytics
+    }
