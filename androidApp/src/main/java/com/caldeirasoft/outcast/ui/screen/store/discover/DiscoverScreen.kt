@@ -154,34 +154,50 @@ fun DiscoverScreen(
                             }
                         }
                         else -> {
-                            items(lazyPagingItems = lazyPagingItems) { item ->
-                                when (item) {
-                                    is StorePodcast -> {
-                                        PodcastListItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    navigateTo(Screen.PodcastScreen(item))
-                                                }),
-                                            storePodcast = item,
-                                            isFollowing = state.followingStatus.contains(item.id),
-                                            isFollowingLoading = state.followLoadingStatus.contains(item.id),
-                                            onSubscribeClick = viewModel::followPodcast
-                                        )
+                            when (lazyPagingItems.peek(0)) {
+                                is StorePodcast -> gridItems(
+                                    lazyPagingItems = lazyPagingItems,
+                                    contentPadding = PaddingValues(16.dp),
+                                    horizontalInnerPadding = 16.dp,
+                                    verticalInnerPadding = 16.dp,
+                                    columns = 2
+                                ) { item ->
+                                    when (item) {
+                                        is StorePodcast -> {
+                                            PodcastGridItem(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable(onClick = {
+                                                        navigateTo(Screen.PodcastScreen(item))
+                                                    }),
+                                                podcast = item,
+                                                isFollowing = state.followingStatus.contains(
+                                                    item.id
+                                                ),
+                                                isFollowingLoading = state.followLoadingStatus.contains(
+                                                    item.id
+                                                ),
+                                                onFollowPodcast = viewModel::followPodcast
+                                            )
+                                        }
                                     }
-                                    is StoreEpisode -> {
-                                        StoreEpisodeItem(
-                                            modifier = Modifier,
-                                            onEpisodeClick = {
-                                                navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
-                                            },
-                                            onPodcastClick = {
-                                                navigateTo(Screen.PodcastScreen(item.podcast))
-                                            },
-                                            episode = item.episode,
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Divider()
+                                }
+                                is StoreEpisode -> items(lazyPagingItems = lazyPagingItems) { item ->
+                                    when (item) {
+                                        is StoreEpisode -> {
+                                            StoreEpisodeItem(
+                                                modifier = Modifier,
+                                                onEpisodeClick = {
+                                                    navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                                                },
+                                                onPodcastClick = {
+                                                    navigateTo(Screen.PodcastScreen(item.podcast))
+                                                },
+                                                episode = item.episode,
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Divider()
+                                        }
                                     }
                                 }
                             }
@@ -443,9 +459,6 @@ fun StoreCollectionItemsContent(
         StoreCollectionEpisodeContent(
             storeCollection = storeCollection,
             navigateTo = navigateTo,
-            followingStatus = followingStatus,
-            followLoadingStatus = followLoadingStatus,
-            onSubscribeClick = onSubscribeClick
         )
     }
 }
@@ -491,9 +504,6 @@ fun StoreCollectionPodcastContent(
 fun StoreCollectionEpisodeContent(
     storeCollection: StoreCollectionItems,
     navigateTo: ScreenFn,
-    followingStatus: List<Long> = emptyList(),
-    followLoadingStatus: List<Long> = emptyList(),
-    onSubscribeClick: (StorePodcast) -> Unit = { },
 ) {
     val numRows = 3
     val indexedItems = storeCollection.items
