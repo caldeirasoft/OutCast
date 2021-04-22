@@ -8,9 +8,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -21,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -40,14 +40,13 @@ import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisode
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.ifLoadingMore
-import com.caldeirasoft.outcast.ui.util.mavericksViewModel
-import com.caldeirasoft.outcast.ui.util.toDp
-import com.caldeirasoft.outcast.ui.util.toPx
+import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -277,7 +276,8 @@ fun DiscoverScreenHeader(
                 .padding(
                     top = AppBarHeight,
                     start = 16.dp,
-                    end = 16.dp)
+                    end = 16.dp
+                )
                 .statusBarsPadding()
                 .navigationBarsPadding(bottom = false)
                 .align(Alignment.Center)
@@ -412,6 +412,127 @@ fun RestoreStatusBarColorOnDispose()
                 color = Color.Transparent,
                 darkIcons = useDarkIcons
             )
+        }
+    }
+}
+
+@Composable
+fun StoreCollectionItemsContent(
+    storeCollection: StoreCollectionItems,
+    navigateTo: ScreenFn,
+    followingStatus: List<Long> = emptyList(),
+    followLoadingStatus: List<Long> = emptyList(),
+    onSubscribeClick: (StorePodcast) -> Unit = { },
+) {
+    StoreHeadingSectionWithLink(
+        title = storeCollection.label,
+        onClick = {
+            navigateTo(Screen.Discover(storeCollection.room))
+        })
+
+    if (storeCollection.items.filterIsInstance<StorePodcast>().isNotEmpty()) {
+        StoreCollectionPodcastContent(
+            storeCollection = storeCollection,
+            navigateTo = navigateTo,
+            followingStatus = followingStatus,
+            followLoadingStatus = followLoadingStatus,
+            onSubscribeClick = onSubscribeClick
+        )
+    }
+    else if (storeCollection.items.filterIsInstance<StoreEpisode>().isNotEmpty()) {
+        StoreCollectionEpisodeContent(
+            storeCollection = storeCollection,
+            navigateTo = navigateTo,
+            followingStatus = followingStatus,
+            followLoadingStatus = followLoadingStatus,
+            onSubscribeClick = onSubscribeClick
+        )
+    }
+}
+
+@Composable
+fun StoreCollectionPodcastContent(
+    storeCollection: StoreCollectionItems,
+    navigateTo: ScreenFn,
+    followingStatus: List<Long> = emptyList(),
+    followLoadingStatus: List<Long> = emptyList(),
+    onSubscribeClick: (StorePodcast) -> Unit = { },
+) {
+    val listState = rememberLazyListState()
+    // content
+    LazyRow(
+        state = listState,
+        modifier = Modifier.nestedScroll(listState.nestedScrollConnection),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        itemsIndexed(items = storeCollection.items) { index, item ->
+            when (item) {
+                is StorePodcast ->
+                    PodcastGridItem(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .clickable(onClick = {
+                                navigateTo(Screen.PodcastScreen(item))
+                            }),
+                        podcast = item,
+                        index = if (storeCollection.sortByPopularity) index + 1 else null,
+                        isFollowing = followingStatus.contains(item.id),
+                        isFollowingLoading = followLoadingStatus.contains(item.id),
+                        onFollowPodcast = onSubscribeClick
+                    )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun StoreCollectionEpisodeContent(
+    storeCollection: StoreCollectionItems,
+    navigateTo: ScreenFn,
+    followingStatus: List<Long> = emptyList(),
+    followLoadingStatus: List<Long> = emptyList(),
+    onSubscribeClick: (StorePodcast) -> Unit = { },
+) {
+    val numRows = 3
+    val indexedItems = storeCollection.items
+            .filterIsInstance<StoreEpisode>()
+            .mapIndexed { index, storeItem -> Pair(index, storeItem) }
+    val chunkedItems = indexedItems.chunked(numRows)
+
+    // Remember a PagerState with our tab count
+    val pagerState = rememberPagerState(pageCount = storeCollection.items.size)
+
+    Column {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.Top
+        ) { page ->
+            if (chunkedItems.indices.contains(page)) {
+                val chartItems = chunkedItems[Math.floorMod(page, chunkedItems.size)]
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                    //.padding(horizontal = 4.dp)
+                )
+                {
+                    chartItems.forEach { (index, storeItem) ->
+                        StoreEpisodeItem(
+                            episode = storeItem.episode,
+                            modifier = Modifier.fillMaxWidth(),
+                            onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.podcast)) },
+                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
+                            index = if (storeCollection.sortByPopularity) (index + 1) else null
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -29,58 +29,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 
-@Composable
-fun StoreCollectionItemsContent(
-    storeCollection: StoreCollectionItems,
-    navigateTo: ScreenFn,
-    followingStatus: List<Long> = emptyList(),
-    followLoadingStatus: List<Long> = emptyList(),
-    onSubscribeClick: (StorePodcast) -> Unit = { },
-) {
-    StoreHeadingSectionWithLink(
-        title = storeCollection.label,
-        onClick = {
-            navigateTo(Screen.Discover(storeCollection.room))
-        })
-
-    val listState = rememberLazyListState()
-    // content
-    LazyRow(
-        state = listState,
-        modifier = Modifier.nestedScroll(listState.nestedScrollConnection),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        itemsIndexed(items = storeCollection.items) { index, item ->
-            when (item) {
-                is StorePodcast ->
-                    PodcastGridItem(
-                        modifier = Modifier
-                            .width(150.dp)
-                            .clickable(onClick = {
-                                navigateTo(Screen.PodcastScreen(item))
-                            }),
-                        podcast = item,
-                        index = if (storeCollection.sortByPopularity) index + 1 else null,
-                        isFollowing = followingStatus.contains(item.id),
-                        isFollowingLoading = followLoadingStatus.contains(item.id),
-                        onFollowPodcast = onSubscribeClick
-                    )
-                is StoreEpisode -> {
-                    EpisodeGridItem(
-                        modifier = Modifier
-                            .width(180.dp)
-                            .clickable(onClick = {
-                                navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
-                            }),
-                        episode = item.episode,
-                    )
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
 fun StoreCollectionDataContent(
