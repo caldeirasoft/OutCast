@@ -59,8 +59,7 @@ interface StorePagingSource
             for (i in startPosition until endPosition) {
                 when (val collection = storePage.storeList[i]) {
                     is StoreCollectionFeatured,
-                    is StoreCollectionData,
-                    ->
+                    is StoreCollectionData ->
                         yield(collection)
                     is StoreCollectionItems -> {
                         val newCollection = collection.itemsIds
@@ -69,7 +68,8 @@ interface StorePagingSource
                             .let {
                                 collection.copy(items = it)
                             }
-                        yield(newCollection)
+                        if (newCollection.items.isNotEmpty())
+                            yield(newCollection)
                     }
                 }
             }

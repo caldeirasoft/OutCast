@@ -24,4 +24,5 @@ data class StorePage(
     val storeIds: List<Long> = storeData.storeIds
     val storeList: MutableList<StoreCollection> = storeData.storeList
     val isMultiRoom: Boolean = storeData.isMultiRoom()
+    val containsFeatured = storeData.storeList.filterIsInstance<StoreCollectionFeatured>().isNotEmpty()
 }

@@ -145,6 +145,7 @@ class StoreRepository @Inject constructor(
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
+        val unAvailableContentIds = storePageDto.pageData?.unAvailableContentIds ?: emptyMap()
         val storeLookup =
             getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
         var topPodcastsIds: List<Long> = emptyList()
@@ -165,8 +166,7 @@ class StoreRepository @Inject constructor(
                                             lockupResult[id]?.let {
                                                 getStoreItemFromLookupResultItem(it, storeFront)
                                                     ?.apply {
-                                                        featuredArtwork =
-                                                            elementChild.artwork?.toArtwork()
+                                                        featuredArtwork = elementChild.artwork?.toArtwork()
                                                         yield(this)
                                                     }
                                             }
@@ -196,8 +196,9 @@ class StoreRepository @Inject constructor(
                     }
                     271 -> { // parse podcast collection
                         element.children.firstOrNull()?.let { elementChild ->
-                            val ids =
-                                elementChild.content.map { content -> content.contentId }
+                            val ids = elementChild.content
+                                .map { content -> content.contentId }
+                                .filter { !unAvailableContentIds.containsValue(it) }
                             when (elementChild.type) {
                                 "popularity" -> { // top podcasts // top episodes
                                     /*when (elementChild.fcKind) {

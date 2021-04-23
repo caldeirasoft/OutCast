@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -76,7 +77,9 @@ fun DiscoverScreen(
             val screenHeight = constraints.maxHeight
             val headerRatio: Float = 1 / 3f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
-            val spacerHeight = headerHeight.value
+
+            if (state.storePage.containsFeatured)
+                headerHeight.value = (screenHeight * 1 / 5f).toInt()
 
             LazyListLayout(lazyListItems = lazyPagingItems) {
                 val listState = rememberLazyListState()
@@ -91,7 +94,7 @@ fun DiscoverScreen(
                     item {
                         Box(modifier = Modifier
                             .fillMaxWidth()
-                            .height(height = spacerHeight.toDp()))
+                            .height(height = headerHeight.value.toDp()))
                         {
                             DiscoverScreenHeader(
                                 title = title,

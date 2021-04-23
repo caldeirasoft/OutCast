@@ -15,9 +15,7 @@ class StoreDataPagingSource(
     override val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 
     override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {
-        Timber.d("DBG - got new Grouping data : use it to Paging")
         val storePage = loadDataFromNetwork()
-        Timber.d("DBG - got new Grouping data : use it to Paging (2)")
         dataLoadedCallback?.invoke(storePage)
         val items = mutableListOf<StoreItem>()
         when {
