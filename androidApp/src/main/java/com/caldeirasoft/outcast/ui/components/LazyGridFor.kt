@@ -21,23 +21,25 @@ fun <T> ColumnScope.Grid(
     crossAxisSpacing: Dp = 0.dp,
     columns: Int = 2,
     items: List<T>,
-    rowHeight: Dp,
-    child: @Composable (item: T, innerPadding: PaddingValues) -> Unit
+    child: @Composable (item: T) -> Unit
 ) {
     val mainAxisPadding = PaddingValues(start = mainAxisSpacing, end = mainAxisSpacing)
     val crossAxisPadding =
         PaddingValues(start = crossAxisSpacing / columns, end = crossAxisSpacing / columns)
     val rows = items.chunked(columns)
     rows.forEachIndexed { index, rowList ->
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .height(rowHeight)
-            .padding(mainAxisPadding)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(mainAxisPadding)
+        ) {
             rowList.forEachIndexed { rowIndex, it ->
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .padding(contentPadding)) {
-                    child(it, crossAxisPadding)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(contentPadding)
+                ) {
+                    child(it)
                 }
 
                 if (rowIndex < columns - 1) {
@@ -46,17 +48,16 @@ fun <T> ColumnScope.Grid(
             }
             val emptyRows = (columns - rowList.size)
             repeat(emptyRows) {
-                Spacer(modifier = Modifier
-                    .weight(1f)
-                    .padding(contentPadding))
+                Spacer(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(contentPadding)
+                )
                 if (it + rowList.size < columns - 1) {
                     VerticalDivider()
                 }
             }
         }
-
-        if (index < rows.size - 1)
-            Divider()
     }
 }
 
@@ -68,38 +69,35 @@ fun <T : Any> LazyListScope.gridItems(
     horizontalInnerPadding: Dp = 0.dp,
     itemContent: @Composable LazyItemScope.(value: T?) -> Unit
 ) {
-    val rows = when {
-        lazyPagingItems.itemCount % columns == 0 -> lazyPagingItems.itemCount / columns
-        else -> (lazyPagingItems.itemCount / columns) + 1
+    gridItems(
+        count = lazyPagingItems.itemCount,
+        columns = columns,
+        contentPadding = contentPadding,
+        verticalInnerPadding = verticalInnerPadding,
+        horizontalInnerPadding = horizontalInnerPadding
+    ) { index ->
+        val item = lazyPagingItems[index]
+        itemContent(item)
     }
+}
 
-    for (row in 0..rows) {
-        if (row == 0) spacerItem(contentPadding.calculateTopPadding())
-
-        item {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = contentPadding.calculateStartPadding(LayoutDirection.Ltr), end = contentPadding.calculateEndPadding(LayoutDirection.Ltr))
-            ) {
-                for (column in 0 until columns) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        val index = (row * columns) + column
-                        if (index < lazyPagingItems.itemCount) {
-                            itemContent(lazyPagingItems[index])
-                        }
-                    }
-                    if (column < columns - 1) {
-                        Spacer(modifier = Modifier.width(horizontalInnerPadding))
-                    }
-                }
-            }
-        }
-
-        if (row < rows - 1)
-            spacerItem(verticalInnerPadding)
-        else
-            spacerItem(contentPadding.calculateBottomPadding())
+fun <T : Any> LazyListScope.gridItemsIndexed(
+    lazyPagingItems: LazyPagingItems<T>,
+    columns: Int = 3,
+    contentPadding: PaddingValues = PaddingValues(),
+    verticalInnerPadding: Dp = 0.dp,
+    horizontalInnerPadding: Dp = 0.dp,
+    itemContent: @Composable LazyItemScope.(index: Int, value: T?) -> Unit
+) {
+    gridItems(
+        count = lazyPagingItems.itemCount,
+        columns = columns,
+        contentPadding = contentPadding,
+        verticalInnerPadding = verticalInnerPadding,
+        horizontalInnerPadding = horizontalInnerPadding
+    ) { index ->
+        val item = lazyPagingItems[index]
+        itemContent(index, item)
     }
 }
 
@@ -146,6 +144,51 @@ fun <T : Any> LazyListScope.gridItems(
     }
 }
 
+fun LazyListScope.gridItems(
+    count: Int,
+    columns: Int = 3,
+    contentPadding: PaddingValues = PaddingValues(),
+    verticalInnerPadding: Dp = 0.dp,
+    horizontalInnerPadding: Dp = 0.dp,
+    itemContent: @Composable LazyItemScope.(index: Int) -> Unit
+) {
+    val rows = when {
+        count % columns == 0 -> count / columns
+        else -> (count / columns) + 1
+    }
+
+    for (row in 0..rows) {
+        if (row == 0) spacerItem(contentPadding.calculateTopPadding())
+
+        item {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = contentPadding.calculateStartPadding(LayoutDirection.Ltr),
+                        end = contentPadding.calculateEndPadding(LayoutDirection.Ltr)
+                    )
+            ) {
+                for (column in 0 until columns) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        val index = (row * columns) + column
+                        if (index < count) {
+                            itemContent(index)
+                        }
+                    }
+                    if (column < columns - 1) {
+                        Spacer(modifier = Modifier.width(horizontalInnerPadding))
+                    }
+                }
+            }
+        }
+
+        if (row < rows - 1)
+            spacerItem(verticalInnerPadding)
+        else
+            spacerItem(contentPadding.calculateBottomPadding())
+    }
+}
 
 fun LazyListScope.spacerItem(height: Dp) {
     item {

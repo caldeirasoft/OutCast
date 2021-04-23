@@ -47,7 +47,9 @@ fun StoreSearchScreen(
 ) {
     val listState = rememberLazyListState(0)
 
-    Scaffold {
+    Scaffold(modifier = Modifier
+        .statusBarsPadding()
+        .navigationBarsPadding(bottom = false)) {
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
             val headerRatio: Float = 1 / 4f
@@ -58,7 +60,6 @@ fun StoreSearchScreen(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .statusBarsPadding()
                     .padding(bottom = 56.dp)
             )
             {
