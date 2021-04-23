@@ -6,13 +6,11 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
-import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
+import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -27,14 +25,12 @@ import kotlinx.coroutines.flow.map
 class TopChartSectionViewModel @AssistedInject constructor(
     @Assisted initialState: TopChartSectionState,
     followUseCase: FollowUseCase,
-    loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
-    val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
-    val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    val podcastDao: PodcastDao
+    private val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
+    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    podcastDao: PodcastDao
 ) : FollowViewModel<TopChartSectionState>(
     initialState,
     followUseCase,
-    loadFollowedPodcastsUseCase,
     podcastDao
 ) {
 

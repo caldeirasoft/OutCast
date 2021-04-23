@@ -4,7 +4,6 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -12,8 +11,7 @@ import kotlinx.coroutines.flow.*
 abstract class FollowViewModel<S : MavericksState>(
     initialState: S,
     private val followUseCase: FollowUseCase,
-    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
-    private val podcastDao: PodcastDao
+    podcastDao: PodcastDao
 ) : MavericksViewModel<S>(initialState) {
 
     val followingStatus: MutableStateFlow<List<Long>> =

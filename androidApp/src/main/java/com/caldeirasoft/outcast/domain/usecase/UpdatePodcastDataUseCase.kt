@@ -16,18 +16,12 @@ class UpdatePodcastDataUseCase @Inject constructor(
     val dataStoreRepository: DataStoreRepository,
 ) {
     fun execute(podcast: Podcast): Flow<Boolean> = flow {
-        val storeFront = getStoreFront()
+        val storeFront = dataStoreRepository.storeFront.first()
         if (shoudUpdate(podcast, storeFront)) {
             podcastsRepository.updatePodcast(podcast.feedUrl, podcast)
         }
         emit(true)
     }
-
-    suspend fun getStoreFront(): String =
-        dataStoreRepository.storeCountry
-            .map { dataStoreRepository.getCurrentStoreFront(it) }
-            .firstOrNull()
-            .orEmpty()
 
     /**
      * Check if podcast should be updated : older than 1 hour

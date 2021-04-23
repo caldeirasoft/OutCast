@@ -8,9 +8,8 @@ import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
 import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadFollowedPodcastsUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadStorePagingDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
+import com.caldeirasoft.outcast.domain.usecase.LoadStorePagingDataUseCase
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -25,12 +24,11 @@ import kotlinx.coroutines.flow.map
 @ExperimentalCoroutinesApi
 class DiscoverViewModel @AssistedInject constructor(
     @Assisted initialState: DiscoverState,
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
+    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
     private val loadStorePagingDataUseCase: LoadStorePagingDataUseCase,
     val followUseCase: FollowUseCase,
-    val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     val podcastDao: PodcastDao
-) : FollowViewModel<DiscoverState>(initialState, followUseCase, loadFollowedPodcastsUseCase, podcastDao) {
+) : FollowViewModel<DiscoverState>(initialState, followUseCase, podcastDao) {
     init {
         followingStatus.setOnEach { copy(followingStatus = it) }
         followLoadingStatus.setOnEach { copy(followLoadingStatus = it) }
@@ -59,7 +57,7 @@ class DiscoverViewModel @AssistedInject constructor(
             .flattenMerge()
             .cachedIn(viewModelScope)
 
-    fun clearNewVersionButton() {
+    fun clearNewVersionNotification() {
         setState {
             copy(newVersionAvailable = false)
         }

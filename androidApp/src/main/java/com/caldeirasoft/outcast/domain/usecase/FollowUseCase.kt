@@ -10,8 +10,6 @@ import javax.inject.Inject
 
 class FollowUseCase @Inject constructor(
     private val podcastsRepository: PodcastsRepository,
-    private val storeRepository: StoreRepository,
-    private val dataStoreRepository: DataStoreRepository,
 ) {
     fun execute(feedUrl: String): Flow<Boolean> = flow {
         podcastsRepository.followPodcast(feedUrl = feedUrl)

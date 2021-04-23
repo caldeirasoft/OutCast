@@ -14,9 +14,5 @@ class FetchStoreFrontUseCase @Inject constructor(
         dataStoreRepository.storeCountry
 
     fun getStoreFront(): Flow<String> =
-        getCountry()
-            .map {
-                Timber.d("DBG - getStoreFront")
-                dataStoreRepository.getCurrentStoreFront(it)
-            }
+        dataStoreRepository.storeFront
 }

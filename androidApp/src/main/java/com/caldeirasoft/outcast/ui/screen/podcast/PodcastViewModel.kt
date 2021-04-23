@@ -23,29 +23,16 @@ import timber.log.Timber
 
 class PodcastViewModel @AssistedInject constructor(
     @Assisted val initialState: PodcastState,
-    private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    private val fetchStorePodcastDataUseCase: FetchStorePodcastDataUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
     private val updatePodcastDataUseCase: UpdatePodcastDataUseCase,
-    private val loadPodcastUseCase: LoadPodcastUseCase,
-    private val loadFollowedPodcastsUseCase: LoadFollowedPodcastsUseCase,
     private val followUseCase: FollowUseCase,
     private val unfollowUseCase: UnfollowUseCase,
-    private val loadPodcastEpisodesUseCase: LoadPodcastEpisodesUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
     private val podcastDao: PodcastDao,
 ) : MavericksViewModel<PodcastState>(initialState), PreferenceViewModel {
 
     private var isInitialized: Boolean = false
-
-    @OptIn(FlowPreview::class)
-    val episodes: Flow<PagingData<Episode>> =
-        loadPodcastEpisodesUseCase.execute(initialState.podcast.feedUrl)
-            .map { it.sortedByDescending { episode ->  episode.releaseDateTime } }
-            .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it.size} episodes") }
-            .map { PagingData.from(it) }
-            .cachedIn(viewModelScope)
 
     init {
         podcastDao.getPodcastAndEpisodesWithUrl(initialState.podcast.feedUrl)

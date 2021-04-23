@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -53,6 +54,10 @@ class DataStoreRepository @Inject constructor(
             preferences[key] = value
         }
     }
+
+    val storeFront: Flow<String> =
+        storeCountry
+            .map { getCurrentStoreFront(it) }
 
     /**
      * getCurrentStoreFront
