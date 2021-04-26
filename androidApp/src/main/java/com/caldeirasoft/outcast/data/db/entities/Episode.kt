@@ -1,9 +1,16 @@
 package com.caldeirasoft.outcast.data.db.entities
 
+import android.os.Parcelable
 import androidx.room.*
+import com.caldeirasoft.outcast.data.db.customparcelers.InstantParceler
+import com.caldeirasoft.outcast.data.db.customparcelers.NullableInstantParceler
 import kotlinx.datetime.Instant
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 
-
+@Parcelize
+@TypeParceler<Instant, InstantParceler>
+@TypeParceler<Instant?, NullableInstantParceler>
 @Entity(
   tableName = "episode",
   primaryKeys = ["feedUrl", "guid"],
@@ -45,5 +52,22 @@ data class Episode(
   @ColumnInfo(name = "isFavorite") val isFavorite: Boolean = false,
   @ColumnInfo(name = "playedAt") val playedAt: Instant? = null,
   @ColumnInfo(name = "updatedAt") val updatedAt: Instant
-)
+) : Parcelable {
+  companion object {
+    val Default = Episode(
+      feedUrl = "",
+      guid = "",
+      name = "",
+      podcastName = "",
+      artistName = "",
+      artworkUrl = "",
+      description = "",
+      duration = 0,
+      mediaType = "",
+      mediaUrl = "",
+      releaseDateTime = Instant.DISTANT_PAST,
+      updatedAt = Instant.DISTANT_PAST,
+    )
+  }
+}
 

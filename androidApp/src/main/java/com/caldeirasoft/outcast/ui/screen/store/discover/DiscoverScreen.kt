@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,7 +35,6 @@ import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -190,10 +188,10 @@ fun DiscoverScreen(
                                             StoreEpisodeItem(
                                                 modifier = Modifier,
                                                 onEpisodeClick = {
-                                                    navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                                                    navigateTo(Screen.EpisodeScreen(item))
                                                 },
                                                 onPodcastClick = {
-                                                    navigateTo(Screen.PodcastScreen(item.podcast))
+                                                    navigateTo(Screen.PodcastScreen(item.storePodcast))
                                                 },
                                                 episode = item.episode,
                                             )
@@ -538,8 +536,8 @@ fun StoreCollectionEpisodeContent(
                         StoreEpisodeItem(
                             episode = storeItem.episode,
                             modifier = Modifier.fillMaxWidth(),
-                            onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.podcast)) },
-                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem.toEpisodeArg())) },
+                            onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.storePodcast)) },
+                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem)) },
                             index = if (storeCollection.sortByPopularity) (index + 1) else null
                         )
                     }

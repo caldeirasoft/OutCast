@@ -94,6 +94,7 @@ object NetworkModule {
         return Json {
             serializersModule = serializer
             coerceInputValues = false
+            ignoreUnknownKeys = true
         }
     }
 

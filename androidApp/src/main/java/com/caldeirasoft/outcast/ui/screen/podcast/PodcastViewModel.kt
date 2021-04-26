@@ -23,19 +23,19 @@ import timber.log.Timber
 
 class PodcastViewModel @AssistedInject constructor(
     @Assisted val initialState: PodcastState,
+    private val loadPodcastFromDbUseCase: LoadPodcastFromDbUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
     private val updatePodcastDataUseCase: UpdatePodcastDataUseCase,
     private val followUseCase: FollowUseCase,
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
-    private val podcastDao: PodcastDao,
 ) : MavericksViewModel<PodcastState>(initialState), PreferenceViewModel {
 
     private var isInitialized: Boolean = false
 
     init {
-        podcastDao.getPodcastAndEpisodesWithUrl(initialState.podcast.feedUrl)
+        loadPodcastFromDbUseCase.execute(initialState.podcast)
             .onEach {
                 if (it == null) // 1rst launch
                     fetchPodcastDataUseCase.execute(initialState.podcast)

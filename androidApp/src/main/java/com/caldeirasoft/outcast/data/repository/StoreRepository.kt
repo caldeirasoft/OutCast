@@ -5,7 +5,6 @@ import androidx.datastore.dataStore
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
 import com.caldeirasoft.outcast.data.util.local.StorePageSerializer
-import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
@@ -71,12 +70,17 @@ class StoreRepository @Inject constructor(
         val url = GENRE_URL.replace("{genre}", (genre ?: DEFAULT_GENRE).toString())
         return when (genre) {
             DEFAULT_GENRE -> {
-                val groupingPageCache = context.dataStore.data.firstOrNull()
-                    .takeUnless { it?.timestamp == Instant.DISTANT_PAST }
-                    .takeUnless { it?.storeFront != storeFront }
+                var groupingPageCache: StorePage? = null
+                try {
+                    groupingPageCache = context.dataStore.data.firstOrNull()
+                        .takeUnless { it?.timestamp == Instant.DISTANT_PAST }
+                        .takeUnless { it?.storeFront != storeFront }
+                }
+                catch (e: Exception) {
+
+                }
 
                 val groupingPage = groupingPageCache ?: getStoreDataAsync(url, storeFront)
-
                 newVersionAvailable?.let {
                     if (groupingPageCache != null) {
                         scope.launch {
@@ -612,7 +616,7 @@ class StoreRepository @Inject constructor(
                     storeFront = storeFront,
                     isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
                     isComplete = false,
-                    podcast = if (item.collection.values.isEmpty()) {
+                    storePodcast = if (item.collection.values.isNotEmpty()) {
                         StorePodcast(
                             id = item.collectionId?.toLong() ?: 0,
                             name = item.collectionName.orEmpty(),

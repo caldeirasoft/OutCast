@@ -111,7 +111,7 @@ private fun ITunesChannelData.toPodcastResponse(
         ?: Instant.DISTANT_PAST
     val category = categories
         ?.mapNotNull { it.name }
-        ?.map { Category.fromName(it) }
+        ?.mapNotNull { Category.fromName(it) }
         ?.firstOrNull()
     val podcast = Podcast(
         feedUrl = feedUrl,
@@ -150,7 +150,7 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         ?.let { fromEpochSeconds(jtInstant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(it)).epochSecond) }
         ?: Instant.DISTANT_PAST
     return Episode(
-        guid = guid.toString(),
+        guid = guid?.value.orEmpty(),
         name = title.orEmpty(),
         url = "",
         podcastId = podcast.podcastId,

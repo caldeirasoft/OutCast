@@ -19,20 +19,19 @@ data class PodcastState(
     val followingStatus: FollowStatus = FollowStatus.UNFOLLOWED,
     val prefs: Preferences? = null,
 ) : MavericksState {
-    constructor(arg: PodcastArg) :
-            this(podcast = arg.toPodcast(), isLoading = true)
+    constructor(arg: Podcast) :
+            this(podcast = arg, isLoading = true)
 
     val artistData: StoreData? =
-        storeFront?.let {
-            podcast.artistUrl?.let {
-                StoreData(
-                    id = podcast.artistId ?: 0L,
-                    label = podcast.artistName,
-                    url = podcast.artistUrl.orEmpty(),
-                    storeFront = storeFront
-                )
-            }
+        podcast.artistUrl?.let {
+            StoreData(
+                id = podcast.artistId ?: 0L,
+                label = podcast.artistName,
+                url = podcast.artistUrl.orEmpty(),
+                storeFront = ""
+            )
         }
+
 
     val podcastPreferenceKeys: PodcastPreferenceKeys =
         PodcastPreferenceKeys(podcast.feedUrl)

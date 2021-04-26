@@ -8,13 +8,19 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
+import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast.Companion.toEpisodeWithPodcast
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.toPodcast
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
+import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg.Companion.toPodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
@@ -47,14 +53,18 @@ sealed class Screen (val id: ScreenName) {
     object Inbox : Screen(ScreenName.INBOX)
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
-    data class PodcastScreen private constructor(val podcastArg: PodcastArg) :
-        Screen(ScreenName.PODCAST) {
-        constructor(storePodcast: StorePodcast) : this(podcastArg = storePodcast.toPodcastArg())
-        constructor(podcast: Podcast) : this(podcastArg = podcast.toPodcastArg())
+    data class PodcastScreen constructor(val podcast: Podcast) : Screen(ScreenName.PODCAST) {
+        constructor(storePodcast: StorePodcast) : this(podcast = storePodcast.toPodcast())
     }
 
     data class PodcastSettings(val podcastId: Long) : Screen(ScreenName.PODCAST_SETTINGS)
-    data class EpisodeScreen(val episodeArg: EpisodeArg) : Screen(ScreenName.EPISODE)
+    data class EpisodeScreen private constructor(
+        val episode: Episode?,
+        val episodeWithPodcast: EpisodeWithPodcast?
+    ) : Screen(ScreenName.EPISODE) {
+        constructor(ep: Episode) : this(episode = ep, episodeWithPodcast = null)
+        constructor(storeEpisode: StoreEpisode) : this(episode = null, episodeWithPodcast = storeEpisode.toEpisodeWithPodcast())
+    }
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     data class Discover(val storeDataArg: StoreDataArg?) : Screen(ScreenName.DISCOVER) {
@@ -70,6 +80,9 @@ sealed class Screen (val id: ScreenName) {
     companion object {
         inline fun <reified T> encodeObject(item: T): String =
             URLEncoder.encode(Json.encodeToString(item), "UTF-8")
+
+        fun String.urlEncode(): String =
+            URLEncoder.encode(this, "UTF-8")
     }
 }
 

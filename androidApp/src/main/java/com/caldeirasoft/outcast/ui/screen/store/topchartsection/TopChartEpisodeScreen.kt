@@ -20,7 +20,6 @@ import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.util.*
 
 
@@ -58,8 +57,8 @@ fun TopChartEpisodeScreen(
                         is StoreEpisode -> {
                             StoreEpisodeItem(
                                 episode = item.episode,
-                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item.toEpisodeArg())) },
-                                onPodcastClick = { navigateTo(Screen.PodcastScreen(item.podcast)) },
+                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
+                                onPodcastClick = { navigateTo(Screen.PodcastScreen(item.storePodcast)) },
                                 index = index + 1
                             )
                             Divider()

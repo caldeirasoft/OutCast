@@ -256,9 +256,8 @@ enum class Category(
     FILM_INTERVIEWS("Film Interviews", 1565, true, TV_AND_FILM);
 
     companion object {
-        fun fromName(rawValue: String): Category =
+        fun fromName(rawValue: String): Category? =
             values().find { t -> t.text.equals(rawValue, ignoreCase = true) }
-                ?: throw IllegalArgumentException("Unknown Category name $rawValue")
 
         fun fromId(id: Int): Category? =
             values().find { t -> t.id == id }

@@ -36,7 +36,7 @@ class StoreEpisode(
     override val artwork: Artwork? = null,
     val isExplicit: Boolean = false,
     val isComplete: Boolean = false,
-    val podcast: StorePodcast,
+    val storePodcast: StorePodcast,
 ) : StoreItemArtwork {
     override var featuredArtwork: Artwork? = null
     override var editorialArtwork: Artwork? = null

@@ -43,11 +43,16 @@ import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverState
+import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverTopAppBar
 import com.caldeirasoft.outcast.ui.theme.*
 import com.caldeirasoft.outcast.ui.util.mavericksViewModel
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toPx
 import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsHeight
+import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -58,18 +63,18 @@ val LocalVibrantColor = compositionLocalOf<Color> { error("No vibrant color") }
 @ExperimentalCoroutinesApi
 @Composable
 fun PodcastScreen(
-    podcastArg: PodcastArg,
+    podcast: Podcast,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: PodcastViewModel = mavericksViewModel(initialArgument = podcastArg)
+    val viewModel: PodcastViewModel = mavericksViewModel(initialArgument = podcast)
     val state by viewModel.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
 
     val podcastData = state.podcast
-    val dominantColor = remember(podcastData) { GetPodcastVibrantColor(podcastData = podcastData) }
+    val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
     val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
 
     LaunchedEffect(key1 = drawerContent) {
@@ -82,7 +87,7 @@ fun PodcastScreen(
     }
 
     CompositionLocalProvider(LocalVibrantColor provides dominantColorOrDefault) {
-        ReachableScaffold(headerRatio = 2 / 5f) { headerHeight ->
+        Scaffold {
             //
             val listState = rememberLazyListState(0)
             LazyColumn(
@@ -94,7 +99,6 @@ fun PodcastScreen(
                     PodcastExpandedHeader(
                         state = state,
                         listState = listState,
-                        headerHeight = headerHeight,
                         navigateTo = navigateTo
                     )
                 }
@@ -184,15 +188,13 @@ fun PodcastScreen(
                         }
                         if (state.showAllEpisodes || state.episodes.size < 5) {
                             items(items = state.episodes) { episode ->
-                                episode?.let {
-                                    EpisodeItem(
-                                        episode = episode,
-                                        onEpisodeClick = {
-                                            navigateTo(Screen.EpisodeScreen(episode.toEpisodeArg()))
-                                        }
-                                    )
-                                    Divider()
-                                }
+                                EpisodeItem(
+                                    episode = episode,
+                                    onEpisodeClick = {
+                                        navigateTo(Screen.EpisodeScreen(episode))
+                                    }
+                                )
+                                Divider()
                             }
                         } else {
                             // show first, last and "show more" button
@@ -202,7 +204,7 @@ fun PodcastScreen(
                                     EpisodeItem(
                                         episode = firstEpisode,
                                         onEpisodeClick = {
-                                            navigateTo(Screen.EpisodeScreen(firstEpisode.toEpisodeArg()))
+                                            navigateTo(Screen.EpisodeScreen(firstEpisode))
                                         }
                                     )
                                     Divider()
@@ -213,8 +215,7 @@ fun PodcastScreen(
                                 // text button "show more episodes"
                                 TextButton(
                                     modifier = Modifier
-                                        .padding(horizontal = 16.dp)
-                                        .align(Alignment.Center),
+                                        .padding(horizontal = 16.dp),
                                     colors = ButtonDefaults.textButtonColors(
                                         contentColor = LocalVibrantColor.current
                                     ),
@@ -233,7 +234,7 @@ fun PodcastScreen(
                                     EpisodeItem(
                                         episode = lastEpisode,
                                         onEpisodeClick = {
-                                            navigateTo(Screen.EpisodeScreen(lastEpisode.toEpisodeArg()))
+                                            navigateTo(Screen.EpisodeScreen(lastEpisode))
                                         }
                                     )
                                     Divider()
@@ -249,17 +250,11 @@ fun PodcastScreen(
                 }
             }
 
-
-            ReachableAppBar(
-                collapsedContent = {
-                    PodcastCollapsedHeader(
-                        podcastData = podcastData,
-                        listState = listState,
-                        headerHeight = headerHeight,
-                        navigateUp = navigateBack)
-                },
-                state = listState,
-                headerHeight = headerHeight)
+            PodcastTopAppBar(
+                state = state,
+                listState = listState,
+                navigateUp = navigateBack
+            )
         }
     }
 }
@@ -267,9 +262,8 @@ fun PodcastScreen(
 @Composable
 private fun PodcastExpandedHeader(
     state: PodcastState,
-    navigateTo: (Screen) -> Unit,
     listState: LazyListState,
-    headerHeight: Int,
+    navigateTo: (Screen) -> Unit,
 ) {
     val podcastData = state.podcast
     val artistData = state.artistData
@@ -277,48 +271,38 @@ private fun PodcastExpandedHeader(
         podcastData.artworkDominantColor
             ?.let { Color.getColor(it).takeUnless { color -> color == Color.White } }
 
-    val alphaLargeHeader = getExpandedHeaderAlpha(listState, headerHeight)
+    val alphaLargeHeader = listState.expandedHeaderAlpha
     Box(modifier = Modifier
         .fillMaxWidth()
-        .height(headerHeight.toDp())
     )
     {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            val bgDominantColor =
+        val bgDominantColor =
                 Color.getColor(podcastData.artworkDominantColor) ?: MaterialTheme.colors.surface
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    //.background(Color.Magenta.copy(alpha = 0.9f))
-                    .background(
-                        brush = Brush.verticalGradient(
-                            0.0f to bgDominantColor.copy(alpha = 0.5f),
-                            0.2f to bgDominantColor.copy(alpha = 0.5f),
-                            0.6f to Color.Transparent,
-                            startY = 0.0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
-                    )
-            )
-        }
-
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        0.0f to bgDominantColor.copy(alpha = 0.5f),
+                        0.2f to bgDominantColor.copy(alpha = 0.5f),
+                        0.6f to Color.Transparent,
+                        startY = 0.0f,
+                        endY = Float.POSITIVE_INFINITY
+                    )
+                )
                 .padding(horizontal = 16.dp)
                 .padding(top = 56.dp, bottom = 8.dp)
                 .alpha(alphaLargeHeader),
         ) {
+            // status bar spacer
+            Spacer(modifier = Modifier.statusBarsHeight())
+
             // thumbnail
             Card(
                 backgroundColor = Color.Transparent,
                 shape = RoundedCornerShape(8.dp),
                 elevation = 2.dp,
                 modifier = Modifier
-                    .weight(1f)
                     .align(Alignment.CenterHorizontally)
             ) {
                 CoilImage(
@@ -326,7 +310,7 @@ private fun PodcastExpandedHeader(
                     contentDescription = podcastData.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .fillMaxHeight()
+                        .width(200.dp)
                         .aspectRatio(1f)
                 )
             }
@@ -370,15 +354,21 @@ private fun PodcastExpandedHeader(
 }
 
 @Composable
-private fun PodcastCollapsedHeader(
-    podcastData: Podcast,
+fun PodcastTopAppBar(
+    state: PodcastState,
     listState: LazyListState,
-    headerHeight: Int,
     navigateUp: () -> Unit,
 ) {
-    val collapsedHeaderAlpha = getCollapsedHeaderAlpha(listState, headerHeight)
-/*    // top app bar
-    val artwork = viewState.storePage.artwork
+    val appBarAlpha = listState.topAppBarAlpha
+    val backgroundColor: Color = Color.blendARGB(
+        MaterialTheme.colors.surface.copy(alpha = 0f),
+        MaterialTheme.colors.surface,
+        appBarAlpha)
+
+    // top app bar
+    val contentColor = contentColorFor(MaterialTheme.colors.surface)
+    /*
+    val artwork = state.podcast.artworkDominantColor
     val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
     val contentColor: Color =
         artwork?.textColor1
@@ -386,33 +376,36 @@ private fun PodcastCollapsedHeader(
                 val contentStartColor = Color.getColor(it)
                 Color.blendARGB(contentStartColor,
                     contentEndColor,
-                    collapsedHeaderAlpha)
+                    appBarAlpha)
             }
             ?: contentEndColor*/
 
-    val topAppBarBackgroudColor = Color.blendARGB(
-        MaterialTheme.colors.background.copy(alpha = 0f),
-        MaterialTheme.colors.background,
-        collapsedHeaderAlpha)
-    TopAppBar(
+    Column(
         modifier = Modifier
-            .fillMaxWidth(),
-        title = {
-            CompositionLocalProvider(LocalContentAlpha provides collapsedHeaderAlpha) {
-                Text(text = podcastData.name)
-            }
-        },
-        navigationIcon = {
-            IconButton(onClick = navigateUp) {
-                Icon(
-                    Icons.Filled.ArrowBack,
-                    contentDescription = null,
-                )
-            }
-        },
-        backgroundColor = topAppBarBackgroudColor,
-        elevation = if (listState.firstVisibleItemIndex > 0) 1.dp else 0.dp
-    )
+            .background(backgroundColor)
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false)
+    ) {
+        TopAppBar(
+            modifier = Modifier,
+            title = {
+                CompositionLocalProvider(LocalContentAlpha provides appBarAlpha) {
+                    Text(text = state.podcast.name)
+                }
+            },
+            navigationIcon = {
+                IconButton(onClick = navigateUp) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                }
+            },
+            actions = { },
+            backgroundColor = Color.Transparent,
+            contentColor = contentColor,
+            elevation = 0.dp
+        )
+        Divider(modifier = Modifier.alpha(appBarAlpha))
+    }
 }
 
 @Composable
@@ -581,8 +574,9 @@ fun FollowButton(state: PodcastState, onClick: () -> Unit) {
     }
 }
 
-fun GetPodcastVibrantColor(podcastData: Podcast): Color? =
-    podcastData.artworkDominantColor
+fun GetPodcastVibrantColor(podcastData: Podcast?): Color? =
+    podcastData
+        ?.artworkDominantColor
         ?.let { Color.getColor(it).takeUnless { it == Color.White || it == Color.Black } }
         ?.let { color ->
             Timber.d(String.format("color : #%06X", (0xFFFFFF and color.toArgb())))

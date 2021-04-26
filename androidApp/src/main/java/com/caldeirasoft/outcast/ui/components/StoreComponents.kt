@@ -97,7 +97,7 @@ fun StoreCollectionFeaturedContent(
                         when (item) {
                             is StoreData -> navigateTo(Screen.Discover(item))
                             is StorePodcast -> navigateTo(Screen.PodcastScreen(item))
-                            is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item.toEpisodeArg()))
+                            is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item))
                         }
                     }
             )

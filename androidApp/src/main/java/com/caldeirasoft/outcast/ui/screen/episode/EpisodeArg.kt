@@ -6,7 +6,8 @@ import android.os.Parcelable
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
-import kotlinx.datetime.Instant
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg.Companion.toPodcastArg
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.UseSerializers
 
@@ -17,38 +18,13 @@ data class EpisodeArg(
     val name: String,
     val url: String,
     val podcastName: String,
-    val artistName: String,
+    val podcastId: Long? = null,
     val feedUrl: String,
+    val artistName: String,
     val artworkUrl: String,
     val duration: Int,
+    val podcastArg: PodcastArg? = null
 ) : Parcelable {
-    fun toEpisode() = Episode(
-        guid = guid,
-        name = name,
-        url = url,
-        podcastId = null,
-        podcastName = podcastName,
-        artistName = artistName,
-        artistId = null,
-        releaseDateTime = Instant.DISTANT_PAST,
-        feedUrl = feedUrl,
-        description = null,
-        isExplicit = false,
-        artworkUrl = artworkUrl,
-        mediaUrl = "",
-        mediaType = "",
-        duration = duration,
-        podcastEpisodeSeason = null,
-        podcastEpisodeNumber = null,
-        podcastEpisodeWebsiteUrl = null,
-        podcastEpisodeType = null,
-        updatedAt = Instant.DISTANT_PAST,
-        playbackPosition = null,
-        isPlayed = false,
-        isFavorite = false,
-        playedAt = null,
-    )
-
     companion object {
         fun Episode.toEpisodeArg() = EpisodeArg(
             guid = guid,
@@ -70,6 +46,7 @@ data class EpisodeArg(
             feedUrl = feedUrl,
             artworkUrl = artwork?.getArtworkPodcast().orEmpty(),
             duration = duration,
+            podcastArg = storePodcast.toPodcastArg()
         )
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
+import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlEncode
 
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
@@ -11,11 +12,31 @@ class Actions(navController: NavController) {
             is PodcastScreen -> {
                 navController.currentBackStackEntry
                     ?.arguments
-                    ?.putParcelable("podcast", screen.podcastArg)
-                navController.navigate(screen.id.name)
+                    ?.putParcelable("podcast", screen.podcast)
+                val screenName = screen.id.name
+                val feedUrl = screen.podcast.feedUrl.urlEncode()
+                navController.navigate("$screenName/$feedUrl")
             }
-            is EpisodeScreen ->
-                navController.navigate("${screen.id.name}/${Screen.encodeObject(screen.episodeArg)}")
+            is EpisodeScreen -> {
+                screen.episode?.let { ep ->
+                    navController.currentBackStackEntry
+                        ?.arguments
+                        ?.putParcelable("episode", ep)
+                    val screenName = screen.id.name
+                    val feedUrl = ep.feedUrl.urlEncode()
+                    val guid = ep.guid
+                    navController.navigate("$screenName/$feedUrl/$guid")
+                }
+                screen.episodeWithPodcast?.let { ep ->
+                    navController.currentBackStackEntry
+                        ?.arguments
+                        ?.putParcelable("episodeWithPodcast", ep)
+                    val screenName = screen.id.name
+                    val feedUrl = ep.episode.feedUrl.urlEncode()
+                    val guid = ep.episode.guid
+                    navController.navigate("$screenName/$feedUrl/$guid")
+                }
+            }
             is Discover -> {
                 val storeData = screen.storeDataArg
                 if (storeData != null) {

@@ -4,6 +4,7 @@ import androidx.room.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata.Companion.metadata
+import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,8 +18,9 @@ interface EpisodeDao : EntityDao<Episode> {
         .filter { it.value == -1L }
         .forEach { update(objList[it.index].metadata) }
 
+    @Transaction
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl AND guid = :guid")
-    fun getEpisodeWithGuid(feedUrl: String, guid: String): Flow<Episode?>
+    fun getEpisodeWithGuid(feedUrl: String, guid: String): Flow<EpisodeWithPodcast?>
 
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl")
     fun getEpisodesWithUrl(feedUrl: String): Flow<List<Episode>>
