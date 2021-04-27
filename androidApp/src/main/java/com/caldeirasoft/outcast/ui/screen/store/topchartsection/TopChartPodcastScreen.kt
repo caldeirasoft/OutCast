@@ -9,10 +9,12 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
@@ -25,11 +27,9 @@ import com.caldeirasoft.outcast.ui.util.*
 fun TopChartPodcastScreen(
     navigateTo: (Screen) -> Unit,
 ) {
-    val viewModel: TopChartSectionViewModel = mavericksViewModel(
-        initialArgument = StoreItemType.PODCAST,
-        keyFactory = { StoreItemType.PODCAST.name })
+    val viewModel: TopChartSectionViewModel = hiltNavGraphViewModel()
 
-    val state by viewModel.collectAsState()
+    val state by viewModel.state.collectAsState()
     val lazyPagingItems = viewModel.topCharts.collectAsLazyPagingItems()
     val listState = rememberLazyListState(0)
 

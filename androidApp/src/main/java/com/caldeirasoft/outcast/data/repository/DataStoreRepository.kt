@@ -7,7 +7,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_NEW_EPISODES
+import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_NOTIFICATIONS
+import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
+import com.caldeirasoft.outcast.data.common.PodcastPreferences
 import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
+import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -48,6 +53,19 @@ class DataStoreRepository @Inject constructor(
         }
     }
 
+    suspend fun updatePodcastNewEpisodes(feedUrl: String, prefs: PodcastPreferences) {
+        dataStore.edit { preferences ->
+            val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
+            preferences[podcastPreferenceKeys.newEpisodes] = prefs.newEpisodes
+            preferences[podcastPreferenceKeys.notifications] = prefs.notifications
+            preferences[podcastPreferenceKeys.episodeLimit] = prefs.episodeLimit
+            preferences[podcastPreferenceKeys.customPlaybackEffects] = prefs.customPlaybackEffects
+            preferences[podcastPreferenceKeys.customPlaybackSpeed] = prefs.customPlaybackSpeed
+            preferences[podcastPreferenceKeys.trimSilence] = prefs.trimSilence
+            preferences[podcastPreferenceKeys.skipIntro] = prefs.skipIntro
+            preferences[podcastPreferenceKeys.skipEnding] = prefs.skipEnding
+        }
+    }
 
     suspend fun <T> updatePreference(key: Preferences.Key<T>, value: T) {
         dataStore.edit { preferences ->

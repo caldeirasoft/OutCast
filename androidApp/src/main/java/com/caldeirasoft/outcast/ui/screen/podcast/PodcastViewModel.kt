@@ -1,28 +1,23 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
 import androidx.datastore.preferences.core.Preferences
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.caldeirasoft.outcast.data.db.dao.PodcastDao
-import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
-import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.domain.util.Resource
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
+import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
+import com.caldeirasoft.outcast.ui.screen.MviViewModel
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import kotlinx.coroutines.FlowPreview
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import javax.inject.Inject
 
-class PodcastViewModel @AssistedInject constructor(
-    @Assisted val initialState: PodcastState,
+@HiltViewModel
+class PodcastViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val loadPodcastFromDbUseCase: LoadPodcastFromDbUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
     private val updatePodcastDataUseCase: UpdatePodcastDataUseCase,
@@ -30,9 +25,16 @@ class PodcastViewModel @AssistedInject constructor(
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
-) : MavericksViewModel<PodcastState>(initialState), PreferenceViewModel {
+) : MviViewModel<PodcastState, PodcastEvent, PodcastActions>(
+    initialState = PodcastState(
+        podcast = savedStateHandle.getObjectNotNull("podcast"),
+        isLoading = true
+    )
+), PreferenceViewModel {
 
     private var isInitialized: Boolean = false
+
+    val dataStore = loadSettingsUseCase.dataStore
 
     init {
         loadPodcastFromDbUseCase.execute(initialState.podcast)
@@ -64,19 +66,35 @@ class PodcastViewModel @AssistedInject constructor(
             }
     }
 
-    fun showAllEpisodes() {
-        setState {
+    override suspend fun performAction(action: PodcastActions) = when(action) {
+        is PodcastActions.OpenEpisodeDetail -> openEpisodeDetails(action.episode)
+        is PodcastActions.FollowPodcast -> follow()
+        is PodcastActions.UnfollowPodcast -> unfollow()
+        is PodcastActions.ShowAllEpisodes -> showAllEpisodes()
+        else -> Unit
+    }
+
+    private suspend fun openEpisodeDetails(episode: Episode) {
+        withState {
+            it.podcast.let { podcast ->
+                emitEvent(PodcastEvent.OpenEpisodeDetail(episode))
+            }
+        }
+    }
+
+    private fun showAllEpisodes() {
+        viewModelScope.setState {
             copy(showAllEpisodes = true)
         }
     }
 
-    fun subscribe() {
+    private fun follow() {
         followUseCase.execute(initialState.podcast.feedUrl)
             .onStart { setState { copy(followingStatus = FollowStatus.FOLLOWING) } }
             .launchIn(viewModelScope)
     }
 
-    fun unfollow() {
+    private fun unfollow() {
         viewModelScope.launch {
             unfollowUseCase.execute(feedUrl = initialState.podcast.feedUrl)
         }
@@ -84,15 +102,7 @@ class PodcastViewModel @AssistedInject constructor(
 
     override fun <T> updatePreference(key: Preferences.Key<T>, value: T) {
         viewModelScope.launch {
-            updateSettingsUseCase.updatePreference(key, value)
+            //updateSettingsUseCase.updatePreference(key, value)
         }
     }
-
-    @AssistedFactory
-    interface Factory : AssistedViewModelFactory<PodcastViewModel, PodcastState> {
-        override fun create(initialState: PodcastState): PodcastViewModel
-    }
-
-    companion object :
-        MavericksViewModelFactory<PodcastViewModel, PodcastState> by hiltMavericksViewModelFactory()
 }

@@ -9,20 +9,16 @@ import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
-import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast.Companion.toEpisodeWithPodcast
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.toPodcast
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
+import com.caldeirasoft.outcast.domain.models.episode
+import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg.Companion.toPodcastArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg.Companion.toStoreDataArg
 import kotlinx.serialization.encodeToString
@@ -36,6 +32,7 @@ enum class ScreenName {
     PROFILE,
     PODCAST,
     EPISODE,
+    EPISODE_STORE,
     DISCOVER,
     STORE_SEARCH,
     STORE_CHARTS,
@@ -58,13 +55,15 @@ sealed class Screen (val id: ScreenName) {
     }
 
     data class PodcastSettings(val podcastId: Long) : Screen(ScreenName.PODCAST_SETTINGS)
-    data class EpisodeScreen private constructor(
-        val episode: Episode?,
-        val episodeWithPodcast: EpisodeWithPodcast?
-    ) : Screen(ScreenName.EPISODE) {
-        constructor(ep: Episode) : this(episode = ep, episodeWithPodcast = null)
-        constructor(storeEpisode: StoreEpisode) : this(episode = null, episodeWithPodcast = storeEpisode.toEpisodeWithPodcast())
+    data class EpisodeScreen constructor(
+        val episode: Episode,
+        val fromSamePodcast: Boolean = false,
+    ) : Screen(ScreenName.EPISODE)
+
+    class EpisodeStoreScreen private constructor(val episode: Episode, val podcast: Podcast) : Screen(ScreenName.EPISODE_STORE) {
+        constructor(storeEpisode: StoreEpisode) : this(episode = storeEpisode.episode, podcast = storeEpisode.storePodcast.podcast)
     }
+
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     data class Discover(val storeDataArg: StoreDataArg?) : Screen(ScreenName.DISCOVER) {

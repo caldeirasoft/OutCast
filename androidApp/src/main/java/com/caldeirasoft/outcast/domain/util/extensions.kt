@@ -50,3 +50,6 @@ inline fun <reified T> Any?.tryCast(block: T.() -> Unit) {
         block()
     }
 }
+
+inline fun <reified T> Any?.castAs(): T? =
+    if (this is T) { this } else null

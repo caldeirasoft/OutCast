@@ -6,7 +6,9 @@ import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.toPodcast
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 data class EpisodeWithPodcast(
   @Embedded val episode: Episode,

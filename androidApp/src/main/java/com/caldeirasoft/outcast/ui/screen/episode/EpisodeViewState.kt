@@ -13,10 +13,6 @@ data class EpisodeViewState(
     val error: Throwable? = null,
 ) : MavericksState
 {
-    constructor(arg: Episode) : this(episode = arg)
-    constructor(arg: EpisodeWithPodcast) :
-            this(episode = arg.episode, podcast = arg.podcast)
-
     val artistData: StoreData? =
         podcast?.artistUrl?.let {
             StoreData(
@@ -26,4 +22,8 @@ data class EpisodeViewState(
                 storeFront = ""
             )
         }
+}
+
+sealed class EpisodeEvent {
+    data class OpenPodcastDetail(val podcast: Podcast) : EpisodeEvent()
 }

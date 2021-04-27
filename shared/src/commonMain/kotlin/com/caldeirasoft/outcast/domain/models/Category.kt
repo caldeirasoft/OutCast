@@ -1,5 +1,7 @@
 package com.caldeirasoft.outcast.domain.models
 
+import kotlinx.serialization.Serializable
+
 /**
  * Supported category types encountered within the `<itunes:category>` element
  * within a `<channel>` element, modeled as a finite set sealed class.
@@ -123,6 +125,7 @@ package com.caldeirasoft.outcast.domain.models
  * | TV & Film               | TV Reviews         | [TV_REVIEWS]                |
  */
 
+@Serializable
 enum class Category(
     val text: String, val id: Int, val nested: Boolean = false, val parent: Category? = null,
 ) {

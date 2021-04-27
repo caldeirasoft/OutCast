@@ -34,7 +34,7 @@ fun StoreEpisodeItem(
     episode: Episode,
     index: Int? = null,
     onEpisodeClick: () -> Unit,
-    onPodcastClick: () -> Unit,
+    onThumbnailClick: () -> Unit,
 ) {
     ListItem(
         modifier = modifier
@@ -74,7 +74,7 @@ fun StoreEpisodeItem(
                 data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.LargeThumbnailSize)
-                    .clickable(onClick = { })
+                    .clickable(onClick = onThumbnailClick )
             )
         }
     )

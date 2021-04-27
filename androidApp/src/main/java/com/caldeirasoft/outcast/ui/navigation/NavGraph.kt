@@ -7,23 +7,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltNavGraphViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
-import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastArg
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverScreen
-import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import com.google.accompanist.insets.navigationBarsPadding
@@ -50,6 +47,21 @@ inline fun <reified T> NavBackStackEntry.getObjectNotNull(key: String): T {
     val chartsEncoded = arguments?.getString(key)
     return requireNotNull(Json.decodeFromString(serializer(), URLDecoder.decode(chartsEncoded, "UTF-8")))
 }
+
+inline fun <reified T> NavBackStackEntry.getObject(key: String): T? =
+    arguments?.getString(key)?.let {
+        Json.decodeFromString(serializer(), URLDecoder.decode(it, "UTF-8"))
+    }
+
+inline fun <reified T> SavedStateHandle.getObject(key: String): T? =
+    (get(key) as String?)?.let {
+        Json.decodeFromString(serializer(), URLDecoder.decode(it, "UTF-8"))
+    }
+
+inline fun <reified T> SavedStateHandle.getObjectNotNull(key: String): T =
+    requireNotNull((get(key) as String?)?.let {
+        Json.decodeFromString(serializer(), URLDecoder.decode(it, "UTF-8"))
+    })
 
 @FlowPreview
 @ExperimentalMaterialApi
@@ -94,19 +106,17 @@ fun MainNavHost(startScreen: ScreenName) {
                 composable(ScreenName.PROFILE.name) { Text(text = "Profile") }
                 composable(ScreenName.DISCOVER.name) {
                     DiscoverScreen(
-                        storeDataArg = null,
-                        navigateTo = actions.select
+                        viewModel = hiltNavGraphViewModel(),
+                        navigateTo = actions.select,
+                        navigateBack = actions.up
                     )
                 }
-                composable(route = "${ScreenName.DISCOVER.name}/{id}",
-                    arguments = listOf(navArgument("id") { type = NavType.LongType })) {
-                    val storeDataArg =
-                        navController.previousBackStackEntry
-                            ?.arguments
-                            ?.getParcelable<StoreDataArg>("storeData")
+                composable(route = "${ScreenName.DISCOVER.name}/{storeData}",
+                    arguments = listOf(navArgument("storeData") { type = NavType.StringType })) {
                     DiscoverScreen(
-                        storeDataArg = storeDataArg,
-                        navigateTo = actions.select
+                        viewModel = hiltNavGraphViewModel(),
+                        navigateTo = actions.select,
+                        navigateBack = actions.up
                     )
                 }
                 composable(ScreenName.STORE_SEARCH.name) {
@@ -127,59 +137,48 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
-                composable(ScreenName.PODCAST.name) {
-                    val podcast =
-                        requireNotNull(navController.previousBackStackEntry
-                            ?.arguments
-                            ?.getParcelable<Podcast>("podcast"))
-                    PodcastScreen(
-                        podcast = podcast,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up)
-                }
                 composable(
-                    route = "${ScreenName.PODCAST.name}/{feedUrl}",
-                    arguments = listOf(navArgument("feedUrl") { type = NavType.StringType })
+                    route = "${ScreenName.PODCAST.name}/{podcast}",
+                    arguments = listOf(navArgument("podcast") { type = NavType.StringType })
                 ) {
-                    val podcast =
-                        requireNotNull(navController.previousBackStackEntry
-                            ?.arguments
-                            ?.getParcelable<Podcast>("podcast"))
                     PodcastScreen(
-                        podcast = podcast,
+                        viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
                 composable(
-                    route = "${ScreenName.EPISODE.name}/{feedUrl}/{guid}",
+                    route = "${ScreenName.EPISODE.name}/{episode}",
                     arguments = listOf(
-                        navArgument("feedUrl") { type = NavType.StringType },
-                        navArgument("guid") { type = NavType.StringType },
+                        navArgument("episode") { type = NavType.StringType },
+                    )
+                ) { backStackEntry ->
+                    val episode = backStackEntry.getObjectNotNull<Episode>("episode")
+
+                    val fromSamePodcast = navController
+                        .previousBackStackEntry
+                        ?.arguments
+                        ?.getBoolean("fromSamePodcast")
+                        ?: false
+
+                    EpisodeScreen(
+                        viewModel = hiltNavGraphViewModel(),
+                        fromSamePodcast = fromSamePodcast,
+                        navigateTo = actions.select,
+                        navigateBack = actions.up
+                    )
+                }
+                composable(
+                    route = "${ScreenName.EPISODE_STORE.name}/{episode}/{podcast}",
+                    arguments = listOf(
+                        navArgument("episode") { type = NavType.StringType },
+                        navArgument("podcast") { type = NavType.StringType },
                     )
                 ) {
-                    navController
-                        .previousBackStackEntry
-                        ?.arguments
-                        ?.getParcelable<Episode>("episode")
-                        ?.let { episode ->
-                            EpisodeScreen(
-                                episode = episode,
-                                navigateTo = actions.select,
-                                navigateBack = actions.up
-                            )
-                        }
-
-                    navController
-                        .previousBackStackEntry
-                        ?.arguments
-                        ?.getParcelable<EpisodeWithPodcast>("episodeWithPodcast")
-                        ?.also { epWithPodcast ->
-                            EpisodeScreen(
-                                episode = epWithPodcast,
-                                navigateTo = actions.select,
-                                navigateBack = actions.up
-                            )
-                        }
+                    EpisodeScreen(
+                        viewModel = hiltNavGraphViewModel(),
+                        navigateTo = actions.select,
+                        navigateBack = actions.up
+                    )
                 }
             }
         }

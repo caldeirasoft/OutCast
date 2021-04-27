@@ -31,60 +31,88 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
-import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverState
-import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverTopAppBar
 import com.caldeirasoft.outcast.ui.theme.*
-import com.caldeirasoft.outcast.ui.util.mavericksViewModel
-import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toPx
 import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 val LocalVibrantColor = compositionLocalOf<Color> { error("No vibrant color") }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
 @Composable
 fun PodcastScreen(
-    podcast: Podcast,
+    viewModel: PodcastViewModel,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: PodcastViewModel = mavericksViewModel(initialArgument = podcast)
-    val state by viewModel.collectAsState()
+    val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
+    PodcastScreen(
+        state = state, drawerState = drawerState
+    ) { action ->
+        when (action) {
+            is PodcastActions.NavigateUp -> navigateBack()
+            is PodcastActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.episode))
+            is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.Discover(action.storeData))
+            is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.Discover(action.category))
+            else -> viewModel.submitAction(action)
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        drawerContent.updateContent {
+            PodcastSettingsBottomSheet(
+                state = state,
+                dataStore = viewModel.dataStore
+            ) { action ->
+                when (action) {
+                    is PodcastActions.NavigateUp -> coroutineScope.launch { drawerState.hide() }
+                    else -> viewModel.submitAction(action)
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+@ExperimentalCoroutinesApi
+@Composable
+private fun PodcastScreen(
+    state: PodcastState,
+    drawerState: ModalBottomSheetState,
+    actioner : (PodcastActions) -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
 
     val podcastData = state.podcast
     val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
     val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
-
-    LaunchedEffect(key1 = drawerContent) {
-        drawerContent.updateContent {
-            PodcastSettingsBottomSheet(
-                viewModel = viewModel,
-                state = state
-            )
-        }
-    }
 
     CompositionLocalProvider(LocalVibrantColor provides dominantColorOrDefault) {
         Scaffold {
@@ -99,7 +127,7 @@ fun PodcastScreen(
                     PodcastExpandedHeader(
                         state = state,
                         listState = listState,
-                        navigateTo = navigateTo
+                        openStoreDataDetail = { actioner(PodcastActions.OpenStoreDataDetail(it)) }
                     )
                 }
 
@@ -147,13 +175,13 @@ fun PodcastScreen(
                                     imageVector = Icons.Default.Check,
                                     translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
                                     alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
-                                    onClick = { viewModel.unfollow() }
+                                    onClick = { actioner(PodcastActions.UnfollowPodcast) }
                                 )
 
                                 // follow button
                                 FollowButton(
                                     state = state,
-                                    onClick = viewModel::subscribe
+                                    onClick = { actioner(PodcastActions.FollowPodcast) }
                                 )
                             }
                         }
@@ -170,7 +198,7 @@ fun PodcastScreen(
                             podcastData.category?.let { genre ->
                                 Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     ChipButton(selected = false,
-                                        onClick = { navigateTo(Screen.Discover(genre)) })
+                                        onClick = { actioner(PodcastActions.OpenCategoryDataDetail(genre)) })
                                     {
                                         Text(text = genre.name)
                                     }
@@ -191,7 +219,7 @@ fun PodcastScreen(
                                 EpisodeItem(
                                     episode = episode,
                                     onEpisodeClick = {
-                                        navigateTo(Screen.EpisodeScreen(episode))
+                                        actioner(PodcastActions.OpenEpisodeDetail(episode))
                                     }
                                 )
                                 Divider()
@@ -204,7 +232,7 @@ fun PodcastScreen(
                                     EpisodeItem(
                                         episode = firstEpisode,
                                         onEpisodeClick = {
-                                            navigateTo(Screen.EpisodeScreen(firstEpisode))
+                                            actioner(PodcastActions.OpenEpisodeDetail(firstEpisode))
                                         }
                                     )
                                     Divider()
@@ -219,7 +247,7 @@ fun PodcastScreen(
                                     colors = ButtonDefaults.textButtonColors(
                                         contentColor = LocalVibrantColor.current
                                     ),
-                                    onClick = viewModel::showAllEpisodes)
+                                    onClick = { actioner(PodcastActions.ShowAllEpisodes) })
                                 {
                                     Text(text = stringResource(id = R.string.action_show_all_episodes),
                                         style = typography.button.copy(letterSpacing = 0.25.sp))
@@ -234,7 +262,7 @@ fun PodcastScreen(
                                     EpisodeItem(
                                         episode = lastEpisode,
                                         onEpisodeClick = {
-                                            navigateTo(Screen.EpisodeScreen(lastEpisode))
+                                            actioner(PodcastActions.OpenEpisodeDetail(lastEpisode))
                                         }
                                     )
                                     Divider()
@@ -253,7 +281,7 @@ fun PodcastScreen(
             PodcastTopAppBar(
                 state = state,
                 listState = listState,
-                navigateUp = navigateBack
+                navigateUp = { actioner(PodcastActions.NavigateUp) }
             )
         }
     }
@@ -263,7 +291,7 @@ fun PodcastScreen(
 private fun PodcastExpandedHeader(
     state: PodcastState,
     listState: LazyListState,
-    navigateTo: (Screen) -> Unit,
+    openStoreDataDetail: (StoreData) -> Unit,
 ) {
     val podcastData = state.podcast
     val artistData = state.artistData
@@ -328,7 +356,7 @@ private fun PodcastExpandedHeader(
 
             // artist name + link
             val clickableArtistMod = artistData?.let {
-                Modifier.clickable { navigateTo(Screen.Discover(it)) }
+                Modifier.clickable { openStoreDataDetail(it) }
             } ?: Modifier
 
             Text(

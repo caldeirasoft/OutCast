@@ -13,14 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.domain.model.SeekbarPreferenceItem
+import com.caldeirasoft.outcast.domain.model.SeekbarFloatPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun SeekBarPreference(
-    item: SeekbarPreferenceItem,
+    item: SeekbarFloatPreferenceItem,
     value: Float?,
     onValueChanged: (Float) -> Unit,
 ) {
@@ -40,7 +40,7 @@ fun SeekBarPreference(
 
 @Composable
 private fun PreferenceSummary(
-    item: SeekbarPreferenceItem,
+    item: SeekbarFloatPreferenceItem,
     sliderValue: Float,
     onValueChanged: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,

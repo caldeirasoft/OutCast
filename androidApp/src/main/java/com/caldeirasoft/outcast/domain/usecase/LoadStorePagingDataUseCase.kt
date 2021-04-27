@@ -18,7 +18,7 @@ class LoadStorePagingDataUseCase @Inject constructor(
     val dataStoreRepository: DataStoreRepository
 ) {
     fun executeAsync(
-        storeData: StoreData,
+        storeData: StoreData?,
         storeFront: String,
         newVersionAvailable: (() -> Unit)? = null,
         dataLoadedCallback: ((StorePage) -> Unit)? = null,
@@ -32,8 +32,8 @@ class LoadStorePagingDataUseCase @Inject constructor(
                 StoreDataPagingSource(
                     loadDataFromNetwork = {
                         when {
-                            storeData.genreId != null -> storeRepository.getGroupingDataAsync(
-                                storeData.genreId,
+                            storeData == null || storeData.genreId != null -> storeRepository.getGroupingDataAsync(
+                                storeData?.genreId,
                                 storeFront,
                                 newVersionAvailable)
                             storeData.url.isNotEmpty() -> storeRepository.getStoreDataAsync(

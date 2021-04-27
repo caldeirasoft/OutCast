@@ -1,18 +1,21 @@
 package com.caldeirasoft.outcast.ui.screen.store.base
 
+import androidx.lifecycle.viewModelScope
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
+import com.caldeirasoft.outcast.ui.screen.MviViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
-abstract class FollowViewModel<S : MavericksState>(
-    initialState: S,
+abstract class FollowViewModel<State: Any, Event: Any, Action: Any>(
+    initialState: State,
     private val followUseCase: FollowUseCase,
-    podcastDao: PodcastDao
-) : MavericksViewModel<S>(initialState) {
+    private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
+) : MviViewModel<State, Event, Action>(initialState) {
 
     val followingStatus: MutableStateFlow<List<Long>> =
         MutableStateFlow(emptyList())
@@ -20,7 +23,8 @@ abstract class FollowViewModel<S : MavericksState>(
         MutableStateFlow(emptyList())
 
     init {
-        podcastDao.getFollowedPodcastIds()
+        fetchFollowedPodcastsUseCase
+            .getFollowedPodcastIds()
             .onEach { followingStatus.emit(it) }
             .launchIn(viewModelScope)
     }

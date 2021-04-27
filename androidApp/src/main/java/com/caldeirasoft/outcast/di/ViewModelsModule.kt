@@ -16,17 +16,6 @@ import dagger.multibindings.IntoMap
 @Module
 @InstallIn(MavericksViewModelComponent::class)
 interface ViewModelsModule {
-    @[Binds IntoMap ViewModelKey(DiscoverViewModel::class)]
-    fun DiscoverViewModelFactory(factory: DiscoverViewModel.Factory): AssistedViewModelFactory<*, *>
-
-    @[Binds IntoMap ViewModelKey(PodcastViewModel::class)]
-    fun PodcastViewModelFactory(factory: PodcastViewModel.Factory): AssistedViewModelFactory<*, *>
-
-    @[Binds IntoMap ViewModelKey(EpisodeViewModel::class)]
-    fun EpisodeViewModelFactory(factory: EpisodeViewModel.Factory): AssistedViewModelFactory<*, *>
-
-    @[Binds IntoMap ViewModelKey(TopChartSectionViewModel::class)]
-    fun TopChartSectionViewModelFactory(factory: TopChartSectionViewModel.Factory): AssistedViewModelFactory<*, *>
 
     @[Binds IntoMap ViewModelKey(LibraryViewModel::class)]
     fun LibraryViewModelFactory(factory: LibraryViewModel.Factory): AssistedViewModelFactory<*, *>

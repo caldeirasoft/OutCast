@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -26,12 +27,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.airbnb.mvrx.compose.collectAsState
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.episode
+import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
@@ -53,18 +56,43 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 
+@OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
+@Composable
+fun DiscoverScreen(
+    viewModel: DiscoverViewModel,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+) {
+    val state by viewModel.state.collectAsState()
+    val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
+    DiscoverScreen(state = state, lazyPagingItems = lazyPagingItems) { action ->
+        when(action) {
+            is DiscoverActions.NavigateUp -> navigateBack()
+            is DiscoverActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.storePodcast))
+            is DiscoverActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeStoreScreen(action.storeEpisode))
+            is DiscoverActions.OpenStoreData -> navigateTo(Screen.Discover(action.storeData))
+            else -> viewModel.submitAction(action)
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when(event) {
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalPagerApi::class)
 @ExperimentalAnimationApi
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
 fun DiscoverScreen(
-    storeDataArg: StoreDataArg?,
-    navigateTo: (Screen) -> Unit,
+    state: DiscoverState,
+    lazyPagingItems: LazyPagingItems<StoreItem>,
+    actioner: (DiscoverActions) -> Unit,
 ) {
-    val viewModel: DiscoverViewModel = mavericksViewModel(initialArgument = storeDataArg)
-    val state by viewModel.collectAsState()
-    val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
     val title = state.takeUnless { it.storeData == StoreData.Default }?.title
         ?: stringResource(id = R.string.store_tab_discover)
 
@@ -76,7 +104,7 @@ fun DiscoverScreen(
             val headerRatio: Float = 1 / 3f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
 
-            if (state.storePage.containsFeatured)
+            if (state.storePage?.containsFeatured == true)
                 headerHeight.value = (screenHeight * 1 / 5f).toInt()
 
             LazyListLayout(lazyListItems = lazyPagingItems) {
@@ -108,7 +136,7 @@ fun DiscoverScreen(
                     }
 
                     // description
-                    state.storePage.description?.let { description ->
+                    state.storePage?.description?.let { description ->
                         item {
                             Box(
                                 modifier = Modifier
@@ -125,29 +153,33 @@ fun DiscoverScreen(
 
                     // content
                     when {
-                        state.storePage.isMultiRoom -> {
+                        state.storePage != null && state.storePage.isMultiRoom -> {
                             items(lazyPagingItems = lazyPagingItems) { collection ->
                                 when (collection) {
                                     is StoreCollectionFeatured ->
                                         StoreCollectionFeaturedContent(
                                             storeCollection = collection,
-                                            navigateTo = navigateTo,
+                                            openStoreDataDetail = { actioner(DiscoverActions.OpenStoreData(it)) },
+                                            openPodcastDetail = { actioner(DiscoverActions.OpenPodcastDetail(it)) },
+                                            openEpisodeDetail = { actioner(DiscoverActions.OpenEpisodeDetail(it)) },
                                         )
                                     is StoreCollectionItems -> {
                                         // content
                                         StoreCollectionItemsContent(
                                             storeCollection = collection,
-                                            navigateTo = navigateTo,
+                                            openStoreDataDetail = { actioner(DiscoverActions.OpenStoreData(it)) },
+                                            openPodcastDetail = { actioner(DiscoverActions.OpenPodcastDetail(it)) },
+                                            openEpisodeDetail = { actioner(DiscoverActions.OpenEpisodeDetail(it)) },
                                             followingStatus = state.followingStatus,
                                             followLoadingStatus = state.followLoadingStatus,
-                                            onSubscribeClick = viewModel::followPodcast,
+                                            onFollowPodcast =  { actioner(DiscoverActions.FollowPodcast(it)) },
                                         )
                                     }
                                     is StoreCollectionData -> {
                                         // rooms
                                         StoreCollectionDataContent(
                                             storeCollection = collection,
-                                            navigateTo = navigateTo
+                                            openStoreDataDetail = { actioner(DiscoverActions.OpenStoreData(it)) },
                                         )
                                     }
                                 }
@@ -168,7 +200,7 @@ fun DiscoverScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable(onClick = {
-                                                        navigateTo(Screen.PodcastScreen(item))
+                                                        actioner(DiscoverActions.OpenPodcastDetail(item))
                                                     }),
                                                 podcast = item,
                                                 isFollowing = state.followingStatus.contains(
@@ -177,7 +209,7 @@ fun DiscoverScreen(
                                                 isFollowingLoading = state.followLoadingStatus.contains(
                                                     item.id
                                                 ),
-                                                onFollowPodcast = viewModel::followPodcast
+                                                onFollowPodcast = { actioner(DiscoverActions.FollowPodcast(it)) },
                                             )
                                         }
                                     }
@@ -188,10 +220,10 @@ fun DiscoverScreen(
                                             StoreEpisodeItem(
                                                 modifier = Modifier,
                                                 onEpisodeClick = {
-                                                    navigateTo(Screen.EpisodeScreen(item))
+                                                    actioner(DiscoverActions.OpenEpisodeDetail(item))
                                                 },
-                                                onPodcastClick = {
-                                                    navigateTo(Screen.PodcastScreen(item.storePodcast))
+                                                onThumbnailClick = {
+                                                    actioner(DiscoverActions.OpenPodcastDetail(item.storePodcast))
                                                 },
                                                 episode = item.episode,
                                             )
@@ -233,7 +265,7 @@ fun DiscoverScreen(
                     discoverState = state,
                     listState = listState,
                     onClick = {
-                        viewModel.clearNewVersionNotification()
+                        actioner(DiscoverActions.ClearNotificationNewVersionAvailable)
                         lazyPagingItems.refresh()
                     })
             }
@@ -248,7 +280,7 @@ fun DiscoverScreenHeader(
     listState: LazyListState,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val artwork = state.storePage.artwork
+        val artwork = state.storePage?.artwork
         if (artwork != null) {
             // Get the current SystemUiController
             val systemUiController = LocalSystemUiController.current
@@ -319,7 +351,7 @@ fun DiscoverTopAppBar(
         appBarAlpha)
 
     // top app bar
-    val artwork = state.storePage.artwork
+    val artwork = state.storePage?.artwork
     val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
     val contentColor: Color =
         artwork?.textColor1
@@ -435,30 +467,33 @@ fun RestoreStatusBarColorOnDispose()
 @Composable
 fun StoreCollectionItemsContent(
     storeCollection: StoreCollectionItems,
-    navigateTo: ScreenFn,
     followingStatus: List<Long> = emptyList(),
     followLoadingStatus: List<Long> = emptyList(),
-    onSubscribeClick: (StorePodcast) -> Unit = { },
+    openStoreDataDetail: (StoreData) -> Unit,
+    openPodcastDetail: (StorePodcast) -> Unit,
+    openEpisodeDetail: (StoreEpisode) -> Unit,
+    onFollowPodcast: (StorePodcast) -> Unit = { },
 ) {
     StoreHeadingSectionWithLink(
         title = storeCollection.label,
         onClick = {
-            navigateTo(Screen.Discover(storeCollection.room))
+            openStoreDataDetail(storeCollection.room)
         })
 
     if (storeCollection.items.filterIsInstance<StorePodcast>().isNotEmpty()) {
         StoreCollectionPodcastContent(
             storeCollection = storeCollection,
-            navigateTo = navigateTo,
             followingStatus = followingStatus,
             followLoadingStatus = followLoadingStatus,
-            onSubscribeClick = onSubscribeClick
+            openPodcastDetail = openPodcastDetail,
+            onFollowPodcast = onFollowPodcast
         )
     }
     else if (storeCollection.items.filterIsInstance<StoreEpisode>().isNotEmpty()) {
         StoreCollectionEpisodeContent(
             storeCollection = storeCollection,
-            navigateTo = navigateTo,
+            openPodcastDetail = openPodcastDetail,
+            openEpisodeDetail = openEpisodeDetail,
         )
     }
 }
@@ -466,10 +501,10 @@ fun StoreCollectionItemsContent(
 @Composable
 fun StoreCollectionPodcastContent(
     storeCollection: StoreCollectionItems,
-    navigateTo: ScreenFn,
+    openPodcastDetail: (StorePodcast) -> Unit,
     followingStatus: List<Long> = emptyList(),
     followLoadingStatus: List<Long> = emptyList(),
-    onSubscribeClick: (StorePodcast) -> Unit = { },
+    onFollowPodcast: (StorePodcast) -> Unit = { },
 ) {
     val listState = rememberLazyListState()
     // content
@@ -485,14 +520,12 @@ fun StoreCollectionPodcastContent(
                     PodcastGridItem(
                         modifier = Modifier
                             .width(150.dp)
-                            .clickable(onClick = {
-                                navigateTo(Screen.PodcastScreen(item))
-                            }),
+                            .clickable(onClick = { openPodcastDetail(item) }),
                         podcast = item,
                         index = if (storeCollection.sortByPopularity) index + 1 else null,
                         isFollowing = followingStatus.contains(item.id),
                         isFollowingLoading = followLoadingStatus.contains(item.id),
-                        onFollowPodcast = onSubscribeClick
+                        onFollowPodcast = onFollowPodcast
                     )
             }
         }
@@ -503,7 +536,8 @@ fun StoreCollectionPodcastContent(
 @Composable
 fun StoreCollectionEpisodeContent(
     storeCollection: StoreCollectionItems,
-    navigateTo: ScreenFn,
+    openPodcastDetail: (StorePodcast) -> Unit,
+    openEpisodeDetail: (StoreEpisode) -> Unit,
 ) {
     val numRows = 3
     val indexedItems = storeCollection.items
@@ -536,12 +570,60 @@ fun StoreCollectionEpisodeContent(
                         StoreEpisodeItem(
                             episode = storeItem.episode,
                             modifier = Modifier.fillMaxWidth(),
-                            onPodcastClick = { navigateTo(Screen.PodcastScreen(storeItem.storePodcast)) },
-                            onEpisodeClick = { navigateTo(Screen.EpisodeScreen(storeItem)) },
+                            onThumbnailClick = { openPodcastDetail(storeItem.storePodcast) },
+                            onEpisodeClick = { openEpisodeDetail(storeItem) },
                             index = if (storeCollection.sortByPopularity) (index + 1) else null
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun StoreCollectionFeaturedContent(
+    storeCollection: StoreCollectionFeatured,
+    openStoreDataDetail: (StoreData) -> Unit,
+    openPodcastDetail: (StorePodcast) -> Unit,
+    openEpisodeDetail: (StoreEpisode) -> Unit,
+) {
+    // Remember a PagerState with our tab count
+    val pagerState = rememberPagerState(pageCount = storeCollection.items.size)
+
+    Column {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2.03f)
+        ) { page ->
+            val item = storeCollection.items[Math.floorMod(page, storeCollection.items.size)]
+            val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
+            Card(
+                backgroundColor = bgDominantColor,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxSize(0.95f)
+                    .padding(horizontal = 4.dp)
+                    .clickable {
+                        when (item) {
+                            is StoreData -> openStoreDataDetail(item)
+                            is StorePodcast -> openPodcastDetail(item)
+                            is StoreEpisode -> openEpisodeDetail(item)
+                        }
+                    }
+            )
+            {
+                CoilImage(
+                    data = item.getArtworkFeaturedUrl(),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
             }
         }
     }

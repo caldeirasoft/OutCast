@@ -7,14 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,64 +19,50 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.airbnb.mvrx.compose.collectAsState
-import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
-import com.caldeirasoft.outcast.domain.util.Log_D
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.podcast.*
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
-import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastLoadingScreen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
-import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.mavericksViewModel
-import com.caldeirasoft.outcast.ui.util.toDp
-import com.caldeirasoft.outcast.ui.util.toPx
 import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
-import kotlinx.coroutines.launch
-
-@Composable
-fun EpisodeScreen(
-    episode: Episode,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
-) {
-    val viewModel: EpisodeViewModel = mavericksViewModel(initialArgument = episode)
-    EpisodeScreen(viewModel, navigateTo, navigateBack)
-}
-
-@Composable
-fun EpisodeScreen(
-    episode: EpisodeWithPodcast,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
-) {
-    val viewModel: EpisodeViewModel = mavericksViewModel(initialArgument = episode)
-    EpisodeScreen(viewModel, navigateTo, navigateBack)
-}
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun EpisodeScreen(
     viewModel: EpisodeViewModel,
+    fromSamePodcast: Boolean = false,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val state by viewModel.collectAsState()
+    val state by viewModel.state.collectAsState()
+    EpisodeScreen(state = state) { action ->
+        when(action) {
+            EpisodeActions.NavigateUp -> navigateBack()
+            else -> viewModel.submitAction(action)
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when(event) {
+                is EpisodeEvent.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(event.podcast))
+            }
+        }
+    }
+}
+
+@Composable
+fun EpisodeScreen(
+    state: EpisodeViewState,
+    actioner: (EpisodeActions) -> Unit,
+) {
     val coroutineScope = rememberCoroutineScope()
 
     val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
@@ -98,7 +81,7 @@ fun EpisodeScreen(
                 EpisodeExpandedHeader(
                     state = state,
                     listState = listState,
-                    navigateTo = navigateTo
+                    actioner = actioner
                 )
             }
 
@@ -148,7 +131,7 @@ fun EpisodeScreen(
         EpisodeTopAppBar(
             state = state,
             listState = listState,
-            navigateUp = navigateBack
+            actioner = actioner
         )
     }
 }
@@ -157,7 +140,7 @@ fun EpisodeScreen(
 private fun EpisodeExpandedHeader(
     state: EpisodeViewState,
     listState: LazyListState,
-    navigateTo: (Screen) -> Unit,
+    actioner: (EpisodeActions) -> Unit,
 ) {
     val dominantColor = MaterialTheme.colors.primary
 
@@ -239,7 +222,9 @@ private fun EpisodeExpandedHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 4.dp)
-                    .clickable { state.podcast?.let { navigateTo(Screen.PodcastScreen(it)) } },
+                    .clickable {
+                        actioner(EpisodeActions.OpenPodcastDetail)
+                    },
                 style = MaterialTheme.typography.body1,
                 maxLines = 2,
                 color = dominantColor
@@ -253,7 +238,7 @@ private fun EpisodeExpandedHeader(
 fun EpisodeTopAppBar(
     state: EpisodeViewState,
     listState: LazyListState,
-    navigateUp: () -> Unit,
+    actioner: (EpisodeActions) -> Unit,
 ) {
     val appBarAlpha = listState.topAppBarAlpha
     val backgroundColor: Color = Color.blendARGB(
@@ -291,7 +276,7 @@ fun EpisodeTopAppBar(
                 }
             },
             navigationIcon = {
-                IconButton(onClick = navigateUp) {
+                IconButton(onClick = { actioner(EpisodeActions.NavigateUp) }) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = null)
                 }
             },

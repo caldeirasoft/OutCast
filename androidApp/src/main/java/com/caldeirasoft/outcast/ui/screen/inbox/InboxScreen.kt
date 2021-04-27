@@ -26,7 +26,6 @@ import com.caldeirasoft.outcast.ui.components.EpisodeItem
 import com.caldeirasoft.outcast.ui.components.ReachableAppBar
 import com.caldeirasoft.outcast.ui.components.ReachableScaffold
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
 import kotlinx.coroutines.FlowPreview

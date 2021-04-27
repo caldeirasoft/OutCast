@@ -1,3 +1,4 @@
+@file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.data.db.entities
 
 import android.os.Parcelable
@@ -11,11 +12,15 @@ import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
+@Serializable
 @Parcelize
 @TypeParceler<Instant, InstantParceler>
 @Entity(

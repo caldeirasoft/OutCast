@@ -1,8 +1,7 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models
 
-import com.caldeirasoft.outcast.db.Episode
-import com.caldeirasoft.outcast.db.Podcast
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.Category
@@ -36,6 +35,4 @@ val StorePodcast.podcast: Podcast
             isExplicit = isExplicit,
             newFeedUrl = null,
             isComplete = false,
-            isSubscribed = false,
-            newEpisodeAction = NewEpisodesAction.CLEAR,
         )

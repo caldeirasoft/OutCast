@@ -4,47 +4,36 @@ import android.content.Context
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
+import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.encodeObject
 import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlEncode
 
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
         when (screen) {
             is PodcastScreen -> {
-                navController.currentBackStackEntry
-                    ?.arguments
-                    ?.putParcelable("podcast", screen.podcast)
                 val screenName = screen.id.name
-                val feedUrl = screen.podcast.feedUrl.urlEncode()
-                navController.navigate("$screenName/$feedUrl")
+                val podcastEncoded = encodeObject(screen.podcast)
+                navController.navigate("$screenName/$podcastEncoded")
             }
             is EpisodeScreen -> {
-                screen.episode?.let { ep ->
-                    navController.currentBackStackEntry
-                        ?.arguments
-                        ?.putParcelable("episode", ep)
-                    val screenName = screen.id.name
-                    val feedUrl = ep.feedUrl.urlEncode()
-                    val guid = ep.guid
-                    navController.navigate("$screenName/$feedUrl/$guid")
-                }
-                screen.episodeWithPodcast?.let { ep ->
-                    navController.currentBackStackEntry
-                        ?.arguments
-                        ?.putParcelable("episodeWithPodcast", ep)
-                    val screenName = screen.id.name
-                    val feedUrl = ep.episode.feedUrl.urlEncode()
-                    val guid = ep.episode.guid
-                    navController.navigate("$screenName/$feedUrl/$guid")
-                }
+                navController.currentBackStackEntry
+                    ?.arguments
+                    ?.putBoolean("fromSamePodcast", screen.fromSamePodcast)
+                val screenName = screen.id.name
+                val episodeEncoded = encodeObject(screen.episode)
+                navController.navigate("$screenName/$episodeEncoded")
+            }
+            is EpisodeStoreScreen -> {
+                val screenName = screen.id.name
+                val episodeEncoded = encodeObject(screen.episode)
+                val podcastEncoded = encodeObject(screen.podcast)
+                navController.navigate("$screenName/$episodeEncoded/$podcastEncoded")
             }
             is Discover -> {
                 val storeData = screen.storeDataArg
                 if (storeData != null) {
-                    navController
-                        .currentBackStackEntry
-                        ?.arguments
-                        ?.putParcelable("storeData", storeData)
-                    navController.navigate("${screen.id.name}/${storeData.id}")
+                    val storeDataEncoded = encodeObject(storeData)
+                    navController.navigate("${screen.id.name}/${storeDataEncoded}")
                 } else {
                     navController.navigate(screen.id.name)
                 }

@@ -16,14 +16,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.domain.model.NumberRangePreferenceItem
+import com.caldeirasoft.outcast.domain.model.NumberRangeFloatPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun NumberRangePreference(
-    item: NumberRangePreferenceItem,
+    item: NumberRangeFloatPreferenceItem,
     value: Float?,
     onValueChanged: (Float) -> Unit,
 ) {
@@ -47,7 +47,7 @@ fun NumberRangePreference(
 
 @Composable
 private fun PreferenceTrailing(
-    item: NumberRangePreferenceItem,
+    item: NumberRangeFloatPreferenceItem,
     value: Float,
     onValueChanged: (Float) -> Unit,
 ) {

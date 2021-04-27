@@ -234,4 +234,8 @@ class PodcastsRepository @Inject constructor(
             preferences.remove(podcastPreferenceKeys.skipEnding)
         }
     }
+
+    fun getPodcastPreferences(feedUrl: String) {
+
+    }
 }

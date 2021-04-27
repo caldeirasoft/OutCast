@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeArg.Companion.toEpisodeArg
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.ScreenFn
@@ -33,7 +32,7 @@ import com.google.accompanist.pager.rememberPagerState
 @Composable
 fun StoreCollectionDataContent(
     storeCollection: StoreCollectionData,
-    navigateTo: (Screen) -> Unit,
+    openStoreDataDetail: (StoreData) -> Unit,
 ) {
     // header
     StoreHeadingSection(title = storeCollection.label)
@@ -51,7 +50,7 @@ fun StoreCollectionDataContent(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .width(200.dp)
-                            .clickable(onClick = { navigateTo(Screen.Discover(item)) })
+                            .clickable(onClick = { openStoreDataDetail(item) })
                     )
                     {
                         CoilImage(
@@ -64,51 +63,6 @@ fun StoreCollectionDataContent(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalPagerApi::class)
-@Composable
-fun StoreCollectionFeaturedContent(
-    storeCollection: StoreCollectionFeatured,
-    navigateTo: (Screen) -> Unit
-) {
-    // Remember a PagerState with our tab count
-    val pagerState = rememberPagerState(pageCount = storeCollection.items.size)
-
-    Column {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2.03f)
-        ) { page ->
-            val item = storeCollection.items[Math.floorMod(page, storeCollection.items.size)]
-            val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
-            Card(
-                backgroundColor = bgDominantColor,
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxSize(0.95f)
-                    .padding(horizontal = 4.dp)
-                    .clickable {
-                        when (item) {
-                            is StoreData -> navigateTo(Screen.Discover(item))
-                            is StorePodcast -> navigateTo(Screen.PodcastScreen(item))
-                            is StoreEpisode -> navigateTo(Screen.EpisodeScreen(item))
-                        }
-                    }
-            )
-            {
-                CoilImage(
-                    data = item.getArtworkFeaturedUrl(),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
             }
         }
     }

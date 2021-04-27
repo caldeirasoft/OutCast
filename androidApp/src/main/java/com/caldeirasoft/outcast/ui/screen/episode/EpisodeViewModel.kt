@@ -1,54 +1,69 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
-import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.usecase.FetchPodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
+import com.caldeirasoft.outcast.ui.navigation.getObject
+import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
+import com.caldeirasoft.outcast.ui.screen.MviViewModel
 import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EpisodeViewModel @AssistedInject constructor(
-    @Assisted initialState: EpisodeViewState,
+@HiltViewModel
+class EpisodeViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val loadEpisodeFromDbUseCase: LoadEpisodeFromDbUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
-) : MavericksViewModel<EpisodeViewState>(initialState) {
+) : MviViewModel<EpisodeViewState, EpisodeEvent, EpisodeActions>(
+    // The string "episode" is the name of the argument in the route
+    EpisodeViewState(
+        episode = savedStateHandle.getObjectNotNull("episode"),
+        podcast = savedStateHandle.getObject("podcast"))
+) {
 
     private var isInitialized: Boolean = false
 
     init {
-        loadEpisodeFromDbUseCase
-            .execute(
-                feedUrl = initialState.episode.feedUrl,
-                guid = initialState.episode.guid
-            )
-            .onEach {
-                if (it == null && !isInitialized) {
-                    // 1rst launch
-                    initialState.podcast?.let { podcast ->
-                        fetchPodcastDataUseCase
-                            .execute(podcast)
-                            .onStart { setState { copy(isLoading = true) } }
-                            .launchIn(viewModelScope)
-                    }
-                }
-                isInitialized = true
-            }
-            .filterNotNull()
-            .setOnEach {
-                copy(
-                    isLoading = false,
-                    episode = it.episode,
-                    podcast = it.podcast
+        val initialState = state.value
+        viewModelScope.launch {
+            loadEpisodeFromDbUseCase
+                .execute(
+                    feedUrl = initialState.episode.feedUrl,
+                    guid = initialState.episode.guid
                 )
-            }
+                .onEach {
+                    if (it == null && !isInitialized) {
+                        // 1rst launch
+                        initialState.podcast?.let { podcast ->
+                            fetchPodcastDataUseCase
+                                .execute(podcast)
+                                .onStart { setState { copy(isLoading = true) } }
+                                .launchIn(viewModelScope)
+                        }
+                    }
+                    isInitialized = true
+                }
+                .filterNotNull()
+                .setOnEach {
+                    copy(
+                        isLoading = false,
+                        episode = it.episode,
+                        podcast = it.podcast
+                    )
+                }
+        }
     }
 
     // get episode data
@@ -57,11 +72,34 @@ class EpisodeViewModel @AssistedInject constructor(
 
     }
 
-    @AssistedFactory
-    interface Factory : AssistedViewModelFactory<EpisodeViewModel, EpisodeViewState> {
-        override fun create(initialState: EpisodeViewState): EpisodeViewModel
+    override suspend fun performAction(action: EpisodeActions) = when(action) {
+        is EpisodeActions.OpenPodcastDetail -> openPodcastDetails()
+        else -> Unit
     }
 
-    companion object :
-        MavericksViewModelFactory<EpisodeViewModel, EpisodeViewState> by hiltMavericksViewModelFactory()
+    private suspend fun openPodcastDetails() {
+        withState {
+            it.podcast?.let { podcast ->
+                emitEvent(EpisodeEvent.OpenPodcastDetail(podcast))
+            }
+        }
+    }
+
+    data class State(
+        val episode: Episode? = null,
+        val podcast: Podcast? = null,
+        val isLoading: Boolean = false,
+        val error: Throwable? = null,
+    )
+    {
+        val artistData: StoreData? =
+            podcast?.artistUrl?.let {
+                StoreData(
+                    id = podcast.artistId ?: 0L,
+                    label = podcast.artistName,
+                    url = podcast.artistUrl.orEmpty(),
+                    storeFront = ""
+                )
+            }
+    }
 }
