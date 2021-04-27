@@ -70,7 +70,7 @@ fun PodcastScreen(
     ) { action ->
         when (action) {
             is PodcastActions.NavigateUp -> navigateBack()
-            is PodcastActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.episode))
+            is PodcastActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.episode, true))
             is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.Discover(action.storeData))
             is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.Discover(action.category))
             else -> viewModel.submitAction(action)

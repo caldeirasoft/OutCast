@@ -59,7 +59,9 @@ abstract class MviViewModel<State: Any, Event: Any, Action: Any>(
 
     abstract suspend fun performAction(action: Action)
 
-    fun emitEvent(event: Event) = _events.tryEmit(event)
+    fun emitEvent(event: Event) {
+        viewModelScope.launch { _events.emit(event) }
+    }
 
     fun submitAction(action: Action) {
         viewModelScope.launch { _pendingActions.emit(action) }

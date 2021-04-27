@@ -52,7 +52,10 @@ fun EpisodeScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when(event) {
-                is EpisodeEvent.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(event.podcast))
+                is EpisodeEvent.OpenPodcastDetail -> {
+                    if (fromSamePodcast) navigateBack()
+                    else navigateTo(Screen.PodcastScreen(event.podcast))
+                }
             }
         }
     }
