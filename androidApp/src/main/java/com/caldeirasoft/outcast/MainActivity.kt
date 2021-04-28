@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     ProvideWindowInsets {
-                        MainNavHost(ScreenName.DISCOVER)
+                        MainNavHost(ScreenName.STORE_DATA)
                     }
                 }
             }

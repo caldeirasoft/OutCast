@@ -11,7 +11,7 @@ data class EpisodeViewState(
     val podcast: Podcast? = null,
     val isLoading: Boolean = false,
     val error: Throwable? = null,
-) : MavericksState
+)
 {
     val artistData: StoreData? =
         podcast?.artistUrl?.let {

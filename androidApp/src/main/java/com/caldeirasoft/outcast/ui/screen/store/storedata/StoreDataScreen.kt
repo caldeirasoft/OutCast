@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store.discover
+package com.caldeirasoft.outcast.ui.screen.store.storedata
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -34,7 +34,6 @@ import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.episode
-import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
@@ -58,19 +57,19 @@ import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
 @Composable
-fun DiscoverScreen(
-    viewModel: DiscoverViewModel,
+fun StoreDataScreen(
+    viewModel: StoreDataViewModel,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
-    DiscoverScreen(state = state, lazyPagingItems = lazyPagingItems) { action ->
+    StoreDataScreen(state = state, lazyPagingItems = lazyPagingItems) { action ->
         when(action) {
-            is DiscoverActions.NavigateUp -> navigateBack()
-            is DiscoverActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.storePodcast))
-            is DiscoverActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeStoreScreen(action.storeEpisode))
-            is DiscoverActions.OpenStoreData -> navigateTo(Screen.Discover(action.storeData))
+            is StoreDataActions.NavigateUp -> navigateBack()
+            is StoreDataActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.storePodcast))
+            is StoreDataActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeStoreScreen(action.storeEpisode))
+            is StoreDataActions.OpenStoreData -> navigateTo(Screen.StoreDataScreen(action.storeData))
             else -> viewModel.submitAction(action)
         }
     }
@@ -88,12 +87,12 @@ fun DiscoverScreen(
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
-fun DiscoverScreen(
-    state: DiscoverState,
+fun StoreDataScreen(
+    state: StoreDataState,
     lazyPagingItems: LazyPagingItems<StoreItem>,
-    actioner: (DiscoverActions) -> Unit,
+    actioner: (StoreDataActions) -> Unit,
 ) {
-    val title = state.takeUnless { it.storeData == StoreData.Default }?.title
+    val title = state.takeUnless { it.storeData == null }?.title
         ?: stringResource(id = R.string.store_tab_discover)
 
     RestoreStatusBarColorOnDispose()
@@ -122,7 +121,7 @@ fun DiscoverScreen(
                             .fillMaxWidth()
                             .height(height = headerHeight.value.toDp()))
                         {
-                            DiscoverScreenHeader(
+                            StoreDataScreenHeader(
                                 title = title,
                                 state = state,
                                 listState = listState
@@ -159,27 +158,27 @@ fun DiscoverScreen(
                                     is StoreCollectionFeatured ->
                                         StoreCollectionFeaturedContent(
                                             storeCollection = collection,
-                                            openStoreDataDetail = { actioner(DiscoverActions.OpenStoreData(it)) },
-                                            openPodcastDetail = { actioner(DiscoverActions.OpenPodcastDetail(it)) },
-                                            openEpisodeDetail = { actioner(DiscoverActions.OpenEpisodeDetail(it)) },
+                                            openStoreDataDetail = { actioner(StoreDataActions.OpenStoreData(it)) },
+                                            openPodcastDetail = { actioner(StoreDataActions.OpenPodcastDetail(it)) },
+                                            openEpisodeDetail = { actioner(StoreDataActions.OpenEpisodeDetail(it)) },
                                         )
                                     is StoreCollectionItems -> {
                                         // content
                                         StoreCollectionItemsContent(
                                             storeCollection = collection,
-                                            openStoreDataDetail = { actioner(DiscoverActions.OpenStoreData(it)) },
-                                            openPodcastDetail = { actioner(DiscoverActions.OpenPodcastDetail(it)) },
-                                            openEpisodeDetail = { actioner(DiscoverActions.OpenEpisodeDetail(it)) },
+                                            openStoreDataDetail = { actioner(StoreDataActions.OpenStoreData(it)) },
+                                            openPodcastDetail = { actioner(StoreDataActions.OpenPodcastDetail(it)) },
+                                            openEpisodeDetail = { actioner(StoreDataActions.OpenEpisodeDetail(it)) },
                                             followingStatus = state.followingStatus,
                                             followLoadingStatus = state.followLoadingStatus,
-                                            onFollowPodcast =  { actioner(DiscoverActions.FollowPodcast(it)) },
+                                            onFollowPodcast =  { actioner(StoreDataActions.FollowPodcast(it)) },
                                         )
                                     }
                                     is StoreCollectionData -> {
                                         // rooms
                                         StoreCollectionDataContent(
                                             storeCollection = collection,
-                                            openStoreDataDetail = { actioner(DiscoverActions.OpenStoreData(it)) },
+                                            openStoreDataDetail = { actioner(StoreDataActions.OpenStoreData(it)) },
                                         )
                                     }
                                 }
@@ -200,7 +199,7 @@ fun DiscoverScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clickable(onClick = {
-                                                        actioner(DiscoverActions.OpenPodcastDetail(item))
+                                                        actioner(StoreDataActions.OpenPodcastDetail(item))
                                                     }),
                                                 podcast = item,
                                                 isFollowing = state.followingStatus.contains(
@@ -209,7 +208,7 @@ fun DiscoverScreen(
                                                 isFollowingLoading = state.followLoadingStatus.contains(
                                                     item.id
                                                 ),
-                                                onFollowPodcast = { actioner(DiscoverActions.FollowPodcast(it)) },
+                                                onFollowPodcast = { actioner(StoreDataActions.FollowPodcast(it)) },
                                             )
                                         }
                                     }
@@ -220,10 +219,10 @@ fun DiscoverScreen(
                                             StoreEpisodeItem(
                                                 modifier = Modifier,
                                                 onEpisodeClick = {
-                                                    actioner(DiscoverActions.OpenEpisodeDetail(item))
+                                                    actioner(StoreDataActions.OpenEpisodeDetail(item))
                                                 },
                                                 onThumbnailClick = {
-                                                    actioner(DiscoverActions.OpenPodcastDetail(item.storePodcast))
+                                                    actioner(StoreDataActions.OpenPodcastDetail(item.storePodcast))
                                                 },
                                                 episode = item.episode,
                                             )
@@ -251,7 +250,7 @@ fun DiscoverScreen(
                 }
 
                 // collapsing app bar
-                DiscoverTopAppBar(
+                StoreDataTopAppBar(
                     title = title,
                     state = state,
                     listState = listState)
@@ -262,10 +261,10 @@ fun DiscoverScreen(
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 72.dp)
                         .navigationBarsPadding(),
-                    discoverState = state,
+                    storeDataState = state,
                     listState = listState,
                     onClick = {
-                        actioner(DiscoverActions.ClearNotificationNewVersionAvailable)
+                        actioner(StoreDataActions.ClearNotificationNewVersionAvailable)
                         lazyPagingItems.refresh()
                     })
             }
@@ -274,9 +273,9 @@ fun DiscoverScreen(
 }
 
 @Composable
-fun DiscoverScreenHeader(
+fun StoreDataScreenHeader(
     title: String,
-    state: DiscoverState,
+    state: StoreDataState,
     listState: LazyListState,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -339,9 +338,9 @@ fun DiscoverScreenHeader(
 }
 
 @Composable
-fun DiscoverTopAppBar(
+fun StoreDataTopAppBar(
     title: String,
-    state: DiscoverState,
+    state: StoreDataState,
     listState: LazyListState,
 ) {
     val appBarAlpha = listState.topAppBarAlpha
@@ -396,7 +395,7 @@ fun DiscoverTopAppBar(
 @Composable
 fun RefreshButton(
     modifier: Modifier,
-    discoverState: DiscoverState,
+    storeDataState: StoreDataState,
     listState: LazyListState,
     onClick: () -> Unit,
 ) {
@@ -409,7 +408,7 @@ fun RefreshButton(
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemScrollOffset }
-            .filter { discoverState.newVersionAvailable }
+            .filter { storeDataState.newVersionAvailable }
             .filter { listState.isScrollInProgress }
             .debounce(100)
             .collect {
@@ -435,7 +434,7 @@ fun RefreshButton(
                     animationSpec = tween(durationMillis = 750)
                 ).value,
             ),
-        visible = discoverState.newVersionAvailable)
+        visible = storeDataState.newVersionAvailable)
     {
         Button(
             onClick = onClick,

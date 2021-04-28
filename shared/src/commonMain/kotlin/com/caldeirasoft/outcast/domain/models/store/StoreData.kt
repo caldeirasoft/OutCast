@@ -4,6 +4,7 @@ package com.caldeirasoft.outcast.domain.models.store
 import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
@@ -41,6 +42,22 @@ data class StoreData(
             id = 0L,
             label = "",
             genreId = Constants.DEFAULT_GENRE,
+            storeFront = "",
+        )
+
+        fun Genre.toStoreData() = StoreData(
+            id = id.toLong(),
+            label = name,
+            url = url,
+            genreId = id,
+            storeFront = "",
+        )
+
+        fun Category.toStoreData() = StoreData(
+            id = id.toLong(),
+            label = text,
+            url = "",
+            genreId = id,
             storeFront = "",
         )
     }

@@ -17,10 +17,9 @@ import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
+import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg
-import com.caldeirasoft.outcast.ui.screen.store.discover.StoreDataArg.Companion.toStoreDataArg
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
@@ -33,7 +32,7 @@ enum class ScreenName {
     PODCAST,
     EPISODE,
     EPISODE_STORE,
-    DISCOVER,
+    STORE_DATA,
     STORE_SEARCH,
     STORE_CHARTS,
     MORE,
@@ -66,10 +65,9 @@ sealed class Screen (val id: ScreenName) {
 
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
-    data class Discover(val storeDataArg: StoreDataArg?) : Screen(ScreenName.DISCOVER) {
-        constructor(storeData: StoreData) : this(storeDataArg = storeData.toStoreDataArg())
-        constructor(genre: Genre) : this(storeDataArg = genre.toStoreDataArg())
-        constructor(category: Category) : this(storeDataArg = category.toStoreDataArg())
+    data class StoreDataScreen(val storeData: StoreData? = null) : Screen(ScreenName.STORE_DATA) {
+        constructor(genre: Genre) : this(storeData = genre.toStoreData())
+        constructor(category: Category) : this(storeData = category.toStoreData())
     }
 
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
@@ -101,7 +99,7 @@ sealed class BottomNavigationScreen(
         Icons.Outlined.Subscriptions,
         Icons.Filled.Subscriptions)
 
-    object Discover : BottomNavigationScreen(ScreenName.DISCOVER,
+    object Discover : BottomNavigationScreen(ScreenName.STORE_DATA,
         R.string.screen_discover,
         Icons.Default.Explore,
         Icons.Filled.Explore

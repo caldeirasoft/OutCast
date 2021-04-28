@@ -10,6 +10,7 @@ import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
 import com.caldeirasoft.outcast.ui.navigation.getObject
 import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
 import com.caldeirasoft.outcast.ui.screen.MviViewModel
+import com.caldeirasoft.outcast.ui.screen.MvieViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +27,7 @@ class EpisodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadEpisodeFromDbUseCase: LoadEpisodeFromDbUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
-) : MviViewModel<EpisodeViewState, EpisodeEvent, EpisodeActions>(
+) : MvieViewModel<EpisodeViewState, EpisodeEvent, EpisodeActions>(
     // The string "episode" is the name of the argument in the route
     EpisodeViewState(
         episode = savedStateHandle.getObjectNotNull("episode"),

@@ -20,7 +20,7 @@ import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
-import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverScreen
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import com.google.accompanist.insets.navigationBarsPadding
@@ -104,16 +104,16 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateBack = actions.up)
                 }
                 composable(ScreenName.PROFILE.name) { Text(text = "Profile") }
-                composable(ScreenName.DISCOVER.name) {
-                    DiscoverScreen(
+                composable(ScreenName.STORE_DATA.name) {
+                    StoreDataScreen(
                         viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )
                 }
-                composable(route = "${ScreenName.DISCOVER.name}/{storeData}",
+                composable(route = "${ScreenName.STORE_DATA.name}/{storeData}",
                     arguments = listOf(navArgument("storeData") { type = NavType.StringType })) {
-                    DiscoverScreen(
+                    StoreDataScreen(
                         viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up

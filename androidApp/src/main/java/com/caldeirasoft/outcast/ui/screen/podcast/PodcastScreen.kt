@@ -48,13 +48,14 @@ import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 val LocalVibrantColor = compositionLocalOf<Color> { error("No vibrant color") }
 
-@OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
+@OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
 @Composable
 fun PodcastScreen(
     viewModel: PodcastViewModel,
@@ -71,8 +72,8 @@ fun PodcastScreen(
         when (action) {
             is PodcastActions.NavigateUp -> navigateBack()
             is PodcastActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.episode, true))
-            is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.Discover(action.storeData))
-            is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.Discover(action.category))
+            is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.StoreDataScreen(action.storeData))
+            is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.StoreDataScreen(action.category))
             else -> viewModel.submitAction(action)
         }
     }

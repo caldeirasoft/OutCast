@@ -8,6 +8,7 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.ui.screen.MviViewModel
+import com.caldeirasoft.outcast.ui.screen.MvieViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
@@ -15,7 +16,7 @@ abstract class FollowViewModel<State: Any, Event: Any, Action: Any>(
     initialState: State,
     private val followUseCase: FollowUseCase,
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
-) : MviViewModel<State, Event, Action>(initialState) {
+) : MvieViewModel<State, Event, Action>(initialState) {
 
     val followingStatus: MutableStateFlow<List<Long>> =
         MutableStateFlow(emptyList())

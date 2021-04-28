@@ -18,10 +18,7 @@ data class PodcastState(
     val showAllEpisodes: Boolean = false,
     val followingStatus: FollowStatus = FollowStatus.UNFOLLOWED,
     val prefs: Preferences? = null,
-) : MavericksState {
-    constructor(arg: Podcast) :
-            this(podcast = arg, isLoading = true)
-
+) {
     val artistData: StoreData? =
         podcast.artistUrl?.let {
             StoreData(
@@ -31,8 +28,4 @@ data class PodcastState(
                 storeFront = ""
             )
         }
-
-
-    val podcastPreferenceKeys: PodcastPreferenceKeys =
-        PodcastPreferenceKeys(podcast.feedUrl)
 }

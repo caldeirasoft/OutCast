@@ -3,10 +3,6 @@ package com.caldeirasoft.outcast.ui.screen.store.topchartsection
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.caldeirasoft.outcast.data.db.dao.PodcastDao
-import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
-import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.Category
@@ -15,13 +11,9 @@ import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStoreTopChartsPagingDataUseCase
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
-import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverActions
-import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverEvent
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataActions
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flattenMerge
@@ -34,7 +26,7 @@ class TopChartSectionViewModel @Inject constructor(
     private val loadStoreTopChartsPagingDataUseCase: LoadStoreTopChartsPagingDataUseCase,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,
     fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
-) : FollowViewModel<TopChartSectionState, DiscoverEvent, DiscoverActions>(
+) : FollowViewModel<TopChartSectionState, StoreDataEvent, StoreDataActions>(
     TopChartSectionState(StoreItemType.PODCAST),
     followUseCase,
     fetchFollowedPodcastsUseCase
@@ -66,7 +58,7 @@ class TopChartSectionViewModel @Inject constructor(
         }
     }
 
-    override suspend fun performAction(action: DiscoverActions) {
+    override suspend fun performAction(action: StoreDataActions) {
         TODO("Not yet implemented")
     }
 }

@@ -8,6 +8,7 @@ import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
 import com.caldeirasoft.outcast.ui.screen.MviViewModel
+import com.caldeirasoft.outcast.ui.screen.MvieViewModel
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +26,7 @@ class PodcastViewModel @Inject constructor(
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
-) : MviViewModel<PodcastState, PodcastEvent, PodcastActions>(
+) : MvieViewModel<PodcastState, PodcastEvent, PodcastActions>(
     initialState = PodcastState(
         podcast = savedStateHandle.getObjectNotNull("podcast"),
         isLoading = true

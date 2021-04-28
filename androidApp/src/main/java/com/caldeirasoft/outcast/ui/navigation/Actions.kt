@@ -5,7 +5,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
 import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.encodeObject
-import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlEncode
 
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
@@ -29,8 +28,8 @@ class Actions(navController: NavController) {
                 val podcastEncoded = encodeObject(screen.podcast)
                 navController.navigate("$screenName/$episodeEncoded/$podcastEncoded")
             }
-            is Discover -> {
-                val storeData = screen.storeDataArg
+            is StoreDataScreen -> {
+                val storeData = screen.storeData
                 if (storeData != null) {
                     val storeDataEncoded = encodeObject(storeData)
                     navController.navigate("${screen.id.name}/${storeDataEncoded}")

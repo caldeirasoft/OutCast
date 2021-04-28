@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,14 +29,10 @@ import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
-import com.caldeirasoft.outcast.ui.screen.store.discover.DiscoverScreenHeader
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.px
 import com.caldeirasoft.outcast.ui.util.toDp
-import com.caldeirasoft.outcast.ui.util.toIntPx
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
-import kotlin.math.log10
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -125,7 +119,7 @@ fun StoreSearchScreen(
                             Category.fromId(categoryId)?.let { category ->
                                 CategoryCardItem(
                                     category = category,
-                                    navigateToCategory = { navigateTo(Screen.Discover(category)) }
+                                    navigateToCategory = { navigateTo(Screen.StoreDataScreen(category)) }
                                 )
                             }
                         }

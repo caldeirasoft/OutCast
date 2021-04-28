@@ -1,48 +1,49 @@
-package com.caldeirasoft.outcast.ui.screen.store.discover
+package com.caldeirasoft.outcast.ui.screen.store.storedata
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.airbnb.mvrx.MavericksViewModelFactory
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
-import com.caldeirasoft.outcast.di.hiltmavericks.AssistedViewModelFactory
-import com.caldeirasoft.outcast.di.hiltmavericks.hiltMavericksViewModelFactory
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStorePagingDataUseCase
 import com.caldeirasoft.outcast.ui.navigation.getObject
+import com.caldeirasoft.outcast.ui.screen.MvieViewModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @HiltViewModel
-class DiscoverViewModel @Inject constructor(
+class StoreDataViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,
     private val loadStorePagingDataUseCase: LoadStorePagingDataUseCase,
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
     val followUseCase: FollowUseCase,
     val podcastDao: PodcastDao
-) : FollowViewModel<DiscoverState, DiscoverEvent, DiscoverActions>(
-    initialState = DiscoverState(storeData = savedStateHandle.getObject("storeData")),
-    followUseCase = followUseCase,
-    fetchFollowedPodcastsUseCase = fetchFollowedPodcastsUseCase) {
+) : MvieViewModel<StoreDataState, StoreDataEvent, StoreDataActions>(
+    initialState = StoreDataState(storeData = savedStateHandle.getObject("storeData")))
+{
+
+    val followLoadingStatus: MutableStateFlow<List<Long>> =
+        MutableStateFlow(emptyList())
 
     init {
-        followingStatus.setOnEach { copy(followingStatus = it) }
+        fetchFollowedPodcastsUseCase
+            .getFollowedPodcastIds()
+            .setOnEach {
+                copy(followingStatus = it)
+            }
+
         followLoadingStatus.setOnEach { copy(followLoadingStatus = it) }
     }
 
@@ -69,15 +70,33 @@ class DiscoverViewModel @Inject constructor(
             .flattenMerge()
             .cachedIn(viewModelScope)
 
-    override suspend fun performAction(action: DiscoverActions) = when(action){
-        is DiscoverActions.ClearNotificationNewVersionAvailable -> clearNewVersionNotification()
-        is DiscoverActions.FollowPodcast -> followPodcast(action.storePodcast)
+    override suspend fun performAction(action: StoreDataActions) = when(action){
+        is StoreDataActions.ClearNotificationNewVersionAvailable -> clearNewVersionNotification()
+        is StoreDataActions.FollowPodcast -> followPodcast(action.storePodcast)
         else -> Unit
     }
 
-    fun clearNewVersionNotification() {
+    private fun clearNewVersionNotification() {
         viewModelScope.setState {
             copy(newVersionAvailable = false)
         }
+    }
+
+    private fun followPodcast(item: StorePodcast) {
+        followUseCase.execute(item)
+            .onStart { setPodcastFollowLoading(item, true) }
+            .catch { setPodcastFollowLoading(item, false) }
+            .onEach {
+                delay(1000)
+                setPodcastFollowLoading(item, false)
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private suspend fun setPodcastFollowLoading(item: StorePodcast, isLoading: Boolean) {
+        if (isLoading)
+            followLoadingStatus.emit(followLoadingStatus.value.plus(item.id))
+        else
+            followLoadingStatus.emit(followLoadingStatus.value.minus(item.id))
     }
 }
