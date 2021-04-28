@@ -3,10 +3,7 @@ package com.caldeirasoft.outcast.data.util
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionData
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionFeatured
-import com.caldeirasoft.outcast.domain.models.store.StoreCollectionItems
-import com.caldeirasoft.outcast.domain.models.store.StorePage
+import com.caldeirasoft.outcast.domain.models.store.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -15,21 +12,21 @@ import kotlinx.coroutines.awaitAll
 interface StorePagingSource
 {
     val scope: CoroutineScope
-    val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem>
+    val getStoreItems: suspend (List<Long>, String, StoreData?) -> List<StoreItem>
 
     suspend fun getItemsFromIds(
         ids: List<Long>,
-        storeData: StorePage
+        storeData: StoreData
     ): List<StoreItem> = getItemsFromIds(ids, storeData.storeFront, storeData)
 
     suspend fun getItemsFromIds(
         ids: List<Long>,
         storeFront: String,
-        storePage: StorePage?
+        storeData: StoreData?
     ): List<StoreItem> {
         val idsSplit = ids.chunked(20)
         val deferredList = idsSplit.map {
-            scope.async(Dispatchers.IO) { getStoreItems(it, storeFront, storePage) }
+            scope.async(Dispatchers.IO) { getStoreItems(it, storeFront, storeData) }
         }
         val lstOfReturnData = deferredList.awaitAll()
         return lstOfReturnData.flatten()
@@ -38,18 +35,18 @@ interface StorePagingSource
     suspend fun getCollections(
         startPosition: Int,
         endPosition: Int,
-        storePage: StorePage,
+        storeData: StoreData,
     ): List<StoreCollection> {
         val ids: MutableSet<Long> = mutableSetOf()
 
-        storePage
+        storeData
             .storeList
             .subList(startPosition, endPosition)
             .filterIsInstance<StoreCollectionItems>()
             .flatMap { it.itemsIds.take(8) }
             .let { list -> ids.addAll(list) }
 
-        val fetchItems = getItemsFromIds(ids.toList(), storePage)
+        val fetchItems = getItemsFromIds(ids.toList(), storeData)
         val storeItemsMap = fetchItems
             .filterIsInstance<StoreItemArtwork>()
             .map { it.id to it }
@@ -57,7 +54,7 @@ interface StorePagingSource
 
         val itemsSequence: Sequence<StoreCollection> = sequence {
             for (i in startPosition until endPosition) {
-                when (val collection = storePage.storeList[i]) {
+                when (val collection = storeData.storeList[i]) {
                     is StoreCollectionFeatured,
                     is StoreCollectionData ->
                         yield(collection)

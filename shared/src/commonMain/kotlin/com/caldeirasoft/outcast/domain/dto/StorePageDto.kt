@@ -63,6 +63,7 @@ class PageDataResult(
     val artist: ArtistResult? = null,
     val metricsBase: MetricsBaseResult? = null,
     val unAvailableContentIds: Map<String, Long>? = null,
+    val selectedChart: TopChartResult? = null,
     val topCharts: List<TopChartResult> = arrayListOf()
 )
 

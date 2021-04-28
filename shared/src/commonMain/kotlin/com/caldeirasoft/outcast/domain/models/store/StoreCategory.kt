@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-class StoreGenre(
+class StoreCategory(
     val id: Int,
     var name: String,
     val storeFront: String,

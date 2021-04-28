@@ -1,7 +1,7 @@
 package com.caldeirasoft.outcast.data.util
 
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
-import com.caldeirasoft.outcast.domain.models.store.StorePage
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
 
@@ -9,7 +9,7 @@ class StoreChartsPagingSource(
     override val scope: CoroutineScope,
     val storeFront: String,
     private val loadDataFromNetwork: suspend () -> List<Long>,
-    override val getStoreItems: suspend (List<Long>, String, StorePage?) -> List<StoreItem>,
+    override val getStoreItems: suspend (List<Long>, String, StoreData?) -> List<StoreItem>,
 ) : BasePagingSource<StoreItem>(), StorePagingSource {
 
     override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {

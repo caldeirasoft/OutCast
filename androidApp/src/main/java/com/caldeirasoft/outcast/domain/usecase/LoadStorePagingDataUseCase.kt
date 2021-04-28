@@ -8,9 +8,7 @@ import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreData
-import com.caldeirasoft.outcast.domain.models.store.StorePage
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 class LoadStorePagingDataUseCase @Inject constructor(
@@ -18,10 +16,11 @@ class LoadStorePagingDataUseCase @Inject constructor(
     val dataStoreRepository: DataStoreRepository
 ) {
     fun executeAsync(
+        url: String,
         storeData: StoreData?,
         storeFront: String,
         newVersionAvailable: (() -> Unit)? = null,
-        dataLoadedCallback: ((StorePage) -> Unit)? = null,
+        dataLoadedCallback: ((StoreData) -> Unit)? = null,
     ): Flow<PagingData<StoreItem>> =
         Pager(
             config = PagingConfig(
@@ -32,14 +31,14 @@ class LoadStorePagingDataUseCase @Inject constructor(
                 StoreDataPagingSource(
                     loadDataFromNetwork = {
                         when {
-                            storeData == null || storeData.genreId != null -> storeRepository.getGroupingDataAsync(
+                            storeData == null -> storeRepository.getGroupingDataAsync(
                                 storeData?.genreId,
                                 storeFront,
                                 newVersionAvailable)
-                            storeData.url.isNotEmpty() -> storeRepository.getStoreDataAsync(
-                                storeData.url,
+                            url.isNotEmpty() -> storeRepository.getStoreDataAsync(
+                                url,
                                 storeFront)
-                            else -> storeData.getPage()
+                            else -> storeData
                         }
                     },
                     dataLoadedCallback = dataLoadedCallback,

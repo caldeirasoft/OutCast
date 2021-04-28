@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.datastore.dataStore
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
-import com.caldeirasoft.outcast.data.util.local.StorePageSerializer
+import com.caldeirasoft.outcast.data.util.local.StoreDataSerializer
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
@@ -43,7 +43,7 @@ class StoreRepository @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.Main)
 
     // Setup datacache
-    val Context.dataStore by dataStore("my_file.json", serializer = StorePageSerializer(json))
+    val Context.dataStore by dataStore("my_file.json", serializer = StoreDataSerializer(json))
 
     /**
      * getStoreDataAsync
@@ -51,7 +51,7 @@ class StoreRepository @Inject constructor(
     suspend fun getStoreDataAsync(
         url: String,
         storeFront: String,
-    ): StorePage {
+    ): StoreData {
         val storeResponse = itunesAPI.storeData(storeFront = storeFront, url = url)
         if (storeResponse.isSuccessful.not())
             throw HttpException(storeResponse)
@@ -66,13 +66,13 @@ class StoreRepository @Inject constructor(
         genre: Int?,
         storeFront: String,
         newVersionAvailable: (() -> Unit)?,
-    ): StorePage {
+    ): StoreData {
         val url = GENRE_URL.replace("{genre}", (genre ?: DEFAULT_GENRE).toString())
         return when (genre) {
             DEFAULT_GENRE -> {
-                var groupingPageCache: StorePage? = null
+                var groupingDataCache: StoreData? = null
                 try {
-                    groupingPageCache = context.dataStore.data.firstOrNull()
+                    groupingDataCache = context.dataStore.data.firstOrNull()
                         .takeUnless { it?.timestamp == Instant.DISTANT_PAST }
                         .takeUnless { it?.storeFront != storeFront }
                 }
@@ -80,30 +80,30 @@ class StoreRepository @Inject constructor(
 
                 }
 
-                val groupingPage = groupingPageCache ?: getStoreDataAsync(url, storeFront)
+                val groupingData = groupingDataCache ?: getStoreDataAsync(url, storeFront)
                 newVersionAvailable?.let {
-                    if (groupingPageCache != null) {
+                    if (groupingDataCache != null) {
                         scope.launch {
                             val now =
                                 Clock.System.now().toLocalDateTime(TimeZone.UTC)
                             val today = now.date
-                            if (groupingPageCache.fetchedAt.toLocalDateTime(TimeZone.UTC).date != today) {
+                            if (groupingDataCache.fetchedAt.toLocalDateTime(TimeZone.UTC).date != today) {
                                 val newGroupingPage = getStoreDataAsync(url, storeFront)
                                 if (newGroupingPage.timestamp.toLocalDateTime(TimeZone.UTC).date !=
-                                    groupingPageCache.timestamp.toLocalDateTime(TimeZone.UTC).date
+                                    groupingDataCache.timestamp.toLocalDateTime(TimeZone.UTC).date
                                 ) {
                                     context.dataStore.updateData { newGroupingPage }
                                     newVersionAvailable.invoke()
                                 } else {
-                                    context.dataStore.updateData { groupingPageCache.copy(fetchedAt = Clock.System.now()) }
+                                    context.dataStore.updateData { groupingDataCache.copy(fetchedAt = Clock.System.now()) }
                                 }
                             }
                         }
                     } else {
-                        context.dataStore.updateData { groupingPage }
+                        context.dataStore.updateData { groupingData }
                     }
                 }
-                groupingPage
+                groupingData
             }
             else -> {
                 getStoreDataAsync(url, storeFront)
@@ -114,7 +114,7 @@ class StoreRepository @Inject constructor(
     /**
      * getStoreData
      */
-    private fun getStoreData(storePageDto: StorePageDto): StorePage {
+    private fun getStoreData(storePageDto: StorePageDto): StoreData {
         val pageData = storePageDto.pageData
         // retrieve data
         return when (pageData?.componentName) {
@@ -126,6 +126,9 @@ class StoreRepository @Inject constructor(
             }
             "multi_room_page" -> {
                 getMultiRoomDataAsync(storePageDto)
+            }
+            "segmented_page" -> {
+                getTopChartsDataAsync(storePageDto)
             }
             "artist_page" -> {
                 when (pageData.metricsBase?.pageType) {
@@ -144,7 +147,7 @@ class StoreRepository @Inject constructor(
     /**
      * getGroupingDataAsync
      */
-    private fun getGroupingDataAsync(storePageDto: StorePageDto): StorePage {
+    private fun getGroupingDataAsync(storePageDto: StorePageDto): StoreData {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
@@ -168,7 +171,8 @@ class StoreRepository @Inject constructor(
                                             lockupResult[id]?.let {
                                                 getStoreItemFromLookupResultItem(it, storeFront)
                                                     ?.apply {
-                                                        featuredArtwork = elementChild.artwork?.toArtwork()
+                                                        featuredArtwork =
+                                                            elementChild.artwork?.toArtwork()
                                                         yield(this)
                                                     }
                                             }
@@ -282,14 +286,11 @@ class StoreRepository @Inject constructor(
             }
         }
 
-        return StorePage(
-            storeData = StoreData(
-                id = storePageDto.pageData?.contentId?.toLong() ?: 0L,
-                label = storePageDto.pageData?.categoryList?.name.orEmpty(),
-                storeFront = storeFront,
-                storeList = collectionSequence.toMutableList(),
-            ),
+        return StoreData(
+            id = storePageDto.pageData?.contentId?.toLong() ?: 0L,
+            label = storePageDto.pageData?.categoryList?.name.orEmpty(),
             storeFront = storeFront,
+            storeList = collectionSequence.toMutableList(),
             lookup = storeLookup,
             timestamp = timestamp
         )
@@ -299,14 +300,14 @@ class StoreRepository @Inject constructor(
     /**
      * getArtistPodcastDataAsync
      */
-    private fun getArtistPodcastDataAsync(storePageDto: StorePageDto): StorePage {
+    private fun getArtistPodcastDataAsync(storePageDto: StorePageDto): StoreData {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val ids = storePageDto.pageData?.contentData?.first()?.adamIds?.map { id -> id.toLong() }
             ?: emptyList()
 
-        val storeData = StoreData(
+        return StoreData(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
             artwork = storePageDto.pageData?.artist
@@ -315,22 +316,18 @@ class StoreRepository @Inject constructor(
                 ?.toArtwork(),
             storeFront = storeFront,
             storeIds = ids,
-        )
-
-        return StorePage(
-            storeData = storeData,
-            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(
                 lockupResult = storePageDto.storePlatformData?.lockup,
-                storeFront = storeFront)
+                storeFront = storeFront
+            )
         )
     }
 
     /**
      * getArtistProviderDataAsync
      */
-    private fun getArtistProviderDataAsync(storePageDto: StorePageDto): StorePage {
+    private fun getArtistProviderDataAsync(storePageDto: StorePageDto): StoreData {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val collectionSequence: Sequence<StoreCollection> = sequence {
@@ -371,17 +368,12 @@ class StoreRepository @Inject constructor(
             storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
                 ?.toArtwork()
 
-        val storeData = StoreData(
+        return StoreData(
             id = storePageDto.pageData?.artist?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.artist?.name.orEmpty(),
             artwork = editorialArtwork ?: uberArtwork,
             storeFront = storeFront,
             storeList = collectionSequence.toMutableList(),
-        )
-
-        return StorePage(
-            storeData = storeData,
-            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(
                 lockupResult = storePageDto.storePlatformData?.lockup,
@@ -392,7 +384,7 @@ class StoreRepository @Inject constructor(
     /**
      * getRoomPodcastDataAsync
      */
-    private fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StorePage {
+    private fun getRoomPodcastDataAsync(storePageDto: StorePageDto): StoreData {
         // parse store page data
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
@@ -402,18 +394,13 @@ class StoreRepository @Inject constructor(
             storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
                 ?.toArtwork()
 
-        val storeData = StoreData(
+        return StoreData(
             id = storePageDto.pageData?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.pageTitle.orEmpty(),
             description = storePageDto.pageData?.description,
             artwork = editorialArtwork ?: uberArtwork,
             storeFront = storeFront,
             storeIds = ids,
-        )
-
-        return StorePage(
-            storeData = storeData,
-            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(
                 lockupResult = storePageDto.storePlatformData?.lockup,
@@ -424,7 +411,7 @@ class StoreRepository @Inject constructor(
     /**
      * getMultiRoomDataAsync
      */
-    private fun getMultiRoomDataAsync(storePageDto: StorePageDto): StorePage {
+    private fun getMultiRoomDataAsync(storePageDto: StorePageDto): StoreData {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
         val collectionSequence: Sequence<StoreCollection> = sequence {
@@ -447,22 +434,62 @@ class StoreRepository @Inject constructor(
             storePageDto.pageData?.artist?.editorialArtwork?.storeFlowcase?.firstOrNull()
                 ?.toArtwork()
 
-        val storeData = StoreData(
+        return StoreData(
             id = storePageDto.pageData?.adamId?.toLong() ?: 0,
             label = storePageDto.pageData?.pageTitle.orEmpty(),
             description = storePageDto.pageData?.description,
             artwork = editorialArtwork ?: uberArtwork,
             storeFront = storeFront,
             storeList = collectionSequence.toMutableList(),
-        )
-
-        return StorePage(
-            storeData = storeData,
-            storeFront = storeFront,
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(
                 lockupResult = storePageDto.storePlatformData?.lockup,
                 storeFront = storeFront)
+        )
+    }
+
+    /**
+     * getTopChartsAsync
+     */
+    private fun getTopChartsDataAsync(storePageDto: StorePageDto): StoreData
+    {
+        val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
+        val selectedChart = storePageDto.pageData
+            ?.segmentedControl?.segments
+            ?.firstOrNull()
+            ?.pageData
+            ?.selectedChart
+        val ids = selectedChart?.adamIds ?: emptyList()
+
+        val storeCategories : List<StoreCategory> =
+            storePageDto.pageData
+                ?.segmentedControl?.segments
+                ?.firstOrNull()
+                ?.pageData
+                ?.categoryList
+                ?.let { categoryList ->
+                    listOf(StoreCategory(
+                        id = categoryList.genreId,
+                        name = categoryList.parentCategoryLabel.orEmpty(),
+                        storeFront = "",
+                        url = categoryList.url.orEmpty()
+                    )) + (categoryList.children.map { child -> child.toStoreCategory() })
+                }
+                ?: emptyList()
+
+        return StoreData(
+            id = selectedChart?.id ?: 0,
+            label = selectedChart?.title.orEmpty(),
+            description = null,
+            artwork = null,
+            storeFront = "",
+            storeIds = ids,
+            storeCategories = storeCategories,
+            sortByPopularity = true,
+            timestamp = timestamp,
+            lookup = getStoreLookupFromLookupResult(
+                lockupResult = storePageDto.storePlatformData?.lockup,
+                storeFront = "")
         )
     }
 
@@ -667,10 +694,10 @@ class StoreRepository @Inject constructor(
     suspend fun getListStoreItemDataAsync(
         lookupIds: List<Long>,
         storeFront: String,
-        storePage: StorePage?,
+        storeData: StoreData?,
     ): List<StoreItemArtwork> {
         val newLookup: MutableMap<Long, StoreItemArtwork> = mutableMapOf()
-        storePage?.lookup?.let { map ->
+        storeData?.lookup?.let { map ->
             newLookup.putAll(map)
         }
         // get current lookup ids
@@ -694,6 +721,6 @@ class StoreRepository @Inject constructor(
 
         return lookupIds
             .filter { id -> newLookup.containsKey(id) }
-            .mapNotNull { id -> newLookup.get(id) }
+            .mapNotNull { id -> newLookup[id] }
     }
 }

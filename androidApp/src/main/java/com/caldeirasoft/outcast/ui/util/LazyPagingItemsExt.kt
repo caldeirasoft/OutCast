@@ -42,7 +42,8 @@ fun LazyPagingItems<*>.ifNotLoading(
     itemsContent: () -> Unit,
 ) : LazyPagingItems<*> {
     val loadState = this.loadState
-    if (loadState.refresh is LoadState.NotLoading)
+    if (loadState.refresh is LoadState.NotLoading
+        && this.itemCount != 0)
         itemsContent()
     return this
 }

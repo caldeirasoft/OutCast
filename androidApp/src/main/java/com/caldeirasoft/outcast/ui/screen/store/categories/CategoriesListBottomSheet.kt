@@ -18,8 +18,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.data.common.Constants.Companion.DEFAULT_GENRE
 import com.caldeirasoft.outcast.domain.models.Category
+import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataActions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
@@ -54,12 +58,11 @@ enum class StoreGenreItem(
 @ExperimentalCoroutinesApi
 @Composable
 fun CategoriesListBottomSheet(
-    category: Category?,
-    onCategorySelected: (Category?) -> Unit,
+    categories: List<StoreCategory>,
+    selectedCategory: StoreCategory,
+    actioner : (StoreDataActions) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState(0)
-    val drawerState = LocalBottomSheetState.current
     Column()
     {
         TopAppBar(
@@ -67,11 +70,7 @@ fun CategoriesListBottomSheet(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = {
-                    coroutineScope.launch {
-                        drawerState.hide()
-                    }
-                }) {
+                IconButton(onClick = { actioner(StoreDataActions.NavigateUp) }) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
@@ -87,17 +86,15 @@ fun CategoriesListBottomSheet(
                 border = ButtonDefaults.outlinedBorder,
                 shape = RoundedCornerShape(8.dp)) {
                 Column {
-                    // all
-                    CategoryListItem(null, category == null, onCategorySelected)
-                    Divider()
-
-                    Category.values()
-                        .filter { !it.nested }
+                    categories
                         .forEach { itemContent ->
                             CategoryListItem(
-                                itemContent,
-                                category == itemContent,
-                                onCategorySelected
+                                category = itemContent,
+                                selected = selectedCategory == itemContent,
+                                onCategorySelected = {
+                                    actioner(StoreDataActions.SelectCategory(itemContent))
+                                    actioner(StoreDataActions.NavigateUp)
+                                }
                             )
                             Divider()
                         }
@@ -109,12 +106,10 @@ fun CategoriesListBottomSheet(
 
 @Composable
 fun CategoryListItem(
-    category: Category?,
+    category: StoreCategory,
     selected: Boolean = false,
-    onCategorySelected: (Category?) -> Unit)
+    onCategorySelected: (StoreCategory) -> Unit)
 {
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
     val backgroundColor: Color = when {
         selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
         else -> Color.Transparent
@@ -124,23 +119,23 @@ fun CategoryListItem(
         else -> MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
     }
 
-    if (category != null) {
-        val name = category.text //stringResource(id = category.titleId)
+    val name = category.name
+    if (category.id != DEFAULT_GENRE) {
         ListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
                     onCategorySelected(category)
-                    coroutineScope.launch {
-                        drawerState.hide()
-                    }
                 }),
             text = { Text(text = name, color = contentColor) },
             icon = {
-                Image(painter = painterResource(id = category.drawableId),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
+                category.getDrawableId()?.let { drawableId ->
+                    Image(
+                        painter = painterResource(id = drawableId),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
         )
     }
@@ -149,14 +144,9 @@ fun CategoryListItem(
             modifier = Modifier
                 .background(backgroundColor)
                 .clickable(onClick = {
-                    onCategorySelected(null)
-                    coroutineScope.launch {
-                        drawerState.hide()
-                    }
+                    onCategorySelected(category)
                 }),
-            text = { Text(
-                text = stringResource(id = R.string.store_genre_all),
-                color = contentColor) },
+            text = { Text(text = name, color = contentColor) },
         )
     }
 }
@@ -186,4 +176,28 @@ val Category.drawableId: Int
         1318 -> R.drawable.ic_artificial_intelligence
         1488 -> R.drawable.ic_handcuffs
         else -> R.drawable.ic_analytics
+    }
+
+@DrawableRes
+fun StoreCategory.getDrawableId() : Int? = when(this.id) {
+        1301 -> R.drawable.ic_color_palette
+        1321 -> R.drawable.ic_analytics
+        1303 -> R.drawable.ic_theater
+        1304 -> R.drawable.ic_mortarboard
+        1483 -> R.drawable.ic_fiction
+        1511 -> R.drawable.ic_city_hall
+        1512 -> R.drawable.ic_first_aid_kit
+        1487 -> R.drawable.ic_history
+        1305 -> R.drawable.ic_family
+        1502 -> R.drawable.ic_game_controller
+        1310 -> R.drawable.ic_guitar
+        1489 -> R.drawable.ic_news
+        1314 -> R.drawable.ic_religion
+        1533 -> R.drawable.ic_flasks
+        1324 -> R.drawable.ic_social_care
+        1545 -> R.drawable.ic_sport
+        1309 -> R.drawable.ic_video_camera
+        1318 -> R.drawable.ic_artificial_intelligence
+        1488 -> R.drawable.ic_handcuffs
+        else -> null
     }

@@ -35,7 +35,7 @@ class UpdatePodcastDataUseCase @Inject constructor(
                 val items = storeRepository.getListStoreItemDataAsync(
                     lookupIds = listOf(podcastId),
                     storeFront = storeFront,
-                    storePage = null
+                    storeData = null
                 )
 
                 if (items.isNotEmpty()) {

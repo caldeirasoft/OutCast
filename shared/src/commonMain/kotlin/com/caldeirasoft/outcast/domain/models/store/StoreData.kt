@@ -2,11 +2,13 @@
 package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.common.Constants
+import com.caldeirasoft.outcast.domain.common.Constants.Companion.GENRE_URL
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
@@ -21,21 +23,23 @@ data class StoreData(
     override val storeFront: String,
     var storeIds: List<Long> = arrayListOf(),
     val storeList: MutableList<StoreCollection> = mutableListOf(),
+    val sortByPopularity: Boolean = false,
+    val storeCategories: List<StoreCategory> = emptyList(),
+    val lookup: Map<Long, StoreItemArtwork> = mutableMapOf(),
+    val timestamp: Instant = Instant.DISTANT_PAST,
+    var fetchedAt: Instant = Clock.System.now(),
 ) : StoreItemArtwork {
     override var featuredArtwork: Artwork? = artwork
     override var editorialArtwork: Artwork? = null
 
-    fun isMultiRoom() = storeList.isNotEmpty()
+    val isMultiRoom: Boolean
+        get() = storeList.isNotEmpty()
 
     override fun getArtworkUrl(): String =
         StoreItemArtwork.artworkUrl(artwork, 400, 196, crop = "fa")
 
-    fun getPage(): StorePage =
-        StorePage(
-            storeData = this.copy(artwork = null),
-            storeFront = this.storeFront,
-            timestamp = Clock.System.now(),
-        )
+    val containsFeatured: Boolean
+        get() = storeList.filterIsInstance<StoreCollectionFeatured>().isNotEmpty()
 
     companion object {
         val Default = StoreData(
@@ -56,7 +60,7 @@ data class StoreData(
         fun Category.toStoreData() = StoreData(
             id = id.toLong(),
             label = text,
-            url = "",
+            url = GENRE_URL.replace("{genre}", id.toString()),
             genreId = id,
             storeFront = "",
         )

@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
@@ -31,7 +32,7 @@ class StoreDataViewModel @Inject constructor(
     val followUseCase: FollowUseCase,
     val podcastDao: PodcastDao
 ) : MvieViewModel<StoreDataState, StoreDataEvent, StoreDataActions>(
-    initialState = StoreDataState(storeData = savedStateHandle.getObject("storeData")))
+    initialState = StoreDataState(data = savedStateHandle.getObject("storeData")))
 {
 
     val followLoadingStatus: MutableStateFlow<List<Long>> =
@@ -47,13 +48,18 @@ class StoreDataViewModel @Inject constructor(
         followLoadingStatus.setOnEach { copy(followLoadingStatus = it) }
     }
 
+    val urlFlow = state
+        .map { it.url }
+        .distinctUntilChanged()
+
     // paged list
     @OptIn(FlowPreview::class)
     val discover: Flow<PagingData<StoreItem>> =
         fetchStoreFrontUseCase.getStoreFront()
             .distinctUntilChanged()
-            .map { storeFront ->
+            .combine(urlFlow) { storeFront, url ->
                 loadStorePagingDataUseCase.executeAsync(
+                    url = url.orEmpty(),
                     storeData = initialState.storeData,
                     storeFront = storeFront,
                     newVersionAvailable = {
@@ -63,7 +69,9 @@ class StoreDataViewModel @Inject constructor(
                     },
                     dataLoadedCallback = { page ->
                         viewModelScope.setState {
-                            copy(storePage = page, title = page.label)
+                            copy(storeData = page,
+                                title = page.label,
+                                categories = page.storeCategories)
                         }
                     })
             }
@@ -73,6 +81,8 @@ class StoreDataViewModel @Inject constructor(
     override suspend fun performAction(action: StoreDataActions) = when(action){
         is StoreDataActions.ClearNotificationNewVersionAvailable -> clearNewVersionNotification()
         is StoreDataActions.FollowPodcast -> followPodcast(action.storePodcast)
+        is StoreDataActions.OpenCategories -> openCategoriesDialog()
+        is StoreDataActions.SelectCategory -> selectCategoryFilter(action.category)
         else -> Unit
     }
 
@@ -91,6 +101,24 @@ class StoreDataViewModel @Inject constructor(
                 setPodcastFollowLoading(item, false)
             }
             .launchIn(viewModelScope)
+    }
+
+    private suspend fun openCategoriesDialog() {
+        withState {
+            emitEvent(StoreDataEvent.OpenCategories(
+                categories = it.categories,
+                selectedCategoryId = it.currentCategoryId!!
+            ))
+        }
+    }
+
+    private suspend fun selectCategoryFilter(selectedCategory: StoreCategory) {
+        setState {
+            copy(
+                currentCategoryId = selectedCategory.id,
+                url = selectedCategory.url
+            )
+        }
     }
 
     private suspend fun setPodcastFollowLoading(item: StorePodcast, isLoading: Boolean) {
