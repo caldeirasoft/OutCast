@@ -16,7 +16,7 @@ data class StoreDataState(
     val currentCategoryId: Int = DEFAULT_GENRE,
     val newVersionAvailable: Boolean = false,
 ) {
-    constructor(data: StoreData?) : this(storeData = data, url = data?.url)
+    constructor(data: StoreData?) : this(storeData = data, url = data?.url, title = data?.label.orEmpty())
 
     val currentCategory: StoreCategory
         get() = categories.first { it.id == currentCategoryId }
