@@ -152,8 +152,6 @@ class StoreRepository @Inject constructor(
         val unAvailableContentIds = storePageDto.pageData?.unAvailableContentIds ?: emptyMap()
         val storeLookup =
             getStoreLookupFromLookupResult(storePageDto.storePlatformData?.lockup, storeFront)
-        var topPodcastsIds: List<Long> = emptyList()
-        var topEpisodesIds: List<Long> = emptyList()
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData?.fcStructure?.model?.children
                 ?.first { element -> element.token == "allPodcasts" }?.children
@@ -205,22 +203,16 @@ class StoreRepository @Inject constructor(
                                 .filter { !unAvailableContentIds.containsValue(it) }
                             when (elementChild.type) {
                                 "popularity" -> { // top podcasts // top episodes
-                                    /*when (elementChild.fcKind) {
-                                        // podcast
-                                        16 -> topPodcastsIds = ids.take(5)
-                                        186 -> topEpisodesIds = ids.take(5)
-                                    }
-                                    if (topPodcastsIds.isNotEmpty() && topEpisodesIds.isNotEmpty()) {
-                                        yield(
-                                            StoreCollectionCharts(
-                                                id = 0,
-                                                topPodcastsIds = topPodcastsIds,
-                                                topEpisodesIds = topEpisodesIds,
-                                                genreId = null,
-                                                storeFront = storeFront
-                                            )
+                                    yield(
+                                        StoreCollectionItems(
+                                            id = elementChild.adamId,
+                                            label = elementChild.name,
+                                            url = elementChild.seeAllUrl,
+                                            itemsIds = ids,
+                                            storeFront = storeFront,
+                                            sortByPopularity = true
                                         )
-                                    }*/
+                                    )
                                 }
                                 "normal" -> {
                                     when (elementChild.content.first().kindIds.first()) {
