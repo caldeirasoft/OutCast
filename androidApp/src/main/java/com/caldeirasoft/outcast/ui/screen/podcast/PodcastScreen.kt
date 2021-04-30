@@ -32,16 +32,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.data.common.Constants
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
+import com.caldeirasoft.outcast.ui.components.nestedscrollview.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataActions
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataScreenHeader
 import com.caldeirasoft.outcast.ui.theme.*
+import com.caldeirasoft.outcast.ui.util.toDp
 import com.caldeirasoft.outcast.ui.util.toPx
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -67,8 +75,11 @@ fun PodcastScreen(
     val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
+    val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
     PodcastScreen(
-        state = state, drawerState = drawerState
+        state = state,
+        drawerState = drawerState,
+        lazyPagingItems = lazyPagingItems
     ) { action ->
         when (action) {
             is PodcastActions.NavigateUp -> navigateBack()
@@ -107,6 +118,7 @@ fun PodcastScreen(
 @Composable
 private fun PodcastScreen(
     state: PodcastState,
+    lazyPagingItems: LazyPagingItems<Episode>,
     drawerState: ModalBottomSheetState,
     actioner : (PodcastActions) -> Unit,
 ) {
@@ -119,170 +131,182 @@ private fun PodcastScreen(
     CompositionLocalProvider(LocalVibrantColor provides dominantColorOrDefault) {
         Scaffold {
             //
-            val listState = rememberLazyListState(0)
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()) {
+            val nestedScrollViewState = rememberNestedScrollViewState()
 
-                item {
-                    PodcastExpandedHeader(
-                        state = state,
-                        listState = listState,
-                        openStoreDataDetail = { actioner(PodcastActions.OpenStoreDataDetail(it)) }
-                    )
-                }
-
-                when {
-                    state.isLoading ->
-                        item {
-                            PodcastLoadingScreen()
-                        }
-                    state.error != null ->
-                        state.error?.let {
-                            item {
-                                ErrorScreen(t = it)
-                            }
-                        }
-                    else -> {
+            VerticalNestedScrollView(
+                state = nestedScrollViewState,
+                header = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        PodcastExpandedHeader(
+                            state = state,
+                            nestedScrollViewState = nestedScrollViewState,
+                            openStoreDataDetail = { actioner(PodcastActions.OpenStoreDataDetail(it)) }
+                        )
                         // buttons
-                        item {
-                            // buttons
-                            BoxWithConstraints(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 16.dp),
-                                contentAlignment = Alignment.Center) {
-                                val fullWidth = constraints.maxWidth
-                                val buttonWidth = 150.dp.toPx()
-                                val twoButtonsWidth = 2 * buttonWidth + 20.dp.toPx()
-                                val edgePadding = (fullWidth - buttonWidth) / 2
-                                val edgePadding2Btns = (fullWidth - twoButtonsWidth) / 2
-                                // settings
-                                FollowingButton(
-                                    textContent = stringResource(id = R.string.action_settings),
-                                    imageVector = Icons.Default.Settings,
-                                    translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding - edgePadding2Btns else 0f,
-                                    alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            drawerState.show()
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            contentAlignment = Alignment.Center) {
+                            val fullWidth = constraints.maxWidth
+                            val buttonWidth = 150.dp.toPx()
+                            val twoButtonsWidth = 2 * buttonWidth + 20.dp.toPx()
+                            val edgePadding = (fullWidth - buttonWidth) / 2
+                            val edgePadding2Btns = (fullWidth - twoButtonsWidth) / 2
+                            // settings
+                            FollowingButton(
+                                textContent = stringResource(id = R.string.action_settings),
+                                imageVector = Icons.Default.Settings,
+                                translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding - edgePadding2Btns else 0f,
+                                alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        drawerState.show()
+                                    }
+                                }
+                            )
+
+                            // following buttons
+                            FollowingButton(
+                                textContent = stringResource(id = R.string.action_following),
+                                imageVector = Icons.Default.Check,
+                                translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
+                                alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                onClick = { actioner(PodcastActions.UnfollowPodcast) }
+                            )
+
+                            // follow button
+                            FollowButton(
+                                state = state,
+                                onClick = { actioner(PodcastActions.FollowPodcast) }
+                            )
+                        }
+                    }
+                },
+                content = {
+                    LazyListLayout(lazyListItems = lazyPagingItems) {
+                        val listState = rememberLazyListState(0)
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+
+                            /* description if present */
+                            item {
+                                podcastData.description?.let { description ->
+                                    PodcastDescriptionContent(description = description)
+                                }
+                            }
+
+                            // genre
+                            item {
+                                podcastData.category?.let { genre ->
+                                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                        ChipButton(selected = false,
+                                            onClick = {
+                                                actioner(
+                                                    PodcastActions.OpenCategoryDataDetail(
+                                                        genre
+                                                    )
+                                                )
+                                            })
+                                        {
+                                            Text(text = genre.name)
                                         }
                                     }
-                                )
+                                }
 
-                                // following buttons
-                                FollowingButton(
-                                    textContent = stringResource(id = R.string.action_following),
-                                    imageVector = Icons.Default.Check,
-                                    translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
-                                    alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
-                                    onClick = { actioner(PodcastActions.UnfollowPodcast) }
-                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
 
-                                // follow button
-                                FollowButton(
-                                    state = state,
-                                    onClick = { actioner(PodcastActions.FollowPodcast) }
+                            // episodes
+                            item {
+                                StoreHeadingSection(
+                                    title = stringResource(
+                                        id = R.string.podcast_x_episodes,
+                                        state.episodes.size
+                                    )
                                 )
                             }
-                        }
+                            if (state.showAllEpisodes || state.episodes.size < 5) {
+                                items(items = state.episodes) { episode ->
+                                    EpisodeItem(
+                                        episode = episode,
+                                        onEpisodeClick = {
+                                            actioner(PodcastActions.OpenEpisodeDetail(episode))
+                                        }
+                                    )
+                                    Divider()
+                                }
+                            } else {
+                                // show first, last and "show more" button
+                                item {
+                                    // most recent episode
+                                    state.episodes[0].let { firstEpisode ->
+                                        EpisodeItem(
+                                            episode = firstEpisode,
+                                            onEpisodeClick = {
+                                                actioner(
+                                                    PodcastActions.OpenEpisodeDetail(
+                                                        firstEpisode
+                                                    )
+                                                )
+                                            }
+                                        )
+                                        Divider()
+                                    }
+                                }
 
-                        /* description if present */
-                        item {
-                            podcastData.description?.let { description ->
-                                PodcastDescriptionContent(description = description)
-                            }
-                        }
-
-                        // genre
-                        item {
-                            podcastData.category?.let { genre ->
-                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                    ChipButton(selected = false,
-                                        onClick = { actioner(PodcastActions.OpenCategoryDataDetail(genre)) })
+                                item {
+                                    // text button "show more episodes"
+                                    TextButton(
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp),
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = LocalVibrantColor.current
+                                        ),
+                                        onClick = { actioner(PodcastActions.ShowAllEpisodes) })
                                     {
-                                        Text(text = genre.name)
+                                        Text(
+                                            text = stringResource(id = R.string.action_show_all_episodes),
+                                            style = typography.button.copy(letterSpacing = 0.25.sp)
+                                        )
+                                    }
+                                    Divider()
+                                }
+
+                                item {
+                                    // oldest episode
+                                    val size = state.episodes.size - 1
+                                    state.episodes[size].let { lastEpisode ->
+                                        EpisodeItem(
+                                            episode = lastEpisode,
+                                            onEpisodeClick = {
+                                                actioner(
+                                                    PodcastActions.OpenEpisodeDetail(
+                                                        lastEpisode
+                                                    )
+                                                )
+                                            }
+                                        )
+                                        Divider()
                                     }
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        // episodes
-                        item {
-                            StoreHeadingSection(
-                                title = stringResource(id = R.string.podcast_x_episodes,
-                                    state.episodes.size))
-                        }
-                        if (state.showAllEpisodes || state.episodes.size < 5) {
-                            items(items = state.episodes) { episode ->
-                                EpisodeItem(
-                                    episode = episode,
-                                    onEpisodeClick = {
-                                        actioner(PodcastActions.OpenEpisodeDetail(episode))
-                                    }
-                                )
-                                Divider()
-                            }
-                        } else {
-                            // show first, last and "show more" button
                             item {
-                                // most recent episode
-                                state.episodes[0].let { firstEpisode ->
-                                    EpisodeItem(
-                                        episode = firstEpisode,
-                                        onEpisodeClick = {
-                                            actioner(PodcastActions.OpenEpisodeDetail(firstEpisode))
-                                        }
-                                    )
-                                    Divider()
-                                }
+                                // bottom app bar spacer
+                                Spacer(modifier = Modifier.height(56.dp))
                             }
-
-                            item {
-                                // text button "show more episodes"
-                                TextButton(
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp),
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = LocalVibrantColor.current
-                                    ),
-                                    onClick = { actioner(PodcastActions.ShowAllEpisodes) })
-                                {
-                                    Text(text = stringResource(id = R.string.action_show_all_episodes),
-                                        style = typography.button.copy(letterSpacing = 0.25.sp))
-                                }
-                                Divider()
-                            }
-
-                            item {
-                                // oldest episode
-                                val size = state.episodes.size - 1
-                                state.episodes[size].let { lastEpisode ->
-                                    EpisodeItem(
-                                        episode = lastEpisode,
-                                        onEpisodeClick = {
-                                            actioner(PodcastActions.OpenEpisodeDetail(lastEpisode))
-                                        }
-                                    )
-                                    Divider()
-                                }
-                            }
-                        }
-
-                        item {
-                            // bottom app bar spacer
-                            Spacer(modifier = Modifier.height(56.dp))
                         }
                     }
                 }
-            }
+            )
 
             PodcastTopAppBar(
                 state = state,
-                listState = listState,
+                nestedScrollViewState = nestedScrollViewState,
                 navigateUp = { actioner(PodcastActions.NavigateUp) }
             )
         }
@@ -292,7 +316,7 @@ private fun PodcastScreen(
 @Composable
 private fun PodcastExpandedHeader(
     state: PodcastState,
-    listState: LazyListState,
+    nestedScrollViewState: NestedScrollViewState,
     openStoreDataDetail: (StoreData) -> Unit,
 ) {
     val podcastData = state.podcast
@@ -301,10 +325,8 @@ private fun PodcastExpandedHeader(
         podcastData.artworkDominantColor
             ?.let { Color.getColor(it).takeUnless { color -> color == Color.White } }
 
-    val alphaLargeHeader = listState.expandedHeaderAlpha
-    Box(modifier = Modifier
-        .fillMaxWidth()
-    )
+    val alphaLargeHeader = nestedScrollViewState.expandedHeaderAlpha
+    Box(modifier = Modifier.fillMaxWidth())
     {
         val bgDominantColor =
                 Color.getColor(podcastData.artworkDominantColor) ?: MaterialTheme.colors.surface
@@ -386,10 +408,10 @@ private fun PodcastExpandedHeader(
 @Composable
 fun PodcastTopAppBar(
     state: PodcastState,
-    listState: LazyListState,
+    nestedScrollViewState: NestedScrollViewState,
     navigateUp: () -> Unit,
 ) {
-    val appBarAlpha = listState.topAppBarAlpha
+    val appBarAlpha = nestedScrollViewState.topAppBarAlpha
     val backgroundColor: Color = Color.blendARGB(
         MaterialTheme.colors.surface.copy(alpha = 0f),
         MaterialTheme.colors.surface,

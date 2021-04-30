@@ -168,7 +168,6 @@ fun StoreDataScreen(
                             }
                         }
                     }
-
                 },
                 content = {
                     LazyListLayout(lazyListItems = lazyPagingItems) {
