@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +43,7 @@ import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomS
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.*
 import com.caldeirasoft.outcast.ui.util.toPx
-import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
@@ -334,8 +335,8 @@ private fun PodcastExpandedHeader(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
             ) {
-                CoilImage(
-                    data = podcastData.artworkUrl,
+                Image(
+                    painter = rememberCoilPainter(request = podcastData.artworkUrl),
                     contentDescription = podcastData.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

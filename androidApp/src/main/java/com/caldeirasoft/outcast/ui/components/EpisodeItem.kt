@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,15 +17,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
-import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
-import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.rememberCoilPainter
 
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -222,8 +220,8 @@ fun EpisodeGridItem(
                     .fillMaxWidth()
                     .aspectRatio(1f))
                 {
-                    CoilImage(
-                        data = episode.artworkUrl,
+                    Image(
+                        painter = rememberCoilPainter(request = episode.artworkUrl),
                         contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

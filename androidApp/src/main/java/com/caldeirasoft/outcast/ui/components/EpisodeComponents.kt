@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.rememberCoilPainter
 
 
 @Composable
@@ -39,8 +40,8 @@ fun StoreEpisodeListItem(episode: StoreEpisode)
                     backgroundColor = colors[1],
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    CoilImage(
-                        data = episode.getArtworkUrl(),
+                    Image(
+                        painter = rememberCoilPainter(request = episode.getArtworkUrl()),
                         contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -113,8 +114,8 @@ fun StoreEpisodeSmallListItemIndexed(
                     backgroundColor = colors[1],
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    CoilImage(
-                        data = episode.getArtworkUrl(),
+                    Image(
+                        painter = rememberCoilPainter(request = episode.getArtworkUrl()),
                         contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -146,8 +147,8 @@ fun StoreEpisodeSmallListItemIndexed(
                     backgroundColor = colors[1],
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    CoilImage(
-                        data = episode.getArtworkUrl(),
+                    Image(
+                        painter = rememberCoilPainter(request = episode.getArtworkUrl()),
                         contentDescription = episode.podcastName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

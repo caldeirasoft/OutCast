@@ -3,10 +3,11 @@ package com.caldeirasoft.outcast.ui.screen.store.storedata
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,22 +41,17 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
-import com.caldeirasoft.outcast.ui.components.foundation.FilterChipGroup
 import com.caldeirasoft.outcast.ui.components.nestedscrollview.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
-import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -64,7 +60,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
 @Composable
@@ -438,18 +433,13 @@ fun StoreDataScreenHeader(
 
             val artworkUrl =
                 StoreItemArtwork.artworkUrl(artwork, 640, 260, crop = "fa")
-            CoilImage(
+            Image(
+                painter = rememberCoilPainter(request = artworkUrl),
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(nestedScrollViewState.expandedHeaderAlpha),
-                data = artworkUrl,
                 contentDescription = state.storeData.label,
                 contentScale = ContentScale.FillHeight,
-                loading = {
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.DarkGray))
-                }
             )
         } else {
             // large title
@@ -735,7 +725,7 @@ fun StoreCollectionFeaturedContent(
                 .aspectRatio(2.03f)
         ) { page ->
             val item = storeCollection.items[Math.floorMod(page, storeCollection.items.size)]
-            val bgDominantColor = Color.getColor(item.artwork?.bgColor!!)
+            val bgDominantColor = Color.getColor(item.artwork?.bgColor) ?: Color.Unspecified
             Card(
                 backgroundColor = bgDominantColor,
                 shape = RoundedCornerShape(8.dp),
@@ -751,8 +741,8 @@ fun StoreCollectionFeaturedContent(
                     }
             )
             {
-                CoilImage(
-                    data = item.getArtworkFeaturedUrl(),
+                Image(
+                    painter = rememberCoilPainter(request = item.getArtworkFeaturedUrl()),
                     contentDescription = null,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier

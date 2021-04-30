@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.ui.screen.episode
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,7 +29,7 @@ import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastLoadingScreen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
-import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
@@ -192,8 +193,8 @@ private fun EpisodeExpandedHeader(
                 modifier = Modifier
                     .align(Alignment.Start)
             ) {
-                CoilImage(
-                    data = state.episode.artworkUrl,
+                Image(
+                    painter = rememberCoilPainter(request = state.episode.artworkUrl),
                     contentDescription = state.episode.podcastName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

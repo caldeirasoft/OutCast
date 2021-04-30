@@ -18,9 +18,12 @@ package com.caldeirasoft.outcast.data.util;
 
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.network.rss.ITunesParser
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
+import com.caldeirasoft.outcast.domain.models.rss.channel.ITunesChannelData
+import com.caldeirasoft.outcast.domain.models.rss.item.ITunesItemData
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flatMapMerge
@@ -31,9 +34,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochSeconds
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
-import tw.ktrssreader.Reader
-import tw.ktrssreader.kotlin.model.channel.ITunesChannelData
-import tw.ktrssreader.kotlin.model.item.ITunesItemData
+import okhttp3.Request
+import okhttp3.Response
+import retrofit2.HttpException
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
@@ -86,9 +89,14 @@ class PodcastsFetcher(
             flow { emit(fetchPodcast(feedUrl)) }
         }
 
-    suspend fun fetchPodcast(url: String, currentPodcast: Podcast? = null): PodcastRssResponse =
-        Reader.coRead<ITunesChannelData>(url).toPodcastResponse(url, currentPodcast)
-
+    private suspend fun fetchPodcast(url: String, currentPodcast: Podcast? = null): PodcastRssResponse =
+        withContext(Dispatchers.IO) {
+            val request = Request.Builder().url(url).build()
+            val response: Response = okHttpClient.newCall(request = request).execute()
+            val xmlContent = response.body?.string().orEmpty()
+            val itunesModel: ITunesChannelData = ITunesParser().parse(xmlContent)
+            return@withContext itunesModel.toPodcastResponse(url, currentPodcast)
+        }
 }
 
 data class PodcastRssResponse(
@@ -98,7 +106,7 @@ data class PodcastRssResponse(
 
 
 /**
- * Map a KtRssReader [ITunesChannelData] instance to our own [Podcast] data class.
+ * Map a [ITunesChannelData] instance to our own [Podcast] data class.
  */
 private fun ITunesChannelData.toPodcastResponse(
     feedUrl: String,
@@ -143,7 +151,7 @@ private fun ITunesChannelData.toPodcastResponse(
 }
 
 /**
- * Map a KtRssReader [ITunesItemData] instance to our own [Episode] data class.
+ * Map a [ITunesItemData] instance to our own [Episode] data class.
  */
 private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
     val releaseDateTime = pubDate

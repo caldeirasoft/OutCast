@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -24,9 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.rememberCoilPainter
 
 
 @Composable
@@ -95,8 +95,8 @@ fun PodcastThumbnail(
         backgroundColor = colors[1],
         shape = RoundedCornerShape(8.dp)
     ) {
-        CoilImage(
-            data = data,
+        Image(
+            painter = rememberCoilPainter(request = data),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
@@ -125,8 +125,8 @@ fun PodcastGridItem(
                 .fillMaxWidth()
                 .aspectRatio(1f))
             {
-                CoilImage(
-                    data = podcast.getArtworkUrl(),
+                Image(
+                    painter = rememberCoilPainter(request = podcast.getArtworkUrl()),
                     contentDescription = podcast.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -178,8 +178,8 @@ fun PodcastGridItem(
             shape = RoundedCornerShape(8.dp)
         )
         {
-            CoilImage(
-                data = podcast.artworkUrl,
+            Image(
+                painter = rememberCoilPainter(request = podcast.artworkUrl),
                 contentDescription = podcast.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -223,9 +223,11 @@ fun FollowPodcastGridIconButton(
     {
         val followingStatus = Pair(isFollowing, isFollowingLoading)
         Crossfade(
-            modifier = Modifier,
             targetState = followingStatus,
-            animationSpec = tween(500)) { followStatus ->
+            modifier = Modifier,
+            animationSpec = tween(500)
+        )
+        { it ->
             when {
                 isFollowingLoading -> {
                     Box(modifier = Modifier
@@ -283,7 +285,8 @@ fun FollowPodcastListIconButton(
     val followingStatus = Pair(isFollowing, isFollowingLoading)
     Crossfade(
         targetState = followingStatus,
-        animationSpec = tween(500)) { followStatus ->
+        animationSpec = tween(500))
+    { it ->
         when {
             isFollowingLoading -> {
                 Box(modifier = Modifier
