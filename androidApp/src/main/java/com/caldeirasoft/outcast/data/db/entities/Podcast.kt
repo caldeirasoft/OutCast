@@ -10,6 +10,7 @@ import com.caldeirasoft.outcast.data.db.customparcelers.InstantParceler
 import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.models.Category
+import com.caldeirasoft.outcast.domain.models.store.Artwork
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
@@ -21,8 +22,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-@Parcelize
-@TypeParceler<Instant, InstantParceler>
 @Entity(
   tableName = "podcast",
   indices = [
@@ -41,6 +40,7 @@ data class Podcast(
   @ColumnInfo(name = "releaseDateTime") val releaseDateTime: Instant,
   @ColumnInfo(name = "artworkUrl") val artworkUrl: String,
   @ColumnInfo(name = "artworkDominantColor") val artworkDominantColor: String? = null,
+  @ColumnInfo(name = "artworkTextColor") val artworkTextColor: String? = null,
   @ColumnInfo(name = "trackCount") val trackCount: Long = 0,
   @ColumnInfo(name = "podcastWebsiteURL") val podcastWebsiteURL: String? = null,
   @ColumnInfo(name = "copyright") val copyright: String? = null,
@@ -51,7 +51,7 @@ data class Podcast(
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
   @ColumnInfo(name = "isFollowed") val isFollowed: Boolean = false,
   @ColumnInfo(name = "updatedAt") val updatedAt: Instant
-) : Parcelable {
+) {
   companion object {
     val Default = Podcast(
       feedUrl = "",
@@ -76,6 +76,7 @@ data class Podcast(
         releaseDateTime = releaseDateTime,
         artworkUrl = getArtworkUrl(),
         artworkDominantColor = artwork?.bgColor,
+        artworkTextColor = artwork?.textColor1,
         trackCount = trackCount.toLong(),
         copyright = copyright,
         isExplicit = isExplicit,

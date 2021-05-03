@@ -22,6 +22,7 @@ data class StorePodcast(
     val releaseDate: Instant,
     val releaseDateTime: Instant,
     override val artwork: Artwork?,
+    override var editorialArtwork: Artwork?,
     val trackCount: Int,
     val podcastWebsiteUrl: String? = null,
     val copyright: String? = null,
@@ -32,7 +33,6 @@ data class StorePodcast(
 ) : StoreItemArtwork {
 
     override var featuredArtwork: Artwork? = null
-    override var editorialArtwork: Artwork? = null
 
     var moreByArtist: List<Long>? = null
     var listenersAlsoBought: List<Long>? = null

@@ -3,10 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.podcast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -34,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.common.Constants
 import com.caldeirasoft.outcast.data.db.entities.Episode
@@ -49,8 +47,7 @@ import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataActions
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataScreenHeader
 import com.caldeirasoft.outcast.ui.theme.*
-import com.caldeirasoft.outcast.ui.util.toDp
-import com.caldeirasoft.outcast.ui.util.toPx
+import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
@@ -61,8 +58,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
-
-val LocalVibrantColor = compositionLocalOf<Color> { error("No vibrant color") }
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
 @Composable
@@ -112,6 +107,12 @@ fun PodcastScreen(
     }
 }
 
+/**
+ * This is the minimum amount of calculated constrast for a color to be used on top of the
+ * surface color. These values are defined within the WCAG AA guidelines, and we use a value of
+ * 3:1 which is the minimum for user-interface components.
+ */
+private const val MinConstastOfPrimaryVsSurface = 3f
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @ExperimentalCoroutinesApi
@@ -125,14 +126,23 @@ private fun PodcastScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val podcastData = state.podcast
-    val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
-    val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
+    val surfaceColor = MaterialTheme.colors.surface
+    val dominantColorState = rememberDominantColorState { color ->
+        // We want a color which has sufficient contrast against the surface color
+        color.constrastAgainst(surfaceColor) >= MinConstastOfPrimaryVsSurface
+    }
 
-    CompositionLocalProvider(LocalVibrantColor provides dominantColorOrDefault) {
+    DynamicThemePrimaryColorsFromImage(dominantColorState) {
+        val selectedImageUrl = podcastData.artworkUrl
+
+        // When the selected image url changes, call updateColorsFromImageUrl()
+        LaunchedEffect(selectedImageUrl) {
+            dominantColorState.updateColorsFromImageUrl(selectedImageUrl)
+        }
+
         Scaffold {
             //
             val nestedScrollViewState = rememberNestedScrollViewState()
-
             VerticalNestedScrollView(
                 state = nestedScrollViewState,
                 header = {
@@ -143,22 +153,31 @@ private fun PodcastScreen(
                             openStoreDataDetail = { actioner(PodcastActions.OpenStoreDataDetail(it)) }
                         )
                         // buttons
-                        BoxWithConstraints(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            contentAlignment = Alignment.Center) {
-                            val fullWidth = constraints.maxWidth
-                            val buttonWidth = 150.dp.toPx()
-                            val twoButtonsWidth = 2 * buttonWidth + 20.dp.toPx()
-                            val edgePadding = (fullWidth - buttonWidth) / 2
-                            val edgePadding2Btns = (fullWidth - twoButtonsWidth) / 2
-                            // settings
+                                .padding(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom = 16.dp
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // following
                             FollowingButton(
-                                textContent = stringResource(id = R.string.action_settings),
-                                imageVector = Icons.Default.Settings,
-                                translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding - edgePadding2Btns else 0f,
-                                alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
+                                followingStatus = state.followingStatus,
+                                onClick = {
+                                    if (state.followingStatus == FollowStatus.UNFOLLOWED)
+                                        actioner(PodcastActions.FollowPodcast)
+                                    else if (state.followingStatus == FollowStatus.FOLLOWED)
+                                        actioner(PodcastActions.UnfollowPodcast)
+                                }
+                            )
+
+                            // settings
+                            SettingsButton(
+                                followingStatus = state.followingStatus,
                                 onClick = {
                                     coroutineScope.launch {
                                         drawerState.show()
@@ -166,143 +185,110 @@ private fun PodcastScreen(
                                 }
                             )
 
-                            // following buttons
-                            FollowingButton(
-                                textContent = stringResource(id = R.string.action_following),
-                                imageVector = Icons.Default.Check,
-                                translationValue = if (state.followingStatus == FollowStatus.FOLLOWED) edgePadding2Btns - edgePadding else 0f,
-                                alphaValue = if (state.followingStatus == FollowStatus.FOLLOWED) 1f else 0f,
-                                onClick = { actioner(PodcastActions.UnfollowPodcast) }
-                            )
-
-                            // follow button
-                            FollowButton(
-                                state = state,
-                                onClick = { actioner(PodcastActions.FollowPodcast) }
-                            )
                         }
                     }
                 },
                 content = {
                     LazyListLayout(lazyListItems = lazyPagingItems) {
-                        val listState = rememberLazyListState(0)
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) {
+            val listState = rememberLazyListState(0)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()) {
 
-                            /* description if present */
-                            item {
-                                podcastData.description?.let { description ->
-                                    PodcastDescriptionContent(description = description)
-                                }
+                        /* description if present */
+                        item {
+                            podcastData.description?.let { description ->
+                                PodcastDescriptionContent(description = description)
                             }
+                        }
 
-                            // genre
-                            item {
-                                podcastData.category?.let { genre ->
-                                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                        ChipButton(selected = false,
-                                            onClick = {
-                                                actioner(
-                                                    PodcastActions.OpenCategoryDataDetail(
-                                                        genre
-                                                    )
-                                                )
-                                            })
-                                        {
-                                            Text(text = genre.name)
-                                        }
+                        // genre
+                        item {
+                            podcastData.category?.let { genre ->
+                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    ChipButton(selected = false,
+                                        onClick = { actioner(PodcastActions.OpenCategoryDataDetail(genre)) })
+                                    {
+                                        Text(text = genre.name)
                                     }
                                 }
-
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
 
-                            // episodes
-                            item {
-                                StoreHeadingSection(
-                                    title = stringResource(
-                                        id = R.string.podcast_x_episodes,
-                                        state.episodes.size
-                                    )
-                                )
-                            }
-                            if (state.showAllEpisodes || state.episodes.size < 5) {
-                                items(items = state.episodes) { episode ->
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // episodes
+                        item {
+                            StoreHeadingSection(
+                                title = stringResource(id = R.string.podcast_x_episodes,
+                                    lazyPagingItems.itemCount))
+                        }
+                        if (state.showAllEpisodes || lazyPagingItems.itemCount < 5) {
+                            items(lazyPagingItems = lazyPagingItems) { episode ->
+                                episode?.let {
                                     EpisodeItem(
                                         episode = episode,
                                         onEpisodeClick = {
                                             actioner(PodcastActions.OpenEpisodeDetail(episode))
                                         }
                                     )
+                                }
+                                Divider()
+                            }
+                        } else {
+                            // show first, last and "show more" button
+                            item {
+                                // most recent episode
+                                lazyPagingItems.peek(0)?.let { firstEpisode ->
+                                    EpisodeItem(
+                                        episode = firstEpisode,
+                                        onEpisodeClick = {
+                                            actioner(PodcastActions.OpenEpisodeDetail(firstEpisode))
+                                        }
+                                    )
                                     Divider()
-                                }
-                            } else {
-                                // show first, last and "show more" button
-                                item {
-                                    // most recent episode
-                                    state.episodes[0].let { firstEpisode ->
-                                        EpisodeItem(
-                                            episode = firstEpisode,
-                                            onEpisodeClick = {
-                                                actioner(
-                                                    PodcastActions.OpenEpisodeDetail(
-                                                        firstEpisode
-                                                    )
-                                                )
-                                            }
-                                        )
-                                        Divider()
-                                    }
-                                }
-
-                                item {
-                                    // text button "show more episodes"
-                                    TextButton(
-                                        modifier = Modifier
-                                            .padding(horizontal = 16.dp),
-                                        colors = ButtonDefaults.textButtonColors(
-                                            contentColor = LocalVibrantColor.current
-                                        ),
-                                        onClick = { actioner(PodcastActions.ShowAllEpisodes) })
-                                    {
-                                        Text(
-                                            text = stringResource(id = R.string.action_show_all_episodes),
-                                            style = typography.button.copy(letterSpacing = 0.25.sp)
-                                        )
-                                    }
-                                    Divider()
-                                }
-
-                                item {
-                                    // oldest episode
-                                    val size = state.episodes.size - 1
-                                    state.episodes[size].let { lastEpisode ->
-                                        EpisodeItem(
-                                            episode = lastEpisode,
-                                            onEpisodeClick = {
-                                                actioner(
-                                                    PodcastActions.OpenEpisodeDetail(
-                                                        lastEpisode
-                                                    )
-                                                )
-                                            }
-                                        )
-                                        Divider()
-                                    }
                                 }
                             }
 
                             item {
-                                // bottom app bar spacer
-                                Spacer(modifier = Modifier.height(56.dp))
+                                // text button "show more episodes"
+                                TextButton(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp),
+                                    colors = ButtonDefaults.textButtonColors(
+                                        //contentColor = LocalVibrantColor.current
+                                    ),
+                                    onClick = { actioner(PodcastActions.ShowAllEpisodes) })
+                                {
+                                    Text(text = stringResource(id = R.string.action_show_all_episodes),
+                                        style = typography.button.copy(letterSpacing = 0.25.sp))
+                                }
+                                Divider()
                             }
+
+                            item {
+                                // oldest episode
+                                val size = lazyPagingItems.itemCount - 1
+                                lazyPagingItems.peek(size)?.let { lastEpisode ->
+                                    EpisodeItem(
+                                        episode = lastEpisode,
+                                        onEpisodeClick = {
+                                            actioner(PodcastActions.OpenEpisodeDetail(lastEpisode))
+                                        }
+                                    )
+                                    Divider()
+                                }
+                            }
+                        }
+
+                        item {
+                            // bottom app bar spacer
+                            Spacer(modifier = Modifier.height(56.dp))
                         }
                     }
                 }
-            )
+            })
 
             PodcastTopAppBar(
                 state = state,
@@ -321,15 +307,11 @@ private fun PodcastExpandedHeader(
 ) {
     val podcastData = state.podcast
     val artistData = state.artistData
-    val dominantColor =
-        podcastData.artworkDominantColor
-            ?.let { Color.getColor(it).takeUnless { color -> color == Color.White } }
 
     val alphaLargeHeader = nestedScrollViewState.expandedHeaderAlpha
     Box(modifier = Modifier.fillMaxWidth())
     {
-        val bgDominantColor =
-                Color.getColor(podcastData.artworkDominantColor) ?: MaterialTheme.colors.surface
+        val bgDominantColor = MaterialTheme.colors.primary
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -342,12 +324,20 @@ private fun PodcastExpandedHeader(
                         endY = Float.POSITIVE_INFINITY
                     )
                 )
-                .padding(horizontal = 16.dp)
-                .padding(top = 56.dp, bottom = 8.dp)
                 .alpha(alphaLargeHeader),
         ) {
-            // status bar spacer
-            Spacer(modifier = Modifier.statusBarsHeight())
+            val appBarColor = MaterialTheme.colors.surface.copy(alpha = 0.87f)
+
+            // Draw a scrim over the status bar which matches the app bar
+            Spacer(
+                Modifier
+                    //.background(appBarColor)
+                    .fillMaxWidth()
+                    .statusBarsHeight()
+            )
+
+            // spacer behind top app bar
+            Spacer(Modifier.height(56.dp))
 
             // thumbnail
             Card(
@@ -355,7 +345,8 @@ private fun PodcastExpandedHeader(
                 shape = RoundedCornerShape(8.dp),
                 elevation = 2.dp,
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.Start)
             ) {
                 Image(
                     painter = rememberCoilPainter(request = podcastData.artworkUrl),
@@ -373,8 +364,9 @@ private fun PodcastExpandedHeader(
             Text(
                 text = podcastData.name,
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.Start),
+                textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.h5,
             )
 
@@ -393,13 +385,13 @@ private fun PodcastExpandedHeader(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                     .padding(bottom = 4.dp)
                     .then(clickableArtistMod),
                 style = MaterialTheme.typography.body1,
-                maxLines = 2,
-                color = artistData?.let { dominantColor /*MaterialTheme.colors.primary*/ }
-                    ?: Color.Unspecified,
-                textAlign = TextAlign.Center
+                maxLines = 1,
+                color = artistData?.let { MaterialTheme.colors.primary } ?: Color.Unspecified,
+                textAlign = TextAlign.Start
             )
         }
     }
@@ -539,39 +531,51 @@ fun PodcastLoadingScreen() {
 
 @Composable
 fun FollowingButton(
-    textContent: String,
-    imageVector: ImageVector,
-    translationValue: Float,
-    alphaValue: Float,
+    followingStatus: FollowStatus,
     onClick: () -> Unit,
 ) {
+    val contentColor = if (followingStatus == FollowStatus.UNFOLLOWED)
+        MaterialTheme.colors.onSurface else MaterialTheme.colors.primary
+    val textContent = when(followingStatus) {
+        FollowStatus.UNFOLLOWED -> stringResource(id = R.string.action_follow)
+        else -> stringResource(id = R.string.action_following)
+    }
     OutlinedButton(
         modifier = Modifier
-            .width(150.dp)
-            .graphicsLayer(
-                translationX = animateFloatAsState(
-                    targetValue = translationValue,
-                    animationSpec = tween(durationMillis = 750)
-                ).value,
-                alpha = animateFloatAsState(
-                    targetValue = alphaValue,
-                    animationSpec = tween(durationMillis = 750)
-                ).value
-            ),
+            .width(150.dp),
         onClick = onClick,
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = LocalVibrantColor.current
+            contentColor = animateColorAsState(targetValue = contentColor).value
         ),
+        border = BorderStroke(width = 1.dp, color = animateColorAsState(targetValue = contentColor).value),
         contentPadding = PaddingValues(start = 24.dp,
             end = 24.dp,
             top = 8.dp,
             bottom = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = textContent,
-                modifier = Modifier.padding(end = 4.dp)
-            )
+            Crossfade(targetState = followingStatus) { followStatus ->
+                when (followStatus) {
+                    FollowStatus.FOLLOWING ->
+                        LinearProgressIndicator(
+                            color = contentColorForExtended(contentColor),
+                            modifier = Modifier
+                                .width(24.dp)
+                                .padding(end = 4.dp))
+                    FollowStatus.UNFOLLOWED ->
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.action_follow),
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
+                    FollowStatus.FOLLOWED ->
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = stringResource(id = R.string.action_follow),
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
+                }
+            }
+
             Text(text = textContent,
                 style = typography.button.copy(letterSpacing = 0.5.sp))
         }
@@ -580,48 +584,29 @@ fun FollowingButton(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun FollowButton(state: PodcastState, onClick: () -> Unit) {
+fun SettingsButton(
+    followingStatus: FollowStatus,
+    onClick: () -> Unit,
+) {
+    val contentColor = MaterialTheme.colors.primary
     AnimatedVisibility(
-        visible = (state.followingStatus != FollowStatus.FOLLOWED),
+        visible = (followingStatus == FollowStatus.FOLLOWED),
         enter = fadeIn(animationSpec = tween(durationMillis = 250)),
         exit = fadeOut(animationSpec = tween(durationMillis = 250)))
     {
-        Button(
-            modifier = Modifier
-                .width(150.dp),
-            onClick = {
-                if (state.followingStatus == FollowStatus.UNFOLLOWED)
-                    onClick()
-            },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = LocalVibrantColor.current,
-                contentColor = contentColorForExtended(LocalVibrantColor.current)
+        OutlinedButton(
+            modifier = Modifier,
+            onClick = onClick,
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = animateColorAsState(targetValue = contentColor).value
             ),
-            contentPadding = PaddingValues(start = 24.dp,
-                end = 24.dp,
-                top = 8.dp,
-                bottom = 8.dp),
+            border = BorderStroke(width = 1.dp, color = contentColor),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Crossfade(targetState = state.followingStatus) { followStatus ->
-                    when (followStatus) {
-                        FollowStatus.FOLLOWING ->
-                            LinearProgressIndicator(
-                                color = contentColorForExtended(LocalVibrantColor.current),
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .padding(end = 4.dp))
-                        FollowStatus.UNFOLLOWED ->
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(id = R.string.action_follow),
-                                modifier = Modifier.padding(end = 4.dp)
-                            )
-                    }
-                }
-                Text(text = stringResource(id = R.string.action_follow),
-                    style = typography.button.copy(letterSpacing = 0.5.sp))
-            }
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "",
+                modifier = Modifier.padding(end = 4.dp)
+            )
         }
     }
 }

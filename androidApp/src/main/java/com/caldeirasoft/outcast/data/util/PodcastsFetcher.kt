@@ -91,12 +91,21 @@ class PodcastsFetcher(
 
     private suspend fun fetchPodcast(url: String, currentPodcast: Podcast? = null): PodcastRssResponse =
         withContext(Dispatchers.IO) {
-            val request = Request.Builder().url(url).build()
+            val request = Request.Builder()
+                .url(url)
+                .header("User-Agent", USER_AGENT)
+                .build()
             val response: Response = okHttpClient.newCall(request = request).execute()
-            val xmlContent = response.body?.string().orEmpty()
+            val responseBodyCopy = response.peekBody(Long.MAX_VALUE)
+            val responseContent = response.body?.string()
+            val xmlContent = responseContent.orEmpty()
             val itunesModel: ITunesChannelData = ITunesParser().parse(xmlContent)
             return@withContext itunesModel.toPodcastResponse(url, currentPodcast)
         }
+
+    companion object {
+        const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
+    }
 }
 
 data class PodcastRssResponse(

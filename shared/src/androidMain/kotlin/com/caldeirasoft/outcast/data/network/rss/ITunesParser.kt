@@ -62,7 +62,7 @@ class ITunesParser : ParserBase<ITunesChannelData>() {
 
     private fun XmlPullParser.readITunesChannel(standardChannel: RssStandardChannelData): ITunesChannelData {
         require(XmlPullParser.START_TAG, null, CHANNEL)
-        logD(logTag, "[readITunesChannel]: Reading iTunes channel")
+        //logD(logTag, "[readITunesChannel]: Reading iTunes channel")
         var image: Image? = null
         var explicit: Boolean? = null
         var categories: List<Category>? = null
@@ -139,7 +139,7 @@ class ITunesParser : ParserBase<ITunesChannelData>() {
         val href: String? = getAttributeValue(null, HREF)
         nextTag()
         require(XmlPullParser.END_TAG, null, ITUNES_IMAGE)
-        logD(logTag, "[readImage]: href = $href")
+        //logD(logTag, "[readImage]: href = $href")
         return Image(
             link = null,
             title = null,
@@ -168,7 +168,7 @@ class ITunesParser : ParserBase<ITunesChannelData>() {
             }
         }
         require(XmlPullParser.END_TAG, null, ITUNES_CATEGORY)
-        logD(logTag, "[readCategory]: categories = $categories")
+        //logD(logTag, "[readCategory]: categories = $categories")
         return categories
     }
 
@@ -187,14 +187,14 @@ class ITunesParser : ParserBase<ITunesChannelData>() {
             }
         }
         require(XmlPullParser.END_TAG, null, ITUNES_OWNER)
-        logD(logTag, "[readOwner] name = $name, email = $email")
+        //logD(logTag, "[readOwner] name = $name, email = $email")
         return Owner(name = name, email = email)
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
     private fun XmlPullParser.readItem(standardItem: RssStandardItem): ITunesItemData {
         require(XmlPullParser.START_TAG, null, ITEM)
-        logD(logTag, "[readItem]: Reading iTunes item")
+        //logD(logTag, "[readItem]: Reading iTunes item")
         var simpleTitle: String? = null
         var duration: String? = null
         var image: String? = null

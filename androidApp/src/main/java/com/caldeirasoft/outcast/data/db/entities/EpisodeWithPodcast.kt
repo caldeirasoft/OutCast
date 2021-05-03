@@ -9,7 +9,6 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Parcelize
 data class EpisodeWithPodcast(
   @Embedded val episode: Episode,
   @Relation(
@@ -18,7 +17,7 @@ data class EpisodeWithPodcast(
     entityColumn = "feedUrl"
   )
   val podcast: Podcast,
-) : Parcelable {
+) {
   companion object {
     fun StoreEpisode.toEpisodeWithPodcast() =
       EpisodeWithPodcast(

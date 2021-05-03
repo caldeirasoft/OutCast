@@ -51,8 +51,8 @@ object NetworkModule {
             writeTimeout(20, TimeUnit.SECONDS)
             addInterceptor(GzipRequestInterceptor)
             addNetworkInterceptor(StethoInterceptor())
-            val customDns = DnsProviders.buildCloudflare(OkHttpClient())
-            dns(customDns)
+            //val customDns = DnsProviders.buildCloudflareIp(OkHttpClient())
+            //dns(customDns)
         }
 
     fun OkHttpClient.Builder.withCacheControl(context: Context) = this.apply {

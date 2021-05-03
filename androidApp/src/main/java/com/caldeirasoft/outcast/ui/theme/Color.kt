@@ -2,7 +2,11 @@ package com.caldeirasoft.outcast.ui.theme
 
 import androidx.annotation.FloatRange
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import kotlin.math.max
+import kotlin.math.min
 
 val purple200 = Color(0xFFBB86FC)
 val purple500 = Color(0xFF6200EE)
@@ -95,4 +99,13 @@ fun xyYtoColor(x: Float, y: Float, Y: Float): Color {
         red = r.coerceIn(0f, 1f),
         green = g.coerceIn(0f, 1f),
         blue = b.coerceIn(0f, 1f))
+}
+
+fun Color.constrastAgainst(background: Color): Float {
+    val fg = if (alpha < 1f) compositeOver(background) else this
+
+    val fgLuminance = fg.luminance() + 0.05f
+    val bgLuminance = background.luminance() + 0.05f
+
+    return max(fgLuminance, bgLuminance) / min(fgLuminance, bgLuminance)
 }

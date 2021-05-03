@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.data.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata
@@ -24,6 +25,9 @@ interface EpisodeDao : EntityDao<Episode> {
 
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl")
     fun getEpisodesWithUrl(feedUrl: String): Flow<List<Episode>>
+
+    @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime DESC")
+    fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode>
 
     @Query("SELECT * FROM episode e WHERE isFavorite = 1")
     fun getFavoriteEpisodes(): Flow<List<Episode>>

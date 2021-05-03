@@ -9,9 +9,7 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
-import com.caldeirasoft.outcast.ui.screen.MviViewModel
 import com.caldeirasoft.outcast.ui.screen.MvieViewModel
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -24,13 +22,12 @@ import javax.inject.Inject
 class PodcastViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadPodcastFromDbUseCase: LoadPodcastFromDbUseCase,
-    private val loadEpisodeFromDbUseCase: LoadEpisodeFromDbUseCase,
+    private val loadPodcastEpisodesPagingDataUseCase: LoadPodcastEpisodesPagingDataUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
     private val updatePodcastDataUseCase: UpdatePodcastDataUseCase,
     private val followUseCase: FollowUseCase,
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
-    private val updateSettingsUseCase: UpdateSettingsUseCase,
 ) : MvieViewModel<PodcastState, PodcastEvent, PodcastActions>(
     initialState = PodcastState(
         podcast = savedStateHandle.getObjectNotNull("podcast"),
@@ -44,11 +41,8 @@ class PodcastViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     val episodes: Flow<PagingData<Episode>> =
-        loadPodcastFromDbUseCase.execute(initialState.podcast)
-            .mapNotNull { it?.episodes }
-            .map { it.sortedByDescending { episode ->  episode.releaseDateTime } }
-            .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it.size} episodes") }
-            .map { PagingData.from(it) }
+        loadPodcastEpisodesPagingDataUseCase.execute(initialState.podcast)
+            .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it} episodes") }
             .cachedIn(viewModelScope)
 
     init {
@@ -59,7 +53,7 @@ class PodcastViewModel @Inject constructor(
                         .onStart { setState { copy(isLoading = true) } }
                         .launchIn(viewModelScope)
                 else if (!isInitialized) // podcast in db : update if necessary
-                    updatePodcastDataUseCase.execute(it.podcast)
+                    updatePodcastDataUseCase.execute(it)
                         .launchIn(viewModelScope)
                 isInitialized = true
             }
@@ -67,10 +61,9 @@ class PodcastViewModel @Inject constructor(
             .setOnEach {
                 copy(
                     isLoading = false,
-                    podcast = it.podcast,
-                    followingStatus = if (it.podcast.isFollowed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
-                    episodes = it.episodes.sortedByDescending { episode ->  episode.releaseDateTime },
-                    showAllEpisodes = it.podcast.isFollowed
+                    podcast = it,
+                    followingStatus = if (it.isFollowed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
+                    showAllEpisodes = it.isFollowed
                 )
             }
 

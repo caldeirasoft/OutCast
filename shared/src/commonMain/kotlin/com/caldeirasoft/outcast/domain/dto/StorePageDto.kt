@@ -231,7 +231,8 @@ class UberListResult(
 
 @Serializable
 class EditorialArtworkResult(
-    val storeFlowcase: ArtworkDto? = null
+    val storeFlowcase: ArtworkDto? = null,
+    val showPageTall: ArtworkDto? = null,
 )
 @Serializable
 class EditorialArtworkArtistResult(
