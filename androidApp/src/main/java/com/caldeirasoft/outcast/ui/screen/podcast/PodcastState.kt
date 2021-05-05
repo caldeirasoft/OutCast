@@ -10,7 +10,8 @@ import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 
 data class PodcastState(
-    val podcast: Podcast,
+    val feedUrl: String,
+    val podcast: Podcast? = null,
     val isLoading: Boolean = false,
     val error: Throwable? = null,
     val storeFront: String? = null,
@@ -20,7 +21,7 @@ data class PodcastState(
     val prefs: Preferences? = null,
 ) {
     val artistData: StoreData? =
-        podcast.artistUrl?.let {
+        podcast?.artistUrl?.let {
             StoreData(
                 id = podcast.artistId ?: 0L,
                 label = podcast.artistName,

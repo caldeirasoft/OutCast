@@ -12,16 +12,16 @@ import javax.inject.Inject
 class LoadPodcastEpisodesPagingDataUseCase @Inject constructor(
     val episodeDao: EpisodeDao
 ) {
-    fun execute(podcast: Podcast): Flow<PagingData<Episode>> =
+    fun execute(feedUrl: String): Flow<PagingData<Episode>> =
         Pager(
             config = PagingConfig(
                 pageSize = 20,
                 enablePlaceholders = false,
-                maxSize = 200,
+                maxSize = 4000,
                 prefetchDistance = 5
             ),
             initialKey = null,
-            pagingSourceFactory = episodeDao.getEpisodesDataSourceWithUrl(podcast.feedUrl).asPagingSourceFactory()
+            pagingSourceFactory = episodeDao.getEpisodesDataSourceWithUrl(feedUrl).asPagingSourceFactory()
         ).flow
 
 }

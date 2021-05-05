@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.data.db.dao
 
 import androidx.room.*
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
 import com.caldeirasoft.outcast.data.db.entities.PodcastMetadata
 import com.caldeirasoft.outcast.data.db.entities.PodcastMetadata.Companion.metaData
 import com.caldeirasoft.outcast.data.db.entities.PodcastWithEpisodes
@@ -15,6 +16,9 @@ interface PodcastDao : EntityDao<Podcast> {
 
     @Update(entity = Podcast::class)
     fun update(podcastMetadata: PodcastMetadata)
+
+    @Update(entity = Podcast::class)
+    fun update(podcastItunesMetadata: PodcastItunesMetadata)
 
     @Transaction
     fun upsert(podcast: Podcast) {

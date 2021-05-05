@@ -14,6 +14,8 @@ import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
+import com.caldeirasoft.outcast.data.db.entities.PodcastMetadata
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -21,6 +23,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -196,6 +199,37 @@ class PodcastsRepository @Inject constructor(
 
             }
         }
+    }
+
+    /**
+     * Update podcasts
+     */
+    @OptIn(InternalCoroutinesApi::class)
+    suspend fun updatePodcastItunesMetadata(storePodcast: Podcast) {
+        val job = scope.async {
+            try {
+                val cachedPodcast = loadPodcast(storePodcast.feedUrl).firstOrNull()
+                if (cachedPodcast != null) {
+                    storePodcast.run {
+                        val metaData = PodcastItunesMetadata(
+                            feedUrl = feedUrl,
+                            podcastId = podcastId,
+                            artistId = artistId,
+                            artistUrl = artistUrl,
+                            userRating = userRating
+                        )
+                        podcastDao.update(metaData)
+                    }
+                }
+                else {
+                    updatePodcast(feedUrl = storePodcast.feedUrl, currentPodcast = storePodcast)
+                }
+            } catch (e: Throwable) {
+                Timber.d("PodcastsRepository : updatePodcastItunesMetadata error: $e")
+                throw e
+            }
+        }
+        job.await()
     }
 
     /**

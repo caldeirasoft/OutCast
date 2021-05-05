@@ -5,33 +5,41 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
 import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.encodeObject
+import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.jsonUrlEncodeObject
+import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlEncode
 
 class Actions(navController: NavController) {
     val select: (Screen) -> Unit = { screen ->
         when (screen) {
             is PodcastScreen -> {
                 val screenName = screen.id.name
-                val podcastEncoded = encodeObject(screen.podcast)
-                navController.navigate("$screenName/$podcastEncoded")
+                screen.storePodcast?.let {
+                    navController.currentBackStackEntry
+                        ?.arguments
+                        ?.putString("podcast", encodeObject(it))
+                }
+                val feedUrl = screen.feedUrl.urlEncode()
+                navController.navigate("$screenName/$feedUrl")
             }
             is EpisodeScreen -> {
                 navController.currentBackStackEntry
                     ?.arguments
                     ?.putBoolean("fromSamePodcast", screen.fromSamePodcast)
+
+                screen.storeEpisode?.let {
+                    navController.currentBackStackEntry
+                        ?.arguments
+                        ?.putString("episode", encodeObject(it))
+                }
                 val screenName = screen.id.name
-                val episodeEncoded = encodeObject(screen.episode)
-                navController.navigate("$screenName/$episodeEncoded")
-            }
-            is EpisodeStoreScreen -> {
-                val screenName = screen.id.name
-                val episodeEncoded = encodeObject(screen.episode)
-                val podcastEncoded = encodeObject(screen.podcast)
-                navController.navigate("$screenName/$episodeEncoded/$podcastEncoded")
+                val feedUrl = screen.feedUrl.urlEncode()
+                val guid = screen.guid.urlEncode()
+                navController.navigate("$screenName/$feedUrl/$guid")
             }
             is StoreDataScreen -> {
                 val storeData = screen.storeData
                 if (storeData != null) {
-                    val storeDataEncoded = encodeObject(storeData)
+                    val storeDataEncoded = jsonUrlEncodeObject(storeData)
                     navController.navigate("${screen.id.name}/${storeDataEncoded}")
                 } else {
                     navController.navigate(screen.id.name)

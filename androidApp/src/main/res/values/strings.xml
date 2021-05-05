@@ -41,8 +41,15 @@
     <string name="podcast_topPodcastsInGenre">Top Podcasts in %1$s</string>
     <string name="podcast_youMayAlsoLike">You may also like</string>
     <string name="podcast_episodes">Episodes</string>
+    <string name="podcast_all_episodes">All episodes</string>
     <string name="podcast_x_episodes">%1$s Episodes</string>
     <string name="podcast_settings">Settings for this podcast</string>
+
+    <!-- filter -->
+    <string name="filter_all">All</string>
+    <string name="filter_inbox">Inbox</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="filter_history">History</string>
 
     <!-- screen -->
     <string name="screen_queue">Queue</string>
@@ -87,4 +94,5 @@
     <string name="action_tap_to_refresh">Tap to refresh</string>
     <string name="action_more">MORE</string>
     <string name="action_show_all_episodes">Show all episodes</string>
+    <string name="action_filter">Filter</string>
 </resources>

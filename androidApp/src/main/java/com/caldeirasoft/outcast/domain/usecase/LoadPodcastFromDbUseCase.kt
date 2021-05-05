@@ -16,6 +16,6 @@ import kotlin.time.hours
 class LoadPodcastFromDbUseCase @Inject constructor(
     val podcastDao: PodcastDao,
 ) {
-    fun execute(podcast: Podcast): Flow<Podcast?> =
-        podcastDao.getPodcastWithUrl(podcast.feedUrl)
+    fun execute(feedUrl: String): Flow<Podcast?> =
+        podcastDao.getPodcastWithUrl(feedUrl)
 }

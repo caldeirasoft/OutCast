@@ -145,7 +145,7 @@ private fun ITunesChannelData.toPodcastResponse(
         description = description?.trim()?.trimIndent(),
         podcastWebsiteURL = link,
         releaseDateTime = releaseDateTime,
-        trackCount = 0,
+        trackCount = items?.size?.toLong() ?: 0L,
         updatedAt = releaseDateTime,
         userRating = currentPodcast?.userRating,
         isFollowed = false,

@@ -54,7 +54,7 @@ fun TopChartEpisodeScreen(
                         is StoreEpisode -> {
                             StoreEpisodeItem(
                                 episode = item.episode,
-                                onEpisodeClick = { navigateTo(Screen.EpisodeStoreScreen(item)) },
+                                onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
                                 onThumbnailClick = { navigateTo(Screen.PodcastScreen(item.storePodcast)) },
                                 index = index + 1
                             )

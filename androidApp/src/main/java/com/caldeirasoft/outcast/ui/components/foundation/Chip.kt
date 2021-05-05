@@ -103,7 +103,8 @@ fun <T: Any> ChipRadioSelector(
 
 @Composable
 fun ActionChipButton(
-    selected: Boolean,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
     onClick: () -> Unit,
     icon: @Composable () -> Unit,
     text: @Composable () -> Unit
@@ -124,7 +125,7 @@ fun ActionChipButton(
                 .copy(alpha = ContentAlpha.disabled)
         ),
         shape = RoundedCornerShape(50),
-        modifier = Modifier.padding(0.dp),
+        modifier = modifier.padding(0.dp),
         contentPadding = PaddingValues(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
         onClick = onClick
     ) {

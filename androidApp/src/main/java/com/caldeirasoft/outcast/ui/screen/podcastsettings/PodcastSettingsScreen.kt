@@ -41,7 +41,7 @@ fun PodcastSettingsBottomSheet(
     val listState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
     val drawerState = LocalBottomSheetState.current
-    val podcastPreferenceKeys = PodcastPreferenceKeys(state.podcast.feedUrl)
+    val podcastPreferenceKeys = PodcastPreferenceKeys(state.feedUrl)
 
     Column()
     {

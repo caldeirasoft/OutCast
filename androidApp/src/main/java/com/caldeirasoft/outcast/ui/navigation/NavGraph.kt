@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.navigation
 
+import android.os.Bundle
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -15,6 +16,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
+import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
@@ -62,6 +65,12 @@ inline fun <reified T> SavedStateHandle.getObjectNotNull(key: String): T =
     requireNotNull((get(key) as String?)?.let {
         Json.decodeFromString(serializer(), URLDecoder.decode(it, "UTF-8"))
     })
+
+inline fun <reified T> Bundle.getObject(key: String): T? =
+    getString(key)?.let {
+        Json.decodeFromString(serializer(), it)
+    }
+
 
 @FlowPreview
 @ExperimentalMaterialApi
@@ -138,44 +147,42 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateBack = actions.up)
                 }
                 composable(
-                    route = "${ScreenName.PODCAST.name}/{podcast}",
-                    arguments = listOf(navArgument("podcast") { type = NavType.StringType })
+                    route = "${ScreenName.PODCAST.name}/{feedUrl}",
+                    arguments = listOf(navArgument("feedUrl") { type = NavType.StringType })
                 ) {
+                    val storePodcast = navController
+                        .previousBackStackEntry
+                        ?.arguments
+                        ?.getObject<StorePodcast>("podcast")
+
                     PodcastScreen(
                         viewModel = hiltNavGraphViewModel(),
+                        storePodcast = storePodcast,
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
                 composable(
-                    route = "${ScreenName.EPISODE.name}/{episode}",
+                    route = "${ScreenName.EPISODE.name}/{feedUrl}/{guid}",
                     arguments = listOf(
-                        navArgument("episode") { type = NavType.StringType },
+                        navArgument("feedUrl") { type = NavType.StringType },
+                        navArgument("guid") { type = NavType.StringType },
                     )
                 ) { backStackEntry ->
-                    val episode = backStackEntry.getObjectNotNull<Episode>("episode")
-
                     val fromSamePodcast = navController
                         .previousBackStackEntry
                         ?.arguments
                         ?.getBoolean("fromSamePodcast")
                         ?: false
 
+                    val storeEpisode = navController
+                        .previousBackStackEntry
+                        ?.arguments
+                        ?.getObject<StoreEpisode>("episode")
+
                     EpisodeScreen(
                         viewModel = hiltNavGraphViewModel(),
+                        storeEpisode = storeEpisode,
                         fromSamePodcast = fromSamePodcast,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up
-                    )
-                }
-                composable(
-                    route = "${ScreenName.EPISODE_STORE.name}/{episode}/{podcast}",
-                    arguments = listOf(
-                        navArgument("episode") { type = NavType.StringType },
-                        navArgument("podcast") { type = NavType.StringType },
-                    )
-                ) {
-                    EpisodeScreen(
-                        viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )

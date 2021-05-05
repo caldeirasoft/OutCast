@@ -31,7 +31,6 @@ enum class ScreenName {
     PROFILE,
     PODCAST,
     EPISODE,
-    EPISODE_STORE,
     STORE_DATA,
     STORE_SEARCH,
     STORE_CHARTS,
@@ -49,18 +48,33 @@ sealed class Screen (val id: ScreenName) {
     object Inbox : Screen(ScreenName.INBOX)
     object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
-    data class PodcastScreen constructor(val podcast: Podcast) : Screen(ScreenName.PODCAST) {
-        constructor(storePodcast: StorePodcast) : this(podcast = storePodcast.toPodcast())
+    data class PodcastScreen(val feedUrl: String, val storePodcast: StorePodcast? = null) : Screen(ScreenName.PODCAST) {
+        constructor(podcast: Podcast) : this(
+            feedUrl = podcast.feedUrl,
+        )
+        constructor(storePodcast: StorePodcast) : this(
+            feedUrl = storePodcast.feedUrl,
+            storePodcast = storePodcast,
+        )
     }
 
     data class PodcastSettings(val podcastId: Long) : Screen(ScreenName.PODCAST_SETTINGS)
     data class EpisodeScreen constructor(
-        val episode: Episode,
+        val feedUrl: String,
+        val guid: String,
         val fromSamePodcast: Boolean = false,
-    ) : Screen(ScreenName.EPISODE)
+        val storeEpisode: StoreEpisode? = null
+    ) : Screen(ScreenName.EPISODE) {
+        constructor(episode: Episode) : this(
+            feedUrl = episode.feedUrl,
+            guid = episode.guid
+        )
 
-    class EpisodeStoreScreen private constructor(val episode: Episode, val podcast: Podcast) : Screen(ScreenName.EPISODE_STORE) {
-        constructor(storeEpisode: StoreEpisode) : this(episode = storeEpisode.episode, podcast = storeEpisode.storePodcast.podcast)
+        constructor(storeEpisode: StoreEpisode) : this(
+            feedUrl = storeEpisode.feedUrl,
+            guid = storeEpisode.guid,
+            storeEpisode = storeEpisode
+        )
     }
 
     object Settings : Screen(ScreenName.SETTINGS)
@@ -76,6 +90,9 @@ sealed class Screen (val id: ScreenName) {
 
     companion object {
         inline fun <reified T> encodeObject(item: T): String =
+            Json.encodeToString(item)
+
+        inline fun <reified T> jsonUrlEncodeObject(item: T): String =
             URLEncoder.encode(Json.encodeToString(item), "UTF-8")
 
         fun String.urlEncode(): String =

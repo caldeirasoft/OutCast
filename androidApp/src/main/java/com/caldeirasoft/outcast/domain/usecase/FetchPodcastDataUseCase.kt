@@ -15,7 +15,7 @@ class FetchPodcastDataUseCase @Inject constructor(
     val podcastsRepository: PodcastsRepository,
 ) {
     fun execute(podcast: Podcast): Flow<Boolean> = flow {
-        podcastsRepository.updatePodcast(podcast.feedUrl, podcast)
+        podcastsRepository.updatePodcastItunesMetadata(podcast)
         emit(true)
     }
 }

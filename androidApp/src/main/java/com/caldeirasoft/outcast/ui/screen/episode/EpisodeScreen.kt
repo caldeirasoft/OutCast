@@ -24,10 +24,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastLoadingScreen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun EpisodeScreen(
     viewModel: EpisodeViewModel,
+    storeEpisode: StoreEpisode? = null,
     fromSamePodcast: Boolean = false,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
@@ -92,7 +93,7 @@ fun EpisodeScreen(
             when {
                 state.isLoading ->
                     item {
-                        PodcastLoadingScreen()
+                        //PodcastLoadingScreen()
                     }
                 state.error != null ->
                     state.error?.let {
