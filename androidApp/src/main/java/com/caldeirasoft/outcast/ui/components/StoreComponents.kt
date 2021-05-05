@@ -30,46 +30,6 @@ import com.google.accompanist.pager.rememberPagerState
 
 
 @Composable
-fun StoreCollectionDataContent(
-    storeCollection: StoreCollectionData,
-    openStoreDataDetail: (StoreData) -> Unit,
-) {
-    // header
-    StoreHeadingSection(title = storeCollection.label)
-
-    // room content
-    LazyRow(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(items = storeCollection.items) { item ->
-            when (item) {
-                is StoreData -> {
-                    Card(
-                        backgroundColor = colors[0],
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .width(200.dp)
-                            .clickable(onClick = { openStoreDataDetail(item) })
-                    )
-                    {
-                        CoilImage(
-                            data = item.getArtworkUrl(),
-                            contentDescription = item.label,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(18 / 9f)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
 fun ChoiceChipTab(
     selected: Boolean,
     text: String,

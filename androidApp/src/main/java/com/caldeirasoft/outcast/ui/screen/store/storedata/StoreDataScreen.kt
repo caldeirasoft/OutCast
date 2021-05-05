@@ -45,9 +45,11 @@ import com.caldeirasoft.outcast.ui.components.nestedscrollview.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.theme.blendARGB
+import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
+import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
@@ -77,7 +79,7 @@ fun StoreDataScreen(
         when(action) {
             is StoreDataActions.NavigateUp -> navigateBack()
             is StoreDataActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.storePodcast))
-            is StoreDataActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeStoreScreen(action.storeEpisode))
+            is StoreDataActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.storeEpisode))
             is StoreDataActions.OpenStoreData -> navigateTo(Screen.StoreDataScreen(action.storeData))
             else -> viewModel.submitAction(action)
         }
@@ -279,6 +281,20 @@ fun StoreDataScreen(
                                                             openStoreDataDetail = {
                                                                 actioner(
                                                                     StoreDataActions.OpenStoreData(
+                                                                        it
+                                                                    )
+                                                                )
+                                                            },
+                                                            openPodcastDetail = {
+                                                                actioner(
+                                                                    StoreDataActions.OpenPodcastDetail(
+                                                                        it
+                                                                    )
+                                                                )
+                                                            },
+                                                            openEpisodeDetail = {
+                                                                actioner(
+                                                                    StoreDataActions.OpenEpisodeDetail(
                                                                         it
                                                                     )
                                                                 )
@@ -751,3 +767,48 @@ fun StoreCollectionFeaturedContent(
         }
     }
 }
+
+@Composable
+fun StoreCollectionDataContent(
+    storeCollection: StoreCollectionData,
+    openStoreDataDetail: (StoreData) -> Unit,
+    openPodcastDetail: (StorePodcast) -> Unit,
+    openEpisodeDetail: (StoreEpisode) -> Unit,
+) {
+    // header
+    StoreHeadingSection(title = storeCollection.label)
+
+    // room content
+    LazyRow(
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(items = storeCollection.items) { item ->
+            Card(
+                backgroundColor = colors[0],
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .width(200.dp)
+                    .clickable(onClick = {
+                        when (item) {
+                            is StoreData -> openStoreDataDetail(item)
+                            is StorePodcast -> openPodcastDetail(item)
+                            is StoreEpisode -> openEpisodeDetail(item)
+                        }
+                    })
+            )
+            {
+                Image(
+                    painter = rememberCoilPainter(request = item.getArtworkFeaturedUrl()),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(18 / 9f)
+                )
+            }
+        }
+    }
+}
+
+

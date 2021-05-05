@@ -238,22 +238,36 @@ class StoreRepository @Inject constructor(
                         }
                     }
                     261 -> { // parse rooms collections / providers collections
-                        val roomSequence: Sequence<StoreData> = sequence {
+                        val roomSequence: Sequence<StoreItemArtwork> = sequence {
                             element.children.forEach { elementChild ->
                                 when (elementChild.link.type) {
                                     "content" -> {
                                         val id = elementChild.link.contentId
                                         if (lockupResult.containsKey(id)) {
-                                            val artist = lockupResult[id]
-                                            yield(
-                                                StoreData(
-                                                    id = id,
-                                                    label = artist?.name.orEmpty(),
-                                                    url = artist?.url.orEmpty(),
-                                                    storeFront = storeFront,
-                                                    artwork = elementChild.artwork!!.toArtwork(),
-                                                )
-                                            )
+                                            lockupResult[id]?.let {
+                                                when (it.kind) {
+                                                    "podcast", "episode" ->
+                                                        getStoreItemFromLookupResultItem(
+                                                            it,
+                                                            storeFront
+                                                        )
+                                                            ?.apply {
+                                                                featuredArtwork =
+                                                                    elementChild.artwork?.toArtwork()
+                                                                yield(this)
+                                                            }
+                                                    else -> // artist, room
+                                                        yield(
+                                                            StoreData(
+                                                                id = id,
+                                                                label = it.name.orEmpty(),
+                                                                url = it.url.orEmpty(),
+                                                                storeFront = storeFront,
+                                                                artwork = elementChild.artwork!!.toArtwork(),
+                                                            )
+                                                        )
+                                                }
+                                            }
                                         }
                                     }
                                     "link" -> {
