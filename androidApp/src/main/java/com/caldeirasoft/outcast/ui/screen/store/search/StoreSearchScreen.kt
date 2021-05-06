@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
@@ -113,7 +114,7 @@ fun StoreSearchScreen(
                 ) { categoryId ->
                     when (categoryId) {
                         -1 -> TopChartCardItem(
-                            navigateToTopChart = { navigateTo(Screen.Charts(StoreItemType.PODCAST)) }
+                            navigateToTopChart = { navigateTo(Screen.StoreDataScreen(StoreData.TopCharts)) }
                         )
                         else -> {
                             Category.fromId(categoryId)?.let { category ->

@@ -207,7 +207,7 @@ class StoreRepository @Inject constructor(
                                 .filter { !unAvailableContentIds.containsValue(it) }
                             when (elementChild.type) {
                                 "popularity" -> { // top podcasts // top episodes
-                                    yield(
+                                    /*yield(
                                         StoreCollectionItems(
                                             id = elementChild.adamId,
                                             label = elementChild.name,
@@ -216,7 +216,7 @@ class StoreRepository @Inject constructor(
                                             storeFront = storeFront,
                                             sortByPopularity = true
                                         )
-                                    )
+                                    )*/
                                 }
                                 "normal" -> {
                                     when (elementChild.content.first().kindIds.first()) {
@@ -468,36 +468,50 @@ class StoreRepository @Inject constructor(
     private fun getTopChartsDataAsync(storePageDto: StorePageDto): StoreData
     {
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
-        val selectedChart = storePageDto.pageData
-            ?.segmentedControl?.segments
-            ?.firstOrNull()
-            ?.pageData
-            ?.selectedChart
-        val ids = selectedChart?.adamIds ?: emptyList()
+        val collectionSequence: Sequence<StoreCollection> = sequence {
+            val entries = storePageDto.pageData
+                ?.segmentedControl?.segments
+                ?.firstOrNull()
+                ?.pageData
+                ?.topCharts
+            entries?.forEach { element ->
+                yield(
+                    StoreCollectionItems(
+                        id = element.id,
+                        label = element.title,
+                        itemsIds = element.adamIds,
+                        storeFront = "",
+                        sortByPopularity = true
+                    )
+                )
+            }
+        }
 
-        val storeCategories : List<StoreCategory> =
+        val storeCategories: List<StoreCategory> =
             storePageDto.pageData
                 ?.segmentedControl?.segments
                 ?.firstOrNull()
                 ?.pageData
                 ?.categoryList
                 ?.let { categoryList ->
-                    listOf(StoreCategory(
-                        id = categoryList.genreId,
-                        name = categoryList.parentCategoryLabel.orEmpty(),
-                        storeFront = "",
-                        url = categoryList.url.orEmpty()
-                    )) + (categoryList.children.map { child -> child.toStoreCategory() })
+                    listOf(
+                        StoreCategory(
+                            id = categoryList.genreId,
+                            name = categoryList.parentCategoryLabel.orEmpty(),
+                            storeFront = "",
+                            url = categoryList.url.orEmpty()
+                        )
+                    ) + (categoryList.children.map { child -> child.toStoreCategory() })
                 }
                 ?: emptyList()
 
         return StoreData(
-            id = selectedChart?.id ?: 0,
-            label = selectedChart?.title.orEmpty(),
+            id = 0,
+            label = storePageDto.pageData?.pageTitle.orEmpty(),
             description = null,
             artwork = null,
             storeFront = "",
-            storeIds = ids,
+            storeList = collectionSequence.toList(),
             storeCategories = storeCategories,
             sortByPopularity = true,
             timestamp = timestamp,

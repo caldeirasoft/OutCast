@@ -43,7 +43,7 @@ interface StorePagingSource
             .storeList
             .subList(startPosition, endPosition)
             .filterIsInstance<StoreCollectionItems>()
-            .flatMap { it.itemsIds.take(8) }
+            .flatMap { it.itemsIds.take(15) }
             .let { list -> ids.addAll(list) }
 
         val fetchItems = getItemsFromIds(ids.toList(), storeData)

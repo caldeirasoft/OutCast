@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.common.Constants.Companion.GENRE_URL
+import com.caldeirasoft.outcast.domain.common.Constants.Companion.TOP_CHARTS_URL
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.Category
@@ -21,8 +22,8 @@ data class StoreData(
     val description: String? = null,
     override val artwork: Artwork? = null,
     override val storeFront: String,
-    var storeIds: List<Long> = arrayListOf(),
-    val storeList: MutableList<StoreCollection> = mutableListOf(),
+    var storeIds: List<Long> = emptyList(),
+    val storeList: List<StoreCollection> = emptyList(),
     val sortByPopularity: Boolean = false,
     val storeCategories: List<StoreCategory> = emptyList(),
     val lookup: Map<Long, StoreItemArtwork> = mutableMapOf(),
@@ -46,6 +47,13 @@ data class StoreData(
             id = 0L,
             label = "",
             genreId = Constants.DEFAULT_GENRE,
+            storeFront = "",
+        )
+
+        val TopCharts = StoreData(
+            id = 0L,
+            label = "",
+            url = TOP_CHARTS_URL,
             storeFront = "",
         )
 

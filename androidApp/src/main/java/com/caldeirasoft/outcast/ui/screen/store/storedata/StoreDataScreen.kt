@@ -49,12 +49,11 @@ import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
-import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.*
-import com.google.accompanist.systemuicontroller.LocalSystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -107,7 +106,8 @@ fun StoreDataScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when(event) {
-                is StoreDataEvent.OpenCategories -> this@LaunchedEffect.launch { drawerState.show() }
+                is StoreDataEvent.OpenCategories ->
+                    this@LaunchedEffect.launch { drawerState.show() }
             }
         }
     }
@@ -123,8 +123,11 @@ fun StoreDataScreen(
     lazyPagingItems: LazyPagingItems<StoreItem>,
     actioner: (StoreDataActions) -> Unit,
 ) {
-    val title = state.takeUnless { it.storeData == null }?.title
-        ?: stringResource(id = R.string.store_tab_discover)
+    val title = when (state.storeData) {
+        StoreData.Default, null -> stringResource(id = R.string.store_tab_discover)
+        StoreData.TopCharts -> stringResource(id = R.string.store_tab_charts)
+        else -> state.title
+    }
 
     RestoreStatusBarColorOnDispose()
 
@@ -426,7 +429,7 @@ fun StoreDataScreenHeader(
         val artwork = state.storeData?.artwork
         if (artwork != null) {
             // Get the current SystemUiController
-            val systemUiController = LocalSystemUiController.current
+            val systemUiController = rememberSystemUiController()
             val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
             val contentColor =
                 artwork.textColor1
@@ -541,10 +544,7 @@ fun RefreshButton(
 ) {
     val offsetY = remember { mutableStateOf(0) }
     val oldIndex = remember { mutableStateOf(0) }
-    val searchOffsetY = remember { mutableStateOf(0) }
     val isButtonHidden = remember { mutableStateOf(false) }
-
-    //listState.layoutInfo.visibleItemsInfo.first().size
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemScrollOffset }
@@ -589,7 +589,7 @@ fun RefreshButton(
 fun RestoreStatusBarColorOnDispose()
 {
     // Get the current SystemUiController
-    val systemUiController = LocalSystemUiController.current
+    val systemUiController = rememberSystemUiController()
     val useDarkIcons = MaterialTheme.colors.isLight
     DisposableEffect(Unit) {
         // Update all of the system bar colors to be transparent, and use
@@ -684,25 +684,21 @@ fun StoreCollectionEpisodeContent(
             .mapIndexed { index, storeItem -> Pair(index, storeItem) }
     val chunkedItems = indexedItems.chunked(numRows)
 
-    // Remember a PagerState with our tab count
-    val pagerState = rememberPagerState(pageCount = storeCollection.items.size)
-
-    Column {
-        HorizontalPager(
-            state = pagerState,
+    val listState = rememberLazyListState()
+    // content
+    BoxWithConstraints {
+        val contentWidth = constraints.maxWidth
+        LazyRow(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalAlignment = Alignment.Top
-        ) { page ->
-            if (chunkedItems.indices.contains(page)) {
-                val chartItems = chunkedItems[Math.floorMod(page, chunkedItems.size)]
-
+                .nestedScroll(listState.nestedScrollConnection),
+            contentPadding = PaddingValues(end = (0.1f * contentWidth).dp, bottom = 16.dp),
+        ) {
+            items(items = chunkedItems) { chartItems ->
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                    //.padding(horizontal = 4.dp)
+                        .width((0.9f * contentWidth).toDp())
                 )
                 {
                     chartItems.forEach { (index, storeItem) ->

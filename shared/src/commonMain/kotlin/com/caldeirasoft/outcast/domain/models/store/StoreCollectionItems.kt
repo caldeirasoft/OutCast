@@ -21,6 +21,7 @@ data class StoreCollectionItems(
             storeIds = itemsIds,
             url = url.orEmpty(),
             storeFront = storeFront,
+            sortByPopularity = sortByPopularity
         )
 
 }

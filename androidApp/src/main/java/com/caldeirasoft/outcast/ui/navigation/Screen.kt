@@ -33,7 +33,6 @@ enum class ScreenName {
     EPISODE,
     STORE_DATA,
     STORE_SEARCH,
-    STORE_CHARTS,
     MORE,
     FAVORITES,
     HISTORY,
@@ -85,8 +84,6 @@ sealed class Screen (val id: ScreenName) {
     }
 
     object StoreSearch : Screen(ScreenName.STORE_SEARCH)
-
-    data class Charts(val itemType: StoreItemType) : Screen(ScreenName.STORE_CHARTS)
 
     companion object {
         inline fun <reified T> encodeObject(item: T): String =

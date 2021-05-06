@@ -25,7 +25,6 @@ import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
-import com.caldeirasoft.outcast.ui.screen.store.topcharts.TopChartsScreen
 import com.google.accompanist.insets.navigationBarsPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.serialization.json.Json
@@ -131,20 +130,6 @@ fun MainNavHost(startScreen: ScreenName) {
                 composable(ScreenName.STORE_SEARCH.name) {
                     StoreSearchScreen(
                         navigateTo = actions.select)
-                }
-                composable(
-                    route = "${ScreenName.STORE_CHARTS.name}/{itemType}",
-                    arguments = listOf(
-                        navArgument("itemType") { type = NavType.StringType })
-                ) { backStackEntry ->
-                    val itemType =
-                        backStackEntry.arguments?.getString("itemType")
-                            ?.let { StoreItemType.valueOf(it) }
-                            ?: StoreItemType.PODCAST
-                    TopChartsScreen(
-                        storeItemType = itemType,
-                        navigateTo = actions.select,
-                        navigateBack = actions.up)
                 }
                 composable(
                     route = "${ScreenName.PODCAST.name}/{feedUrl}",
