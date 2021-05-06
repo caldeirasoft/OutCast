@@ -45,8 +45,6 @@ class Actions(navController: NavController) {
                     navController.navigate(screen.id.name)
                 }
             }
-            is Charts ->
-                navController.navigate("${screen.id.name}/${screen.itemType}")
             is PodcastSettings ->
                 navController.navigate("${screen.id.name}/${screen.podcastId}")
             else ->

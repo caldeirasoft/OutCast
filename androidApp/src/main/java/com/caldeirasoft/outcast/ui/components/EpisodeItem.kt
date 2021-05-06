@@ -5,6 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.More
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
+import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
 import com.google.accompanist.coil.rememberCoilPainter
@@ -33,6 +37,7 @@ fun StoreEpisodeItem(
     index: Int? = null,
     onEpisodeClick: () -> Unit,
     onThumbnailClick: () -> Unit,
+    onContextMenuClick: (Episode) -> Unit,
 ) {
     ListItem(
         modifier = modifier
@@ -52,28 +57,33 @@ fun StoreEpisodeItem(
                 maxLines = 2,
             )
         },
-        overlineText = {
-            val context = LocalContext.current
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    text = episode.releaseDateTime.formatRelativeDisplay(context).uppercase(),
-                    style = MaterialTheme.typography.caption
-                )
-            }
-        },
         secondaryText = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(episode = episode)
-                QueueButton(episode = episode)
-            }
+            val context = LocalContext.current
+            Text(
+                text = with(AnnotatedString.Builder()) {
+                    append(episode.releaseDateTime.formatRelativeDisplay(context))
+                    if (episode.duration != 0) {
+                        append(" ◾ ${episode.duration.formatDuration()}")
+                    }
+                    toAnnotatedString()
+                },
+            )
         },
         icon = {
             PodcastThumbnail(
                 data = episode.artworkUrl,
                 modifier = Modifier
                     .size(EpisodeDefaults.LargeThumbnailSize)
-                    .clickable(onClick = onThumbnailClick )
+                    .clickable(onClick = onThumbnailClick)
             )
+        },
+        trailing = {
+            IconButton(
+                onClick = { onContextMenuClick(episode) }
+            ) {
+                Icon(imageVector = Icons.Default.MoreHoriz,
+                    contentDescription = null)
+            }
         }
     )
 }
@@ -355,10 +365,12 @@ private object EpisodeDefaults {
 
         Row(modifier = modifier
             .fillMaxWidth()
-            .padding(start = ContentLeftPadding,
+            .padding(
+                start = ContentLeftPadding,
                 top = ContentTopPadding,
                 bottom = ContentInnerPadding,
-                end = ContentRightPadding))
+                end = ContentRightPadding
+            ))
         {
             icon()
 
