@@ -140,7 +140,7 @@ fun EpisodeItem(
             PodcastThumbnail(
                 data = episode.artworkUrl,
                 modifier = Modifier
-                    .size(EpisodeDefaults.SmallThumbnailSize)
+                    .size(EpisodeDefaults.ThumbnailSize)
                     .clickable(onClick = { onPodcastClick?.invoke() })
             )
         },
@@ -167,7 +167,10 @@ fun EpisodeItem(
         },
         overlineText = {
             val context = LocalContext.current
-            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+            Text(text = episode
+                .releaseDateTime
+                .formatRelativeDisplay(context)
+                .toUpperCase(Locale.getDefault()))
         },
         descriptionText = {
             episode.description?.let {
@@ -178,42 +181,6 @@ fun EpisodeItem(
             }
         }
     )
-
-    /*
-    ListItem(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onEpisodeClick() },
-        text = {
-            Text(text = episode.name, maxLines = 2)
-        },
-        secondaryText = {
-            val context = LocalContext.current
-            Text(
-                text = with(AnnotatedString.Builder()) {
-                    append(episode.duration.formatDuration())
-                    append(" ● ")
-                    append(episode.releaseDateTime.formatRelativeDisplay(context))
-                    append("\n")
-                    episode.description?.let {
-                        append(it)
-                    }
-                    toAnnotatedString()
-                },
-                maxLines = 3,
-            )
-        },
-        icon = {
-            PodcastThumbnail(
-                imageModel = episode.getArtworkUrl(),
-                modifier = Modifier
-                    .size(EpisodeDefaults.SmallThumbnailSize)
-                    .clickable(onClick = { })
-            )
-        }
-    )
-    */
-
 }
 
 @Composable
