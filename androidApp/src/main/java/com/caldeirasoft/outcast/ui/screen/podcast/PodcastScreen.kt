@@ -269,13 +269,14 @@ private fun PodcastScreen(
                             // episodes
                             items(lazyPagingItems = lazyPagingItems) { episode ->
                                 episode?.let {
-                                    EpisodeItem(
+                                    PodcastEpisodeItem(
                                         episode = episode,
                                         onEpisodeClick = {
                                             actioner(
                                                 PodcastActions.OpenEpisodeDetail(episode)
                                             )
-                                        }
+                                        },
+                                        onContextMenuClick = {}
                                     )
                                 }
                                 Divider()

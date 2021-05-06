@@ -8,6 +8,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -27,6 +29,7 @@ import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
 import com.google.accompanist.coil.rememberCoilPainter
+import java.util.*
 
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -126,6 +129,7 @@ fun EpisodeItem(
     episode: Episode,
     onEpisodeClick: () -> Unit,
     onPodcastClick: (() -> Unit)? = null,
+    onContextMenuClick: () -> Unit,
     index: Int? = null,
 ) {
     EpisodeDefaults.EpisodeItem(
@@ -156,14 +160,101 @@ fun EpisodeItem(
         },
         releasedTimeText = { },
         actionButtons = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayButton(episode = episode)
-                QueueButton(episode = episode)
-            }
+            EpisodeActionButtons(
+                episode = episode,
+                onContextMenuClick = onContextMenuClick
+            )
         },
         overlineText = {
             val context = LocalContext.current
             Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+        },
+        descriptionText = {
+            episode.description?.let {
+                Text(text = HtmlCompat.fromHtml(
+                    it,
+                    HtmlCompat.FROM_HTML_MODE_COMPACT
+                ).toString(), maxLines = 2)
+            }
+        }
+    )
+
+    /*
+    ListItem(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onEpisodeClick() },
+        text = {
+            Text(text = episode.name, maxLines = 2)
+        },
+        secondaryText = {
+            val context = LocalContext.current
+            Text(
+                text = with(AnnotatedString.Builder()) {
+                    append(episode.duration.formatDuration())
+                    append(" ● ")
+                    append(episode.releaseDateTime.formatRelativeDisplay(context))
+                    append("\n")
+                    episode.description?.let {
+                        append(it)
+                    }
+                    toAnnotatedString()
+                },
+                maxLines = 3,
+            )
+        },
+        icon = {
+            PodcastThumbnail(
+                imageModel = episode.getArtworkUrl(),
+                modifier = Modifier
+                    .size(EpisodeDefaults.SmallThumbnailSize)
+                    .clickable(onClick = { })
+            )
+        }
+    )
+    */
+
+}
+
+@Composable
+fun PodcastEpisodeItem(
+    modifier: Modifier = Modifier,
+    episode: Episode,
+    onEpisodeClick: () -> Unit,
+    onContextMenuClick: () -> Unit,
+    index: Int? = null,
+) {
+    EpisodeDefaults.EpisodeItem(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onEpisodeClick() },
+        text = {
+            Text(
+                text = with(AnnotatedString.Builder()) {
+                    if (index != null) {
+                        pushStyle(SpanStyle(color = Color.Red))
+                        append("${index}. ")
+                        pop()
+                    }
+                    append(episode.name)
+                    toAnnotatedString()
+                },
+                maxLines = 2,
+            )
+        },
+        releasedTimeText = { },
+        actionButtons = {
+            EpisodeActionButtons(
+                episode = episode,
+                onContextMenuClick = onContextMenuClick
+            )
+        },
+        overlineText = {
+            val context = LocalContext.current
+            Text(text = episode
+                .releaseDateTime
+                .formatRelativeDisplay(context)
+                .toUpperCase(Locale.getDefault()))
         },
         descriptionText = {
             episode.description?.let {
@@ -305,6 +396,33 @@ fun EpisodeTrailerItem(
     )
 }
 
+@Composable
+fun EpisodeActionButtons(
+    modifier: Modifier = Modifier,
+    episode: Episode,
+    onContextMenuClick: () -> Unit,
+) {
+    val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    Row(modifier = Modifier
+        .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PlayButton(
+            episode = episode)
+        Spacer(modifier = Modifier.weight(1f))
+        // queued button
+        // favorite button
+        // more button
+        IconButton(onClick = onContextMenuClick) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = null,
+                tint = tintColor,
+            )
+        }
+    }
+}
+
 private object EpisodeDefaults {
     // List item related defaults.
     private val MinHeight = 88.dp
@@ -343,7 +461,7 @@ private object EpisodeDefaults {
     @Composable
     fun EpisodeItem(
         modifier: Modifier = Modifier,
-        icon: @Composable () -> Unit,
+        icon: @Composable (() -> Unit)? = null,
         overlineText: @Composable (() -> Unit)? = null,
         descriptionText: @Composable (() -> Unit)? = null,
         text: @Composable () -> Unit,
@@ -368,23 +486,27 @@ private object EpisodeDefaults {
             .padding(
                 start = ContentLeftPadding,
                 top = ContentTopPadding,
-                bottom = ContentInnerPadding,
-                end = ContentRightPadding
+                bottom = ContentInnerPadding
             ))
         {
-            icon()
-
-            Column(modifier = Modifier
-                .weight(1f)
-                .padding(start = ContentInnerPadding))
-            {
-                styledOverlineText?.let {
+            icon?.let {
+                Box(modifier = Modifier.padding(end = ContentInnerPadding)) {
                     it()
                 }
-                styledText()
-                //styledReleasedTimeText()
-                styledDescriptionText?.let {
-                    it()
+            }
+
+            Column(modifier = Modifier
+                .weight(1f))
+            {
+                Column(modifier = Modifier.padding(end = ContentRightPadding)) {
+                    styledOverlineText?.let {
+                        it()
+                    }
+                    styledText()
+                    //styledReleasedTimeText()
+                    styledDescriptionText?.let {
+                        it()
+                    }
                 }
                 actionButtons()
             }

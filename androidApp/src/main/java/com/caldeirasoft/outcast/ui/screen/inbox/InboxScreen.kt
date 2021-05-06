@@ -74,7 +74,9 @@ private fun InboxScreen(
                     episode = episode,
                     onEpisodeClick = {
                         navigateTo(Screen.EpisodeScreen(episode))
-                    }
+                    },
+                    onContextMenuClick = {},
+                    onPodcastClick = {}
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
