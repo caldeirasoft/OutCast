@@ -102,6 +102,14 @@ class PodcastViewModel @Inject constructor(
         }
     }
 
+    private suspend fun openPodcastContextMenu() {
+        withState { state ->
+            state.podcast?.let {
+                emitEvent(PodcastEvent.OpenPodcastContextMenu(it))
+            }
+        }
+    }
+
     private suspend fun openEpisodeDetails(episode: Episode) {
         withState {
             emitEvent(PodcastEvent.OpenEpisodeDetail(episode))

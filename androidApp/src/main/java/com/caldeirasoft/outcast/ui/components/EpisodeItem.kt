@@ -127,15 +127,21 @@ fun QueueEpisodeItem(
 fun EpisodeItem(
     modifier: Modifier = Modifier,
     episode: Episode,
-    onEpisodeClick: () -> Unit,
+    onEpisodeClick: (() -> Unit)? = null,
     onPodcastClick: (() -> Unit)? = null,
-    onContextMenuClick: () -> Unit,
+    onContextMenuClick: (() -> Unit)? = null,
     index: Int? = null,
+    showActions: Boolean = true,
 ) {
+    val clickableMod = if (onEpisodeClick != null) {
+        Modifier.clickable(onClick = onEpisodeClick)
+    } else {
+        Modifier
+    }
     EpisodeDefaults.EpisodeItem(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onEpisodeClick() },
+            .then(clickableMod),
         icon = {
             PodcastThumbnail(
                 data = episode.artworkUrl,
@@ -160,10 +166,12 @@ fun EpisodeItem(
         },
         releasedTimeText = { },
         actionButtons = {
-            EpisodeActionButtons(
-                episode = episode,
-                onContextMenuClick = onContextMenuClick
-            )
+            if (showActions && onContextMenuClick != null) {
+                EpisodeActionButtons(
+                    episode = episode,
+                    onContextMenuClick = onContextMenuClick
+                )
+            }
         },
         overlineText = {
             val context = LocalContext.current

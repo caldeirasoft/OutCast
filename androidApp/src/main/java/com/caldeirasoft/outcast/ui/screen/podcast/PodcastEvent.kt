@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 
 sealed class PodcastEvent {

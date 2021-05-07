@@ -1,7 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,8 +31,7 @@ import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.nestedscrollview.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
@@ -44,11 +42,8 @@ import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
@@ -76,48 +71,21 @@ fun PodcastScreen(
             is PodcastActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.episode.feedUrl, action.episode.guid, true))
             is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.StoreDataScreen(action.storeData))
             is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.StoreDataScreen(action.category))
-            is PodcastActions.OpenPodcastContextMenu -> {
-                coroutineScope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar("Open podcast context menu")
-                    //drawerState.show()
-                }
-            }
-            is PodcastActions.OpenSettings -> {
-                coroutineScope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar("Open podcast settings")
-                    //drawerState.show()
-                }
-            }
             else -> viewModel.submitAction(action)
         }
     }
 
-    LaunchedEffect(viewModel) {
-        storePodcast?.let {
+    storePodcast?.let {
+        LaunchedEffect(storePodcast) {
             viewModel.submitAction(PodcastActions.SetPodcast(it))
         }
     }
 
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-            }
-        }
-    }
-
-    LaunchedEffect(viewModel) {
-        drawerContent.updateContent {
-            PodcastSettingsBottomSheet(
-                state = state,
-                dataStore = viewModel.dataStore
-            ) { action ->
-                when (action) {
-                    is PodcastActions.NavigateUp -> coroutineScope.launch { drawerState.hide() }
-                    else -> viewModel.submitAction(action)
-                }
-            }
-        }
-    }
+    ObsertUiEffects(viewModel = viewModel,
+        state = state,
+        navigateTo = navigateTo,
+        navigateBack = navigateBack
+    )
 }
 
 /**
@@ -276,7 +244,11 @@ private fun PodcastScreen(
                                                 PodcastActions.OpenEpisodeDetail(episode)
                                             )
                                         },
-                                        onContextMenuClick = {}
+                                        onContextMenuClick = {
+                                            actioner(
+                                                PodcastActions.OpenEpisodeContextMenu(episode)
+                                            )
+                                        }
                                     )
                                 }
                                 Divider()
@@ -396,6 +368,96 @@ private fun PodcastHeader(
                 color = artistData?.let { MaterialTheme.colors.primary } ?: Color.Unspecified,
                 textAlign = TextAlign.Start
             )
+        }
+    }
+}
+
+@Composable
+private fun ObsertUiEffects(
+    viewModel: PodcastViewModel,
+    state: PodcastState,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+) {
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is PodcastEvent.OpenSettings -> {
+                    drawerContent.updateContent {
+                        PodcastSettingsBottomSheet(
+                            state = state,
+                            dataStore = viewModel.dataStore
+                        ) { action ->
+                            when (action) {
+                                is PodcastActions.NavigateUp -> { }
+                                /*coroutineScope.launch { drawerState.hide() }*/
+                                else -> viewModel.submitAction(action)
+                            }
+                        }
+                    }
+                    delay(500)
+                    drawerState.show()
+                }
+                is PodcastEvent.OpenPodcastContextMenu -> {
+                    OpenBottomSheetMenu(
+                        header = { // header : podcast
+                            PodcastContextMenuHeader(podcast = event.podcast)
+                        },
+                        items = listOf(
+                            BottomSheetMenuItem(
+                                titleId = R.string.action_settings,
+                                icon = Icons.Default.Settings,
+                                onClick = { viewModel.submitAction(PodcastActions.OpenSettings) },
+                            ),
+                            BottomSheetMenuItem(
+                                titleId = R.string.action_share_podcast,
+                                icon = Icons.Default.Share,
+                                onClick = { viewModel.submitAction(PodcastActions.OpenSettings) },
+                            )
+                        ),
+                        drawerState = drawerState,
+                        drawerContent = drawerContent
+                    )
+                }
+                is PodcastEvent.OpenEpisodeContextMenu -> {
+                    OpenBottomSheetMenu(
+                        header = { // header : episode
+                            EpisodeItem(
+                                episode = event.episode,
+                                showActions = false,
+                            )
+                        },
+                        items = listOf(
+                            BottomSheetMenuItem(
+                                titleId = R.string.action_play_next,
+                                icon = Icons.Default.QueuePlayNext,
+                                onClick = { viewModel.submitAction(PodcastActions.PlayNextEpisode(event.episode)) },
+                            ),
+                            BottomSheetMenuItem(
+                                titleId = R.string.action_play_last,
+                                icon = Icons.Default.AddToQueue,
+                                onClick = { viewModel.submitAction(PodcastActions.PlayLastEpisode(event.episode)) },
+                            ),
+                            BottomSheetMenuItem(
+                                titleId = R.string.action_save_episode,
+                                icon = Icons.Default.FavoriteBorder,
+                                onClick = { viewModel.submitAction(PodcastActions.SaveEpisode(event.episode)) },
+                            ),
+                            BottomSheetSeparator,
+                            BottomSheetMenuItem(
+                                titleId = R.string.action_share_episode,
+                                icon = Icons.Default.Share,
+                                onClick = { viewModel.submitAction(PodcastActions.ShareEpisode(event.episode)) },
+                            )
+                        ),
+                        drawerState = drawerState,
+                        drawerContent = drawerContent
+                    )
+                }
+            }
         }
     }
 }
@@ -583,25 +645,6 @@ fun PodcastMetaData(podcastData: Podcast,
             }
         }
     }
-    /*
-        // episode count
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Tag,
-                modifier = Modifier.size(16.dp),
-                contentDescription = null,
-                tint = tintColor
-            )
-            Text(
-                text = stringResource(id = R.string.podcast_x_episodes, podcastData.trackCount),
-                color = tintColor
-            )
-        }
-         */
-
 }
 
 fun GetPodcastVibrantColor(podcastData: Podcast?): Color? =
@@ -678,7 +721,7 @@ fun PodcastHeaderLoadingScreen(headerHeightDp: Dp) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 3.dp)
-                        .height(14.dp)
+                        .height(18.dp)
                         .background(brush = brush)
                 )
 
@@ -706,9 +749,8 @@ fun PodcastHeaderLoadingScreen(headerHeightDp: Dp) {
             // Buttons
             Surface(
                 modifier = Modifier
-                    .size(height = 25.dp, width = 90.dp)
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 3.dp),
+                    .size(height = 35.dp, width = 100.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(50)
             ) {
                 Spacer(modifier = Modifier
@@ -778,3 +820,51 @@ fun PodcastEpisodesLoadingScreen() {
     }
 }
 
+@Composable
+private fun PodcastContextMenuHeader(
+    podcast: Podcast,
+) {
+    ListItem(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        text = {
+            Text(
+                text = podcast.name,
+                maxLines = 1
+            )
+        },
+        secondaryText = { Text(podcast.artistName) },
+        icon = {
+            PodcastThumbnail(
+                data = podcast.artworkUrl,
+                modifier = Modifier.size(PodcastDefaults.SmallThumbnailSize),
+            )
+        },
+    )
+}
+
+
+@Composable
+private fun EpisodeContextMenuHeader(
+    state: PodcastState,
+    episode: Episode,
+) {
+    // header : episode
+    ListItem(
+        modifier = Modifier.fillMaxWidth(),
+        text = {
+            Text(
+                text = episode.name,
+                maxLines = 1
+            )
+        },
+        secondaryText = { Text(episode.description.orEmpty(), maxLines = 2) },
+        icon = {
+            PodcastThumbnail(
+                data = episode.artworkUrl,
+                modifier = Modifier.size(PodcastDefaults.ThumbnailSize),
+            )
+        },
+    )
+}

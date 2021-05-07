@@ -17,4 +17,8 @@ sealed class PodcastActions {
     object OpenPodcastContextMenu : PodcastActions()
     data class OpenEpisodeContextMenu(val episode: Episode) : PodcastActions()
     object OpenSettings : PodcastActions()
+    data class PlayNextEpisode(val episode: Episode) : PodcastActions()
+    data class PlayLastEpisode(val episode: Episode) : PodcastActions()
+    data class SaveEpisode(val episode: Episode) : PodcastActions()
+    data class ShareEpisode(val episode: Episode) : PodcastActions()
 }
