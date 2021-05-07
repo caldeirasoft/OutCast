@@ -22,6 +22,7 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.net.URLDecoder
 import java.net.URLEncoder
 
 enum class ScreenName {
@@ -94,6 +95,9 @@ sealed class Screen (val id: ScreenName) {
 
         fun String.urlEncode(): String =
             URLEncoder.encode(this, "UTF-8")
+
+        fun String.urlDecode(): String =
+            URLDecoder.decode(this, "UTF-8")
     }
 }
 

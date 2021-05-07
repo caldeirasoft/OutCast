@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,10 +25,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -48,6 +52,12 @@ fun EpisodeScreen(
         when(action) {
             EpisodeActions.NavigateUp -> navigateBack()
             else -> viewModel.submitAction(action)
+        }
+    }
+
+    storeEpisode?.let {
+        LaunchedEffect(storeEpisode) {
+            viewModel.submitAction(EpisodeActions.SetEpisode(it))
         }
     }
 
@@ -96,7 +106,7 @@ fun EpisodeScreen(
                         //PodcastLoadingScreen()
                     }
                 state.error != null ->
-                    state.error?.let {
+                    state.error.let {
                         item {
                             ErrorScreen(t = it)
                         }
@@ -104,21 +114,21 @@ fun EpisodeScreen(
                 else -> {
                     // buttons
                     item {
-                        // buttons
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically) {
-                            PlayButton(episode = state.episode)
-                            QueueButton(episode = state.episode)
+                        state.episode?.let {
+                            EpisodeExtendedActionButtons(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                                    .padding(bottom = 16.dp),
+                                episode = it,
+                                onContextMenuClick = { }
+                            )
                         }
                     }
 
                     /* description if present */
                     item {
-                        state.episode.description?.let { description ->
+                        state.episode?.description?.let { description ->
                             EpisodeDescriptionContent(description = description)
                         }
                     }
@@ -195,11 +205,11 @@ private fun EpisodeExpandedHeader(
                     .align(Alignment.Start)
             ) {
                 Image(
-                    painter = rememberCoilPainter(request = state.episode.artworkUrl),
-                    contentDescription = state.episode.podcastName,
+                    painter = rememberCoilPainter(request = state.episode?.artworkUrl.orEmpty()),
+                    contentDescription = state.episode?.podcastName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .width(72.dp)
+                        .width(120.dp)
                         .aspectRatio(1f)
                 )
             }
@@ -209,8 +219,8 @@ private fun EpisodeExpandedHeader(
             // episode name
             Box(modifier = Modifier.heightIn(min = 50.dp)) {
                 Text(
-                    text = state.episode.name,
-                    style = MaterialTheme.typography.h5,
+                    text = state.episode?.name.orEmpty(),
+                    style = MaterialTheme.typography.h5.copy(fontSize = 20.sp),
                     modifier = Modifier.align(Alignment.BottomStart)
                 )
             }
@@ -220,7 +230,7 @@ private fun EpisodeExpandedHeader(
             // podcast name
             Text(
                 text = with(AnnotatedString.Builder()) {
-                    append(state.episode.podcastName)
+                    append(state.episode?.podcastName.orEmpty())
                     append(" ›")
                     toAnnotatedString()
                 },
@@ -277,7 +287,7 @@ fun EpisodeTopAppBar(
             modifier = Modifier,
             title = {
                 CompositionLocalProvider(LocalContentAlpha provides appBarAlpha) {
-                    Text(text = state.episode.name)
+                    Text(text = state.episode?.name.orEmpty())
                 }
             },
             navigationIcon = {
@@ -305,5 +315,32 @@ private fun EpisodeDescriptionContent(description: String) {
             overflow = TextOverflow.Clip,
             textAlign = TextAlign.Start,
             maxLines = 5)
+    }
+}
+
+@Composable
+private fun EpisodeExtendedActionButtons(
+    modifier: Modifier = Modifier,
+    episode: Episode,
+    onContextMenuClick: () -> Unit,
+) {
+    val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    Row(modifier = modifier
+        .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PlayButton(
+            episode = episode)
+        Spacer(modifier = Modifier.weight(1f))
+        // queued button
+        // favorite button
+        // more button
+        IconButton(onClick = onContextMenuClick) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = null,
+                tint = tintColor,
+            )
+        }
     }
 }

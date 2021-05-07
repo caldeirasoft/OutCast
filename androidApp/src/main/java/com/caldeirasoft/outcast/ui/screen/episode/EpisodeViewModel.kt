@@ -4,21 +4,25 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.domain.models.episode
+import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData
+import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
+import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchPodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
+import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlDecode
+import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlEncode
 import com.caldeirasoft.outcast.ui.navigation.getObject
 import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
 import com.caldeirasoft.outcast.ui.screen.MviViewModel
 import com.caldeirasoft.outcast.ui.screen.MvieViewModel
+import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,32 +34,22 @@ class EpisodeViewModel @Inject constructor(
 ) : MvieViewModel<EpisodeViewState, EpisodeEvent, EpisodeActions>(
     // The string "episode" is the name of the argument in the route
     EpisodeViewState(
-        episode = savedStateHandle.getObjectNotNull("episode"),
-        podcast = savedStateHandle.getObject("podcast"))
+        feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
+        guid = savedStateHandle.get<String>("guid")?.urlDecode().orEmpty(),
+    )
 ) {
 
     private var isInitialized: Boolean = false
+    private var isEpisodeSet: Boolean = false
 
     init {
         val initialState = state.value
         viewModelScope.launch {
             loadEpisodeFromDbUseCase
                 .execute(
-                    feedUrl = initialState.episode.feedUrl,
-                    guid = initialState.episode.guid
+                    feedUrl = initialState.feedUrl,
+                    guid = initialState.guid
                 )
-                .onEach {
-                    if (it == null && !isInitialized) {
-                        // 1rst launch
-                        initialState.podcast?.let { podcast ->
-                            fetchPodcastDataUseCase
-                                .execute(podcast)
-                                .onStart { setState { copy(isLoading = true) } }
-                                .launchIn(viewModelScope)
-                        }
-                    }
-                    isInitialized = true
-                }
                 .filterNotNull()
                 .setOnEach {
                     copy(
@@ -74,8 +68,27 @@ class EpisodeViewModel @Inject constructor(
     }
 
     override suspend fun performAction(action: EpisodeActions) = when(action) {
+        is EpisodeActions.SetEpisode -> setEpisode(action.storeEpisode)
         is EpisodeActions.OpenPodcastDetail -> openPodcastDetails()
         else -> Unit
+    }
+
+    private fun setEpisode(storeEpisode: StoreEpisode) {
+        if (!isEpisodeSet) {
+            fetchPodcastDataUseCase
+                .execute(storeEpisode.storePodcast.podcast)
+                .onStart {
+                    isEpisodeSet = true
+                    setState {
+                        copy(
+                            isLoading = true,
+                            episode = storeEpisode.episode,
+                            podcast = storeEpisode.storePodcast.podcast
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
+        }
     }
 
     private suspend fun openPodcastDetails() {
@@ -84,23 +97,5 @@ class EpisodeViewModel @Inject constructor(
                 emitEvent(EpisodeEvent.OpenPodcastDetail(podcast))
             }
         }
-    }
-
-    data class State(
-        val episode: Episode? = null,
-        val podcast: Podcast? = null,
-        val isLoading: Boolean = false,
-        val error: Throwable? = null,
-    )
-    {
-        val artistData: StoreData? =
-            podcast?.artistUrl?.let {
-                StoreData(
-                    id = podcast.artistId ?: 0L,
-                    label = podcast.artistName,
-                    url = podcast.artistUrl.orEmpty(),
-                    storeFront = ""
-                )
-            }
     }
 }

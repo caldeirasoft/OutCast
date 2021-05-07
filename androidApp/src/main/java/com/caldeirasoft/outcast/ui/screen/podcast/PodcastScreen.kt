@@ -60,6 +60,13 @@ fun PodcastScreen(
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
+
+    storePodcast?.let {
+        LaunchedEffect(storePodcast) {
+            viewModel.submitAction(PodcastActions.SetPodcast(it))
+        }
+    }
+
     PodcastScreen(
         state = state,
         scaffoldState = scaffoldState,
@@ -72,12 +79,6 @@ fun PodcastScreen(
             is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.StoreDataScreen(action.storeData))
             is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.StoreDataScreen(action.category))
             else -> viewModel.submitAction(action)
-        }
-    }
-
-    storePodcast?.let {
-        LaunchedEffect(storePodcast) {
-            viewModel.submitAction(PodcastActions.SetPodcast(it))
         }
     }
 
@@ -144,120 +145,118 @@ private fun PodcastScreen(
                                     )
                                 }
                             )
-                            // Rating
-                            PodcastMetaData(
-                                podcastData = podcastData,
-                                onCategoryClick = {
-                                    actioner(
-                                        PodcastActions.OpenCategoryDataDetail(it)
-                                    )
-                                }
-                            )
-                            // action buttons
-                            PodcastActionButtons(
-                                state = state,
-                                onFollowPodcast = { actioner(PodcastActions.FollowPodcast) },
-                                onUnfollowPodcast = { actioner(PodcastActions.UnfollowPodcast) },
-                                onOpenPodcastContextMenu = { actioner(PodcastActions.OpenPodcastContextMenu) }
-                            )
-                            // description
-                            podcastData.description?.let { description ->
-                                PodcastDescriptionContent(description = description)
-                            }
                         } else {
                             PodcastHeaderLoadingScreen(headerHeight.value.toDp())
                         }
                     }
                 },
                 content = {
-                    LazyListLayout(
-                        lazyListItems = lazyPagingItems,
-                        onLoading = { PodcastEpisodesLoadingScreen() }
-                    )
-                    {
-                        val listState = rememberLazyListState(0)
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) {
-                            /*
-                                // genre
-                                item {
-                                    podcastData?.category?.let { genre ->
-                                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                            ChipButton(selected = false,
-                                                onClick = {
-                                                    actioner(
-                                                        PodcastActions.OpenCategoryDataDetail(
-                                                            genre
-                                                        )
-                                                    )
-                                                })
-                                            {
-                                                Text(text = genre.name)
-                                            }
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                }
-                                */
-                            // episode title
-                            item {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(48.dp)
-                                        .padding(horizontal = 16.dp)
+                    val listState = rememberLazyListState(0)
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        // action buttons
+                        item {
+                            podcastData?.let {
+                                PodcastActionButtons(
+                                    state = state,
+                                    onFollowPodcast = { actioner(PodcastActions.FollowPodcast) },
+                                    onUnfollowPodcast = { actioner(PodcastActions.UnfollowPodcast) },
+                                    onOpenPodcastContextMenu = { actioner(PodcastActions.OpenPodcastContextMenu) }
+                                )
+                            }
+                        }
+                        // description
+                        item {
+                            podcastData?.description?.let { description ->
+                                PodcastDescriptionContent(description = description)
+                            }
+                        }
+                        // genre
+                        item {
+                            podcastData?.category?.let { genre ->
+                                Box(modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .padding(bottom = 8.dp)
                                 ) {
-                                    Text(
-                                        stringResource(id = R.string.podcast_episodes),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .align(Alignment.CenterVertically),
-                                        style = MaterialTheme.typography.h6
-                                    )
-
-                                    ActionChipButton(
-                                        modifier = Modifier.align(Alignment.CenterVertically),
-                                        onClick = { /*TODO*/ },
-                                        icon = {
-                                            Icon(imageVector = Icons.Filled.Sort,
-                                                contentDescription = null,
-                                                modifier = Modifier
-                                                    .padding(start = 4.dp)
-                                                    .size(16.dp)
-                                                    .align(Alignment.CenterVertically))
-                                        }) {
-                                        Text(text = stringResource(id = R.string.action_filter))
+                                    ChipButton(selected = false,
+                                        onClick = {
+                                            actioner(
+                                                PodcastActions.OpenCategoryDataDetail(
+                                                    genre
+                                                )
+                                            )
+                                        })
+                                    {
+                                        Text(text = genre.name)
                                     }
                                 }
                             }
-                            // episodes
-                            items(lazyPagingItems = lazyPagingItems) { episode ->
-                                episode?.let {
-                                    PodcastEpisodeItem(
-                                        episode = episode,
-                                        onEpisodeClick = {
-                                            actioner(
-                                                PodcastActions.OpenEpisodeDetail(episode)
-                                            )
-                                        },
-                                        onContextMenuClick = {
-                                            actioner(
-                                                PodcastActions.OpenEpisodeContextMenu(episode)
-                                            )
-                                        }
-                                    )
+                        }
+                        // episode title
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    stringResource(id = R.string.podcast_episodes),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .align(Alignment.CenterVertically),
+                                    style = MaterialTheme.typography.h6
+                                )
+
+                                ActionChipButton(
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    onClick = { /*TODO*/ },
+                                    icon = {
+                                        Icon(imageVector = Icons.Filled.Sort,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .padding(start = 4.dp)
+                                                .size(16.dp)
+                                                .align(Alignment.CenterVertically))
+                                    }) {
+                                    Text(text = stringResource(id = R.string.action_filter))
                                 }
-                                Divider()
+                            }
+                        }
+                        lazyPagingItems
+                            .ifLoading {
+                                item {
+                                    PodcastEpisodesLoadingScreen()
+                                }
+                            }
+                            .ifNotLoading {
+                                // episodes
+                                items(lazyPagingItems = lazyPagingItems) { episode ->
+                                    episode?.let {
+                                        PodcastEpisodeItem(
+                                            episode = episode,
+                                            onEpisodeClick = {
+                                                actioner(
+                                                    PodcastActions.OpenEpisodeDetail(episode)
+                                                )
+                                            },
+                                            onContextMenuClick = {
+                                                actioner(
+                                                    PodcastActions.OpenEpisodeContextMenu(episode)
+                                                )
+                                            }
+                                        )
+                                    }
+                                    Divider()
+                                }
                             }
 
-                            item {
-                                // bottom app bar spacer
-                                Spacer(modifier = Modifier.height(56.dp))
-                            }
+                        item {
+                            // bottom app bar spacer
+                            Spacer(modifier = Modifier.height(56.dp))
                         }
                     }
                 })
@@ -527,7 +526,7 @@ private fun PodcastDescriptionContent(description: String) {
         OverflowHtmlText(text = description,
             overflow = TextOverflow.Clip,
             textAlign = TextAlign.Start,
-            maxLines = 3)
+            maxLines = 2)
     }
 }
 
@@ -544,8 +543,8 @@ fun PodcastActionButtons(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(36.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // following button

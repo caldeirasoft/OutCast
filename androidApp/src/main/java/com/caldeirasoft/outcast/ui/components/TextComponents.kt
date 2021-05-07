@@ -124,7 +124,7 @@ fun OverflowHtmlText(
     var isExpanded by remember { mutableStateOf(false) }
     Box(modifier = modifier
         .fillMaxSize()
-        .clickable { isExpanded = isExpanded.not() }) {
+        .then(if (!isExpanded) Modifier.clickable { isExpanded = isExpanded.not() } else Modifier)) {
         HtmlText(
             htmlText = text,
             modifier = Modifier,

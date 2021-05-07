@@ -372,7 +372,7 @@ fun EpisodeTrailerItem(
 }
 
 @Composable
-fun EpisodeActionButtons(
+private fun EpisodeActionButtons(
     modifier: Modifier = Modifier,
     episode: Episode,
     onContextMenuClick: () -> Unit,

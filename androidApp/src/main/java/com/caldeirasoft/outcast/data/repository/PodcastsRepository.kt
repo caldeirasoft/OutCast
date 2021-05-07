@@ -208,6 +208,7 @@ class PodcastsRepository @Inject constructor(
     suspend fun updatePodcastItunesMetadata(storePodcast: Podcast) {
         val job = scope.async {
             try {
+                Timber.d("updatePodcastItunesMetadata: ${storePodcast.feedUrl}")
                 val cachedPodcast = loadPodcast(storePodcast.feedUrl).firstOrNull()
                 if (cachedPodcast != null) {
                     storePodcast.run {
