@@ -12,9 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,6 +26,10 @@ import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.AppbarContainer
+import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.CollapsingToolbar
+import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.ScrollStrategy
+import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.rememberCollapsingToolbarState
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
 import com.caldeirasoft.outcast.ui.theme.typography
@@ -47,81 +49,87 @@ fun StoreSearchScreen(
         .navigationBarsPadding(bottom = false)) {
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
-            val headerRatio: Float = 1 / 4f
+            val headerRatio: Float = 1 / 3f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
-            val spacerHeight = headerHeight.value
+            var expandedAlpha by remember { mutableStateOf(1f) }
 
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 56.dp)
-            )
-            {
-                val categoriesIds = listOf(-1) + Category.values()
-                    .filter { !it.nested }
-                    .map { it.id }
-                // header
-                item {
+            val collapsingToolbarState = rememberCollapsingToolbarState()
+
+            AppbarContainer(
+                modifier = Modifier.fillMaxWidth(),
+                scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+                collapsingToolbarState = collapsingToolbarState
+            ) {
+                CollapsingToolbar(collapsingToolbarState = collapsingToolbarState) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(height = spacerHeight.toDp())
-                    )
-                    {
-                        // large title
-                        Box(
-                            modifier = Modifier
-                                .padding(
-                                    top = AppBarHeight,
-                                    start = 16.dp,
-                                    end = 16.dp
-                                )
-                                .align(Alignment.Center)
-                                .alpha(listState.expandedHeaderAlpha)
-                        ) {
-                            ProvideTextStyle(typography.h4) {
-                                Text(
-                                    text = stringResource(id = R.string.screen_search),
-                                    textAlign = TextAlign.Center
-                                )
+                            .height(height = headerHeight.value.toDp())
+                            .parallax(0.5f)
+                            .progress {
+                                expandedAlpha = it
                             }
+                            .alpha(expandedAlpha),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        ProvideTextStyle(typography.h4) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp),
+                                text = stringResource(id = R.string.screen_search),
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
+
+                    SearchBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .road(Alignment.BottomStart, Alignment.BottomStart)
+                    )
                 }
 
-                stickyHeader {
-                    // search bar
-                    Box(modifier = Modifier.fillMaxWidth()
-                        .background(MaterialTheme.colors.background)) {
-                        SearchBar(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 56.dp)
+                        .navigationBarsPadding()
+                        .appBarBody()
+                )
+                {
+                    val categoriesIds = listOf(-1) + Category.values()
+                        .filter { !it.nested }
+                        .map { it.id }
+
+                    item {
+                        // header
+                        StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
                     }
-                }
-
-                item {
-                    // header
-                    StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
-                }
-                gridItems(
-                    items = categoriesIds,
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalInnerPadding = 8.dp,
-                    verticalInnerPadding = 8.dp,
-                    columns = 2
-                ) { categoryId ->
-                    when (categoryId) {
-                        -1 -> TopChartCardItem(
-                            navigateToTopChart = { navigateTo(Screen.StoreDataScreen(StoreData.TopCharts)) }
-                        )
-                        else -> {
-                            Category.fromId(categoryId)?.let { category ->
-                                CategoryCardItem(
-                                    category = category,
-                                    navigateToCategory = { navigateTo(Screen.StoreDataScreen(category)) }
-                                )
+                    gridItems(
+                        items = categoriesIds,
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalInnerPadding = 8.dp,
+                        verticalInnerPadding = 8.dp,
+                        columns = 2
+                    ) { categoryId ->
+                        when (categoryId) {
+                            -1 -> TopChartCardItem(
+                                navigateToTopChart = { navigateTo(Screen.StoreDataScreen(StoreData.TopCharts)) }
+                            )
+                            else -> {
+                                Category.fromId(categoryId)?.let { category ->
+                                    CategoryCardItem(
+                                        category = category,
+                                        navigateToCategory = {
+                                            navigateTo(
+                                                Screen.StoreDataScreen(
+                                                    category
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

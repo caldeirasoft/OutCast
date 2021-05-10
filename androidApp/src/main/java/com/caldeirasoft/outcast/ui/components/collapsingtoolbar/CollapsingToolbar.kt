@@ -31,22 +31,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.MeasureResult
-import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.layout.ParentDataModifier
-import androidx.compose.ui.layout.Remeasurement
-import androidx.compose.ui.layout.RemeasurementModifier
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.CollapsingToolbarScopeInstance.pin
-import com.caldeirasoft.outcast.ui.components.nestedscrollview.NestedScrollViewState
-import com.caldeirasoft.outcast.ui.components.nestedscrollview.headerScrollRatio
-import kotlinx.coroutines.CoroutineScope
 import kotlin.math.*
 
 fun interface CollapsingToolbarHeightChangeListener {
@@ -214,7 +203,7 @@ private class CollapsingToolbarMeasurePolicy(
 
 		val height = collapsingToolbarState.height
 		return layout(width, height) {
-			val progress = collapsingToolbarState.progress
+			val progress = collapsingToolbarState.progress.takeUnless { it.isNaN() } ?: 1f
 
 			placeables.forEachIndexed { i, placeable ->
 				val strategy = placeStrategy[i]
