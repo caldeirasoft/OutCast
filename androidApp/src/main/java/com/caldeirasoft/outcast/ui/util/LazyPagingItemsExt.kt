@@ -1,5 +1,9 @@
 package com.caldeirasoft.outcast.ui.util
 
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 
@@ -95,5 +99,28 @@ inline fun <reified T : Any> LazyPagingItems<T>.refreshOrRetry() {
         retry()
     } else {
         refresh()
+    }
+}
+
+@Composable
+fun LazyPagingItems<*>.rememberLazyListStateWithPagingItems(
+    initialFirstVisibleItemIndex: Int = 0,
+    initialFirstVisibleItemScrollOffset: Int = 0
+): LazyListState {
+    // this state recomposes every time the LazyPagingItems receives an update and changes the
+    // recomposerPlaceholder is internal
+    @Suppress("UNUSED_VARIABLE")
+    val loadState = this.loadState
+
+    return if (this.itemCount > 0) {
+        rememberSaveable(saver = LazyListState.Saver) {
+            LazyListState(
+                initialFirstVisibleItemIndex,
+                initialFirstVisibleItemScrollOffset
+            )
+        }
+    }
+    else {
+        LazyListState(0, 0)
     }
 }

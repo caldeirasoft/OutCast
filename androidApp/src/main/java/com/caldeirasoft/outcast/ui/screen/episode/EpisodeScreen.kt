@@ -220,7 +220,7 @@ private fun EpisodeExpandedHeader(
             Box(modifier = Modifier.heightIn(min = 50.dp)) {
                 Text(
                     text = state.episode?.name.orEmpty(),
-                    style = MaterialTheme.typography.h5.copy(fontSize = 20.sp),
+                    style = MaterialTheme.typography.h5,
                     modifier = Modifier.align(Alignment.BottomStart)
                 )
             }
