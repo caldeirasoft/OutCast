@@ -1,9 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
 import androidx.datastore.preferences.core.Preferences
-import androidx.paging.PagingData
-import com.airbnb.mvrx.MavericksState
-import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData

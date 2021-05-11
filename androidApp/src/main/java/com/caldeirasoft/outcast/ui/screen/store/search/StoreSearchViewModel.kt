@@ -1,13 +1,13 @@
 package com.caldeirasoft.outcast.ui.screen.store.search
 
-import com.airbnb.mvrx.MavericksViewModel
+import androidx.lifecycle.ViewModel
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import kotlinx.coroutines.flow.first
 
 class StoreSearchViewModel(
     initialState: StoreSearchViewState,
     private val fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-) : MavericksViewModel<StoreSearchViewState>(initialState) {
+) : ViewModel() {
     // get genres
     suspend fun getGenres() =
         suspend {

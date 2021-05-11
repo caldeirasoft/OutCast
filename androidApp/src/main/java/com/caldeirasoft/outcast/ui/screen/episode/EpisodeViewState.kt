@@ -1,10 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
-import com.airbnb.mvrx.MavericksState
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.models.store.StoreData
 
 data class EpisodeViewState(
     val feedUrl: String,

@@ -91,7 +91,6 @@ dependencies {
     api(libs.paging.compose)
     api(libs.jsoup)
     api(libs.timber)
-    api(libs.mavericks)
     api(libs.javax.inject)
     kapt(libs.hilt.compiler)
     releaseImplementation(libs.chucker.release)

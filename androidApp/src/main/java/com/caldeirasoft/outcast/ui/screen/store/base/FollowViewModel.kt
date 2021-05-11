@@ -1,13 +1,9 @@
 package com.caldeirasoft.outcast.ui.screen.store.base
 
 import androidx.lifecycle.viewModelScope
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
-import com.caldeirasoft.outcast.ui.screen.MviViewModel
 import com.caldeirasoft.outcast.ui.screen.MvieViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*

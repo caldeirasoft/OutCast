@@ -19,8 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.caldeirasoft.outcast.presentation.viewmodel.InboxViewModel
 import com.caldeirasoft.outcast.ui.components.EpisodeItem
 import com.caldeirasoft.outcast.ui.components.ReachableAppBar
@@ -37,8 +35,8 @@ fun InboxScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val viewModel: InboxViewModel = mavericksViewModel()
-    val state by viewModel.collectAsState()
+    val viewModel: InboxViewModel = InboxViewModel()
+    val state = InboxViewState()
 
     InboxScreen(
         state = state,

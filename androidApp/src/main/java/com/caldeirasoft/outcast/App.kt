@@ -1,7 +1,6 @@
 package com.caldeirasoft.outcast
 
 import android.app.Application
-import com.airbnb.mvrx.Mavericks
 import com.facebook.stetho.Stetho
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,8 +13,6 @@ import timber.log.Timber
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-
-        Mavericks.initialize(this@App)
 
         if (BuildConfig.DEBUG) {
             initErrorHandler()
