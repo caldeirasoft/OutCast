@@ -33,6 +33,6 @@ val StoreEpisode.episode: Episode
             updatedAt = Clock.System.now(),
             playbackPosition = null,
             isPlayed = false,
-            isFavorite = false,
+            isSaved = false,
             playedAt = null,
         )

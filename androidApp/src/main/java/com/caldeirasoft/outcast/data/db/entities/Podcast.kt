@@ -50,6 +50,7 @@ data class Podcast(
   @ColumnInfo(name = "isComplete") val isComplete: Boolean = false,
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
   @ColumnInfo(name = "isFollowed") val isFollowed: Boolean = false,
+  @ColumnInfo(name = "followedAt") val followedAt: Instant? = null,
   @ColumnInfo(name = "updatedAt") val updatedAt: Instant
 ) {
   companion object {

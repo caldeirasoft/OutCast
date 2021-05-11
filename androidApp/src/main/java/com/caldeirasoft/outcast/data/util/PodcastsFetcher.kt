@@ -189,7 +189,7 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         updatedAt = Clock.System.now(),
         isPlayed = false,
         playedAt = Instant.DISTANT_PAST,
-        isFavorite = false,
+        isSaved = false,
         playbackPosition = null,
     )
 }

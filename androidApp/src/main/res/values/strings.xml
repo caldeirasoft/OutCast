@@ -45,6 +45,22 @@
     <string name="podcast_x_episodes">%1$s Episodes</string>
     <string name="podcast_settings">Settings for this podcast</string>
 
+    <!-- date -->
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_today">Today</string>
+
+    <!-- library sort -->
+    <string name="library_sort_recently_followed">Recently followed</string>
+    <string name="library_sort_recently_updated">Recently updated</string>
+    <string name="library_sort_by_name">Name</string>
+    <string name="library_sort_by_author">Author</string>
+
+    <!-- library item type -->
+    <string name="library_item_latest">Latest episodes</string>
+    <string name="library_item_saved">Saved episodes</string>
+    <string name="library_item_sideloads">Sideloads</string>
+    <string name="library_item_podcasts">Podcasts</string>
+
     <!-- filter -->
     <string name="filter_all">All</string>
     <string name="filter_inbox">Inbox</string>
@@ -99,6 +115,7 @@
     <string name="action_share_episode">Share episode</string>
     <string name="action_show_more">Show more ▼</string>
     <string name="action_show_all_episodes">Show all episodes</string>
+    <string name="action_sort_by">Sort by</string>
     <string name="action_subscribe">Subscribe</string>
     <string name="action_subscribed">Subscribed</string>
     <string name="action_settings">Settings</string>

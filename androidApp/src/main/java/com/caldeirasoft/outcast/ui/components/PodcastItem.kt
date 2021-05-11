@@ -165,52 +165,6 @@ fun PodcastGridItem(
 }
 
 @Composable
-fun PodcastGridItem(
-    modifier: Modifier = Modifier,
-    podcast: Podcast,
-    index: Int? = null,
-)
-{
-    Column(modifier = modifier
-        .padding(horizontal = 8.dp)) {
-        Card(
-            backgroundColor = colors[1],
-            shape = RoundedCornerShape(8.dp)
-        )
-        {
-            Image(
-                painter = rememberCoilPainter(request = podcast.artworkUrl),
-                contentDescription = podcast.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f))
-        }
-        Text(
-            text = with(AnnotatedString.Builder()) {
-                if (index != null) {
-                    pushStyle(SpanStyle(color = Color.Red))
-                    append("${index}. ")
-                    pop()
-                }
-                append(podcast.name)
-                toAnnotatedString()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            style = MaterialTheme.typography.body2
-        )
-        Text(
-            podcast.artistName,
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.caption
-        )
-    }
-}
-
-@Composable
 fun FollowPodcastGridIconButton(
     modifier: Modifier,
     isFollowing: Boolean = false,
@@ -227,7 +181,7 @@ fun FollowPodcastGridIconButton(
             modifier = Modifier,
             animationSpec = tween(500)
         )
-        { it ->
+        { _ ->
             when {
                 isFollowingLoading -> {
                     Box(modifier = Modifier
@@ -286,7 +240,7 @@ fun FollowPodcastListIconButton(
     Crossfade(
         targetState = followingStatus,
         animationSpec = tween(500))
-    { it ->
+    { _ ->
         when {
             isFollowingLoading -> {
                 Box(modifier = Modifier

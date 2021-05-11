@@ -446,12 +446,6 @@ fun StoreDataScreen(
             }
 
 
-            // collapsing app bar
-            /*StoreDataTopAppBar(
-                title = title,
-                state = state,
-                nestedScrollViewState = nestedScrollViewState)*/
-
             // refresh button
             RefreshButton(
                 modifier = Modifier

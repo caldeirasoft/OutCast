@@ -241,7 +241,7 @@ class PodcastsRepository @Inject constructor(
         if (updatePodcast)
             updatePodcast(feedUrl)
         // subscribe to podcast
-        podcastDao.followPodcast(feedUrl = feedUrl)
+        podcastDao.followPodcast(feedUrl = feedUrl, followedAt = Clock.System.now())
         addMostRecentEpisodeToInbox(feedUrl)
         val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
         dataStore.edit { preferences ->

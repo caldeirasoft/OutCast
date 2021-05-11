@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.util
 
 import android.content.Context
+import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.util.Log_D
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
@@ -20,7 +21,7 @@ object DateFormatter {
     private val lastWeek = today + DatePeriod(days = -7)
     private val lastYear = today + DatePeriod(years = -1)
 
-    fun Instant.formatRelativeDisplay(context: Context): String {
+    fun Instant.formatRelativeDateTime(context: Context): String {
         val localDateTime = this.toLocalDateTime(TimeZone.currentSystemDefault())
         val localDate = localDateTime.date
         return when {
@@ -28,7 +29,19 @@ object DateFormatter {
                 // SHORT: 2:05 AM
                 localDateTime.toJavaLocalDateTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
             }
-            localDate == yesterday -> "Yesterday"
+            localDate == yesterday -> context.resources.getString(R.string.date_yesterday)
+            localDate > lastWeek -> localDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+            localDate > lastYear -> localDate.toJavaLocalDate().format(getDateFormatterWithoutYear())
+            else -> localDate.toJavaLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+        }
+    }
+
+    fun Instant.formatRelativeDate(context: Context): String {
+        val localDateTime = this.toLocalDateTime(TimeZone.currentSystemDefault())
+        val localDate = localDateTime.date
+        return when {
+            localDate == today -> context.resources.getString(R.string.date_today)
+            localDate == yesterday -> context.resources.getString(R.string.date_yesterday)
             localDate > lastWeek -> localDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
             localDate > lastYear -> localDate.toJavaLocalDate().format(getDateFormatterWithoutYear())
             else -> localDate.toJavaLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))

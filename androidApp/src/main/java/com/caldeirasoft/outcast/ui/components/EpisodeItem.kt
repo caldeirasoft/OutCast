@@ -6,12 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDisplay
+import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDateTime
 import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.applyTextStyleNullable
@@ -64,7 +61,7 @@ fun StoreEpisodeItem(
             val context = LocalContext.current
             Text(
                 text = with(AnnotatedString.Builder()) {
-                    append(episode.releaseDateTime.formatRelativeDisplay(context))
+                    append(episode.releaseDateTime.formatRelativeDateTime(context))
                     if (episode.duration != 0) {
                         append(" ◾ ${episode.duration.formatDuration()}")
                     }
@@ -112,7 +109,7 @@ fun QueueEpisodeItem(
         text = { Text(text = episode.name, maxLines = 1) },
         releasedTimeText = {
             val context = LocalContext.current
-            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+            Text(text = episode.releaseDateTime.formatRelativeDateTime(context))
         },
         actionButtons = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -177,7 +174,7 @@ fun EpisodeItem(
             val context = LocalContext.current
             Text(text = episode
                 .releaseDateTime
-                .formatRelativeDisplay(context)
+                .formatRelativeDateTime(context)
                 .toUpperCase(Locale.getDefault()))
         },
         descriptionText = {
@@ -228,7 +225,7 @@ fun PodcastEpisodeItem(
             val context = LocalContext.current
             Text(text = episode
                 .releaseDateTime
-                .formatRelativeDisplay(context)
+                .formatRelativeDateTime(context)
                 .toUpperCase(Locale.getDefault()))
         },
         descriptionText = {
@@ -359,7 +356,7 @@ fun EpisodeTrailerItem(
         text = { Text(text = episode.name, maxLines = 1) },
         overlineText = {
             val context = LocalContext.current
-            Text(text = episode.releaseDateTime.formatRelativeDisplay(context))
+            Text(text = episode.releaseDateTime.formatRelativeDateTime(context))
         },
         actionButtons = {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -108,6 +108,7 @@ fun MainNavHost(startScreen: ScreenName) {
                 }
                 composable(ScreenName.LIBRARY.name) {
                     LibraryScreen(
+                        viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }

@@ -26,14 +26,14 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 enum class ScreenName {
+    LIBRARY,
+    STORE_DATA,
+    STORE_SEARCH,
     QUEUE,
     INBOX,
-    LIBRARY,
     PROFILE,
     PODCAST,
     EPISODE,
-    STORE_DATA,
-    STORE_SEARCH,
     MORE,
     FAVORITES,
     HISTORY,

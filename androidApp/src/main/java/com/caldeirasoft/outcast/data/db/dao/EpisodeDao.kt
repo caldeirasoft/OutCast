@@ -29,8 +29,8 @@ interface EpisodeDao : EntityDao<Episode> {
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime DESC")
     fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode>
 
-    @Query("SELECT * FROM episode e WHERE isFavorite = 1")
-    fun getFavoriteEpisodes(): Flow<List<Episode>>
+    @Query("SELECT * FROM episode e WHERE isSaved = 1")
+    fun getSavedEpisodes(): Flow<List<Episode>>
 
     @Query("SELECT * FROM episode e WHERE playbackPosition != NULL OR isPlayed = 1")
     fun getEpisodesHistory(): Flow<List<Episode>>
@@ -44,17 +44,17 @@ interface EpisodeDao : EntityDao<Episode> {
 
     @Query("""
         UPDATE episode 
-        SET isFavorite = 1
+        SET isSaved = 1
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
-    suspend fun addEpisodeToFavorites(feedUrl: String, guid: String)
+    suspend fun saveEpisodeToLibrary(feedUrl: String, guid: String)
 
     @Query("""
         UPDATE episode 
-        SET isFavorite = 0 
+        SET isSaved = 0 
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
-    suspend fun removeEpisodeToFavorites(feedUrl: String, guid: String)
+    suspend fun deleteFromLibrary(feedUrl: String, guid: String)
 
     @Query("""
         UPDATE episode 

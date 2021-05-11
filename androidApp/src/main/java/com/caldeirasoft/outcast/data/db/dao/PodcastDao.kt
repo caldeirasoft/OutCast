@@ -55,8 +55,8 @@ interface PodcastDao : EntityDao<Podcast> {
     @Query("UPDATE podcast SET updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE feedUrl = :feedUrl")
     suspend fun updateLastAccess(feedUrl: String)
 
-    @Query("UPDATE podcast SET isFollowed = 1 WHERE feedUrl = :feedUrl")
-    suspend fun followPodcast(feedUrl: String)
+    @Query("UPDATE podcast SET isFollowed = 1, followedAt = :followedAt WHERE feedUrl = :feedUrl")
+    suspend fun followPodcast(feedUrl: String, followedAt: Instant)
 
     @Query("UPDATE podcast SET isFollowed = 0 WHERE feedUrl = :feedUrl")
     suspend fun unfollowPodcast(feedUrl: String)
