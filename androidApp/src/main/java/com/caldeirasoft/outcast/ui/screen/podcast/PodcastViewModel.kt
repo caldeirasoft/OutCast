@@ -83,6 +83,10 @@ class PodcastViewModel @Inject constructor(
         is PodcastActions.FollowPodcast -> follow()
         is PodcastActions.UnfollowPodcast -> unfollow()
         is PodcastActions.ShowAllEpisodes -> showAllEpisodes()
+        is PodcastActions.OpenPodcastContextMenu -> openPodcastContextMenu()
+        is PodcastActions.OpenSettings -> emitEvent(PodcastEvent.OpenSettings)
+        is PodcastActions.OpenEpisodeContextMenu ->
+            emitEvent(PodcastEvent.OpenEpisodeContextMenu(action.episode))
         else -> Unit
     }
 

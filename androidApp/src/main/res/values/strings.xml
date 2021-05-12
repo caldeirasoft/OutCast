@@ -116,9 +116,6 @@
     <string name="action_sort_by">Sort by</string>
     <string name="action_subscribe">Subscribe</string>
     <string name="action_subscribed">Subscribed</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_follow">Follow</string>
-    <string name="action_following">Following</string>
     <string name="action_subscribing">Subscribing</string>
     <string name="action_tap_to_refresh">Tap to refresh</string>
 </resources>
