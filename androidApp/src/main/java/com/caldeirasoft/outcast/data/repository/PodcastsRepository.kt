@@ -18,6 +18,7 @@ import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
 import com.caldeirasoft.outcast.data.db.entities.PodcastMetadata
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
+import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -217,6 +218,7 @@ class PodcastsRepository @Inject constructor(
                             podcastId = podcastId,
                             artistId = artistId,
                             artistUrl = artistUrl,
+                            category = category,
                             userRating = userRating
                         )
                         podcastDao.update(metaData)
@@ -244,6 +246,25 @@ class PodcastsRepository @Inject constructor(
         podcastDao.followPodcast(feedUrl = feedUrl, followedAt = Clock.System.now())
         addMostRecentEpisodeToInbox(feedUrl)
         val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
+        dataStore.edit { preferences ->
+            preferences[podcastPreferenceKeys.newEpisodes] = NewEpisodesAction.INBOX.name
+            preferences[podcastPreferenceKeys.notifications] = true
+            preferences[podcastPreferenceKeys.episodeLimit] = "0"
+            preferences[podcastPreferenceKeys.customPlaybackEffects] = false
+        }
+    }
+
+    /**
+     * Follow podcast
+     */
+    suspend fun followPodcast(storePodcast: StorePodcast, updatePodcast: Boolean = false) {
+        // fetch remote podcast data
+        if (updatePodcast)
+            updatePodcast(storePodcast.feedUrl, storePodcast.podcast)
+        // subscribe to podcast
+        podcastDao.followPodcast(feedUrl = storePodcast.feedUrl, followedAt = Clock.System.now())
+        addMostRecentEpisodeToInbox(storePodcast.feedUrl)
+        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = storePodcast.feedUrl)
         dataStore.edit { preferences ->
             preferences[podcastPreferenceKeys.newEpisodes] = NewEpisodesAction.INBOX.name
             preferences[podcastPreferenceKeys.notifications] = true

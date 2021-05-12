@@ -2,6 +2,8 @@ package com.caldeirasoft.outcast.data.repository
 
 import androidx.paging.PagingSource
 import com.caldeirasoft.outcast.Database
+import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
+import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.db.Episode
 import com.caldeirasoft.outcast.db.Podcast
 import com.squareup.sqldelight.android.paging.QueryDataSourceFactory

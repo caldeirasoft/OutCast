@@ -48,6 +48,7 @@
     <!-- date -->
     <string name="date_yesterday">Yesterday</string>
     <string name="date_today">Today</string>
+    <string name="date_last_update_x">Last update : %1$s</string>
 
     <!-- library sort -->
     <string name="library_sort_recently_followed">Recently followed</string>
@@ -73,6 +74,10 @@
     <string name="screen_library">Library</string>
     <string name="screen_discover">Discover</string>
     <string name="screen_search">Search</string>
+    <string name="screen_latest_episodes">Latest episodes</string>
+    <string name="screen_saved_episodes">Saved episodes</string>
+    <string name="screen_played_episodes">Recently played episodes</string>
+    <string name="screen_sideloads">Sideloads</string>
     <string name="screen_more">More</string>
     <string name="screen_profile">Profile</string>
     <string name="screen_favorites">Favorites</string>

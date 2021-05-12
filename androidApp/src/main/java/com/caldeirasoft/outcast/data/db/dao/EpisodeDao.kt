@@ -6,7 +6,11 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata.Companion.metadata
 import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
+import com.caldeirasoft.outcast.domain.models.Category
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.days
 
 @Dao
 interface EpisodeDao : EntityDao<Episode> {
@@ -34,6 +38,25 @@ interface EpisodeDao : EntityDao<Episode> {
 
     @Query("SELECT * FROM episode e WHERE playbackPosition != NULL OR isPlayed = 1")
     fun getEpisodesHistory(): Flow<List<Episode>>
+
+    // get latest episodes (unplayed) / last 3 months
+    @Query("""
+        SELECT e.* FROM episode e
+        INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
+        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL
+          AND e.releaseDateTime > :releaseDateTime
+        ORDER BY e.releaseDateTime DESC
+    """)
+    fun getLatestEpisodesDataSource(releaseDateTime: Instant = Clock.System.now().minus(90.days)): DataSource.Factory<Int, Episode>
+
+    // get latest episodes (unplayed) categories / last 3 months
+    @Query("""
+        SELECT DISTINCT e.category FROM episode e
+        INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
+        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL
+          AND e.releaseDateTime > :releaseDateTime
+    """)
+    fun getLatestEpisodesCategories(releaseDateTime: Instant = Clock.System.now().minus(90.days)): Flow<List<Category?>>
 
     @Query("""
         UPDATE episode 

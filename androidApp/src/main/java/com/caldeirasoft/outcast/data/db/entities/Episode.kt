@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.room.*
 import com.caldeirasoft.outcast.data.db.customparcelers.InstantParceler
 import com.caldeirasoft.outcast.data.db.customparcelers.NullableInstantParceler
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
@@ -47,6 +48,7 @@ data class Episode(
   @ColumnInfo(name = "mediaUrl") val mediaUrl: String,
   @ColumnInfo(name = "mediaType") val mediaType: String,
   @ColumnInfo(name = "duration") val duration: Int,
+  @ColumnInfo(name = "category") val category: Category? = null,
   @ColumnInfo(name = "podcastEpisodeSeason") val podcastEpisodeSeason: Int? = null,
   @ColumnInfo(name = "podcastEpisodeNumber") val podcastEpisodeNumber: Int? = null,
   @ColumnInfo(name = "podcastEpisodeWebsiteUrl") val podcastEpisodeWebsiteUrl: String? = null,

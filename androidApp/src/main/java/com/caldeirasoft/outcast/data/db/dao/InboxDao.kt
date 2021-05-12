@@ -7,8 +7,7 @@ import kotlinx.datetime.Instant
 
 @Dao
 interface InboxDao : EntityDao<Episode> {
-    @Query("SELECT * FROM episode e INNER JOIN inbox USING (feedUrl, guid) ORDER BY e.releaseDateTime")
-    fun getEpisodes(): Flow<List<Episode>>
+
 
     @Query("""
         INSERT OR REPLACE INTO inbox (feedUrl, guid)

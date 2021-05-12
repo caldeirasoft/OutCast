@@ -60,7 +60,7 @@ abstract class MviViewModel<State: Any, Action: Any>(
         }
     }
 
-    private fun <A> selectSubscribe(prop1: KProperty1<State, A>): Flow<A> {
+    protected fun <A> selectSubscribe(prop1: KProperty1<State, A>): Flow<A> {
         return _state.map { prop1.get(it) }.distinctUntilChanged()
     }
 

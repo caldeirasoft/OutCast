@@ -9,7 +9,6 @@ data class LibraryState(
     val sortByDesc: Boolean = false,
     val displayAsGrid: Boolean = false,
     val savedEpisodesCount: Int = 0,
-    val newEpisodesUpdatedAt: Instant = Instant.DISTANT_PAST,
 ) {
     val sortedPodcasts: List<Podcast>
     get() = when(sortBy) {
@@ -22,4 +21,7 @@ data class LibraryState(
             it.reversed()
         else it
     }
+
+    val newEpisodesUpdatedAt: Instant?
+        get() = podcasts.maxOfOrNull { it.releaseDateTime }
 }

@@ -20,6 +20,7 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
+import com.caldeirasoft.outcast.ui.screen.episodes.latest.LatestEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.inbox.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
@@ -86,11 +87,9 @@ fun MainNavHost(startScreen: ScreenName) {
                 SetupBottomNavBar(
                     navController = navController,
                     items = listOf(
-                        BottomNavigationScreen.Inbox,
                         BottomNavigationScreen.Library,
                         BottomNavigationScreen.Discover,
                         BottomNavigationScreen.Search,
-                        BottomNavigationScreen.More,
                     ),
                     navigateTo = actions.selectBottomNav
                 )
@@ -100,20 +99,15 @@ fun MainNavHost(startScreen: ScreenName) {
                 navController = navController,
                 startDestination = startScreen.name,
             ) {
-                composable(ScreenName.INBOX.name) {
-                    InboxScreen(
-                        navigateTo = actions.select,
-                        navigateBack = actions.up
-                    )
-                }
                 composable(ScreenName.LIBRARY.name) {
+                    // library
                     LibraryScreen(
                         viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
-                composable(ScreenName.PROFILE.name) { Text(text = "Profile") }
                 composable(ScreenName.STORE_DATA.name) {
+                    // discover
                     StoreDataScreen(
                         viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
@@ -129,8 +123,12 @@ fun MainNavHost(startScreen: ScreenName) {
                     )
                 }
                 composable(ScreenName.STORE_SEARCH.name) {
+                    // search
                     StoreSearchScreen(
                         navigateTo = actions.select)
+                }
+                composable(ScreenName.PROFILE.name) {
+                    Text(text = "Profile")
                 }
                 composable(
                     route = "${ScreenName.PODCAST.name}/{feedUrl}",
@@ -172,6 +170,12 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )
+                }
+                composable(ScreenName.LATEST_EPISODES.name) {
+                    LatestEpisodesScreen(
+                        viewModel = hiltNavGraphViewModel(),
+                        navigateTo = actions.select,
+                        navigateBack = actions.up)
                 }
             }
         }

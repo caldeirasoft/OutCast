@@ -41,6 +41,7 @@ class StoreDataViewModel @Inject constructor(
     init {
         fetchFollowedPodcastsUseCase
             .getFollowedPodcastIds()
+            .distinctUntilChanged()
             .setOnEach {
                 copy(followingStatus = it)
             }

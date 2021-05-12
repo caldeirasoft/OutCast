@@ -31,10 +31,12 @@ enum class ScreenName {
     STORE_SEARCH,
     QUEUE,
     INBOX,
-    PROFILE,
     PODCAST,
     EPISODE,
+    LATEST_EPISODES,
+    SAVED_EPISODES,
     MORE,
+    PROFILE,
     FAVORITES,
     HISTORY,
     FILES,
@@ -77,6 +79,11 @@ sealed class Screen (val id: ScreenName) {
         )
     }
 
+    object StoreSearch : Screen(ScreenName.STORE_SEARCH)
+    object LatestEpisodes : Screen(ScreenName.LATEST_EPISODES)
+    object SavedEpisodes : Screen(ScreenName.SAVED_EPISODES)
+    object History : Screen(ScreenName.HISTORY)
+
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
     data class StoreDataScreen(val storeData: StoreData? = null) : Screen(ScreenName.STORE_DATA) {
@@ -84,7 +91,6 @@ sealed class Screen (val id: ScreenName) {
         constructor(category: Category) : this(storeData = category.toStoreData())
     }
 
-    object StoreSearch : Screen(ScreenName.STORE_SEARCH)
 
     companion object {
         inline fun <reified T> encodeObject(item: T): String =

@@ -18,7 +18,7 @@ class FollowUseCase @Inject constructor(
 
     fun execute(storePodcast: StorePodcast): Flow<Boolean> = flow {
         // fetch remote podcast data
-        podcastsRepository.followPodcast(feedUrl = storePodcast.feedUrl, updatePodcast = true)
+        podcastsRepository.followPodcast(storePodcast = storePodcast, updatePodcast = true)
         emit(true)
     }
 }

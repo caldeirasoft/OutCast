@@ -9,7 +9,7 @@ import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
 
 sealed class LibraryActions {
     data class OpenPodcastDetail(val podcast: Podcast) : LibraryActions()
-    object OpenNewEpisodesScreen : LibraryActions()
+    object OpenLatestEpisodesScreen : LibraryActions()
     object OpenSavedEpisodesScreen : LibraryActions()
     object OpenHistoryScreen : LibraryActions()
     object ToggleDisplay : LibraryActions()

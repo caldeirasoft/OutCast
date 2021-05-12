@@ -96,7 +96,6 @@ class PodcastsFetcher(
                 .header("User-Agent", USER_AGENT)
                 .build()
             val response: Response = okHttpClient.newCall(request = request).execute()
-            val responseBodyCopy = response.peekBody(Long.MAX_VALUE)
             val responseContent = response.body?.string()
             val xmlContent = responseContent.orEmpty()
             val itunesModel: ITunesChannelData = ITunesParser().parse(xmlContent)
@@ -138,7 +137,7 @@ private fun ITunesChannelData.toPodcastResponse(
         artistId = currentPodcast?.artistId,
         artistUrl = currentPodcast?.artistUrl,
         url = "",
-        category = category,
+        category = currentPodcast?.category,
         artworkUrl = currentPodcast?.artworkUrl ?: image?.url.orEmpty(),
         artworkDominantColor = currentPodcast?.artworkDominantColor,
         copyright = copyright,
@@ -182,6 +181,7 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         mediaUrl = enclosure?.url.orEmpty(),
         mediaType = enclosure?.type.orEmpty(),
         duration = duration?.let { parseDurationString(it) } ?: 0,
+        category = podcast.category,
         podcastEpisodeNumber = episode,
         podcastEpisodeSeason = season,
         podcastEpisodeType = episodeType,

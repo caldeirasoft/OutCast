@@ -28,9 +28,8 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.colors
+import com.caldeirasoft.outcast.ui.util.ComposableFn
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
-import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDateTime
-import com.caldeirasoft.outcast.ui.util.applyTextStyleCustom
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -60,7 +59,7 @@ fun LibraryScreen(
     ) { action ->
         when (action) {
             is LibraryActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.podcast))
-            is LibraryActions.OpenNewEpisodesScreen -> navigateTo(Screen.Inbox)
+            is LibraryActions.OpenLatestEpisodesScreen -> navigateTo(Screen.LatestEpisodes)
             is LibraryActions.OpenSavedEpisodesScreen -> navigateTo(Screen.Inbox)
             is LibraryActions.OpenHistoryScreen -> navigateTo(Screen.Inbox)
             else -> viewModel.submitAction(action)
@@ -165,8 +164,14 @@ private fun LibraryScreen(
                                         LibraryListItem(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable(onClick = { }),
-                                            item = item
+                                                .clickable(onClick = {
+                                                    when (item) {
+                                                        LibraryItemType.LATEST_EPISODES ->
+                                                            actioner(LibraryActions.OpenLatestEpisodesScreen)
+                                                    }
+                                                }),
+                                            item = item,
+                                            state = state,
                                         )
                                     }
                                 else -> {
@@ -203,8 +208,14 @@ private fun LibraryScreen(
                                         LibraryGridItem(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable(onClick = { }),
-                                            item = item
+                                                .clickable(onClick = {
+                                                    when (item) {
+                                                        LibraryItemType.LATEST_EPISODES ->
+                                                            actioner(LibraryActions.OpenLatestEpisodesScreen)
+                                                    }
+                                                }),
+                                            item = item,
+                                            state = state,
                                         )
                                     }
                                 else -> {
@@ -308,6 +319,7 @@ fun PodcastGridItem(
 @Composable
 fun LibraryGridItem(
     item: LibraryItemType,
+    state: LibraryState,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -319,6 +331,9 @@ fun LibraryGridItem(
             maxLines = 2,
             style = MaterialTheme.typography.body1
         )
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            LibraryListItemSecondaryText(item, state)
+        }
         /*Text(
             podcast.artistName,
             modifier = Modifier.fillMaxWidth(),
@@ -363,16 +378,20 @@ private fun PodcastListItem(
 @Composable
 fun LibraryListItem(
     item: LibraryItemType,
+    state: LibraryState,
     modifier: Modifier = Modifier
 ) {
     ListItem(
         modifier = modifier.fillMaxWidth(),
         text = {
-            Text(text = stringResource(id = item.titleId),
+            Text(
+                text = stringResource(id = item.titleId),
                 maxLines = 2
             )
         },
-        secondaryText = {  },
+        secondaryText = {
+            LibraryListItemSecondaryText(item, state)
+        },
         icon = {
             LibraryThumbnail(
                 item = item,
@@ -380,6 +399,7 @@ fun LibraryListItem(
             )
         },
     )
+
 }
 
 @Composable
@@ -409,6 +429,25 @@ private fun LibraryThumbnail(
                     .fillMaxSize(0.5f)
             )
         }
+    }
+}
+
+@Composable
+private fun LibraryListItemSecondaryText(
+    item: LibraryItemType,
+    state: LibraryState,
+) {
+    val context = LocalContext.current
+    when (item) {
+        LibraryItemType.LATEST_EPISODES -> {
+            Text(
+                text = stringResource(
+                    id = R.string.date_last_update_x,
+                    state.newEpisodesUpdatedAt?.formatRelativeDate(context).orEmpty()
+                )
+            )
+        }
+        else -> null
     }
 }
 
