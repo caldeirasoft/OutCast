@@ -14,7 +14,6 @@ import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_SKIP
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_TRIM_SILENCE
 
 class PodcastPreferenceKeys(val feedUrl: String) {
-    val newEpisodes = stringPreferencesKey("$feedUrl:$PREFERENCES_NEW_EPISODES")
     val notifications = booleanPreferencesKey("$feedUrl:$PREFERENCES_NOTIFICATIONS")
     val episodeLimit = stringPreferencesKey("$feedUrl:$PREFERENCES_EPISODE_LIMIT")
     val customPlaybackEffects =

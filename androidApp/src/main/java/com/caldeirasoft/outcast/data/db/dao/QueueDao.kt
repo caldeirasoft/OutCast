@@ -11,25 +11,26 @@ interface QueueDao : EntityDao<Episode> {
     fun getEpisodes(): Flow<List<Episode>>
 
     @Query("""
-        INSERT OR REPLACE INTO queue (feedUrl, guid, queueIndex)
-        SELECT e.feedUrl, e.guid, 0
-        FROM episode e
-        INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
-        WHERE e.feedUrl = :feedUrl
-         AND e.releaseDateTime > :releaseDateTime;
+        INSERT INTO queue (feedUrl, guid, queueIndex)
+        VALUES (:feedUrl, :guid, 0);
     """)
-    suspend fun addRecentEpisodesIntoQueueFirst(feedUrl: String, releaseDateTime: Instant)
+    suspend fun addToQueueNext(feedUrl: String, guid: String)
 
     @Query("""
-        INSERT OR REPLACE INTO queue (feedUrl, guid, queueIndex)
-        SELECT e.feedUrl, e.guid, -1
-        FROM episode e
-        INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
-        WHERE e.feedUrl = :feedUrl
-         AND e.releaseDateTime > :releaseDateTime;
+        INSERT INTO queue (feedUrl, guid, queueIndex)
+        VALUES (:feedUrl, :guid, -1);
     """)
-    suspend fun addRecentEpisodesIntoQueueLast(feedUrl: String, releaseDateTime: Instant)
+    suspend fun addToQueueLast(feedUrl: String, guid: String)
 
-    @Query("DELETE FROM inbox WHERE feedUrl = :feedUrl AND guid = :guid")
-    suspend fun deleteEpisodeWithGuid(feedUrl: String, guid: String)
+    @Query("""
+        INSERT INTO queue (feedUrl, guid, queueIndex)
+        VALUES (:feedUrl, :guid, :queueIndex);
+    """)
+    suspend fun addToQueue(feedUrl: String, guid: String, queueIndex:Int)
+
+    @Query("""
+        DELETE FROM queue
+        WHERE feedUrl = :feedUrl AND guid = :guid;
+    """)
+    suspend fun removeFromQueue(feedUrl: String, guid: String)
 }

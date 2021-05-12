@@ -43,7 +43,8 @@ interface EpisodeDao : EntityDao<Episode> {
     @Query("""
         SELECT e.* FROM episode e
         INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
-        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL
+        LEFT JOIN queue q ON (e.feedUrl = q.feedUrl AND e.guid = q.guid)
+        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL AND q.feedUrl IS NULL
           AND e.releaseDateTime > :releaseDateTime
         ORDER BY e.releaseDateTime DESC
     """)
@@ -51,9 +52,11 @@ interface EpisodeDao : EntityDao<Episode> {
 
     // get latest episodes (unplayed) categories / last 3 months
     @Query("""
-        SELECT DISTINCT e.category FROM episode e
+        SELECT DISTINCT e.category
+        FROM episode e
         INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
-        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL
+        LEFT JOIN queue q ON (e.feedUrl = q.feedUrl AND e.guid = q.guid)
+        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL AND q.feedUrl IS NULL
           AND e.releaseDateTime > :releaseDateTime
     """)
     fun getLatestEpisodesCategories(releaseDateTime: Instant = Clock.System.now().minus(90.days)): Flow<List<Category?>>

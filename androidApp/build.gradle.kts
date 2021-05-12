@@ -5,7 +5,6 @@ plugins {
     kotlin("plugin.serialization") apply true
     kotlin("plugin.parcelize") apply true
     id("dagger.hilt.android.plugin")
-    id("com.squareup.sqldelight") apply true
 }
 
 // get compose version in gradle.properties file
@@ -77,7 +76,6 @@ dependencies {
     api(libs.bundles.stetho)
     api(libs.bundles.retrofit)
     api(libs.bundles.okhttp)
-    api(libs.bundles.sqldelight)
     api(libs.bundles.accompanist)
     api(libs.core.ktx)
     api(libs.appcompat)
@@ -97,12 +95,4 @@ dependencies {
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support
     coreLibraryDesugaring(libs.desugarJdkLibs)
-}
-
-sqldelight {
-    database("Database") {
-        packageName = "com.caldeirasoft.outcast"
-        schemaOutputDirectory = file("build/dbs")
-        dialect = "sqlite:3.24"
-    }
 }

@@ -2,19 +2,16 @@ package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.toPodcast
-import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.episode
-import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
@@ -30,15 +27,14 @@ enum class ScreenName {
     STORE_DATA,
     STORE_SEARCH,
     QUEUE,
-    INBOX,
     PODCAST,
     EPISODE,
     LATEST_EPISODES,
     SAVED_EPISODES,
+    PLAYED_EPISODES,
     MORE,
     PROFILE,
     FAVORITES,
-    HISTORY,
     FILES,
     SETTINGS,
     PODCAST_SETTINGS,
@@ -47,8 +43,6 @@ enum class ScreenName {
 
 sealed class Screen (val id: ScreenName) {
     object Queue : Screen(ScreenName.QUEUE)
-    object Inbox : Screen(ScreenName.INBOX)
-    object Library : Screen(ScreenName.LIBRARY)
     object Profile : Screen(ScreenName.PROFILE)
     data class PodcastScreen(val feedUrl: String, val storePodcast: StorePodcast? = null) : Screen(ScreenName.PODCAST) {
         constructor(podcast: Podcast) : this(
@@ -79,10 +73,9 @@ sealed class Screen (val id: ScreenName) {
         )
     }
 
-    object StoreSearch : Screen(ScreenName.STORE_SEARCH)
     object LatestEpisodes : Screen(ScreenName.LATEST_EPISODES)
     object SavedEpisodes : Screen(ScreenName.SAVED_EPISODES)
-    object History : Screen(ScreenName.HISTORY)
+    object PlayedEpisodes : Screen(ScreenName.PLAYED_EPISODES)
 
     object Settings : Screen(ScreenName.SETTINGS)
     object Statistics : Screen(ScreenName.STATISTICS)
@@ -113,11 +106,6 @@ sealed class BottomNavigationScreen(
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 ) {
-    object Inbox : BottomNavigationScreen(ScreenName.INBOX,
-        R.string.screen_inbox,
-        Icons.Outlined.Inbox,
-        Icons.Filled.Inbox)
-
     object Library : BottomNavigationScreen(ScreenName.LIBRARY,
         R.string.screen_library,
         Icons.Outlined.Subscriptions,
@@ -133,8 +121,5 @@ sealed class BottomNavigationScreen(
         R.string.screen_search,
         Icons.Outlined.Search,
         Icons.Filled.Search)
-
-    object More :
-        BottomNavigationScreen(ScreenName.MORE, R.string.screen_more, Icons.Default.MoreHoriz)
 }
 

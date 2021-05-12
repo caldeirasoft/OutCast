@@ -1,36 +1,27 @@
 package com.caldeirasoft.outcast.data.repository
 
-import com.caldeirasoft.outcast.Database
-import com.caldeirasoft.outcast.db.Episode
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.caldeirasoft.outcast.data.db.dao.QueueDao
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import kotlinx.coroutines.flow.Flow
 
-class QueueRepository(val database: Database) {
+class QueueRepository(val queueDao: QueueDao) {
     fun fetchQueue(): Flow<List<Episode>> =
-        database.queueQueries
-            .selectAll()
-            .asFlow()
-            .mapToList()
+        queueDao.getEpisodes()
 
-    fun addToQueue(episode: Episode, queueIndex: Long) {
-        database.queueQueries
-            addToQueue(episode = episode, queueIndex = queueIndex)
+    suspend fun addToQueue(episode: Episode, queueIndex: Int) {
+        queueDao.addToQueue(feedUrl = episode.feedUrl, guid = episode.guid, queueIndex = queueIndex)
     }
 
-    fun addToQueueNext(episode: Episode) {
-        database.queueQueries
-            addToQueueNext(episode = episode)
+    suspend fun addToQueueNext(episode: Episode) {
+        queueDao.addToQueueNext(feedUrl = episode.feedUrl, guid = episode.guid)
     }
 
-    fun addToQueueLast(episode: Episode) {
-        database.queueQueries
-            addToQueueLast(episode = episode)
+    suspend fun addToQueueLast(episode: Episode) {
+        queueDao.addToQueueLast(feedUrl = episode.feedUrl, guid = episode.guid)
     }
 
-    fun removeFromQueue(id: Long) {
-        database.queueQueries
-            removeFromQueue(id = id)
+    suspend fun removeFromQueue(episode: Episode) {
+        queueDao.removeFromQueue(feedUrl = episode.feedUrl, guid = episode.guid)
     }
 
 

@@ -80,6 +80,7 @@ private fun getPreferenceItems(
     podcastPreferenceKeys: PodcastPreferenceKeys,
     actioner : (PodcastActions) -> Unit,
 ) = listOf(
+    /*
     SingleListPreferenceItem(
         title = stringResource(R.string.settings_new_episodes),
         summary = stringResource(R.string.settings_new_episodes_desc),
@@ -93,6 +94,7 @@ private fun getPreferenceItems(
             "ARCHIVE" to stringResource(R.string.settings_new_episodes_archive)
         )
     ),
+     */
     SwitchPreferenceItem(
         title = stringResource(R.string.settings_notifications),
         summary = stringResource(R.string.settings_notifications_desc),

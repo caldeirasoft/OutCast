@@ -41,10 +41,7 @@ class UpdatePodcastDataUseCase @Inject constructor(
                 if (items.isNotEmpty()) {
                     val podcastLookup = items.firstOrNull() as? StorePodcast
                     if (podcastLookup != null)
-                        needUpdate = podcastsRepository.updatePodcastReleaseDate(
-                            feedUrl = podcast.feedUrl,
-                            podcastLookup = podcastLookup
-                        )
+                        needUpdate = podcastsRepository.updatePodcastReleaseDate(podcastLookup)
                 }
             } else needUpdate = true
         }

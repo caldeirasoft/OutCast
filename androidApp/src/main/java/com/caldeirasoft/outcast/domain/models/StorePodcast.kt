@@ -2,9 +2,6 @@
 package com.caldeirasoft.outcast.domain.models
 
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.enums.NewEpisodesAction
-import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant

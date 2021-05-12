@@ -28,7 +28,6 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.theme.colors
-import com.caldeirasoft.outcast.ui.util.ComposableFn
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.coil.rememberCoilPainter
@@ -60,8 +59,8 @@ fun LibraryScreen(
         when (action) {
             is LibraryActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.podcast))
             is LibraryActions.OpenLatestEpisodesScreen -> navigateTo(Screen.LatestEpisodes)
-            is LibraryActions.OpenSavedEpisodesScreen -> navigateTo(Screen.Inbox)
-            is LibraryActions.OpenHistoryScreen -> navigateTo(Screen.Inbox)
+            is LibraryActions.OpenSavedEpisodesScreen -> navigateTo(Screen.SavedEpisodes)
+            is LibraryActions.OpenPlayedEpisodesScreen -> navigateTo(Screen.PlayedEpisodes)
             else -> viewModel.submitAction(action)
         }
     }

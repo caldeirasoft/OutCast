@@ -27,7 +27,6 @@ class PodcastViewModel @Inject constructor(
     private val loadPodcastFromDbUseCase: LoadPodcastFromDbUseCase,
     private val loadPodcastEpisodesPagingDataUseCase: LoadPodcastEpisodesPagingDataUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
-    private val updatePodcastDataUseCase: UpdatePodcastDataUseCase,
     private val followUseCase: FollowUseCase,
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
@@ -53,10 +52,12 @@ class PodcastViewModel @Inject constructor(
         loadPodcastFromDbUseCase.execute(initialState.feedUrl)
             .onEach {
                 // 1rst launch
-                if ((it != null) && (!isInitialized)) // podcast in db : update if necessary
-                    updatePodcastDataUseCase
+                if ((it != null) && (!isInitialized)) {
+                    // podcast in db : update if necessary
+                    fetchPodcastDataUseCase
                         .execute(it)
                         .launchIn(viewModelScope)
+                }
                 isInitialized = true
             }
             .filterNotNull()

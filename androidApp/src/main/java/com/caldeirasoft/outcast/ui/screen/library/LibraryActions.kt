@@ -11,7 +11,7 @@ sealed class LibraryActions {
     data class OpenPodcastDetail(val podcast: Podcast) : LibraryActions()
     object OpenLatestEpisodesScreen : LibraryActions()
     object OpenSavedEpisodesScreen : LibraryActions()
-    object OpenHistoryScreen : LibraryActions()
+    object OpenPlayedEpisodesScreen : LibraryActions()
     object ToggleDisplay : LibraryActions()
     object OpenSortByBottomSheet : LibraryActions()
     data class ChangeSort(val sortBy: LibrarySort) : LibraryActions()

@@ -485,11 +485,5 @@ private object EpisodeDefaults {
 
         }
     }
-
-    enum class EpisodeSpot {
-        QUEUE,
-        INBOX,
-        LIBRARY
-    }
 }
 

@@ -6,24 +6,21 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
-import com.caldeirasoft.outcast.data.db.dao.InboxDao
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.Inbox
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.Queue
 import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 
 @androidx.room.Database(
-    entities = [Podcast::class, Episode::class, Inbox::class, Queue::class],
-    version = 1
+    entities = [Podcast::class, Episode::class, Queue::class],
+    version = 2
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDb : RoomDatabase() {
     abstract fun podcastDao(): PodcastDao
     abstract fun episodeDao(): EpisodeDao
-    abstract fun inboxDao(): InboxDao
     abstract fun queueDao(): QueueDao
 
     companion object {
@@ -43,6 +40,7 @@ abstract class OutcastDb : RoomDatabase() {
         private val DB_CALLBACK = object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
+                // insert into queue move queueIndex
                 db.execSQL(
                     """
                         CREATE TRIGGER insert_queue_update_index
@@ -54,17 +52,7 @@ abstract class OutcastDb : RoomDatabase() {
                     """.trimIndent()
                 )
 
-                db.execSQL(
-                    """
-                        CREATE TRIGGER add_to_queue_remove_from_inbox
-                        AFTER INSERT ON queue
-                        BEGIN
-                            DELETE FROM inbox
-                             WHERE feedUrl = new.feedUrl AND guid = new.guid;
-                        END;
-                    """.trimIndent()
-                )
-
+                // insert into queue last (queueIndex = -1) => update queueIndex
                 db.execSQL(
                     """
                         CREATE TRIGGER insert_queue_last
@@ -78,6 +66,7 @@ abstract class OutcastDb : RoomDatabase() {
                     """.trimIndent()
                 )
 
+                // update queueIndex after deletion
                 db.execSQL(
                     """
                         CREATE TRIGGER delete_queue_update_index
@@ -85,18 +74,6 @@ abstract class OutcastDb : RoomDatabase() {
                         BEGIN
                             UPDATE queue SET queueIndex = queueIndex - 1
                             WHERE queueIndex > old.queueIndex;
-                        END;
-                    """.trimIndent()
-                )
-
-                db.execSQL(
-                    """
-                        CREATE TRIGGER unfollow_podcast_delete_inbox
-                        AFTER UPDATE OF isFollowed ON podcast
-                        FOR EACH ROW WHEN new.isFollowed = 0
-                        BEGIN
-                            DELETE FROM inbox
-                             WHERE feedUrl = new.feedUrl;
                         END;
                     """.trimIndent()
                 )

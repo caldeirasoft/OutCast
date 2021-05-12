@@ -28,8 +28,6 @@ kotlin {
                 api(libs.coroutines.core)
                 api(libs.kotlinx.datetime)
                 api(libs.kotlinx.serialization)
-                api(libs.sqldelight.runtime)
-                api(libs.sqldelight.coroutines)
             }
         }
         val commonTest by getting {
@@ -44,7 +42,6 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api(libs.coroutines.android)
-                api(libs.sqldelight.android)
                 //implementation(KotlinX.coroutines.android)
             }
         }

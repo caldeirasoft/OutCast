@@ -33,9 +33,13 @@ class LatestEpisodesViewModel @Inject constructor(
         loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
             .onEach { Timber.d("LoadLatestEpisodesPagingDataUseCase : $it episodes") }
             .map { pagingData ->
-                pagingData.filter { episode ->
-                    episode.category == state.value.category
-                }
+                state.value.category
+                    ?.let {
+                        pagingData.filter { episode ->
+                            episode.category == state.value.category
+                        }
+                    }
+                    ?: pagingData
             }
             .map { pagingData ->
                 pagingData.map {
