@@ -5,14 +5,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.podcast
-import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
-import com.caldeirasoft.outcast.ui.navigation.getObjectNotNull
-import com.caldeirasoft.outcast.ui.screen.MvieViewModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -30,7 +30,7 @@ class PodcastViewModel @Inject constructor(
     private val followUseCase: FollowUseCase,
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
-) : MvieViewModel<PodcastState, PodcastEvent, PodcastActions>(
+) : EpisodeListViewModel<PodcastState, PodcastEvent>(
     initialState = PodcastState(
         feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
         isLoading = true
@@ -43,8 +43,9 @@ class PodcastViewModel @Inject constructor(
     val dataStore = loadSettingsUseCase.dataStore
 
     @OptIn(FlowPreview::class)
-    val episodes: Flow<PagingData<Episode>> =
+    override val episodes: Flow<PagingData<EpisodeUiModel>> =
         loadPodcastEpisodesPagingDataUseCase.execute(initialState.feedUrl)
+            .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
             .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it} episodes") }
             .cachedIn(viewModelScope)
 
@@ -77,20 +78,7 @@ class PodcastViewModel @Inject constructor(
             }
     }
 
-    override suspend fun performAction(action: PodcastActions) = when(action) {
-        is PodcastActions.SetPodcast -> setPodcast(action.storePodcast)
-        is PodcastActions.OpenEpisodeDetail -> openEpisodeDetails(action.episode)
-        is PodcastActions.FollowPodcast -> follow()
-        is PodcastActions.UnfollowPodcast -> unfollow()
-        is PodcastActions.ShowAllEpisodes -> showAllEpisodes()
-        is PodcastActions.OpenPodcastContextMenu -> openPodcastContextMenu()
-        is PodcastActions.OpenSettings -> emitEvent(PodcastEvent.OpenSettings)
-        is PodcastActions.OpenEpisodeContextMenu ->
-            emitEvent(PodcastEvent.OpenEpisodeContextMenu(action.episode))
-        else -> Unit
-    }
-
-    private fun setPodcast(storePodcast: StorePodcast) {
+    fun setPodcast(storePodcast: StorePodcast) {
         if (!isPodcastSet) {
             fetchPodcastDataUseCase
                 .execute(storePodcast.podcast)
@@ -107,7 +95,7 @@ class PodcastViewModel @Inject constructor(
         }
     }
 
-    private suspend fun openPodcastContextMenu() {
+    suspend fun openPodcastContextMenu() {
         withState { state ->
             state.podcast?.let {
                 emitEvent(PodcastEvent.OpenPodcastContextMenu(it))
@@ -115,25 +103,19 @@ class PodcastViewModel @Inject constructor(
         }
     }
 
-    private suspend fun openEpisodeDetails(episode: Episode) {
+    suspend fun openEpisodeDetails(episode: Episode) {
         withState {
             emitEvent(PodcastEvent.OpenEpisodeDetail(episode))
         }
     }
 
-    private fun showAllEpisodes() {
-        viewModelScope.setState {
-            copy(showAllEpisodes = true)
-        }
-    }
-
-    private fun follow() {
+    fun follow() {
         followUseCase.execute(initialState.feedUrl)
             .onStart { setState { copy(followingStatus = FollowStatus.FOLLOWING) } }
             .launchIn(viewModelScope)
     }
 
-    private fun unfollow() {
+    fun unfollow() {
         viewModelScope.launch {
             unfollowUseCase.execute(feedUrl = initialState.feedUrl)
         }

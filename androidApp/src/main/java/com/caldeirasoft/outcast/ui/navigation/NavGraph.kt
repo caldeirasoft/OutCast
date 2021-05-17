@@ -18,7 +18,7 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.latest.LatestEpisodesScreen
+import com.caldeirasoft.outcast.ui.screen.episodes.base.LatestEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen

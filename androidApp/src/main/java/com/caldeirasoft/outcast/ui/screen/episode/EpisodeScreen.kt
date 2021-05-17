@@ -25,13 +25,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -48,16 +46,15 @@ fun EpisodeScreen(
     navigateBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    EpisodeScreen(state = state) { action ->
-        when(action) {
-            EpisodeActions.NavigateUp -> navigateBack()
-            else -> viewModel.submitAction(action)
-        }
-    }
+    EpisodeScreen(
+        state = state,
+        onPodcastClick = viewModel::openPodcastDetails,
+        navigateBack = navigateBack
+    )
 
     storeEpisode?.let {
         LaunchedEffect(storeEpisode) {
-            viewModel.submitAction(EpisodeActions.SetEpisode(it))
+            viewModel.setEpisode(it)
         }
     }
 
@@ -76,10 +73,9 @@ fun EpisodeScreen(
 @Composable
 fun EpisodeScreen(
     state: EpisodeViewState,
-    actioner: (EpisodeActions) -> Unit,
+    navigateBack: () -> Unit,
+    onPodcastClick: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
     val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
 
@@ -96,7 +92,7 @@ fun EpisodeScreen(
                 EpisodeExpandedHeader(
                     state = state,
                     listState = listState,
-                    actioner = actioner
+                    onPodcastClick = onPodcastClick,
                 )
             }
 
@@ -146,7 +142,7 @@ fun EpisodeScreen(
         EpisodeTopAppBar(
             state = state,
             listState = listState,
-            actioner = actioner
+            navigateBack = navigateBack,
         )
     }
 }
@@ -155,7 +151,7 @@ fun EpisodeScreen(
 private fun EpisodeExpandedHeader(
     state: EpisodeViewState,
     listState: LazyListState,
-    actioner: (EpisodeActions) -> Unit,
+    onPodcastClick: () -> Unit,
 ) {
     val dominantColor = MaterialTheme.colors.primary
 
@@ -237,9 +233,7 @@ private fun EpisodeExpandedHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 4.dp)
-                    .clickable {
-                        actioner(EpisodeActions.OpenPodcastDetail)
-                    },
+                    .clickable(onClick = onPodcastClick),
                 style = MaterialTheme.typography.body1,
                 maxLines = 2,
                 color = dominantColor
@@ -253,7 +247,7 @@ private fun EpisodeExpandedHeader(
 fun EpisodeTopAppBar(
     state: EpisodeViewState,
     listState: LazyListState,
-    actioner: (EpisodeActions) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val appBarAlpha = listState.topAppBarAlpha
     val backgroundColor: Color = Color.blendARGB(
@@ -291,7 +285,7 @@ fun EpisodeTopAppBar(
                 }
             },
             navigationIcon = {
-                IconButton(onClick = { actioner(EpisodeActions.NavigateUp) }) {
+                IconButton(onClick = navigateBack) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = null)
                 }
             },

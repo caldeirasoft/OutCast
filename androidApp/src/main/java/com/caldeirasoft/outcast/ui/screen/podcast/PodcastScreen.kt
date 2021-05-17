@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -34,7 +33,7 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsBottomSheet
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.*
 import com.caldeirasoft.outcast.ui.util.*
@@ -63,26 +62,60 @@ fun PodcastScreen(
 
     storePodcast?.let {
         LaunchedEffect(storePodcast) {
-            viewModel.submitAction(PodcastActions.SetPodcast(it))
+            viewModel.setPodcast(it)
         }
     }
 
     PodcastScreen(
         state = state,
         scaffoldState = scaffoldState,
-        drawerState = drawerState,
-        lazyPagingItems = lazyPagingItems
-    ) { action ->
-        when (action) {
-            is PodcastActions.NavigateUp -> navigateBack()
-            is PodcastActions.OpenEpisodeDetail -> navigateTo(Screen.EpisodeScreen(action.episode.feedUrl, action.episode.guid, true))
-            is PodcastActions.OpenStoreDataDetail -> navigateTo(Screen.StoreDataScreen(action.storeData))
-            is PodcastActions.OpenCategoryDataDetail -> navigateTo(Screen.StoreDataScreen(action.category))
-            else -> viewModel.submitAction(action)
-        }
-    }
+        lazyPagingItems = lazyPagingItems,
+        navigateBack = navigateBack,
+        navigateTo = navigateTo,
+        onFollowPodcast = viewModel::follow,
+        onUnfollowPodcast = viewModel::unfollow,
+        onMoreButtonClick = {
 
-    ObsertUiEffects(viewModel = viewModel,
+        },
+        onEpisodeItemMoreButtonClick = { episode ->
+            coroutineScope.OpenBottomSheetMenu(
+                header = { // header : episode
+                    EpisodeItem(
+                        episode = episode,
+                        showActions = false,
+                    )
+                },
+                items = listOf(
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_play_next,
+                        icon = Icons.Default.QueuePlayNext,
+                        onClick = { viewModel.playNext(episode) },
+                    ),
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_play_last,
+                        icon = Icons.Default.AddToQueue,
+                        onClick = { viewModel.playLast(episode) },
+                    ),
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_save_episode,
+                        icon = Icons.Default.FavoriteBorder,
+                        onClick = { viewModel.saveEpisode(episode) },
+                    ),
+                    BottomSheetSeparator,
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_share_episode,
+                        icon = Icons.Default.Share,
+                        onClick = { viewModel.shareEpisode(episode) },
+                    )
+                ),
+                drawerState = drawerState,
+                drawerContent = drawerContent
+            )
+        }
+    )
+
+    ObserveUiEffects(
+        viewModel = viewModel,
         state = state,
         navigateTo = navigateTo,
         navigateBack = navigateBack
@@ -95,9 +128,13 @@ fun PodcastScreen(
 private fun PodcastScreen(
     state: PodcastState,
     scaffoldState: ScaffoldState,
-    lazyPagingItems: LazyPagingItems<Episode>,
-    drawerState: ModalBottomSheetState,
-    actioner : (PodcastActions) -> Unit,
+    lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+    onFollowPodcast: () -> Unit,
+    onUnfollowPodcast: () -> Unit,
+    onMoreButtonClick: () -> Unit,
+    onEpisodeItemMoreButtonClick: (Episode) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -156,9 +193,7 @@ private fun PodcastScreen(
                                 state = state,
                                 collapsingToolbarState = collapsingToolbarState,
                                 openStoreDataDetail = {
-                                    actioner(
-                                        PodcastActions.OpenStoreDataDetail(it)
-                                    )
+                                    navigateTo(Screen.StoreDataScreen(it))
                                 }
                             )
                         }
@@ -175,7 +210,7 @@ private fun PodcastScreen(
                             .pin(),
                         state = state,
                         collapsingToolbarState = collapsingToolbarState,
-                        navigateUp = { actioner(PodcastActions.NavigateUp) }
+                        navigateUp = navigateBack
                     )
                 }
                 val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
@@ -190,9 +225,9 @@ private fun PodcastScreen(
                         podcastData?.let {
                             PodcastActionButtons(
                                 state = state,
-                                onFollowPodcast = { actioner(PodcastActions.FollowPodcast) },
-                                onUnfollowPodcast = { actioner(PodcastActions.UnfollowPodcast) },
-                                onOpenPodcastContextMenu = { actioner(PodcastActions.OpenPodcastContextMenu) }
+                                onFollowPodcast = onFollowPodcast,
+                                onUnfollowPodcast = onUnfollowPodcast,
+                                onOpenPodcastContextMenu = onMoreButtonClick
                             )
                         }
                     }
@@ -211,11 +246,7 @@ private fun PodcastScreen(
                             ) {
                                 ChipButton(selected = false,
                                     onClick = {
-                                        actioner(
-                                            PodcastActions.OpenCategoryDataDetail(
-                                                genre
-                                            )
-                                        )
+                                        navigateTo(Screen.StoreDataScreen(genre))
                                     })
                                 {
                                     Text(text = genre.name)
@@ -256,23 +287,19 @@ private fun PodcastScreen(
                     }
 
                     // episodes
-                    items(lazyPagingItems = lazyPagingItems) { episode ->
-                        episode?.let {
-                            PodcastEpisodeItem(
-                                episode = episode,
-                                onEpisodeClick = {
-                                    actioner(
-                                        PodcastActions.OpenEpisodeDetail(episode)
+                    items(lazyPagingItems = lazyPagingItems) { uiModel ->
+                        uiModel?.let {
+                            when(uiModel) {
+                                is EpisodeUiModel.EpisodeItem -> {
+                                    PodcastEpisodeItem(
+                                        episode = uiModel.episode,
+                                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(uiModel.episode)) },
+                                        onContextMenuClick = { onEpisodeItemMoreButtonClick(uiModel.episode) }
                                     )
-                                },
-                                onContextMenuClick = {
-                                    actioner(
-                                        PodcastActions.OpenEpisodeContextMenu(episode)
-                                    )
+                                    Divider()
                                 }
-                            )
+                            }
                         }
-                        Divider()
                     }
 
                     lazyPagingItems
@@ -391,97 +418,6 @@ private fun PodcastHeader(
         }
     }
 }
-
-@Composable
-private fun ObsertUiEffects(
-    viewModel: PodcastViewModel,
-    state: PodcastState,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
-) {
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is PodcastEvent.OpenSettings -> {
-                    drawerContent.updateContent {
-                        PodcastSettingsBottomSheet(
-                            state = state,
-                            dataStore = viewModel.dataStore
-                        ) { action ->
-                            when (action) {
-                                is PodcastActions.NavigateUp -> { }
-                                /*coroutineScope.launch { drawerState.hide() }*/
-                                else -> viewModel.submitAction(action)
-                            }
-                        }
-                    }
-                    delay(500)
-                    drawerState.show()
-                }
-                is PodcastEvent.OpenPodcastContextMenu -> {
-                    OpenBottomSheetMenu(
-                        header = { // header : podcast
-                            PodcastContextMenuHeader(podcast = event.podcast)
-                        },
-                        items = listOf(
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_settings,
-                                icon = Icons.Default.Settings,
-                                onClick = { viewModel.submitAction(PodcastActions.OpenSettings) },
-                            ),
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_share_podcast,
-                                icon = Icons.Default.Share,
-                                onClick = { viewModel.submitAction(PodcastActions.OpenSettings) },
-                            )
-                        ),
-                        drawerState = drawerState,
-                        drawerContent = drawerContent
-                    )
-                }
-                is PodcastEvent.OpenEpisodeContextMenu -> {
-                    OpenBottomSheetMenu(
-                        header = { // header : episode
-                            EpisodeItem(
-                                episode = event.episode,
-                                showActions = false,
-                            )
-                        },
-                        items = listOf(
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_play_next,
-                                icon = Icons.Default.QueuePlayNext,
-                                onClick = { viewModel.submitAction(PodcastActions.PlayNextEpisode(event.episode)) },
-                            ),
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_play_last,
-                                icon = Icons.Default.AddToQueue,
-                                onClick = { viewModel.submitAction(PodcastActions.PlayLastEpisode(event.episode)) },
-                            ),
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_save_episode,
-                                icon = Icons.Default.FavoriteBorder,
-                                onClick = { viewModel.submitAction(PodcastActions.SaveEpisode(event.episode)) },
-                            ),
-                            BottomSheetSeparator,
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_share_episode,
-                                icon = Icons.Default.Share,
-                                onClick = { viewModel.submitAction(PodcastActions.ShareEpisode(event.episode)) },
-                            )
-                        ),
-                        drawerState = drawerState,
-                        drawerContent = drawerContent
-                    )
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
 private fun PodcastScreenTopAppBar(
@@ -832,50 +768,19 @@ fun PodcastEpisodesLoadingScreen() {
 }
 
 @Composable
-private fun PodcastContextMenuHeader(
-    podcast: Podcast,
-) {
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        text = {
-            Text(
-                text = podcast.name,
-                maxLines = 1
-            )
-        },
-        secondaryText = { Text(podcast.artistName) },
-        icon = {
-            PodcastThumbnail(
-                data = podcast.artworkUrl,
-                modifier = Modifier.size(PodcastDefaults.SmallThumbnailSize),
-            )
-        },
-    )
-}
-
-
-@Composable
-private fun EpisodeContextMenuHeader(
+private fun ObserveUiEffects(
+    viewModel: PodcastViewModel,
     state: PodcastState,
-    episode: Episode,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
 ) {
-    // header : episode
-    ListItem(
-        modifier = Modifier.fillMaxWidth(),
-        text = {
-            Text(
-                text = episode.name,
-                maxLines = 1
-            )
-        },
-        secondaryText = { Text(episode.description.orEmpty(), maxLines = 2) },
-        icon = {
-            PodcastThumbnail(
-                data = episode.artworkUrl,
-                modifier = Modifier.size(PodcastDefaults.ThumbnailSize),
-            )
-        },
-    )
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+            }
+        }
+    }
 }

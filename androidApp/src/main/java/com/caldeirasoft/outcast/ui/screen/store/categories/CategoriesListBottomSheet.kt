@@ -11,7 +11,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -21,12 +20,8 @@ import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.common.Constants.Companion.DEFAULT_GENRE
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
-import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataActions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.launch
 
 enum class StoreGenreItem(
     val genreId: Int,
@@ -54,13 +49,14 @@ enum class StoreGenreItem(
     True_Crime(1488, R.string.store_genre_1488, R.drawable.ic_handcuffs)
 }
 
-@FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
+@OptIn(FlowPreview::class)
 fun CategoriesListBottomSheet(
     categories: List<StoreCategory>,
     selectedCategory: StoreCategory,
-    actioner : (StoreDataActions) -> Unit,
+    navigateUp: () -> Unit,
+    onCategorySelected: (StoreCategory) -> Unit
 ) {
     val scrollState = rememberScrollState(0)
     Column()
@@ -70,7 +66,7 @@ fun CategoriesListBottomSheet(
                 Text(text = stringResource(id = R.string.store_tab_categories))
             },
             navigationIcon = {
-                IconButton(onClick = { actioner(StoreDataActions.NavigateUp) }) {
+                IconButton(onClick = navigateUp) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             },
@@ -92,8 +88,8 @@ fun CategoriesListBottomSheet(
                                 category = itemContent,
                                 selected = selectedCategory == itemContent,
                                 onCategorySelected = {
-                                    actioner(StoreDataActions.SelectCategory(itemContent))
-                                    actioner(StoreDataActions.NavigateUp)
+                                    onCategorySelected(it)
+                                    navigateUp()
                                 }
                             )
                             Divider()

@@ -1,11 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.library
 
-import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.store.StoreData
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
 
 sealed class LibraryActions {
     data class OpenPodcastDetail(val podcast: Podcast) : LibraryActions()

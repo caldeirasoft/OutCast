@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes.base
+package com.caldeirasoft.outcast.ui.screen.episodes
 
 import androidx.datastore.preferences.core.Preferences
 import com.caldeirasoft.outcast.data.db.entities.Episode

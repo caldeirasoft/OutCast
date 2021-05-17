@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -13,8 +12,7 @@ import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStorePagingDataUseCase
 import com.caldeirasoft.outcast.ui.navigation.getObject
-import com.caldeirasoft.outcast.ui.screen.MvieViewModel
-import com.caldeirasoft.outcast.ui.screen.store.base.FollowViewModel
+import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -30,8 +28,7 @@ class StoreDataViewModel @Inject constructor(
     private val loadStorePagingDataUseCase: LoadStorePagingDataUseCase,
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
     val followUseCase: FollowUseCase,
-    val podcastDao: PodcastDao
-) : MvieViewModel<StoreDataState, StoreDataEvent, StoreDataActions>(
+) : BaseViewModelEvents<StoreDataState, StoreDataEvent>(
     initialState = StoreDataState(data = savedStateHandle.getObject("storeData")))
 {
 
@@ -79,13 +76,6 @@ class StoreDataViewModel @Inject constructor(
             .flattenMerge()
             .cachedIn(viewModelScope)
 
-    override suspend fun performAction(action: StoreDataActions) = when(action){
-        is StoreDataActions.ClearNotificationNewVersionAvailable -> clearNewVersionNotification()
-        is StoreDataActions.FollowPodcast -> followPodcast(action.storePodcast)
-        is StoreDataActions.OpenCategories -> openCategoriesDialog()
-        is StoreDataActions.SelectCategory -> selectCategoryFilter(action.category)
-        else -> Unit
-    }
 
     private fun clearNewVersionNotification() {
         viewModelScope.setState {
@@ -93,7 +83,7 @@ class StoreDataViewModel @Inject constructor(
         }
     }
 
-    private fun followPodcast(item: StorePodcast) {
+    fun followPodcast(item: StorePodcast) {
         followUseCase.execute(item)
             .onStart { setPodcastFollowLoading(item, true) }
             .catch { setPodcastFollowLoading(item, false) }
@@ -108,13 +98,13 @@ class StoreDataViewModel @Inject constructor(
         withState {
             emitEvent(StoreDataEvent.OpenCategories(
                 categories = it.categories,
-                selectedCategoryId = it.currentCategoryId!!
+                selectedCategoryId = it.currentCategoryId
             ))
         }
     }
 
-    private suspend fun selectCategoryFilter(selectedCategory: StoreCategory) {
-        setState {
+    fun selectCategoryFilter(selectedCategory: StoreCategory) {
+        viewModelScope.setState {
             copy(
                 currentCategoryId = selectedCategory.id,
                 url = selectedCategory.url

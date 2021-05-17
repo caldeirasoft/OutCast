@@ -18,11 +18,17 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
+import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
-import com.caldeirasoft.outcast.ui.components.foundation.FilterChipGroup
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
+import com.caldeirasoft.outcast.ui.screen.episodes.LatestEpisodesViewModel
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
 import com.caldeirasoft.outcast.ui.util.ifLoading
@@ -32,7 +38,6 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import timber.log.Timber
 
@@ -40,40 +45,95 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 @Composable
 fun EpisodesScreen(
-    viewModel: EpisodesViewModel,
+    viewModel: EpisodeListViewModel<EpisodesState, EpisodesEvent>,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
+    onCategoryFilterClick: ((Category?) -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsState()
     val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
+    val coroutineScope = rememberCoroutineScope()
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
 
     EpisodesScreen(
         state = state,
-        lazyPagingItems = lazyPagingItems
-    ) { action ->
-        when (action) {
-            is EpisodesActions.NavigateUp -> navigateBack()
-            is EpisodesActions.OpenEpisodeDetail ->
-                navigateTo(Screen.EpisodeScreen(
-                    action.episode.feedUrl,
-                    action.episode.guid,
-                    false))
-            else -> viewModel.submitAction(action)
+        lazyPagingItems = lazyPagingItems,
+        navigateTo = navigateTo,
+        navigateBack = navigateBack,
+        onCategoryFilterClick = onCategoryFilterClick,
+        onEpisodeItemMoreButtonClick = { episode ->
+            coroutineScope.OpenBottomSheetMenu(
+                header = { // header : episode
+                    EpisodeItem(
+                        episode = episode,
+                        showActions = false,
+                    )
+                },
+                items = listOf(
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_play_next,
+                        icon = Icons.Default.QueuePlayNext,
+                        onClick = { viewModel.playNext(episode) },
+                    ),
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_play_last,
+                        icon = Icons.Default.AddToQueue,
+                        onClick = { viewModel.playLast(episode) },
+                    ),
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_save_episode,
+                        icon = Icons.Default.FavoriteBorder,
+                        onClick = { viewModel.saveEpisode(episode) },
+                    ),
+                    BottomSheetSeparator,
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_share_episode,
+                        icon = Icons.Default.Share,
+                        onClick = { viewModel.shareEpisode(episode) },
+                    )
+                ),
+                drawerState = drawerState,
+                drawerContent = drawerContent
+            )
+        }
+    )
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is EpisodesEvent.RefreshList ->
+                    lazyPagingItems.refresh()
+            }
         }
     }
+}
 
-    ObsertUiEffects(
+@FlowPreview
+@ExperimentalCoroutinesApi
+@Composable
+fun LatestEpisodesScreen(
+    viewModel: LatestEpisodesViewModel,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+) {
+    EpisodesScreen(
         viewModel = viewModel,
-        lazyPagingItems = lazyPagingItems
+        navigateTo = navigateTo,
+        navigateBack = navigateBack,
+        onCategoryFilterClick = viewModel::filterByCategory
     )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun EpisodesScreen(
+fun EpisodesScreen(
     state: EpisodesState,
-    lazyPagingItems: LazyPagingItems<EpisodesUiModel>,
-    actioner : (EpisodesActions) -> Unit,
+    lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+    onEpisodeItemMoreButtonClick: (Episode) -> Unit,
+    onCategoryFilterClick: ((Category?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     Scaffold(modifier = Modifier) {
@@ -136,7 +196,7 @@ private fun EpisodesScreen(
                         ChipGroup(
                             selectedValue = state.category,
                             values = state.categories,
-                            onClick = { actioner(EpisodesActions.FilterByCategory(it)) }) {
+                            onClick = { category -> onCategoryFilterClick?.invoke(category) }) {
                             Text(text = it.text)
                         }
                     }
@@ -144,23 +204,19 @@ private fun EpisodesScreen(
                     items(lazyPagingItems = lazyPagingItems) { uiModel ->
                         uiModel?.let {
                             when(uiModel) {
-                                is EpisodesUiModel.EpisodeItem -> {
+                                is EpisodeUiModel.EpisodeItem -> {
                                     EpisodeItem(
                                         episode = uiModel.episode,
                                         onEpisodeClick = {
-                                            actioner(
-                                                EpisodesActions.OpenEpisodeDetail(uiModel.episode)
-                                            )
+                                            navigateTo(Screen.EpisodeScreen(uiModel.episode))
                                         },
                                         onContextMenuClick = {
-                                            actioner(
-                                                EpisodesActions.OpenEpisodeContextMenu(uiModel.episode)
-                                            )
+                                            onEpisodeItemMoreButtonClick(uiModel.episode)
                                         }
                                     )
                                     Divider()
                                 }
-                                is EpisodesUiModel.SeparatorItem ->
+                                is EpisodeUiModel.SeparatorItem ->
                                     Text(text = uiModel.date.formatRelativeDate(context),
                                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                         style = MaterialTheme.typography.body2
@@ -208,59 +264,5 @@ private fun EpisodesTopAppBar(
 
         if (collapsingToolbarState.progress == 0f)
             Divider()
-    }
-}
-
-@OptIn(InternalCoroutinesApi::class)
-@Composable
-private fun ObsertUiEffects(
-    viewModel: EpisodesViewModel,
-    lazyPagingItems: LazyPagingItems<*>
-) {
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is EpisodesEvent.RefreshList ->
-                    lazyPagingItems.refresh()
-                is EpisodesEvent.OpenEpisodeContextMenu -> {
-                    OpenBottomSheetMenu(
-                        header = { // header : episode
-                            EpisodeItem(
-                                episode = event.episode,
-                                showActions = false,
-                            )
-                        },
-                        items = listOf(
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_play_next,
-                                icon = Icons.Default.QueuePlayNext,
-                                onClick = { viewModel.submitAction(EpisodesActions.PlayNextEpisode(event.episode)) },
-                            ),
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_play_last,
-                                icon = Icons.Default.AddToQueue,
-                                onClick = { viewModel.submitAction(EpisodesActions.PlayLastEpisode(event.episode)) },
-                            ),
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_save_episode,
-                                icon = Icons.Default.FavoriteBorder,
-                                onClick = { viewModel.submitAction(EpisodesActions.SaveEpisode(event.episode)) },
-                            ),
-                            BottomSheetSeparator,
-                            BottomSheetMenuItem(
-                                titleId = R.string.action_share_episode,
-                                icon = Icons.Default.Share,
-                                onClick = { viewModel.submitAction(EpisodesActions.ShareEpisode(event.episode)) },
-                            )
-                        ),
-                        drawerState = drawerState,
-                        drawerContent = drawerContent
-                    )
-                }
-            }
-        }
     }
 }

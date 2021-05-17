@@ -24,9 +24,7 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResource
 import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResourceZero
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceScreen
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastActions
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastState
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
@@ -35,7 +33,6 @@ import kotlinx.coroutines.launch
 fun PodcastSettingsBottomSheet(
     state: PodcastState,
     dataStore: DataStore<Preferences>,
-    actioner : (PodcastActions) -> Unit,
 ) {
     val context = LocalContext.current.applicationContext
     val listState = rememberLazyListState(0)
@@ -68,7 +65,6 @@ fun PodcastSettingsBottomSheet(
             items = getPreferenceItems(
                 context = context,
                 podcastPreferenceKeys = podcastPreferenceKeys,
-                actioner = actioner
             )
         )
     }
@@ -78,7 +74,6 @@ fun PodcastSettingsBottomSheet(
 private fun getPreferenceItems(
     context: Context,
     podcastPreferenceKeys: PodcastPreferenceKeys,
-    actioner : (PodcastActions) -> Unit,
 ) = listOf(
     /*
     SingleListPreferenceItem(
@@ -181,8 +176,8 @@ private fun getPreferenceItems(
         singleLineTitle = true,
         icon = Icons.Default.Unsubscribe,
         onClick = {
-            actioner(PodcastActions.UnfollowPodcast)
-            actioner(PodcastActions.NavigateUp)
+            //actioner(PodcastActions.UnfollowPodcast)
+            //actioner(PodcastActions.NavigateUp)
         }
     )
 )

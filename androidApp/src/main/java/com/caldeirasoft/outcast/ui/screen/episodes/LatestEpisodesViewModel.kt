@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes.latest
+package com.caldeirasoft.outcast.ui.screen.episodes
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -11,8 +11,6 @@ import com.caldeirasoft.outcast.ui.util.isDateTheSame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -21,15 +19,13 @@ class LatestEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
     private val loadLatestEpisodeCategoriesUseCase: LoadLatestEpisodeCategoriesUseCase,
-) : EpisodesViewModel(
+) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
 ) {
     private var pagingData: Flow<PagingData<Episode>>? = null
-    private val categoryFlow = selectSubscribe(EpisodesState::category)
-    private val category: Category? = null
 
     @OptIn(FlowPreview::class)
-    override val episodes: Flow<PagingData<EpisodesUiModel>> =
+    override val episodes: Flow<PagingData<EpisodeUiModel>> =
         loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
             .onEach { Timber.d("LoadLatestEpisodesPagingDataUseCase : $it episodes") }
             .map { pagingData ->
@@ -43,7 +39,7 @@ class LatestEpisodesViewModel @Inject constructor(
             }
             .map { pagingData ->
                 pagingData.map {
-                    EpisodesUiModel.EpisodeItem(it)
+                    EpisodeUiModel.EpisodeItem(it)
                 }
             }
             .insertDateSeparators()
@@ -64,20 +60,14 @@ class LatestEpisodesViewModel @Inject constructor(
             }
     }
 
-    override suspend fun performAction(action: EpisodesActions) = when(action) {
-        is EpisodesActions.FilterByCategory ->
-            filterByCategory(action.category)
-        else -> super.performAction(action)
-    }
-
-    private suspend fun filterByCategory(category: Category?) {
-        setState {
+    fun filterByCategory(category: Category?) {
+        viewModelScope.setState {
             copy(category = category)
         }
         emitEvent(EpisodesEvent.RefreshList)
     }
 
-    private fun Flow<PagingData<EpisodesUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodesUiModel>> =
+    private fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
         map {
             it.insertSeparators { before, after ->
                 if (after == null) {
@@ -88,11 +78,11 @@ class LatestEpisodesViewModel @Inject constructor(
                 val releaseDate = after.episode.releaseDateTime
                 if (before == null) {
                     // we're at the beginning of the lis
-                    return@insertSeparators EpisodesUiModel.SeparatorItem(releaseDate)
+                    return@insertSeparators EpisodeUiModel.SeparatorItem(releaseDate)
                 }
                 // check between 2 items
                 if (before.episode.releaseDateTime.isDateTheSame(after.episode.releaseDateTime)) {
-                    EpisodesUiModel.SeparatorItem(releaseDate)
+                    EpisodeUiModel.SeparatorItem(releaseDate)
                 }
                 else {
                     // no separator
