@@ -78,34 +78,56 @@ class EpisodeViewModel @Inject constructor(
     }
 
     fun playEpisode() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.PlayEpisodeEvent)
+        }
     }
 
     fun playNext() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.PlayNextEpisodeEvent)
+        }
     }
 
     fun playLast() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.PlayLastEpisodeEvent)
+        }
     }
 
     fun downloadEpisode() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.DownloadEpisodeEvent)
+        }
     }
 
     fun cancelDownloadEpisode() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.CancelDownloadEpisodeEvent)
+        }
     }
 
     fun removeDownloadEpisode() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.RemoveDownloadEpisodeEvent)
+        }
     }
 
     fun saveEpisode() {
-
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.SaveEpisodeEvent)
+        }
     }
 
     fun removeSavedEpisode() {
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.RemoveFromSavedEpisodesEvent)
+        }
+    }
 
+    fun shareEpisode() {
+        viewModelScope.launch {
+            emitEvent(EpisodeEvent.ShareEpisodeEvent)
+        }
     }
 }

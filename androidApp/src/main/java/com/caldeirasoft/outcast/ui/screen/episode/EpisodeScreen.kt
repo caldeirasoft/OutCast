@@ -12,8 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +24,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
 import com.caldeirasoft.outcast.ui.theme.blendARGB
@@ -46,10 +47,51 @@ fun EpisodeScreen(
     navigateBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
+
     EpisodeScreen(
         state = state,
+        scaffoldState = scaffoldState,
         onPodcastClick = viewModel::openPodcastDetails,
-        navigateBack = navigateBack
+        navigateBack = navigateBack,
+        onMoreButtonClick = { episode ->
+            coroutineScope.OpenBottomSheetMenu(
+                header = { // header : episode
+                    EpisodeItem(
+                        episode = episode,
+                        showActions = false,
+                    )
+                },
+                items = listOf(
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_play_next,
+                        icon = Icons.Default.QueuePlayNext,
+                        onClick = { viewModel.playNext() },
+                    ),
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_play_last,
+                        icon = Icons.Default.AddToQueue,
+                        onClick = { viewModel.playLast() },
+                    ),
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_save_episode,
+                        icon = Icons.Default.FavoriteBorder,
+                        onClick = { viewModel.saveEpisode() },
+                    ),
+                    BottomSheetSeparator,
+                    BottomSheetMenuItem(
+                        titleId = R.string.action_share_episode,
+                        icon = Icons.Default.Share,
+                        onClick = { viewModel.shareEpisode() },
+                    )
+                ),
+                drawerState = drawerState,
+                drawerContent = drawerContent
+            )
+        }
     )
 
     storeEpisode?.let {
@@ -65,6 +107,24 @@ fun EpisodeScreen(
                     if (fromSamePodcast) navigateBack()
                     else navigateTo(Screen.PodcastScreen(event.podcast))
                 }
+                is EpisodeEvent.PlayEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play episode")
+                is EpisodeEvent.PlayNextEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play next episode")
+                is EpisodeEvent.PlayLastEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play last episode")
+                is EpisodeEvent.DownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Download episode")
+                is EpisodeEvent.RemoveDownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Remove download episode")
+                is EpisodeEvent.CancelDownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Cancel download episode")
+                is EpisodeEvent.SaveEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Save episode")
+                is EpisodeEvent.RemoveFromSavedEpisodesEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Remove from saved episode")
+                is EpisodeEvent.ShareEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Share episode")
             }
         }
     }
@@ -73,13 +133,27 @@ fun EpisodeScreen(
 @Composable
 fun EpisodeScreen(
     state: EpisodeViewState,
+    scaffoldState: ScaffoldState,
     navigateBack: () -> Unit,
     onPodcastClick: () -> Unit,
+    onMoreButtonClick: (Episode) -> Unit,
 ) {
     val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
     val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
 
-    Scaffold {
+    Scaffold(
+        scaffoldState = scaffoldState,
+        snackbarHost = {
+            // reuse default SnackbarHost to have default animation and timing handling
+            SnackbarHost(it) { data ->
+                // custom snackbar with the custom border
+                Snackbar(
+                    modifier = Modifier.padding(bottom = 56.dp),
+                    snackbarData = data
+                )
+            }
+        },
+    ) {
         //
         val listState = rememberLazyListState(0)
         LazyColumn(
@@ -117,7 +191,9 @@ fun EpisodeScreen(
                                     .padding(horizontal = 16.dp)
                                     .padding(bottom = 16.dp),
                                 episode = it,
-                                onContextMenuClick = { }
+                                onContextMenuClick = {
+                                    onMoreButtonClick(it)
+                                }
                             )
                         }
                     }

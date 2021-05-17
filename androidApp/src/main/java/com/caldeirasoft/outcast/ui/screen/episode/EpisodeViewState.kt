@@ -14,4 +14,14 @@ data class EpisodeViewState(
 
 sealed class EpisodeEvent {
     data class OpenPodcastDetail(val podcast: Podcast) : EpisodeEvent()
+    object PlayEpisodeEvent : EpisodeEvent()
+    object PauseEpisodeEvent : EpisodeEvent()
+    object PlayNextEpisodeEvent : EpisodeEvent()
+    object PlayLastEpisodeEvent : EpisodeEvent()
+    object DownloadEpisodeEvent : EpisodeEvent()
+    object CancelDownloadEpisodeEvent : EpisodeEvent()
+    object RemoveDownloadEpisodeEvent : EpisodeEvent()
+    object SaveEpisodeEvent : EpisodeEvent()
+    object RemoveFromSavedEpisodesEvent : EpisodeEvent()
+    object ShareEpisodeEvent : EpisodeEvent()
 }

@@ -53,11 +53,13 @@ fun EpisodesScreen(
     val state by viewModel.state.collectAsState()
     val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
     val coroutineScope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
 
     EpisodesScreen(
         state = state,
+        scaffoldState = scaffoldState,
         lazyPagingItems = lazyPagingItems,
         navigateTo = navigateTo,
         navigateBack = navigateBack,
@@ -129,6 +131,7 @@ fun LatestEpisodesScreen(
 @Composable
 fun EpisodesScreen(
     state: EpisodesState,
+    scaffoldState: ScaffoldState,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
@@ -136,7 +139,19 @@ fun EpisodesScreen(
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    Scaffold(modifier = Modifier) {
+    Scaffold(
+        scaffoldState = scaffoldState,
+        snackbarHost = {
+            // reuse default SnackbarHost to have default animation and timing handling
+            SnackbarHost(it) { data ->
+                // custom snackbar with the custom border
+                Snackbar(
+                    modifier = Modifier.padding(bottom = 56.dp),
+                    snackbarData = data
+                )
+            }
+        },
+    ) {
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
             val headerRatio: Float = 1 / 3f

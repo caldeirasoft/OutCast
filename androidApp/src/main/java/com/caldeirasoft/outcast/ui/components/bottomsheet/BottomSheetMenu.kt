@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,7 +29,8 @@ fun CoroutineScope.OpenBottomSheetMenu(
     drawerContent.updateContent {
         BottomSheetMenu(
             header = header,
-            items = items
+            items = items,
+            drawerState = drawerState
         )
     }
     this.launch {
@@ -41,7 +43,9 @@ fun CoroutineScope.OpenBottomSheetMenu(
 private fun BottomSheetMenu(
     header: @Composable () -> Unit,
     items: List<BaseBottomSheetMenuItem>,
+    drawerState: ModalBottomSheetState,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     Column()
     {
         // header
@@ -52,7 +56,10 @@ private fun BottomSheetMenu(
                 is BottomSheetMenuItem ->
                     MenuItem(text = stringResource(id = item.titleId),
                         imageVector = item.icon,
-                        click = item.onClick
+                        click = {
+                            item.onClick()
+                            coroutineScope.launch { drawerState.hide() }
+                        }
                     )
                 is BottomSheetSeparator ->
                     Divider()
@@ -64,10 +71,13 @@ private fun BottomSheetMenu(
 
 @Composable
 private fun MenuItem(text: String, imageVector: ImageVector?, click: () -> Unit) {
-    Row(Modifier.heightIn(min = MinHeight)
-        .clickable { click() }) {
+    Row(
+        Modifier
+            .heightIn(min = MinHeight)
+            .clickable { click() }) {
         Box(
-            Modifier.align(Alignment.CenterVertically)
+            Modifier
+                .align(Alignment.CenterVertically)
                 .widthIn(min = IconLeftPadding + IconMinPaddedWidth)
                 .padding(
                     start = IconLeftPadding,
@@ -86,7 +96,8 @@ private fun MenuItem(text: String, imageVector: ImageVector?, click: () -> Unit)
             }
         }
         Box(
-            Modifier.weight(1f)
+            Modifier
+                .weight(1f)
                 .align(Alignment.CenterVertically)
                 .padding(start = ContentLeftPadding, end = ContentRightPadding),
             contentAlignment = Alignment.CenterStart
