@@ -84,6 +84,7 @@ fun MainNavHost(startScreen: ScreenName) {
                 SetupBottomNavBar(
                     navController = navController,
                     items = listOf(
+                        BottomNavigationScreen.Latest,
                         BottomNavigationScreen.Library,
                         BottomNavigationScreen.Discover,
                         BottomNavigationScreen.Search,

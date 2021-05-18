@@ -5,8 +5,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Subscriptions
+import androidx.compose.material.icons.filled.WatchLater
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Subscriptions
+import androidx.compose.material.icons.outlined.WatchLater
+import androidx.compose.material.icons.twotone.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
@@ -73,7 +77,6 @@ sealed class Screen (val id: ScreenName) {
         )
     }
 
-    object LatestEpisodes : Screen(ScreenName.LATEST_EPISODES)
     object SavedEpisodes : Screen(ScreenName.SAVED_EPISODES)
     object PlayedEpisodes : Screen(ScreenName.PLAYED_EPISODES)
 
@@ -106,6 +109,11 @@ sealed class BottomNavigationScreen(
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 ) {
+    object Latest : BottomNavigationScreen(ScreenName.LATEST_EPISODES,
+        R.string.screen_latest_episodes,
+        Icons.Outlined.WatchLater,
+        Icons.Filled.WatchLater)
+
     object Library : BottomNavigationScreen(ScreenName.LIBRARY,
         R.string.screen_library,
         Icons.Outlined.Subscriptions,
@@ -113,13 +121,13 @@ sealed class BottomNavigationScreen(
 
     object Discover : BottomNavigationScreen(ScreenName.STORE_DATA,
         R.string.screen_discover,
-        Icons.Default.Explore,
+        Icons.Outlined.Explore,
         Icons.Filled.Explore
     )
 
     object Search : BottomNavigationScreen(ScreenName.STORE_SEARCH,
         R.string.screen_search,
         Icons.Outlined.Search,
-        Icons.Filled.Search)
+        Icons.TwoTone.Search)
 }
 

@@ -58,7 +58,6 @@ fun LibraryScreen(
     ) { action ->
         when (action) {
             is LibraryActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.podcast))
-            is LibraryActions.OpenLatestEpisodesScreen -> navigateTo(Screen.LatestEpisodes)
             is LibraryActions.OpenSavedEpisodesScreen -> navigateTo(Screen.SavedEpisodes)
             is LibraryActions.OpenPlayedEpisodesScreen -> navigateTo(Screen.PlayedEpisodes)
             else -> viewModel.submitAction(action)
@@ -132,7 +131,6 @@ private fun LibraryScreen(
                 )
                 {
                     val libraryIds = listOf(
-                        LibraryItemType.LATEST_EPISODES.name,
                         LibraryItemType.SAVED_EPISODES.name
                     ) + state.sortedPodcasts.map { it.feedUrl }
 
@@ -157,7 +155,7 @@ private fun LibraryScreen(
                     when (state.displayAsGrid) {
                         false -> items(items = libraryIds) { itemId ->
                             when (itemId) {
-                                LibraryItemType.LATEST_EPISODES.name,
+                                LibraryItemType.SIDELOADS.name,
                                 LibraryItemType.SAVED_EPISODES.name ->
                                     libraryItemsMap[itemId]?.let { item ->
                                         LibraryListItem(
@@ -165,8 +163,8 @@ private fun LibraryScreen(
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
                                                     when (item) {
-                                                        LibraryItemType.LATEST_EPISODES ->
-                                                            actioner(LibraryActions.OpenLatestEpisodesScreen)
+                                                        //LibraryItemType.LATEST_EPISODES ->
+                                                        //    actioner(LibraryActions.OpenLatestEpisodesScreen)
                                                     }
                                                 }),
                                             item = item,
@@ -201,7 +199,7 @@ private fun LibraryScreen(
                             columns = 2
                         ) { itemId ->
                             when (itemId) {
-                                LibraryItemType.LATEST_EPISODES.name,
+                                LibraryItemType.SIDELOADS.name,
                                 LibraryItemType.SAVED_EPISODES.name ->
                                     libraryItemsMap[itemId]?.let { item ->
                                         LibraryGridItem(
@@ -209,8 +207,8 @@ private fun LibraryScreen(
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
                                                     when (item) {
-                                                        LibraryItemType.LATEST_EPISODES ->
-                                                            actioner(LibraryActions.OpenLatestEpisodesScreen)
+                                                        //LibraryItemType.LATEST_EPISODES ->
+                                                        //    actioner(LibraryActions.OpenLatestEpisodesScreen)
                                                     }
                                                 }),
                                             item = item,
@@ -417,7 +415,6 @@ private fun LibraryThumbnail(
         Box(modifier = Modifier.fillMaxSize(0.5f)) {
             Icon(
                 imageVector = when(item) {
-                    LibraryItemType.LATEST_EPISODES -> Icons.Filled.Schedule
                     LibraryItemType.SAVED_EPISODES -> Icons.Filled.BookmarkBorder
                     LibraryItemType.SIDELOADS -> Icons.Filled.Cloud
                     else -> Icons.Filled.Podcasts
@@ -436,13 +433,12 @@ private fun LibraryListItemSecondaryText(
     item: LibraryItemType,
     state: LibraryState,
 ) {
-    val context = LocalContext.current
     when (item) {
-        LibraryItemType.LATEST_EPISODES -> {
+        LibraryItemType.SAVED_EPISODES -> {
             Text(
                 text = stringResource(
-                    id = R.string.date_last_update_x,
-                    state.newEpisodesUpdatedAt?.formatRelativeDate(context).orEmpty()
+                    id = R.string.podcast_x_episodes,
+                    state.savedEpisodesCount
                 )
             )
         }
