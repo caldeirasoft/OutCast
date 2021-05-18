@@ -55,25 +55,51 @@ fun LibraryScreen(
 
     LibraryScreen(
         state = state,
-    ) { action ->
-        when (action) {
-            is LibraryActions.OpenPodcastDetail -> navigateTo(Screen.PodcastScreen(action.podcast))
-            is LibraryActions.OpenSavedEpisodesScreen -> navigateTo(Screen.SavedEpisodes)
-            is LibraryActions.OpenPlayedEpisodesScreen -> navigateTo(Screen.PlayedEpisodes)
-            else -> viewModel.submitAction(action)
+        navigateTo = navigateTo,
+        onToggleDisplayButtonClick = viewModel::toggleDisplay,
+        onSortButtonClick = {
+            coroutineScope.OpenBottomSheetMenu(
+                header = { // header : podcast
+                    Text(
+                        text = stringResource(id = R.string.action_sort_by),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                },
+                items = LibrarySort.values().map { sort ->
+                    BottomSheetMenuItem(
+                        titleId = sort.titleId,
+                        icon = sort
+                            .takeIf { it == state.sortBy }
+                            ?.let {
+                                when (state.sortByDesc) {
+                                    true -> Icons.Default.ArrowDownward
+                                    false -> Icons.Default.ArrowUpward
+                                }
+                            },
+                        onClick = {
+                            coroutineScope.launch { drawerState.hide() }
+                            if (sort == state.sortBy)
+                                viewModel.changePodcastSort(!state.sortByDesc)
+                            else
+                                viewModel.changePodcastSort(sort)
+                        },
+                    )
+                },
+                drawerState = drawerState,
+                drawerContent = drawerContent
+            )
         }
-    }
-
-    ObsertUiEffects(
-        viewModel = viewModel,
     )
+
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun LibraryScreen(
     state: LibraryState,
-    actioner : (LibraryActions) -> Unit,
+    navigateTo: (Screen) -> Unit,
+    onSortButtonClick: () -> Unit,
+    onToggleDisplayButtonClick: () -> Unit,
 ) {
     Scaffold(modifier = Modifier) {
         BoxWithConstraints {
@@ -140,15 +166,15 @@ private fun LibraryScreen(
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // sort button
-                            LibrarySortButton(state = state, onClick = {
-                                actioner(LibraryActions.OpenSortByBottomSheet)
-                            })
+                            LibrarySortButton(
+                                state = state,
+                                onClick = onSortButtonClick)
                             // spacer
                             Spacer(Modifier.weight(1f))
                             // grid/list button
-                            LibraryDisplayButton(state = state, onClick = {
-                                actioner(LibraryActions.ToggleDisplay)
-                            })
+                            LibraryDisplayButton(
+                                state = state,
+                                onClick = onToggleDisplayButtonClick)
                         }
                     }
 
@@ -177,11 +203,7 @@ private fun LibraryScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
-                                                    actioner(
-                                                        LibraryActions.OpenPodcastDetail(
-                                                            item
-                                                        )
-                                                    )
+                                                    navigateTo(Screen.PodcastScreen(item))
                                                 }),
                                             podcast = item,
                                             sort = state.sortBy
@@ -221,11 +243,7 @@ private fun LibraryScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
-                                                    actioner(
-                                                        LibraryActions.OpenPodcastDetail(
-                                                            item
-                                                        )
-                                                    )
+                                                    navigateTo(Screen.PodcastScreen(item))
                                                 }),
                                             podcast = item,
                                             sort = state.sortBy
@@ -487,50 +505,3 @@ private fun LibraryDisplayButton(
     }
 }
 
-@Composable
-private fun ObsertUiEffects(
-    viewModel: LibraryViewModel,
-) {
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is LibraryEvent.OpenSortByBottomSheet -> {
-                    OpenBottomSheetMenu(
-                        header = { // header : podcast
-                            Text(
-                                text = stringResource(id = R.string.action_sort_by),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-                        },
-                        items = LibrarySort.values().map { sort ->
-                            BottomSheetMenuItem(
-                                titleId = sort.titleId,
-                                icon = sort
-                                    .takeIf { it == event.sort }
-                                    ?.let {
-                                        when (event.sortByDesc) {
-                                            true -> Icons.Default.ArrowDownward
-                                            false -> Icons.Default.ArrowUpward
-                                        }
-                                    },
-                                onClick = {
-                                    coroutineScope.launch { drawerState.hide() }
-                                    if (sort == event.sort)
-                                        viewModel.submitAction(LibraryActions.ChangeSortOrder(!event.sortByDesc))
-                                    else
-                                        viewModel.submitAction(LibraryActions.ChangeSort(sort))
-                                },
-                            )
-                        },
-                        drawerState = drawerState,
-                        drawerContent = drawerContent
-                    )
-                }
-            }
-        }
-    }
-}

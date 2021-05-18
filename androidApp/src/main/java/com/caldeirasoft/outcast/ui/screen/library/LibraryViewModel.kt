@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
+import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
 import com.caldeirasoft.outcast.ui.screen.MvieViewModel
 import com.caldeirasoft.outcast.ui.screen.library.LibraryActions
 import com.caldeirasoft.outcast.ui.screen.library.LibraryEvent
@@ -15,7 +16,7 @@ import javax.inject.Inject
 class LibraryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
-) : MvieViewModel<LibraryState, LibraryEvent, LibraryActions>(
+) : BaseViewModelEvents<LibraryState, LibraryEvent>(
     initialState = LibraryState()
 ) {
     init {
@@ -26,37 +27,28 @@ class LibraryViewModel @Inject constructor(
             }
     }
 
-    override suspend fun performAction(action: LibraryActions) = when (action) {
-        is LibraryActions.OpenSortByBottomSheet -> withState {
-            emitEvent(LibraryEvent.OpenSortByBottomSheet(it.sortBy, it.sortByDesc))
-        }
-        is LibraryActions.ChangeSort -> changePodcastSort(action.sortBy)
-        is LibraryActions.ChangeSortOrder -> changePodcastSort(action.sortByDesc)
-        is LibraryActions.ToggleDisplay -> toggleDisplay()
-        else -> Unit
-    }
 
-    private suspend fun changePodcastSort(sort: LibrarySort) {
+    fun changePodcastSort(sort: LibrarySort) {
         when(sort) {
             LibrarySort.RECENTLY_UPDATED, LibrarySort.RECENTLY_FOLLOWED ->
-                setState {
+                viewModelScope.setState {
                     copy(sortBy = sort, sortByDesc = true)
                 }
             LibrarySort.NAME, LibrarySort.AUTHOR ->
-                setState {
+                viewModelScope.setState {
                     copy(sortBy = sort, sortByDesc = false)
                 }
         }
     }
 
-    private suspend fun changePodcastSort(sortByOrder: Boolean) {
-        setState {
+    fun changePodcastSort(sortByOrder: Boolean) {
+        viewModelScope.setState {
             copy(sortByDesc = sortByOrder)
         }
     }
 
-    private suspend fun toggleDisplay() {
-        setState {
+    fun toggleDisplay() {
+        viewModelScope.setState {
             copy(displayAsGrid = !displayAsGrid)
         }
     }
