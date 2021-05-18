@@ -347,7 +347,6 @@ fun StoreDataScreen(
                                                         onThumbnailClick = {
                                                             navigateTo(Screen.PodcastScreen(item.storePodcast))
                                                         },
-                                                        onContextMenuClick = { },
                                                         episode = item.episode,
                                                         index = (index + 1).takeIf { sortByPopularity },
                                                     )
@@ -651,7 +650,6 @@ fun StoreCollectionEpisodeContent(
                             modifier = Modifier.fillMaxWidth(),
                             onThumbnailClick = { openPodcastDetail(storeItem.storePodcast) },
                             onEpisodeClick = { openEpisodeDetail(storeItem) },
-                            onContextMenuClick = { },
                             index = if (storeCollection.sortByPopularity) (index + 1) else null
                         )
                     }

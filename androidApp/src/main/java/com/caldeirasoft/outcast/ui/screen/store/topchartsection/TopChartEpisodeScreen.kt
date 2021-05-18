@@ -56,7 +56,6 @@ fun TopChartEpisodeScreen(
                                 episode = item.episode,
                                 onEpisodeClick = { navigateTo(Screen.EpisodeScreen(item)) },
                                 onThumbnailClick = { navigateTo(Screen.PodcastScreen(item.storePodcast)) },
-                                onContextMenuClick = { },
                                 index = index + 1
                             )
                             Divider()

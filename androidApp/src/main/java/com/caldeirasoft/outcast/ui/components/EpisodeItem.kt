@@ -37,7 +37,6 @@ fun StoreEpisodeItem(
     index: Int? = null,
     onEpisodeClick: () -> Unit,
     onThumbnailClick: () -> Unit,
-    onContextMenuClick: (Episode) -> Unit,
 ) {
     ListItem(
         modifier = modifier
@@ -77,14 +76,6 @@ fun StoreEpisodeItem(
                     .clickable(onClick = onThumbnailClick)
             )
         },
-        trailing = {
-            IconButton(
-                onClick = { onContextMenuClick(episode) }
-            ) {
-                Icon(imageVector = Icons.Default.MoreHoriz,
-                    contentDescription = null)
-            }
-        }
     )
 }
 
