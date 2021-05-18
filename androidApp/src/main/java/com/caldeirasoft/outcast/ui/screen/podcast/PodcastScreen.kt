@@ -74,9 +74,10 @@ fun PodcastScreen(
         navigateTo = navigateTo,
         onFollowPodcast = viewModel::follow,
         onUnfollowPodcast = viewModel::unfollow,
-        onMoreButtonClick = {
-
-        },
+        onNotificationButtonClick = viewModel::toggleNotifications,
+        onSettingsButtonClick = { },
+        onShareItemClick = viewModel::sharePodcast,
+        onWebsiteItemClick = viewModel::openPodcastWebsite,
         onEpisodeItemMoreButtonClick = { episode ->
             coroutineScope.OpenBottomSheetMenu(
                 header = { // header : episode
@@ -114,12 +115,16 @@ fun PodcastScreen(
         }
     )
 
-    ObserveUiEffects(
-        viewModel = viewModel,
-        state = state,
-        navigateTo = navigateTo,
-        navigateBack = navigateBack
-    )
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is PodcastEvent.SharePodcast ->
+                    scaffoldState.snackbarHostState.showSnackbar("Share podcast")
+                is PodcastEvent.OpenWebsite ->
+                    scaffoldState.snackbarHostState.showSnackbar("Open ${event.websiteUrl}")
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
@@ -133,7 +138,10 @@ private fun PodcastScreen(
     navigateBack: () -> Unit,
     onFollowPodcast: () -> Unit,
     onUnfollowPodcast: () -> Unit,
-    onMoreButtonClick: () -> Unit,
+    onNotificationButtonClick: () -> Unit,
+    onSettingsButtonClick: () -> Unit,
+    onShareItemClick: () -> Unit,
+    onWebsiteItemClick: () -> Unit,
     onEpisodeItemMoreButtonClick: (Episode) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -223,11 +231,14 @@ private fun PodcastScreen(
                     // action buttons
                     item {
                         podcastData?.let {
-                            PodcastActionButtons(
+                            PodcastActionAppBar(
                                 state = state,
                                 onFollowPodcast = onFollowPodcast,
                                 onUnfollowPodcast = onUnfollowPodcast,
-                                onOpenPodcastContextMenu = onMoreButtonClick
+                                onSettingsButtonClick = onSettingsButtonClick,
+                                onNotificationButtonClick = onNotificationButtonClick,
+                                onShareItemClick = onShareItemClick,
+                                onWebsiteItemClick = onWebsiteItemClick
                             )
                         }
                     }
@@ -481,65 +492,119 @@ private fun PodcastDescriptionContent(description: String) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PodcastActionButtons(
+fun PodcastActionAppBar(
     state: PodcastState,
     onFollowPodcast: () -> Unit,
     onUnfollowPodcast: () -> Unit,
-    onOpenPodcastContextMenu: () -> Unit,
+    onNotificationButtonClick: () -> Unit,
+    onSettingsButtonClick: () -> Unit,
+    onShareItemClick: () -> Unit,
+    onWebsiteItemClick: () -> Unit,
 ) {
+    var expanded by remember { mutableStateOf(false) }
     // action buttons
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .height(36.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // following button
-        ActionChipButton(
-            selected = (state.followingStatus == FollowStatus.FOLLOWED),
-            onClick = {
-                if (state.followingStatus == FollowStatus.UNFOLLOWED)
-                    onFollowPodcast()
-                else if (state.followingStatus == FollowStatus.FOLLOWED)
-                    onUnfollowPodcast()
-            },
-            icon = {
-                Crossfade(targetState = state.followingStatus) { followStatus ->
-                    when (followStatus) {
-                        FollowStatus.FOLLOWING ->
-                            LinearProgressIndicator(
-                                color = contentColorForExtended(MaterialTheme.colors.onSurface),
-                                modifier = Modifier
-                                    .width(24.dp))
-                        FollowStatus.UNFOLLOWED ->
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(id = R.string.action_follow),
-                            )
-                        FollowStatus.FOLLOWED ->
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = stringResource(id = R.string.action_follow),
-                            )
+    TopAppBar(
+        modifier = Modifier,
+        title = {
+            // following button
+            ActionChipButton(
+                selected = (state.followingStatus == FollowStatus.FOLLOWED),
+                onClick = {
+                    if (state.followingStatus == FollowStatus.UNFOLLOWED)
+                        onFollowPodcast()
+                    else if (state.followingStatus == FollowStatus.FOLLOWED)
+                        onUnfollowPodcast()
+                },
+                icon = {
+                    Crossfade(targetState = state.followingStatus) { followStatus ->
+                        when (followStatus) {
+                            FollowStatus.FOLLOWING ->
+                                LinearProgressIndicator(
+                                    color = contentColorForExtended(MaterialTheme.colors.onSurface),
+                                    modifier = Modifier
+                                        .width(24.dp))
+                            FollowStatus.UNFOLLOWED ->
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = stringResource(id = R.string.action_follow),
+                                )
+                            FollowStatus.FOLLOWED ->
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = stringResource(id = R.string.action_follow),
+                                )
+                        }
+                    }
+                }
+            ) {
+                Text(
+                    text = when (state.followingStatus) {
+                        FollowStatus.UNFOLLOWED -> stringResource(id = R.string.action_follow)
+                        else -> stringResource(id = R.string.action_following)
+                    }
+                )
+            }
+        },
+        actions = {
+            if (state.followingStatus == FollowStatus.FOLLOWED) {
+                // notification button
+                IconButton(onClick = onNotificationButtonClick) {
+                    Icon(
+                        imageVector = Icons.Default.NotificationsOff,
+                        contentDescription = null
+                    )
+                }
+                // settings button
+                IconButton(onClick = onSettingsButtonClick) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = null
+                    )
+                }
+            }
+            // more button
+            Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }) {
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        onShareItemClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .size(20.dp)
+                        )
+                        Text(text = stringResource(id = R.string.action_share))
+                    }
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        onWebsiteItemClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .size(20.dp)
+                        )
+                        Text(text = stringResource(id = R.string.action_open_website))
                     }
                 }
             }
-        ) {
-            Text(
-                text = when (state.followingStatus) {
-                    FollowStatus.UNFOLLOWED -> stringResource(id = R.string.action_follow)
-                    else -> stringResource(id = R.string.action_following)
-                }
-            )
-        }
-
-        // more button
-        IconButton(onClick = onOpenPodcastContextMenu) {
-            Icon(imageVector = Icons.Default.MoreHoriz,
-                contentDescription = null)
-        }
-    }
+        },
+        backgroundColor = Color.Transparent,
+        elevation = 0.dp
+    )
 }
 
 @Composable
@@ -762,24 +827,6 @@ fun PodcastEpisodesLoadingScreen() {
                             .background(brush = brush))
                     }
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ObserveUiEffects(
-    viewModel: PodcastViewModel,
-    state: PodcastState,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
-) {
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
             }
         }
     }

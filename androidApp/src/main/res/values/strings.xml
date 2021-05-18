@@ -98,11 +98,18 @@
     <string name="settings_unfollow">Unfollow this podcast</string>
 
     <!-- actions -->
+    <string name="action_download">Download</string>
+    <string name="action_cancel_download">Cancel download</string>
+    <string name="action_remove_download">Remove download</string>
     <string name="action_filter">Filter</string>
     <string name="action_follow">Follow</string>
     <string name="action_following">Following</string>
     <string name="action_goto_show">Go to show</string>
+    <string name="action_mark_as_played">Mark as played</string>
+    <string name="action_mark_as_unplayed">Mark as unplayed</string>
+    <string name="action_mark_all_as_played">Mark all as played</string>
     <string name="action_more">MORE</string>
+    <string name="action_open_website">Open website</string>
     <string name="action_play">Play</string>
     <string name="action_play_next">Play next</string>
     <string name="action_play_last">Play last</string>

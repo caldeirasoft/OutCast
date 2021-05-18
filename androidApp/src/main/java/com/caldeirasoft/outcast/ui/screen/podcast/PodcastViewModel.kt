@@ -13,6 +13,7 @@ import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -95,13 +96,6 @@ class PodcastViewModel @Inject constructor(
         }
     }
 
-    suspend fun openPodcastContextMenu() {
-        withState { state ->
-            state.podcast?.let {
-                emitEvent(PodcastEvent.OpenPodcastContextMenu(it))
-            }
-        }
-    }
 
     suspend fun openEpisodeDetails(episode: Episode) {
         withState {
@@ -118,6 +112,30 @@ class PodcastViewModel @Inject constructor(
     fun unfollow() {
         viewModelScope.launch {
             unfollowUseCase.execute(feedUrl = initialState.feedUrl)
+        }
+    }
+
+    fun toggleNotifications() {
+        viewModelScope.withState {
+            it.podcast?.let { podcast ->
+                emitEvent(PodcastEvent.ToggleNotifications)
+            }
+        }
+    }
+
+    fun sharePodcast() {
+        viewModelScope.withState {
+            it.podcast?.let { podcast ->
+                emitEvent(PodcastEvent.SharePodcast(podcast))
+            }
+        }
+    }
+
+    fun openPodcastWebsite() {
+        viewModelScope.withState {
+            it.podcast?.podcastWebsiteURL?.let { url ->
+                emitEvent(PodcastEvent.OpenWebsite(url))
+            }
         }
     }
 
