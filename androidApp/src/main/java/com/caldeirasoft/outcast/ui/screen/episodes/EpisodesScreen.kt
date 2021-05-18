@@ -24,6 +24,7 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
@@ -106,6 +107,24 @@ fun EpisodesScreen(
             when (event) {
                 is EpisodesEvent.RefreshList ->
                     lazyPagingItems.refresh()
+                is EpisodesEvent.PlayEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play episode")
+                is EpisodesEvent.PlayNextEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play next episode")
+                is EpisodesEvent.PlayLastEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play last episode")
+                is EpisodesEvent.DownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Download episode")
+                is EpisodesEvent.RemoveDownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Remove download episode")
+                is EpisodesEvent.CancelDownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Cancel download episode")
+                is EpisodesEvent.SaveEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Save episode")
+                is EpisodesEvent.RemoveFromSavedEpisodesEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Remove from saved episode")
+                is EpisodesEvent.ShareEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Share episode")
             }
         }
     }
