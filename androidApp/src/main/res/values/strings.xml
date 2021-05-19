@@ -75,7 +75,7 @@
     <string name="screen_search">Search</string>
     <string name="screen_latest_episodes">Latest episodes</string>
     <string name="screen_saved_episodes">Saved episodes</string>
-    <string name="screen_played_episodes">Recently played episodes</string>
+    <string name="screen_played_episodes">Previously played episodes</string>
     <string name="screen_sideloads">Sideloads</string>
     <string name="screen_more">More</string>
     <string name="screen_profile">Profile</string>

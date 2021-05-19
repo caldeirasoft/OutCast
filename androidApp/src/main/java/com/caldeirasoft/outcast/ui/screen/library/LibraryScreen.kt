@@ -57,6 +57,9 @@ fun LibraryScreen(
         state = state,
         navigateTo = navigateTo,
         onToggleDisplayButtonClick = viewModel::toggleDisplay,
+        onPlayedEpisodesButtonClick = {
+            navigateTo(Screen.PlayedEpisodes)
+        },
         onSortButtonClick = {
             coroutineScope.OpenBottomSheetMenu(
                 header = { // header : podcast
@@ -100,6 +103,7 @@ private fun LibraryScreen(
     navigateTo: (Screen) -> Unit,
     onSortButtonClick: () -> Unit,
     onToggleDisplayButtonClick: () -> Unit,
+    onPlayedEpisodesButtonClick: () -> Unit,
 ) {
     Scaffold(modifier = Modifier) {
         BoxWithConstraints {
@@ -146,7 +150,8 @@ private fun LibraryScreen(
                             .statusBarsPadding()
                             .navigationBarsPadding(bottom = false),
                         state = state,
-                        collapsingToolbarState = collapsingToolbarState
+                        collapsingToolbarState = collapsingToolbarState,
+                        onPlayedEpisodesButtonClick = onPlayedEpisodesButtonClick
                     )
                 }
 
@@ -178,8 +183,51 @@ private fun LibraryScreen(
                         }
                     }
 
-                    when (state.displayAsGrid) {
-                        false -> items(items = libraryIds) { itemId ->
+                    if (state.displayAsGrid) {
+                        gridItems(
+                            items = libraryIds,
+                            contentPadding = PaddingValues(16.dp),
+                            horizontalInnerPadding = 16.dp,
+                            verticalInnerPadding = 16.dp,
+                            columns = 2
+                        ) { itemId ->
+                            when (itemId) {
+                                LibraryItemType.SIDELOADS.name,
+                                LibraryItemType.SAVED_EPISODES.name ->
+                                    libraryItemsMap[itemId]?.let { item ->
+                                        LibraryGridItem(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable(onClick = {
+                                                    when (item) {
+                                                        LibraryItemType.SAVED_EPISODES ->
+                                                            navigateTo(Screen.SavedEpisodes)
+                                                        else -> {
+                                                        }
+                                                    }
+                                                }),
+                                            item = item,
+                                            state = state,
+                                        )
+                                    }
+                                else -> {
+                                    podcastsMap[itemId]?.let { item ->
+                                        PodcastGridItem(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable(onClick = {
+                                                    navigateTo(Screen.PodcastScreen(item))
+                                                }),
+                                            podcast = item,
+                                            sort = state.sortBy
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        items(items = libraryIds) { itemId ->
                             when (itemId) {
                                 LibraryItemType.SIDELOADS.name,
                                 LibraryItemType.SAVED_EPISODES.name ->
@@ -213,47 +261,6 @@ private fun LibraryScreen(
                                 }
                             }
                         }
-
-                        true -> gridItems(
-                            items = libraryIds,
-                            contentPadding = PaddingValues(16.dp),
-                            horizontalInnerPadding = 16.dp,
-                            verticalInnerPadding = 16.dp,
-                            columns = 2
-                        ) { itemId ->
-                            when (itemId) {
-                                LibraryItemType.SIDELOADS.name,
-                                LibraryItemType.SAVED_EPISODES.name ->
-                                    libraryItemsMap[itemId]?.let { item ->
-                                        LibraryGridItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    when (item) {
-                                                        LibraryItemType.SAVED_EPISODES ->
-                                                            navigateTo(Screen.SavedEpisodes)
-                                                        else -> { }
-                                                    }
-                                                }),
-                                            item = item,
-                                            state = state,
-                                        )
-                                    }
-                                else -> {
-                                    podcastsMap[itemId]?.let { item ->
-                                        PodcastGridItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    navigateTo(Screen.PodcastScreen(item))
-                                                }),
-                                            podcast = item,
-                                            sort = state.sortBy
-                                        )
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -265,7 +272,8 @@ private fun LibraryScreen(
 private fun LibraryTopAppBar(
     modifier: Modifier,
     state: LibraryState,
-    collapsingToolbarState: CollapsingToolbarState
+    collapsingToolbarState: CollapsingToolbarState,
+    onPlayedEpisodesButtonClick: () -> Unit,
 ) {
     Timber.d("progress: ${collapsingToolbarState.progress}, alpha:${collapsingToolbarState.collapsedAlpha}")
     Column(
@@ -275,7 +283,14 @@ private fun LibraryTopAppBar(
             modifier = Modifier,
             title = {
             },
-            actions = { },
+            actions = {
+                IconButton(onClick = onPlayedEpisodesButtonClick) {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = null,
+                    )
+                }
+            },
             backgroundColor = Color.Transparent,
             contentColor = MaterialTheme.colors.onSurface,
             elevation = 0.dp

@@ -161,6 +161,22 @@ fun SavedEpisodesScreen(
     )
 }
 
+@FlowPreview
+@ExperimentalCoroutinesApi
+@Composable
+fun PlayedEpisodesScreen(
+    viewModel: SavedEpisodesViewModel,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+) {
+    EpisodesScreen(
+        title = stringResource(id = R.string.screen_played_episodes),
+        viewModel = viewModel,
+        navigateTo = navigateTo,
+        navigateBack = navigateBack,
+    )
+}
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EpisodesScreen(

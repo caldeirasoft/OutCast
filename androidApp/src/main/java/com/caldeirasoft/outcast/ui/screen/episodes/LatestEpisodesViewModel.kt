@@ -22,8 +22,6 @@ class LatestEpisodesViewModel @Inject constructor(
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
 ) {
-    private var pagingData: Flow<PagingData<Episode>>? = null
-
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
         loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
@@ -45,10 +43,6 @@ class LatestEpisodesViewModel @Inject constructor(
             .cachedIn(viewModelScope)
 
     init {
-        pagingData = loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
-            .onEach { Timber.d("LoadLatestEpisodesPagingDataUseCase : $it episodes") }
-
-
         loadLatestEpisodeCategoriesUseCase.getLatestEpisodesCategories()
             .map { it.filterNotNull() }
             .setOnEach { categories ->
