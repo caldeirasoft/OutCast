@@ -3,7 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.episodes
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 
-sealed class EpisodesEvent {
+open class EpisodesEvent {
     data class OpenEpisodeDetail(val episode: Episode) : EpisodesEvent()
     data class OpenEpisodeContextMenu(val episode: Episode) : EpisodesEvent()
     object RefreshList : EpisodesEvent()

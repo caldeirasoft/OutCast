@@ -10,6 +10,7 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.*
+import com.caldeirasoft.outcast.domain.util.castAs
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel

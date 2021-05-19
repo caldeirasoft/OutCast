@@ -34,6 +34,7 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.theme.*
 import com.caldeirasoft.outcast.ui.util.*
@@ -81,10 +82,7 @@ fun PodcastScreen(
         onEpisodeItemMoreButtonClick = { episode ->
             coroutineScope.OpenBottomSheetMenu(
                 header = { // header : episode
-                    EpisodeItem(
-                        episode = episode,
-                        showActions = false,
-                    )
+                    EpisodeItem(episode = episode, showActions = false)
                 },
                 items = listOf(
                     BottomSheetMenuItem(
@@ -122,6 +120,24 @@ fun PodcastScreen(
                     scaffoldState.snackbarHostState.showSnackbar("Share podcast")
                 is PodcastEvent.OpenWebsite ->
                     scaffoldState.snackbarHostState.showSnackbar("Open ${event.websiteUrl}")
+                is EpisodesEvent.PlayEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play episode")
+                is EpisodesEvent.PlayNextEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play next episode")
+                is EpisodesEvent.PlayLastEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Play last episode")
+                is EpisodesEvent.DownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Download episode")
+                is EpisodesEvent.RemoveDownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Remove download episode")
+                is EpisodesEvent.CancelDownloadEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Cancel download episode")
+                is EpisodesEvent.SaveEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Save episode")
+                is EpisodesEvent.RemoveFromSavedEpisodesEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Remove from saved episode")
+                is EpisodesEvent.ShareEpisodeEvent ->
+                    scaffoldState.snackbarHostState.showSnackbar("Share episode")
             }
         }
     }
