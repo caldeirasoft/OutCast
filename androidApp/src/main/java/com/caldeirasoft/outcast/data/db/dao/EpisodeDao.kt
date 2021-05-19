@@ -33,6 +33,9 @@ interface EpisodeDao : EntityDao<Episode> {
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime DESC")
     fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode>
 
+    @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime ASC")
+    fun getEpisodesDataSourceWithUrlOrderByDateAsc(feedUrl: String): DataSource.Factory<Int, Episode>
+
     @Query("SELECT * FROM episode e WHERE isSaved = 1")
     fun getSavedEpisodes(): Flow<List<Episode>>
 

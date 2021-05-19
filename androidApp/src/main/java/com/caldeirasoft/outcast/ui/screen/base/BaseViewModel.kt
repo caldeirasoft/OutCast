@@ -36,7 +36,7 @@ abstract class BaseViewModel<State: Any>(
         }
     }
 
-    protected suspend fun withState(block: (State) -> Unit) {
+    protected suspend fun withState(block: suspend (State) -> Unit) {
         stateMutex.withLock {
             block(_state.value)
         }
@@ -46,7 +46,7 @@ abstract class BaseViewModel<State: Any>(
         launch { this@BaseViewModel.setState(reducer) }
     }
 
-    protected fun CoroutineScope.withState(block: (State) -> Unit) {
+    protected fun CoroutineScope.withState(block: suspend (State) -> Unit) {
         launch { this@BaseViewModel.withState(block) }
     }
 

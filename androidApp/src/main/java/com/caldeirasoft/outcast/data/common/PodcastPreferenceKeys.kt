@@ -7,13 +7,16 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_CUSTOM_PLAYBACK_EFFECTS
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_CUSTOM_PLAYBACK_SPEED
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_EPISODE_LIMIT
-import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_NEW_EPISODES
+import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_FILTER
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_NOTIFICATIONS
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_SKIP_ENDING
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_SKIP_INTROS
+import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_SORT_ORDER
 import com.caldeirasoft.outcast.data.common.Constants.Companion.PREFERENCES_TRIM_SILENCE
 
 class PodcastPreferenceKeys(val feedUrl: String) {
+    val sortOrder = stringPreferencesKey("$feedUrl:$PREFERENCES_SORT_ORDER")
+    val filter = stringPreferencesKey("$feedUrl:$PREFERENCES_FILTER")
     val notifications = booleanPreferencesKey("$feedUrl:$PREFERENCES_NOTIFICATIONS")
     val episodeLimit = stringPreferencesKey("$feedUrl:$PREFERENCES_EPISODE_LIMIT")
     val customPlaybackEffects =

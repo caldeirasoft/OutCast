@@ -7,10 +7,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.domain.enums.PodcastFilter
+import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.domain.util.castAs
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
@@ -20,7 +21,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +32,10 @@ class PodcastViewModel @Inject constructor(
     private val followUseCase: FollowUseCase,
     private val unfollowUseCase: UnfollowUseCase,
     private val loadSettingsUseCase: LoadSettingsUseCase,
+    private val getPodcastSortOrderUseCase: GetPodcastSortOrderUseCase,
+    private val updatePodcastSortOrderUseCase: UpdatePodcastSortOrderUseCase,
+    private val getPodcastFilterUseCase: GetPodcastFilterUseCase,
+    private val updatePodcastFilterUseCase: UpdatePodcastFilterUseCase,
 ) : EpisodeListViewModel<PodcastState, PodcastEvent>(
     initialState = PodcastState(
         feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
@@ -46,10 +50,14 @@ class PodcastViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        loadPodcastEpisodesPagingDataUseCase.execute(initialState.feedUrl)
+        selectSubscribe(PodcastState::sortOrder)
+            .distinctUntilChanged()
+            .filterNotNull()
+            .flatMapLatest { sortOrder -> loadPodcastEpisodesPagingDataUseCase
+                .execute(initialState.feedUrl, sortOrder) }
             .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
-            .onEach { Timber.d("loadPodcastEpisodesUseCase : ${it} episodes") }
             .cachedIn(viewModelScope)
+
 
     init {
         loadPodcastFromDbUseCase.execute(initialState.feedUrl)
@@ -77,6 +85,16 @@ class PodcastViewModel @Inject constructor(
         loadSettingsUseCase.settings
             .setOnEach {
                 copy(prefs = it)
+            }
+
+        getPodcastSortOrderUseCase.execute(initialState.feedUrl)
+            .setOnEach {
+                copy(sortOrder = it)
+            }
+
+        getPodcastFilterUseCase.execute(initialState.feedUrl)
+            .setOnEach {
+                copy(filter = it)
             }
     }
 
@@ -137,6 +155,25 @@ class PodcastViewModel @Inject constructor(
             it.podcast?.podcastWebsiteURL?.let { url ->
                 emitEvent(PodcastEvent.OpenWebsite(url))
             }
+        }
+    }
+
+    fun togglePodcastSortOrder() {
+        viewModelScope.withState {
+            updatePodcastSortOrderUseCase.execute(
+                feedUrl = it.feedUrl,
+                sortOrder = if (it.sortOrder == SortOrder.DESC) SortOrder.ASC else SortOrder.DESC
+            )
+        }
+    }
+
+    fun updateFilter(filter: PodcastFilter) {
+        viewModelScope.withState {
+            updatePodcastFilterUseCase.execute(
+                feedUrl = it.feedUrl,
+                filter = filter
+            )
+            emitEvent(EpisodesEvent.RefreshList)
         }
     }
 

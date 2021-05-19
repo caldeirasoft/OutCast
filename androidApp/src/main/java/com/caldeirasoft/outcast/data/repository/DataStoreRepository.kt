@@ -2,14 +2,12 @@ package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
-import com.caldeirasoft.outcast.data.common.PodcastPreferences
 import com.caldeirasoft.outcast.domain.dto.StoreFrontDto
+import com.caldeirasoft.outcast.domain.enums.PodcastFilter
+import com.caldeirasoft.outcast.domain.enums.SortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -34,6 +32,46 @@ class DataStoreRepository @Inject constructor(
             //context.resources.configuration.locales.get(0).country
         }
 
+    val storeFront: Flow<String> =
+        storeCountry
+            .map { getCurrentStoreFront(it) }
+
+    // podcast sortOrder
+    fun getPodcastSortOrder(feedUrl: String): Flow<SortOrder> {
+        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
+        return dataStore.data.map {
+            it[podcastPreferenceKeys.sortOrder]
+                ?.let { sortOrder -> SortOrder.valueOf(sortOrder) }
+                ?: SortOrder.DESC
+        }
+    }
+
+    // podcast sortOrder
+    suspend fun updatePodcastSortOrder(feedUrl: String, sortOrder: SortOrder) {
+        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
+        dataStore.edit { preferences ->
+            preferences[podcastPreferenceKeys.sortOrder] = sortOrder.name
+        }
+    }
+
+    // podcast filter
+    fun getPodcastFilter(feedUrl: String): Flow<PodcastFilter> {
+        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
+        return dataStore.data.map {
+            it[podcastPreferenceKeys.filter]
+                ?.let { filter -> PodcastFilter.valueOf(filter) }
+                ?: PodcastFilter.ALL
+        }
+    }
+
+    // podcast filter
+    suspend fun updatePodcastFilter(feedUrl: String, filter: PodcastFilter) {
+        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
+        dataStore.edit { preferences ->
+            preferences[podcastPreferenceKeys.filter] = filter.name
+        }
+    }
+
     suspend fun saveStoreCountryPreference(country: String) {
         dataStore.edit { preferences ->
             preferences[PreferenceKeys.STOREFRONT_REGION] = country
@@ -54,10 +92,6 @@ class DataStoreRepository @Inject constructor(
             preferences[key] = value
         }
     }
-
-    val storeFront: Flow<String> =
-        storeCountry
-            .map { getCurrentStoreFront(it) }
 
     /**
      * getCurrentStoreFront

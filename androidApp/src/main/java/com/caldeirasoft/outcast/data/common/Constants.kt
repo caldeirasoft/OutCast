@@ -16,5 +16,8 @@ class Constants {
         const val PREFERENCES_TRIM_SILENCE = "pref_trim_silence"
         const val PREFERENCES_SKIP_INTROS = "pref_skip_intros"
         const val PREFERENCES_SKIP_ENDING = "pref_skip_ending"
+        const val PREFERENCES_SORT_BY = "pref_sort_by"
+        const val PREFERENCES_SORT_ORDER = "pref_sort_order"
+        const val PREFERENCES_FILTER = "pref_filter"
     }
 }

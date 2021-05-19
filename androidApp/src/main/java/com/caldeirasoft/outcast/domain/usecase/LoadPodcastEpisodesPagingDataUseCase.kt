@@ -6,14 +6,17 @@ import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.repository.DataStoreRepository
+import com.caldeirasoft.outcast.domain.enums.SortOrder
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class LoadPodcastEpisodesPagingDataUseCase @Inject constructor(
-    val episodeDao: EpisodeDao
+    val episodeDao: EpisodeDao,
+    val dataStoreRepository: DataStoreRepository
 ) {
-    fun execute(feedUrl: String): Flow<PagingData<Episode>> =
-        Pager(
+    fun execute(feedUrl: String, sortOrder: SortOrder): Flow<PagingData<Episode>> {
+        return Pager(
             config = PagingConfig(
                 pageSize = 20,
                 enablePlaceholders = false,
@@ -21,7 +24,9 @@ class LoadPodcastEpisodesPagingDataUseCase @Inject constructor(
                 prefetchDistance = 5
             ),
             initialKey = null,
-            pagingSourceFactory = episodeDao.getEpisodesDataSourceWithUrl(feedUrl).asPagingSourceFactory()
+            pagingSourceFactory = if (sortOrder == SortOrder.DESC)
+                episodeDao.getEpisodesDataSourceWithUrl(feedUrl).asPagingSourceFactory()
+                else episodeDao.getEpisodesDataSourceWithUrlOrderByDateAsc(feedUrl).asPagingSourceFactory()
         ).flow
-
+    }
 }
