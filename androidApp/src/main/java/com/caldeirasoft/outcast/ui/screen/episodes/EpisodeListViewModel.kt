@@ -3,6 +3,8 @@ package com.caldeirasoft.outcast.ui.screen.episodes
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
+import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.util.castAs
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
@@ -13,6 +15,8 @@ import kotlin.reflect.typeOf
 
 abstract class EpisodeListViewModel<State: Any, Event: EpisodesEvent>(
     initialState: State,
+    private val saveEpisodeUseCase: SaveEpisodeUseCase,
+    private val removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : BaseViewModelEvents<State, EpisodesEvent>(initialState)
 {
     @OptIn(FlowPreview::class)
@@ -60,12 +64,14 @@ abstract class EpisodeListViewModel<State: Any, Event: EpisodesEvent>(
 
     fun saveEpisode(episode: Episode) {
         viewModelScope.launch {
+            saveEpisodeUseCase.execute(episode)
             emitEvent(EpisodesEvent.SaveEpisodeEvent)
         }
     }
 
     fun removeSavedEpisode(episode: Episode) {
         viewModelScope.launch {
+            removeSaveEpisodeUseCase.execute(episode)
             emitEvent(EpisodesEvent.RemoveFromSavedEpisodesEvent)
         }
     }

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
@@ -375,6 +377,13 @@ private fun EpisodeActionButtons(
         Spacer(modifier = Modifier.weight(1f))
         // queued button
         // favorite button
+        if (episode.isSaved) {
+            Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Filled.Bookmark,
+                contentDescription = null
+            )
+        }
         // more button
         IconButton(onClick = onContextMenuClick) {
             Icon(

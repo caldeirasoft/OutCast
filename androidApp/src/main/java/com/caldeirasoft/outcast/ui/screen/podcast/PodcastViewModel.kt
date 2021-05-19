@@ -36,11 +36,15 @@ class PodcastViewModel @Inject constructor(
     private val updatePodcastSortOrderUseCase: UpdatePodcastSortOrderUseCase,
     private val getPodcastFilterUseCase: GetPodcastFilterUseCase,
     private val updatePodcastFilterUseCase: UpdatePodcastFilterUseCase,
+    saveEpisodeUseCase: SaveEpisodeUseCase,
+    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : EpisodeListViewModel<PodcastState, PodcastEvent>(
     initialState = PodcastState(
         feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
         isLoading = true
-    )
+    ),
+    saveEpisodeUseCase = saveEpisodeUseCase,
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
 ), PreferenceViewModel {
 
     private var isInitialized: Boolean = false

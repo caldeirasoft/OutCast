@@ -7,6 +7,8 @@ import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.usecase.FetchPodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
+import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
+import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
 import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlDecode
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +23,8 @@ class EpisodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadEpisodeFromDbUseCase: LoadEpisodeFromDbUseCase,
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
+    private val saveEpisodeUseCase: SaveEpisodeUseCase,
+    private val removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : BaseViewModelEvents<EpisodeViewState, EpisodeEvent>(
     // The string "episode" is the name of the argument in the route
     EpisodeViewState(
@@ -113,15 +117,12 @@ class EpisodeViewModel @Inject constructor(
         }
     }
 
-    fun saveEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.SaveEpisodeEvent)
-        }
-    }
-
-    fun removeSavedEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.RemoveFromSavedEpisodesEvent)
+    fun toggleSaveEpisode() {
+        viewModelScope.withState {
+            it.episode?.let { episode ->
+                if (episode.isSaved.not()) saveEpisodeUseCase.execute(episode)
+                else removeSaveEpisodeUseCase.execute(episode)
+            }
         }
     }
 

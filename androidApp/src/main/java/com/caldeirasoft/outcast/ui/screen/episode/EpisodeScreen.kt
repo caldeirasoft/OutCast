@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +59,7 @@ fun EpisodeScreen(
         scaffoldState = scaffoldState,
         onPodcastClick = viewModel::openPodcastDetails,
         navigateBack = navigateBack,
+        onSaveButtonClick = viewModel::toggleSaveEpisode,
         onMoreButtonClick = { episode ->
             coroutineScope.OpenBottomSheetMenu(
                 header = { // header : episode
@@ -75,11 +78,6 @@ fun EpisodeScreen(
                         titleId = R.string.action_play_last,
                         icon = Icons.Default.AddToQueue,
                         onClick = { viewModel.playLast() },
-                    ),
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_save_episode,
-                        icon = Icons.Default.FavoriteBorder,
-                        onClick = { viewModel.saveEpisode() },
                     ),
                     BottomSheetSeparator,
                     BottomSheetMenuItem(
@@ -136,6 +134,7 @@ fun EpisodeScreen(
     scaffoldState: ScaffoldState,
     navigateBack: () -> Unit,
     onPodcastClick: () -> Unit,
+    onSaveButtonClick: () -> Unit,
     onMoreButtonClick: (Episode) -> Unit,
 ) {
     val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
@@ -185,12 +184,13 @@ fun EpisodeScreen(
                     // buttons
                     item {
                         state.episode?.let {
-                            EpisodeExtendedActionButtons(
+                            EpisodeActionAppBar(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp)
                                     .padding(bottom = 16.dp),
                                 episode = it,
+                                onSaveButtonClick = onSaveButtonClick,
                                 onContextMenuClick = {
                                     onMoreButtonClick(it)
                                 }
@@ -389,28 +389,40 @@ private fun EpisodeDescriptionContent(description: String) {
 }
 
 @Composable
-private fun EpisodeExtendedActionButtons(
+private fun EpisodeActionAppBar(
     modifier: Modifier = Modifier,
     episode: Episode,
+    onSaveButtonClick: () -> Unit,
     onContextMenuClick: () -> Unit,
 ) {
     val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
-    Row(modifier = modifier
-        .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        PlayButton(
-            episode = episode)
-        Spacer(modifier = Modifier.weight(1f))
-        // queued button
-        // favorite button
-        // more button
-        IconButton(onClick = onContextMenuClick) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = null,
-                tint = tintColor,
+    TopAppBar(
+        modifier = Modifier,
+        title = {
+            PlayButton(
+                episode = episode
             )
-        }
-    }
+        },
+        actions = {
+            // queued button
+            // save button
+            IconButton(onClick = onSaveButtonClick) {
+                Icon(
+                    imageVector = if (episode.isSaved) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
+                    contentDescription = null,
+                    tint = tintColor,
+                )
+            }
+            // more button
+            IconButton(onClick = onContextMenuClick) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = null,
+                    tint = tintColor,
+                )
+            }
+        },
+        backgroundColor = Color.Transparent,
+        elevation = 0.dp
+    )
 }

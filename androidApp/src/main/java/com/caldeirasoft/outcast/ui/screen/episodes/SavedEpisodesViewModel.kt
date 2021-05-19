@@ -4,27 +4,26 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
+import com.caldeirasoft.outcast.domain.usecase.LoadSavedEpisodesPagingDataUseCase
+import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
+import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import timber.log.Timber
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
 class SavedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadSavedEpisodesPagingDataUseCase: LoadSavedEpisodesPagingDataUseCase,
+    saveEpisodeUseCase: SaveEpisodeUseCase,
+    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
+    saveEpisodeUseCase = saveEpisodeUseCase,
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
 ) {
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =

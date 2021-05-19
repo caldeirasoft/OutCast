@@ -25,8 +25,12 @@ import javax.inject.Inject
 class PlayedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
+    saveEpisodeUseCase: SaveEpisodeUseCase,
+    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
+    saveEpisodeUseCase = saveEpisodeUseCase,
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
 ) {
 
     @OptIn(FlowPreview::class)

@@ -99,11 +99,19 @@ fun PodcastScreen(
                         icon = Icons.Default.AddToQueue,
                         onClick = { viewModel.playLast(episode) },
                     ),
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_save_episode,
-                        icon = Icons.Default.FavoriteBorder,
-                        onClick = { viewModel.saveEpisode(episode) },
-                    ),
+                    if (episode.isSaved.not())
+                        BottomSheetMenuItem(
+                            titleId = R.string.action_save_episode,
+                            icon = Icons.Default.Favorite,
+                            onClick = { viewModel.saveEpisode(episode) },
+                        )
+                    else
+                        BottomSheetMenuItem(
+                            titleId = R.string.action_remove_saved_episode,
+                            icon = Icons.Default.FavoriteBorder,
+                            onClick = { viewModel.removeSavedEpisode(episode) },
+                        )
+                    ,
                     BottomSheetSeparator,
                     BottomSheetMenuItem(
                         titleId = R.string.action_share_episode,

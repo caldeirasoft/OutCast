@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,11 +84,19 @@ fun EpisodesScreen(
                         icon = Icons.Default.AddToQueue,
                         onClick = { viewModel.playLast(episode) },
                     ),
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_save_episode,
-                        icon = Icons.Default.FavoriteBorder,
-                        onClick = { viewModel.saveEpisode(episode) },
-                    ),
+                    if (episode.isSaved.not())
+                        BottomSheetMenuItem(
+                            titleId = R.string.action_save_episode,
+                            icon = Icons.Outlined.BookmarkAdd,
+                            onClick = { viewModel.saveEpisode(episode) },
+                        )
+                    else
+                        BottomSheetMenuItem(
+                            titleId = R.string.action_remove_saved_episode,
+                            icon = Icons.Outlined.BookmarkRemove,
+                            onClick = { viewModel.removeSavedEpisode(episode) },
+                        )
+                    ,
                     BottomSheetSeparator,
                     BottomSheetMenuItem(
                         titleId = R.string.action_share_episode,

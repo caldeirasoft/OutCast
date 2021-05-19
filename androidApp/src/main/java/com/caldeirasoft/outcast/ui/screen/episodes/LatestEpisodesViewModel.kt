@@ -19,8 +19,12 @@ class LatestEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
     private val loadLatestEpisodeCategoriesUseCase: LoadLatestEpisodeCategoriesUseCase,
+    saveEpisodeUseCase: SaveEpisodeUseCase,
+    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
+    saveEpisodeUseCase = saveEpisodeUseCase,
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
 ) {
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
