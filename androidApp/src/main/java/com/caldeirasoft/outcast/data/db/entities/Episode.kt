@@ -57,6 +57,7 @@ data class Episode(
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
   @ColumnInfo(name = "isPlayed") val isPlayed: Boolean = false,
   @ColumnInfo(name = "isSaved") val isSaved: Boolean = false,
+  @ColumnInfo(name = "savedAt") val savedAt: Instant? = null,
   @ColumnInfo(name = "playedAt") val playedAt: Instant? = null,
   @ColumnInfo(name = "updatedAt") val updatedAt: Instant
 ) : Parcelable {

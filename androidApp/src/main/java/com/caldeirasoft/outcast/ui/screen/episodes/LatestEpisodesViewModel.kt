@@ -27,7 +27,6 @@ class LatestEpisodesViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
         loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
-            .onEach { Timber.d("LoadLatestEpisodesPagingDataUseCase : $it episodes") }
             .map { pagingData ->
                 state.value.category
                     ?.let {

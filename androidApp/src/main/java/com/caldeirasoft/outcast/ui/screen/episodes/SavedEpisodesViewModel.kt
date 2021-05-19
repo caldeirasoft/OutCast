@@ -22,38 +22,14 @@ import javax.inject.Inject
 @HiltViewModel
 class SavedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
+    private val loadSavedEpisodesPagingDataUseCase: LoadSavedEpisodesPagingDataUseCase,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
 ) {
-
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
-            .onEach { Timber.d("LoadLatestEpisodesPagingDataUseCase : $it episodes") }
-            .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) }}
-            .map {
-                it.insertSeparators { before, after ->
-                    if (after == null) {
-                        // end of the list
-                        return@insertSeparators null
-                    }
-
-                    val releaseDate = after.episode.releaseDateTime
-                    if (before == null) {
-                        // we're at the beginning of the lis
-                        return@insertSeparators EpisodeUiModel.SeparatorItem(releaseDate)
-                    }
-                    // check between 2 items
-                    if (before.episode.releaseDateTime.toLocalDateTime(TimeZone.UTC).date !=
-                        after.episode.releaseDateTime.toLocalDateTime(TimeZone.UTC).date) {
-                        EpisodeUiModel.SeparatorItem(releaseDate)
-                    }
-                    else {
-                        // no separator
-                        null
-                    }
-                }
-            }
+        loadSavedEpisodesPagingDataUseCase
+            .execute()
+            .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
             .cachedIn(viewModelScope)
 }

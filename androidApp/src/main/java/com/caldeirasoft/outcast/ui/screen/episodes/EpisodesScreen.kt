@@ -25,11 +25,7 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
-import com.caldeirasoft.outcast.ui.screen.episodes.LatestEpisodesViewModel
+import com.caldeirasoft.outcast.ui.screen.episodes.*
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
 import com.caldeirasoft.outcast.ui.util.ifLoading
@@ -47,6 +43,7 @@ import timber.log.Timber
 @Composable
 fun EpisodesScreen(
     viewModel: EpisodeListViewModel<EpisodesState, EpisodesEvent>,
+    title: String,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
@@ -61,6 +58,7 @@ fun EpisodesScreen(
     EpisodesScreen(
         state = state,
         scaffoldState = scaffoldState,
+        title = title,
         lazyPagingItems = lazyPagingItems,
         navigateTo = navigateTo,
         navigateBack = navigateBack,
@@ -139,10 +137,27 @@ fun LatestEpisodesScreen(
     navigateBack: () -> Unit,
 ) {
     EpisodesScreen(
+        title = stringResource(id = R.string.screen_latest_episodes),
         viewModel = viewModel,
         navigateTo = navigateTo,
         navigateBack = navigateBack,
         onCategoryFilterClick = viewModel::filterByCategory
+    )
+}
+
+@FlowPreview
+@ExperimentalCoroutinesApi
+@Composable
+fun SavedEpisodesScreen(
+    viewModel: SavedEpisodesViewModel,
+    navigateTo: (Screen) -> Unit,
+    navigateBack: () -> Unit,
+) {
+    EpisodesScreen(
+        title = stringResource(id = R.string.screen_saved_episodes),
+        viewModel = viewModel,
+        navigateTo = navigateTo,
+        navigateBack = navigateBack,
     )
 }
 
@@ -151,6 +166,7 @@ fun LatestEpisodesScreen(
 fun EpisodesScreen(
     state: EpisodesState,
     scaffoldState: ScaffoldState,
+    title: String,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
@@ -186,7 +202,7 @@ fun EpisodesScreen(
                     var textSize by remember { mutableStateOf(25.sp) }
 
                     Text(
-                        text = stringResource(id = R.string.screen_latest_episodes),
+                        text = title,
                         modifier = Modifier
                             .heightIn(min = AppBarHeight)
                             .road(Alignment.CenterStart, Alignment.BottomStart)

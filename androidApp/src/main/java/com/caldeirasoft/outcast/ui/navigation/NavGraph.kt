@@ -19,6 +19,7 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
 import com.caldeirasoft.outcast.ui.screen.episodes.base.LatestEpisodesScreen
+import com.caldeirasoft.outcast.ui.screen.episodes.base.SavedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
@@ -171,6 +172,12 @@ fun MainNavHost(startScreen: ScreenName) {
                 }
                 composable(ScreenName.LATEST_EPISODES.name) {
                     LatestEpisodesScreen(
+                        viewModel = hiltNavGraphViewModel(),
+                        navigateTo = actions.select,
+                        navigateBack = actions.up)
+                }
+                composable(ScreenName.SAVED_EPISODES.name) {
+                    SavedEpisodesScreen(
                         viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up)

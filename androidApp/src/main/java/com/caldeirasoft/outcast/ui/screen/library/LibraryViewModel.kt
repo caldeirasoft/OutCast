@@ -4,8 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
-import com.caldeirasoft.outcast.ui.screen.MvieViewModel
-import com.caldeirasoft.outcast.ui.screen.library.LibraryActions
 import com.caldeirasoft.outcast.ui.screen.library.LibraryEvent
 import com.caldeirasoft.outcast.ui.screen.library.LibrarySort
 import com.caldeirasoft.outcast.ui.screen.library.LibraryState

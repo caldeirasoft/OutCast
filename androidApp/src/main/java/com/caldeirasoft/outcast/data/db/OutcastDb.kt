@@ -15,7 +15,7 @@ import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 
 @androidx.room.Database(
     entities = [Podcast::class, Episode::class, Queue::class],
-    version = 2
+    version = 3
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDb : RoomDatabase() {

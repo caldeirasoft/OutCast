@@ -189,8 +189,9 @@ private fun LibraryScreen(
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
                                                     when (item) {
-                                                        //LibraryItemType.LATEST_EPISODES ->
-                                                        //    actioner(LibraryActions.OpenLatestEpisodesScreen)
+                                                        LibraryItemType.SAVED_EPISODES ->
+                                                            navigateTo(Screen.SavedEpisodes)
+                                                        else -> { }
                                                     }
                                                 }),
                                             item = item,
@@ -229,8 +230,9 @@ private fun LibraryScreen(
                                                 .fillMaxWidth()
                                                 .clickable(onClick = {
                                                     when (item) {
-                                                        //LibraryItemType.LATEST_EPISODES ->
-                                                        //    actioner(LibraryActions.OpenLatestEpisodesScreen)
+                                                        LibraryItemType.SAVED_EPISODES ->
+                                                            navigateTo(Screen.SavedEpisodes)
+                                                        else -> { }
                                                     }
                                                 }),
                                             item = item,

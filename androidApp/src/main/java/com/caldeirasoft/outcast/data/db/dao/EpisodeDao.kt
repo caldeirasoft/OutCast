@@ -37,7 +37,7 @@ interface EpisodeDao : EntityDao<Episode> {
     fun getEpisodesDataSourceWithUrlOrderByDateAsc(feedUrl: String): DataSource.Factory<Int, Episode>
 
     @Query("SELECT * FROM episode e WHERE isSaved = 1")
-    fun getSavedEpisodes(): Flow<List<Episode>>
+    fun getSavedEpisodesDataSource(): DataSource.Factory<Int, Episode>
 
     @Query("SELECT * FROM episode e WHERE playbackPosition != NULL OR isPlayed = 1")
     fun getEpisodesHistory(): Flow<List<Episode>>
@@ -73,14 +73,14 @@ interface EpisodeDao : EntityDao<Episode> {
 
     @Query("""
         UPDATE episode 
-        SET isSaved = 1
+        SET isSaved = 1, savedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
     suspend fun saveEpisodeToLibrary(feedUrl: String, guid: String)
 
     @Query("""
         UPDATE episode 
-        SET isSaved = 0 
+        SET isSaved = 0, savedAt = NULL 
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
     suspend fun deleteFromLibrary(feedUrl: String, guid: String)
