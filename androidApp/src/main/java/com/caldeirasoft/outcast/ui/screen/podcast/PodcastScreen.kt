@@ -26,6 +26,8 @@ import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.domain.enums.PodcastFilter
+import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -79,6 +81,8 @@ fun PodcastScreen(
         onSettingsButtonClick = { },
         onShareItemClick = viewModel::sharePodcast,
         onWebsiteItemClick = viewModel::openPodcastWebsite,
+        onSortButtonClick = viewModel::togglePodcastSortOrder,
+        onFilterItemClick = viewModel::updateFilter,
         onEpisodeItemMoreButtonClick = { episode ->
             coroutineScope.OpenBottomSheetMenu(
                 header = { // header : episode
@@ -158,6 +162,8 @@ private fun PodcastScreen(
     onSettingsButtonClick: () -> Unit,
     onShareItemClick: () -> Unit,
     onWebsiteItemClick: () -> Unit,
+    onSortButtonClick: () -> Unit,
+    onFilterItemClick: (PodcastFilter) -> Unit,
     onEpisodeItemMoreButtonClick: (Episode) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -281,36 +287,68 @@ private fun PodcastScreen(
                             }
                         }
                     }
-                    // episode title
+                    // episode title + actions
                     item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                                .padding(horizontal = 16.dp)
-                        ) {
-                            Text(
-                                stringResource(id = R.string.podcast_episodes),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically),
-                                style = MaterialTheme.typography.h6
-                            )
-
-                            ActionChipButton(
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                                onClick = { /*TODO*/ },
-                                icon = {
-                                    Icon(imageVector = Icons.Filled.Sort,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .padding(start = 4.dp)
-                                            .size(16.dp)
-                                            .align(Alignment.CenterVertically))
-                                }) {
-                                Text(text = stringResource(id = R.string.action_filter))
-                            }
-                        }
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    stringResource(id = R.string.podcast_episodes),
+                                )
+                            },
+                            actions = {
+                                if (state.followingStatus == FollowStatus.FOLLOWED) {
+                                    // filter button
+                                    /*Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
+                                        IconButton(onClick = { expanded = !expanded }) {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreVert,
+                                                contentDescription = null
+                                            )
+                                        }
+                                        DropdownMenu(
+                                            expanded = expanded,
+                                            onDismissRequest = { expanded = false }) {
+                                            DropdownMenuItem(onClick = {
+                                                expanded = false
+                                                onShareItemClick()
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Share,
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(20.dp)
+                                                )
+                                                Text(text = stringResource(id = R.string.action_share))
+                                            }
+                                            DropdownMenuItem(onClick = {
+                                                expanded = false
+                                                onWebsiteItemClick()
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Public,
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(20.dp)
+                                                )
+                                                Text(text = stringResource(id = R.string.action_open_website))
+                                            }
+                                        }
+                                    }*/
+                                    // sort button
+                                    IconButton(onClick = onSortButtonClick) {
+                                        Icon(
+                                            imageVector = if (state.sortOrder == SortOrder.DESC)
+                                                Icons.Default.Sort else Icons.Default.SortByAlpha,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            },
+                            backgroundColor = Color.Transparent,
+                            elevation = 0.dp
+                        )
                     }
 
                     // episodes
