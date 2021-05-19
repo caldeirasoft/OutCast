@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit
 @Module
 object NetworkModule {
     @Provides
-    fun provideCache(application: Application): Cache {
+    fun provideHttpCache(application: Application): Cache {
         val cacheSize = 10 * 1024 * 1024
         return Cache(application.cacheDir, cacheSize.toLong())
     }
@@ -99,32 +99,34 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideOkHttpClient(@ApplicationContext appContext: Context): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext appContext: Context, cache: Cache): OkHttpClient {
         return provideHttpClientBuilder()
             .withChucker(context = appContext)
+            .cache(cache)
             .build()
     }
 
     //@Provides
-    fun provideOkHttpClientWithCacheControl(@ApplicationContext appContext: Context): OkHttpClient {
+    fun provideOkHttpClientWithCacheControl(@ApplicationContext appContext: Context, cache: Cache): OkHttpClient {
         return provideHttpClientBuilder()
             .withChucker(context = appContext)
             .withCacheControl(context = appContext)
+            .cache(cache)
             .build()
     }
 
     @Provides
-    fun provideItunesAPI(@ApplicationContext appContext: Context): ItunesAPI =
-        provideRetrofit(provideOkHttpClient(appContext))
+    fun provideItunesAPI(@ApplicationContext appContext: Context, cache: Cache): ItunesAPI =
+        provideRetrofit(provideOkHttpClientWithCacheControl(appContext, cache))
 
     @Provides
-    fun provideItunesSearchAPI(@ApplicationContext appContext: Context): ItunesSearchAPI =
-        provideRetrofit(provideOkHttpClient(appContext))
+    fun provideItunesSearchAPI(@ApplicationContext appContext: Context, cache: Cache): ItunesSearchAPI =
+        provideRetrofit(provideOkHttpClient(appContext, cache))
 
     @Provides
-    fun providePodcastsFetcher(@ApplicationContext appContext: Context) =
+    fun providePodcastsFetcher(@ApplicationContext appContext: Context, cache: Cache) =
         PodcastsFetcher(
-            okHttpClient = provideOkHttpClient(appContext),
+            okHttpClient = provideOkHttpClient(appContext, cache),
             ioDispatcher = Dispatchers.IO
         )
 
