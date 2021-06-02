@@ -280,7 +280,7 @@ private fun PodcastScreen(
                     }
                     // genre
                     item {
-                        podcastData?.category?.let { genre ->
+                        podcastData?.genre?.let { genre ->
                             Box(modifier = Modifier
                                 .padding(horizontal = 16.dp)
                                 .padding(bottom = 8.dp)
@@ -698,7 +698,7 @@ fun PodcastMetaData(podcastData: Podcast,
             }
         }
         // category
-        podcastData.category?.let { category ->
+        podcastData.genre?.let { category ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),

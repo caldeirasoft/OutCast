@@ -11,6 +11,7 @@ import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 @Serializable
@@ -48,34 +49,33 @@ data class Episode(
   @ColumnInfo(name = "mediaUrl") val mediaUrl: String,
   @ColumnInfo(name = "mediaType") val mediaType: String,
   @ColumnInfo(name = "duration") val duration: Int,
-  @ColumnInfo(name = "category") val category: Category? = null,
+  @ColumnInfo(name = "category") val category: Int? = null,
   @ColumnInfo(name = "podcastEpisodeSeason") val podcastEpisodeSeason: Int? = null,
   @ColumnInfo(name = "podcastEpisodeNumber") val podcastEpisodeNumber: Int? = null,
   @ColumnInfo(name = "podcastEpisodeWebsiteUrl") val podcastEpisodeWebsiteUrl: String? = null,
   @ColumnInfo(name = "podcastEpisodeType") val podcastEpisodeType: String? = null,
-  @ColumnInfo(name = "playbackPosition") val playbackPosition: Int? = null,
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
-  @ColumnInfo(name = "isPlayed") val isPlayed: Boolean = false,
+  @ColumnInfo(name = "updatedAt") val updatedAt: String,
+
+  // save
   @ColumnInfo(name = "isSaved") val isSaved: Boolean = false,
-  @ColumnInfo(name = "savedAt") val savedAt: Instant? = null,
-  @ColumnInfo(name = "playedAt") val playedAt: Instant? = null,
-  @ColumnInfo(name = "updatedAt") val updatedAt: Instant
+  @ColumnInfo(name = "saved_at") val savedAt: String? = null,
+
+  // playback
+  @ColumnInfo(name = "playback_state") val playbackState: Int = 0,
+  @ColumnInfo(name = "playback_position") val playbackPosition: Int? = null,
+  @ColumnInfo(name = "playback_played_at") val playedAt: String? = null,
 ) : Parcelable {
-  companion object {
-    val Default = Episode(
-      feedUrl = "",
-      guid = "",
-      name = "",
-      podcastName = "",
-      artistName = "",
-      artworkUrl = "",
-      description = "",
-      duration = 0,
-      mediaType = "",
-      mediaUrl = "",
-      releaseDateTime = Instant.DISTANT_PAST,
-      updatedAt = Instant.DISTANT_PAST,
-    )
-  }
+
+  @Transient
+  val isFinished: Boolean
+    get() = playbackPosition?.let { it >= duration } ?: false
+
+  val hasBeenStarted: Boolean
+    get() = playbackPosition?.let { it >= 0 } ?: false
+
+  val playedAtInstant: Instant?
+    get() = playedAt?.let { Instant.parse(it) }
+
 }
 

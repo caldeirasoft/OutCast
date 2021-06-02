@@ -126,4 +126,8 @@
     <string name="action_subscribed">Subscribed</string>
     <string name="action_subscribing">Subscribing</string>
     <string name="action_tap_to_refresh">Tap to refresh</string>
+
+    <!-- exo -->
+    <string name="exo_download_notification_channel_name">Downloads</string>
+    <string name="exo_download_notification_channel_description">Download mp3</string>
 </resources>

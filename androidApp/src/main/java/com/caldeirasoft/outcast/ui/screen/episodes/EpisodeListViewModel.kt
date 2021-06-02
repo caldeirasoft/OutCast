@@ -2,14 +2,16 @@ package com.caldeirasoft.outcast.ui.screen.episodes
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import com.caldeirasoft.outcast.data.db.entities.Download
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.util.castAs
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.reflect.typeOf
 
@@ -17,10 +19,22 @@ abstract class EpisodeListViewModel<State: Any, Event: EpisodesEvent>(
     initialState: State,
     private val saveEpisodeUseCase: SaveEpisodeUseCase,
     private val removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    private val downloadRepository: DownloadRepository,
 ) : BaseViewModelEvents<State, EpisodesEvent>(initialState)
 {
     @OptIn(FlowPreview::class)
     abstract val episodes: Flow<PagingData<EpisodeUiModel>>
+    protected val downloadsFlow: MutableStateFlow<List<Download>> =
+        MutableStateFlow(emptyList())
+
+    init {
+        downloadRepository.getAllDownloads()
+            .distinctUntilChanged()
+            .onEach { downloads ->
+                downloadsFlow.emit(downloads)
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun openPodcastDetails(episode: Episode) {
 
@@ -65,6 +79,7 @@ abstract class EpisodeListViewModel<State: Any, Event: EpisodesEvent>(
     fun saveEpisode(episode: Episode) {
         viewModelScope.launch {
             saveEpisodeUseCase.execute(episode)
+            downloadRepository.startDownload(episode)
             emitEvent(EpisodesEvent.SaveEpisodeEvent)
         }
     }
@@ -72,6 +87,7 @@ abstract class EpisodeListViewModel<State: Any, Event: EpisodesEvent>(
     fun removeSavedEpisode(episode: Episode) {
         viewModelScope.launch {
             removeSaveEpisodeUseCase.execute(episode)
+            downloadRepository.removeDownload(episode)
             emitEvent(EpisodesEvent.RemoveFromSavedEpisodesEvent)
         }
     }

@@ -283,6 +283,7 @@ fun EpisodesScreen(
                                 is EpisodeUiModel.EpisodeItem -> {
                                     EpisodeItem(
                                         episode = uiModel.episode,
+                                        download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
                                         onEpisodeClick = {
                                             navigateTo(Screen.EpisodeScreen(uiModel.episode))
                                         },

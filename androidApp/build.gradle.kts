@@ -11,11 +11,11 @@ plugins {
 val composeVersion: String by project
 
 android {
-    compileSdkVersion(30)
+    compileSdk = 30
     defaultConfig {
         applicationId = "com.caldeirasoft.outcast.androidApp"
-        minSdkVersion(24)
-        targetSdkVersion(30)
+        minSdk = 24
+        targetSdk =30
         versionCode = 1
         versionName = "0.1"
     }
@@ -77,6 +77,7 @@ dependencies {
     api(libs.bundles.retrofit)
     api(libs.bundles.okhttp)
     api(libs.bundles.accompanist)
+    api(libs.bundles.exoplayer)
     api(libs.core.ktx)
     api(libs.appcompat)
     api(libs.palette)
@@ -89,8 +90,10 @@ dependencies {
     api(libs.paging.compose)
     api(libs.jsoup)
     api(libs.timber)
+    api(libs.work.runtime)
     api(libs.javax.inject)
     kapt(libs.hilt.compiler)
+    kapt(libs.hilt.workCompiler)
     releaseImplementation(libs.chucker.release)
     debugImplementation(libs.chucker.debug)
     // Java 8+ API desugaring support

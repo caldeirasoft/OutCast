@@ -5,7 +5,7 @@ import androidx.room.*
 @Dao
 interface EntityDao<in E> {
     @Insert
-    fun insert(entity: E): Long
+    suspend fun insert(entity: E): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAll(vararg entity: E): List<Long>

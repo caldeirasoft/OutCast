@@ -29,8 +29,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlinx.datetime.*
 import kotlinx.datetime.Instant.Companion.fromEpochSeconds
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
@@ -188,11 +187,8 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         podcastEpisodeSeason = season,
         podcastEpisodeType = episodeType,
         podcastEpisodeWebsiteUrl = link,
-        updatedAt = Clock.System.now(),
-        isPlayed = false,
-        playedAt = Instant.DISTANT_PAST,
+        updatedAt = Clock.System.now().toString(),
         isSaved = false,
-        playbackPosition = null,
     )
 }
 

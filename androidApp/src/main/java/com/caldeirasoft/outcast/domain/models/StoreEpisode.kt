@@ -7,7 +7,11 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.serializers.DurationSerializer
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.UseSerializers
+import java.time.format.DateTimeFormatter
 
 val StoreEpisode.episode: Episode
         get() = Episode(
@@ -30,9 +34,8 @@ val StoreEpisode.episode: Episode
             podcastEpisodeType = this.podcastEpisodeType,
             podcastEpisodeWebsiteUrl = this.podcastEpisodeWebsiteUrl,
             isExplicit = false,
-            updatedAt = Clock.System.now(),
+            updatedAt = Clock.System.now().toString(),
             playbackPosition = null,
-            isPlayed = false,
             isSaved = false,
             playedAt = null,
         )

@@ -5,23 +5,26 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.caldeirasoft.outcast.data.db.dao.DownloadDao
 import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
+import com.caldeirasoft.outcast.data.db.entities.Download
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.Queue
 import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 
 @androidx.room.Database(
-    entities = [Podcast::class, Episode::class, Queue::class],
-    version = 3
+    entities = [Podcast::class, Episode::class, Queue::class, Download::class],
+    version = 1
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDb : RoomDatabase() {
     abstract fun podcastDao(): PodcastDao
     abstract fun episodeDao(): EpisodeDao
     abstract fun queueDao(): QueueDao
+    abstract fun downloadDao(): DownloadDao
 
     companion object {
         private var INSTANCE: OutcastDb? = null

@@ -16,6 +16,11 @@ pluginManagement {
         //jcenter()
         mavenCentral()
         gradlePluginPortal()
+        maven(url  = uri("https://oss.sonatype.org/content/repositories/snapshots")) {
+            content {
+                includeModule("com.google.dagger", "hilt-android-gradle-plugin")
+            }
+        }
     }
 
     plugins {
@@ -36,7 +41,8 @@ pluginManagement {
             when (requested.id.id) {
                 "com.android.application", "com.android.library" -> useModule("com.android.tools.build:gradle:${androidGradleVersion}")
                 "com.squareup.sqldelight" -> useModule("com.squareup.sqldelight:gradle-plugin:${sqldelightVersion}")
-                "dagger.hilt.android.plugin" -> useModule("com.google.dagger:hilt-android-gradle-plugin:$hiltVersion")
+                "dagger.hilt.android.plugin" -> useModule("com.google.dagger:hilt-android-gradle-plugin:${hiltVersion}")
+                "kotlin-multiplatform" -> useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
             }
         }
     }

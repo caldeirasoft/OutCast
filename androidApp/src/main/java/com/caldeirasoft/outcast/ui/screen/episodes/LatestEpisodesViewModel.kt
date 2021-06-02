@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.repository.DownloadRepository
+import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.screen.episodes.base.*
@@ -17,23 +19,25 @@ import javax.inject.Inject
 @HiltViewModel
 class LatestEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
     private val loadLatestEpisodeCategoriesUseCase: LoadLatestEpisodeCategoriesUseCase,
     saveEpisodeUseCase: SaveEpisodeUseCase,
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    private val episodesRepository: EpisodesRepository,
+    private val downloadRepository: DownloadRepository,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
     saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+    downloadRepository = downloadRepository
 ) {
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
+        getLatestEpisodes()
             .map { pagingData ->
                 state.value.category
                     ?.let {
                         pagingData.filter { episode ->
-                            episode.category == state.value.category
+                            episode.category == state.value.category?.ordinal
                         }
                     }
                     ?: pagingData
@@ -55,6 +59,11 @@ class LatestEpisodesViewModel @Inject constructor(
                     category = this.category.takeIf { categories.contains(it) }
                 )
             }
+
+        downloadsFlow
+            .setOnEach { downloads ->
+                copy(downloads = downloads)
+            }
     }
 
     fun filterByCategory(category: Category?) {
@@ -63,6 +72,19 @@ class LatestEpisodesViewModel @Inject constructor(
         }
         emitEvent(EpisodesEvent.RefreshList)
     }
+
+    private fun getLatestEpisodes(): Flow<PagingData<Episode>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                maxSize = 4000,
+                prefetchDistance = 5
+            ),
+            initialKey = null,
+            pagingSourceFactory = episodesRepository.getLatestEpisodesDataSource().asPagingSourceFactory()
+        ).flow
+
 
     private fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
         map {

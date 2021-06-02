@@ -19,6 +19,7 @@ import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 @Serializable
@@ -45,7 +46,7 @@ data class Podcast(
   @ColumnInfo(name = "podcastWebsiteURL") val podcastWebsiteURL: String? = null,
   @ColumnInfo(name = "copyright") val copyright: String? = null,
   @ColumnInfo(name = "userRating") val userRating: Double? = null,
-  @ColumnInfo(name = "category") val category: Category? = null,
+  @ColumnInfo(name = "category") val category: Int? = null,
   @ColumnInfo(name = "newFeedUrl") val newFeedUrl: String? = null,
   @ColumnInfo(name = "isComplete") val isComplete: Boolean = false,
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
@@ -53,6 +54,10 @@ data class Podcast(
   @ColumnInfo(name = "followedAt") val followedAt: Instant? = null,
   @ColumnInfo(name = "updatedAt") val updatedAt: Instant
 ) {
+
+  val genre: Category?
+    get() = category?.let { Category.values()[it] }
+
   companion object {
     val Default = Podcast(
       feedUrl = "",
@@ -81,7 +86,7 @@ data class Podcast(
         trackCount = trackCount.toLong(),
         copyright = copyright,
         isExplicit = isExplicit,
-        category = category,
+        category = category?.ordinal,
         newFeedUrl = null,
         isComplete = false,
         isFollowed = false,

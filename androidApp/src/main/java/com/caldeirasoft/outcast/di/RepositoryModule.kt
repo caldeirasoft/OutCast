@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.caldeirasoft.outcast.data.api.ItunesAPI
 import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
+import com.caldeirasoft.outcast.data.db.dao.DownloadDao
 import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
@@ -20,7 +21,7 @@ import kotlinx.serialization.json.Json
 
 @InstallIn(SingletonComponent::class)
 @Module
-class RepositoryModule {
+object RepositoryModule {
     @Provides
     fun providePodcastRepository(
         podcastsFetcher: PodcastsFetcher,
@@ -40,6 +41,17 @@ class RepositoryModule {
             json)
 
     @Provides
+    fun provideEpisodesRepository(
+        @ApplicationContext context: Context,
+        episodeDao: EpisodeDao,
+        queueDao: QueueDao
+    ) =
+        EpisodesRepository(
+            context,
+            episodeDao,
+            queueDao)
+
+    @Provides
     fun provideStoreRepository(
         itunesAPI: ItunesAPI,
         searchAPI: ItunesSearchAPI,
@@ -54,4 +66,10 @@ class RepositoryModule {
         dataStore: DataStore<Preferences>,
     ) =
         DataStoreRepository(context, dataStore)
+
+    @Provides
+    fun provideDownloadsRepository(
+        @ApplicationContext context: Context,
+        downloadDao: DownloadDao
+    ) = DownloadRepository(context, downloadDao)
 }

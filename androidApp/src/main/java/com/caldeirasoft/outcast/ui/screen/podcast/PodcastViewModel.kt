@@ -7,6 +7,9 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.repository.DataStoreRepository
+import com.caldeirasoft.outcast.data.repository.DownloadRepository
+import com.caldeirasoft.outcast.data.repository.PodcastsRepository
 import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.podcast
@@ -36,15 +39,19 @@ class PodcastViewModel @Inject constructor(
     private val updatePodcastSortOrderUseCase: UpdatePodcastSortOrderUseCase,
     private val getPodcastFilterUseCase: GetPodcastFilterUseCase,
     private val updatePodcastFilterUseCase: UpdatePodcastFilterUseCase,
+    private val podcastsRepository: PodcastsRepository,
+    private val dataStoreRepository: DataStoreRepository,
     saveEpisodeUseCase: SaveEpisodeUseCase,
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    downloadRepository: DownloadRepository,
 ) : EpisodeListViewModel<PodcastState, PodcastEvent>(
     initialState = PodcastState(
         feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
         isLoading = true
     ),
     saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+    downloadRepository = downloadRepository
 ), PreferenceViewModel {
 
     private var isInitialized: Boolean = false

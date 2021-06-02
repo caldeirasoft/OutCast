@@ -2,10 +2,8 @@ package com.caldeirasoft.outcast.data.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
-import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata
+import com.caldeirasoft.outcast.data.db.entities.*
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata.Companion.metadata
-import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
 import com.caldeirasoft.outcast.domain.models.Category
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
@@ -39,7 +37,7 @@ interface EpisodeDao : EntityDao<Episode> {
     @Query("SELECT * FROM episode e WHERE isSaved = 1")
     fun getSavedEpisodesDataSource(): DataSource.Factory<Int, Episode>
 
-    @Query("SELECT * FROM episode e WHERE playbackPosition != NULL OR isPlayed = 1")
+    @Query("SELECT * FROM episode e WHERE playback_position != NULL")
     fun getEpisodesHistory(): Flow<List<Episode>>
 
     // get latest episodes (unplayed) / last 3 months
@@ -47,7 +45,7 @@ interface EpisodeDao : EntityDao<Episode> {
         SELECT e.* FROM episode e
         INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
         LEFT JOIN queue q ON (e.feedUrl = q.feedUrl AND e.guid = q.guid)
-        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL AND q.feedUrl IS NULL
+        WHERE p.isFollowed = 1 AND e.playback_position IS NULL AND q.feedUrl IS NULL
           AND e.releaseDateTime > :releaseDateTime
         ORDER BY e.releaseDateTime DESC
     """)
@@ -59,35 +57,35 @@ interface EpisodeDao : EntityDao<Episode> {
         FROM episode e
         INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
         LEFT JOIN queue q ON (e.feedUrl = q.feedUrl AND e.guid = q.guid)
-        WHERE p.isFollowed = 1 AND e.isPlayed = 0 AND e.playbackPosition IS NULL AND q.feedUrl IS NULL
+        WHERE p.isFollowed = 1 AND e.playback_position IS NULL AND q.feedUrl IS NULL
           AND e.releaseDateTime > :releaseDateTime
     """)
-    fun getLatestEpisodesCategories(releaseDateTime: Instant = Clock.System.now().minus(90.days)): Flow<List<Category?>>
+    fun getLatestEpisodesCategories(releaseDateTime: Instant = Clock.System.now().minus(90.days)): Flow<List<Int?>>
 
     @Query("""
         UPDATE episode 
-        SET playbackPosition = :playbackPosition AND updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') 
+        SET playback_position = :playbackPosition AND updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') 
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
     suspend fun addEpisodeToHistory(feedUrl: String, guid: String, playbackPosition: Long)
 
     @Query("""
         UPDATE episode 
-        SET isSaved = 1, savedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        SET isSaved = 1, saved_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
     suspend fun saveEpisodeToLibrary(feedUrl: String, guid: String)
 
     @Query("""
         UPDATE episode 
-        SET isSaved = 0, savedAt = NULL 
+        SET isSaved = 0, saved_at = NULL 
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
     suspend fun deleteFromLibrary(feedUrl: String, guid: String)
 
     @Query("""
         UPDATE episode 
-        SET playbackPosition = NULL, isPlayed = 1, playedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        SET playback_position = duration, playback_played_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
         WHERE feedUrl = :feedUrl AND guid = :guid
     """)
     suspend fun markEpisodeAsPlayed(feedUrl: String, guid: String)

@@ -9,6 +9,7 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.Category
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -18,5 +19,7 @@ class LoadLatestEpisodeCategoriesUseCase @Inject constructor(
     private val episodeDao: EpisodeDao
 ) {
     fun getLatestEpisodesCategories(): Flow<List<Category?>> =
-        episodeDao.getLatestEpisodesCategories()
+        episodeDao
+            .getLatestEpisodesCategories()
+            .map { categories -> categories.map { index -> index?.let { Category.values()[index] } } }
 }

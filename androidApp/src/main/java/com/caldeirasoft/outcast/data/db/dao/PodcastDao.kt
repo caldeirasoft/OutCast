@@ -12,7 +12,7 @@ import kotlinx.datetime.Instant
 @Dao
 interface PodcastDao : EntityDao<Podcast> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    override fun insert(podcast: Podcast): Long
+    override suspend fun insert(podcast: Podcast): Long
 
     @Update(entity = Podcast::class)
     fun update(podcastMetadata: PodcastMetadata)
@@ -21,7 +21,7 @@ interface PodcastDao : EntityDao<Podcast> {
     fun update(podcastItunesMetadata: PodcastItunesMetadata)
 
     @Transaction
-    fun upsert(podcast: Podcast) {
+    suspend fun upsert(podcast: Podcast) {
         val id = insert(podcast)
         if (id == -1L) {
             update(podcast.metaData)

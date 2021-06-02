@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
@@ -27,10 +28,12 @@ class PlayedEpisodesViewModel @Inject constructor(
     private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
     saveEpisodeUseCase: SaveEpisodeUseCase,
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    downloadRepository: DownloadRepository,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
     saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+    downloadRepository = downloadRepository
 ) {
 
     @OptIn(FlowPreview::class)
@@ -49,13 +52,13 @@ class PlayedEpisodesViewModel @Inject constructor(
                     return@insertSeparators null
                 }
 
-                val releaseDate = after.episode.playedAt ?: Instant.DISTANT_PAST
+                val releaseDate = after.episode.playedAtInstant ?: Instant.DISTANT_PAST
                 if (before == null) {
                     // we're at the beginning of the lis
                     return@insertSeparators EpisodeUiModel.SeparatorItem(releaseDate)
                 }
                 // check between 2 items
-                if (before.episode.playedAt?.isDateTheSame(releaseDate) == true) {
+                if (before.episode.playedAtInstant?.isDateTheSame(releaseDate) == true) {
                     EpisodeUiModel.SeparatorItem(releaseDate)
                 }
                 else {

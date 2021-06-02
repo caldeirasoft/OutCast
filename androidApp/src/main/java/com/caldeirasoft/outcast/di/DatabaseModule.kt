@@ -28,4 +28,7 @@ object DatabaseDaoModule {
 
     @Provides
     fun provideQueueDao(db: OutcastDb) = db.queueDao()
+
+    @Provides
+    fun provideDownloadDao(db: OutcastDb) = db.downloadDao()
 }

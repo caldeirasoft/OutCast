@@ -32,7 +32,7 @@ class StoreDataViewModel @Inject constructor(
     initialState = StoreDataState(data = savedStateHandle.getObject("storeData")))
 {
 
-    val followLoadingStatus: MutableStateFlow<List<Long>> =
+    private val followLoadingStatus: MutableStateFlow<List<Long>> =
         MutableStateFlow(emptyList())
 
     init {

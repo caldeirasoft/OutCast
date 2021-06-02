@@ -1,18 +1,17 @@
 package com.caldeirasoft.outcast.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
+import com.caldeirasoft.outcast.data.db.entities.Download
+import com.caldeirasoft.outcast.data.db.entities.DownloadState
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDateTime
 import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
@@ -117,6 +118,7 @@ fun QueueEpisodeItem(
 fun EpisodeItem(
     modifier: Modifier = Modifier,
     episode: Episode,
+    download: Download? = null,
     onEpisodeClick: (() -> Unit)? = null,
     onPodcastClick: (() -> Unit)? = null,
     onContextMenuClick: (() -> Unit)? = null,
@@ -159,6 +161,7 @@ fun EpisodeItem(
             if (showActions && onContextMenuClick != null) {
                 EpisodeActionButtons(
                     episode = episode,
+                    download = download,
                     onContextMenuClick = onContextMenuClick
                 )
             }
@@ -185,6 +188,7 @@ fun EpisodeItem(
 fun PodcastEpisodeItem(
     modifier: Modifier = Modifier,
     episode: Episode,
+    download: Download? = null,
     onEpisodeClick: () -> Unit,
     onContextMenuClick: () -> Unit,
     index: Int? = null,
@@ -211,6 +215,7 @@ fun PodcastEpisodeItem(
         actionButtons = {
             EpisodeActionButtons(
                 episode = episode,
+                download = download,
                 onContextMenuClick = onContextMenuClick
             )
         },
@@ -365,15 +370,16 @@ fun EpisodeTrailerItem(
 private fun EpisodeActionButtons(
     modifier: Modifier = Modifier,
     episode: Episode,
+    download: Download?,
     onContextMenuClick: () -> Unit,
 ) {
+    //TODO: app bar ?
     val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
     Row(modifier = Modifier
         .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlayButton(
-            episode = episode)
+        PlayButton(episode = episode)
         Spacer(modifier = Modifier.weight(1f))
         // queued button
         // favorite button
@@ -384,6 +390,11 @@ private fun EpisodeActionButtons(
                 contentDescription = null
             )
         }
+        // downloaded button
+        EpisodeDownloadButton(
+            episode = episode,
+            download = download)
+
         // more button
         IconButton(onClick = onContextMenuClick) {
             Icon(
@@ -392,6 +403,59 @@ private fun EpisodeActionButtons(
                 tint = tintColor,
             )
         }
+    }
+}
+
+@Composable
+private fun EpisodeDownloadButton(
+    modifier: Modifier = Modifier,
+    episode: Episode,
+    download: Download?
+) {
+    val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    when (download?.state) {
+        DownloadState.CREATED.ordinal ->
+            Box(modifier = Modifier.padding(start = 8.dp)) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+                Icon(
+                    imageVector = Icons.Filled.ArrowDownward,
+                    contentDescription = null,
+                    tint = tintColor,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.Center)
+                )
+            }
+        DownloadState.IN_PROGRESS.ordinal ->
+            Box(modifier = Modifier.padding(start = 8.dp)) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    progress = download.progress / 100f
+                )
+                Icon(
+                    imageVector = Icons.Filled.ArrowDownward,
+                    contentDescription = null,
+                    tint = tintColor,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.Center)
+                )
+            }
+        DownloadState.COMPLETED.ordinal ->
+            Box(modifier = Modifier.padding(start = 8.dp)) {
+                Icon(
+                    imageVector = Icons.Filled.DownloadForOffline,
+                    contentDescription = null,
+                    tint = tintColor,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.Center)
+                )
+            }
     }
 }
 

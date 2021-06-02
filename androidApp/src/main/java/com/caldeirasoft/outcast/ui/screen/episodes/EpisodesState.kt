@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.ui.screen.episodes
 
 import androidx.datastore.preferences.core.Preferences
+import com.caldeirasoft.outcast.data.db.entities.Download
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.Category
@@ -11,5 +12,6 @@ data class EpisodesState(
     val error: Throwable? = null,
     val episodes: List<Episode> = emptyList(),
     val category: Category? = null,
-    val categories: List<Category> = emptyList()
+    val categories: List<Category> = emptyList(),
+    val downloads: List<Download> = emptyList(),
 )

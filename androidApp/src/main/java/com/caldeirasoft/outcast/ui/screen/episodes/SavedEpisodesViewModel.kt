@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.domain.usecase.LoadSavedEpisodesPagingDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
@@ -20,10 +21,12 @@ class SavedEpisodesViewModel @Inject constructor(
     private val loadSavedEpisodesPagingDataUseCase: LoadSavedEpisodesPagingDataUseCase,
     saveEpisodeUseCase: SaveEpisodeUseCase,
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    downloadRepository: DownloadRepository,
 ) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
     initialState = EpisodesState(),
     saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase
+    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+    downloadRepository = downloadRepository
 ) {
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =

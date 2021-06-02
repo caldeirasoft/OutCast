@@ -15,7 +15,7 @@ data class EpisodeMetadata(
   @ColumnInfo(name = "mediaUrl") val mediaUrl: String,
   @ColumnInfo(name = "mediaType") val mediaType: String,
   @ColumnInfo(name = "duration") val duration: Int,
-  @ColumnInfo(name = "category") val category: Category? = null,
+  @ColumnInfo(name = "category") val category: Int? = null,
   @ColumnInfo(name = "podcastEpisodeSeason") val podcastEpisodeSeason: Int? = null,
   @ColumnInfo(name = "podcastEpisodeNumber") val podcastEpisodeNumber: Int? = null,
   @ColumnInfo(name = "podcastEpisodeWebsiteUrl") val podcastEpisodeWebsiteUrl: String? = null,
