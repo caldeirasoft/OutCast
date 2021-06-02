@@ -117,7 +117,7 @@ class ExoDownloadService : DownloadService(
 
     private fun handledDownloadFailed(download: Download) {
         UpdateDownloadWorker.updateAndStartNext(
-            workManager = WorkManager.getInstance(this),
+            context = this,
             downloadId = download.request.id,
             progress = download.percentDownloaded.roundToInt(),
             state = DownloadState.FAILED,
@@ -127,7 +127,7 @@ class ExoDownloadService : DownloadService(
 
     private fun handledDownloadRemoved(download: Download) {
         UpdateDownloadWorker.updateAndStartNext(
-            workManager = WorkManager.getInstance(this),
+            context = this,
             downloadId = download.request.id,
             progress = 0,
             state = DownloadState.NONE,
@@ -145,7 +145,7 @@ class ExoDownloadService : DownloadService(
 
     private fun handledDownloadCompleted(download: Download) {
         UpdateDownloadWorker.updateAndStartNext(
-            workManager = WorkManager.getInstance(this),
+            context = this,
             downloadId = download.request.id,
             progress = download.percentDownloaded.roundToInt(),
             state = DownloadState.COMPLETED,

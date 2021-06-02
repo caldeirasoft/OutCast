@@ -44,7 +44,7 @@ class RemoveDownloadWorker @AssistedInject constructor(
          * @param mediaUrl
          */
         fun enqueue(
-            workManager: WorkManager,
+            context: Context,
             mediaUrl: String
         ) {
             val downloadData =
@@ -57,7 +57,7 @@ class RemoveDownloadWorker @AssistedInject constructor(
                 .addTag(DOWNLOAD_WORKER_TAG)
                 .build()
 
-            workManager
+            WorkManager.getInstance(context)
                 .enqueueUniqueWork(
                     mediaUrl,
                     ExistingWorkPolicy.REPLACE,

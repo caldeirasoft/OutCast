@@ -58,7 +58,7 @@ class StartDownloadWorker @AssistedInject constructor(
          * @param state
          */
         fun enqueue(
-            workManager: WorkManager,
+            context: Context,
             mediaUrl: String,
             downloadOnlyOnWifi: Boolean
         ) {
@@ -75,7 +75,7 @@ class StartDownloadWorker @AssistedInject constructor(
             val downloadWorkRequest =
                 DownloadWorker.buildWorkRequest(downloadOnlyOnWifi)
 
-            workManager
+            WorkManager.getInstance(context)
                 .beginUniqueWork(
                     DOWNLOAD_ID,
                     ExistingWorkPolicy.REPLACE,

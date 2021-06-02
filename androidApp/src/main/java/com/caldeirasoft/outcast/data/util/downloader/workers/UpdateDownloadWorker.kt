@@ -52,7 +52,7 @@ class UpdateDownloadWorker @AssistedInject constructor(
          * @param state
          */
         fun updateAndStartNext(
-            workManager: WorkManager,
+            context: Context,
             downloadId: String,
             progress: Int,
             state: DownloadState,
@@ -72,7 +72,7 @@ class UpdateDownloadWorker @AssistedInject constructor(
             val downloadWorkRequest =
                 DownloadWorker.buildWorkRequest(downloadOnlyOnWifi)
 
-            workManager
+            WorkManager.getInstance(context)
                 .beginUniqueWork(
                     downloadId,
                     ExistingWorkPolicy.REPLACE,

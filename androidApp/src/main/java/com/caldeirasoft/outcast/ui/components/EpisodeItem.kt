@@ -1,5 +1,7 @@
 package com.caldeirasoft.outcast.ui.components
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -9,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -414,21 +417,29 @@ private fun EpisodeDownloadButton(
 ) {
     val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
     when (download?.state) {
-        DownloadState.CREATED.ordinal ->
-            Box(modifier = Modifier.padding(start = 8.dp)) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp
+        DownloadState.CREATED.ordinal -> {
+            val infiniteTransition = rememberInfiniteTransition()
+            val animatedColor: Color by infiniteTransition.animateColor(
+                initialValue = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled),
+                targetValue = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.high),
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1200, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
                 )
+            )
+            Box(modifier = Modifier
+                .padding(start = 8.dp)
+                .size(20.dp)) {
                 Icon(
                     imageVector = Icons.Filled.ArrowDownward,
                     contentDescription = null,
-                    tint = tintColor,
+                    tint = animatedColor,
                     modifier = Modifier
                         .size(16.dp)
                         .align(Alignment.Center)
                 )
             }
+        }
         DownloadState.IN_PROGRESS.ordinal ->
             Box(modifier = Modifier.padding(start = 8.dp)) {
                 CircularProgressIndicator(

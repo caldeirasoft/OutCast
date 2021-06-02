@@ -101,7 +101,7 @@ class DownloadRepository @Inject constructor(
      */
     fun startDownload(episode: Episode) {
         StartDownloadWorker.enqueue(
-            workManager = WorkManager.getInstance(context),
+            context = context,
             mediaUrl = episode.mediaUrl,
             downloadOnlyOnWifi = true
         )
@@ -112,7 +112,7 @@ class DownloadRepository @Inject constructor(
      */
     fun removeDownload(episode: Episode) {
         RemoveDownloadWorker.enqueue(
-            workManager = WorkManager.getInstance(context),
+            context = context,
             mediaUrl = episode.mediaUrl,
         )
     }
