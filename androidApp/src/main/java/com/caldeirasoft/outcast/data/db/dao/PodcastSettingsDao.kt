@@ -1,0 +1,16 @@
+package com.caldeirasoft.outcast.data.db.dao;
+
+import androidx.room.*
+import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
+
+import com.caldeirasoft.outcast.data.db.entities.Settings;
+
+import kotlinx.coroutines.flow.Flow;
+
+@Dao
+interface PodcastSettingsDao  : EntityDao<PodcastSettings>{
+    @Transaction
+    @Query("SELECT * FROM podcast_settings WHERE feedUrl = :feedUrl")
+    fun getPodcastSettingsWithUrl(feedUrl: String): Flow<PodcastSettings?>
+}

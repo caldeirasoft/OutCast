@@ -2,8 +2,8 @@ package com.caldeirasoft.outcast.domain.enums
 
 enum class PodcastFilter {
     ALL,
-    UNPLAYED,
-    DOWNLOADED,
+    INBOX,
+    QUEUE,
     SAVED,
     PREVIOUSLY_PLAYED,
 }
