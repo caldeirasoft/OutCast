@@ -30,7 +30,9 @@ class SettingsRepository @Inject constructor(
      * Get all settings
      */
     fun getSettings(): Flow<Settings> =
-        settingsDao.getAllSettings()
+        settingsDao
+            .getAllSettings()
+            .filterNotNull()
 
     /**
      * Update settings

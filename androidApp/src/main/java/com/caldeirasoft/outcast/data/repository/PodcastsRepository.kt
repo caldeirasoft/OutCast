@@ -7,10 +7,12 @@ import androidx.datastore.preferences.core.edit
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
 import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
+import com.caldeirasoft.outcast.data.db.dao.PodcastSettingsDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
+import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -28,6 +30,7 @@ class PodcastsRepository @Inject constructor(
     val podcastDao: PodcastDao,
     val episodeDao: EpisodeDao,
     val queueDao: QueueDao,
+    val podcastSettingsDao: PodcastSettingsDao,
     val json: Json,
 ) {
 
@@ -149,11 +152,7 @@ class PodcastsRepository @Inject constructor(
             updatePodcast(feedUrl)
         // subscribe to podcast
         podcastDao.followPodcast(feedUrl = feedUrl, followedAt = Clock.System.now())
-        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = feedUrl)
-        dataStore.edit { preferences ->
-            preferences[podcastPreferenceKeys.notifications] = true
-            preferences[podcastPreferenceKeys.customPlaybackEffects] = false
-        }
+        podcastSettingsDao.insert(PodcastSettings(feedUrl = feedUrl))
     }
 
     /**
@@ -165,11 +164,7 @@ class PodcastsRepository @Inject constructor(
             updatePodcast(storePodcast.feedUrl, storePodcast.podcast)
         // subscribe to podcast
         podcastDao.followPodcast(feedUrl = storePodcast.feedUrl, followedAt = Clock.System.now())
-        val podcastPreferenceKeys = PodcastPreferenceKeys(feedUrl = storePodcast.feedUrl)
-        dataStore.edit { preferences ->
-            preferences[podcastPreferenceKeys.notifications] = true
-            preferences[podcastPreferenceKeys.customPlaybackEffects] = false
-        }
+        podcastSettingsDao.insert(PodcastSettings(feedUrl = storePodcast.feedUrl))
     }
 
     /**

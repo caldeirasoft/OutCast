@@ -58,7 +58,7 @@ sealed class Screen (val id: ScreenName) {
         )
     }
 
-    data class PodcastSettings(val podcastId: Long) : Screen(ScreenName.PODCAST_SETTINGS)
+    data class PodcastSettings(val feedUrl: String) : Screen(ScreenName.PODCAST_SETTINGS)
     data class EpisodeScreen constructor(
         val feedUrl: String,
         val guid: String,

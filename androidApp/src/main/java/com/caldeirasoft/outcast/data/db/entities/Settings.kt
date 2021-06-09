@@ -33,6 +33,27 @@ data class Settings(
   companion object {
     const val TABLE_NAME: String = "settings"
 
+    val Settings.backgroundSyncOption: BackgroundRefreshOptions
+      get() = BackgroundRefreshOptions.values()[this.backgroundSync]
+
+    val Settings.episodeLimitOption: EpisodeLimitOptions
+      get() = EpisodeLimitOptions.values()[this.episodeLimit]
+
+    val Settings.deletePlayedEpisodesDelayOption: DeleteEpisodesDelay
+      get() = DeleteEpisodesDelay.values()[this.deletePlayedEpisodesDelay]
+
+    val Settings.streamOnMobileDataOption: StreamOptions
+      get() = StreamOptions.values()[this.streamOnMobileData]
+
+    val Settings.skipBackButtonOption: SkipOptions
+      get() = SkipOptions.values()[this.skipBackButton]
+
+    val Settings.skipForwardButtonOption: SkipOptions
+      get() = SkipOptions.values()[this.skipForwardButton]
+
+    val Settings.externalControlsOptionsOption: ExternalControlsOptions
+      get() = ExternalControlsOptions.values()[this.externalControlsOptions]
+
     // general
     // notifications
     // downloads

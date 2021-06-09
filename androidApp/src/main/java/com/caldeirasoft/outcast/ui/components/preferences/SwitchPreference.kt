@@ -12,16 +12,15 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 fun SwitchPreference(
     item: SwitchPreferenceItem,
     value: Boolean?,
-    onValueChanged: (Boolean) -> Unit,
 ) {
     val currentValue = value ?: item.defaultValue
     Preference(
         item = item,
-        onClick = { onValueChanged(!currentValue) }
+        onClick = { item.onValueChanged(!currentValue) }
     ) {
         Switch(
             checked = currentValue,
-            onCheckedChange = { onValueChanged(!currentValue) },
+            onCheckedChange = { item.onValueChanged(!currentValue) },
             enabled = item.enabled
         )
     }

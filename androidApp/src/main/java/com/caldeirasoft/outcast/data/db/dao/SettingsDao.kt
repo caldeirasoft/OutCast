@@ -13,5 +13,5 @@ import kotlinx.coroutines.flow.Flow;
 @Dao
 interface SettingsDao  : EntityDao<Settings>{
     @Query("SELECT * FROM settings WHERE id = 1")
-    fun getAllSettings():Flow<Settings>
+    fun getAllSettings():Flow<Settings?>
 }

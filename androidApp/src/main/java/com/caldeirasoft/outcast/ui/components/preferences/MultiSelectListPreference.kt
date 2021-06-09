@@ -17,20 +17,20 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
-fun MultiSelectListPreference(
-    item: MultiListPreferenceItem,
-    values: Set<String>?,
-    onValuesChanged: (Set<String>) -> Unit,
+fun <T> MultiSelectListPreference(
+    item: MultiListPreferenceItem<T>,
 ) {
-    val selectedValues = values ?: item.defaultValue
+    val selectedValues = item.defaultValue
     val showDialog = remember { mutableStateOf(false) }
     val closeDialog = { showDialog.value = false }
-    val descripion = item.entries.filter { selectedValues.contains(it.key) }.map { it.value }
+    val description = item.entries
+        .filter { selectedValues.contains(it.key) }
+        .map { it.value }
         .joinToString(separator = ", ", limit = 3)
 
     Preference(
         item = item,
-        summary = if (descripion.isNotBlank()) descripion else null,
+        summary = if (description.isNotBlank()) description else null,
         onClick = { showDialog.value = true }
     )
 
@@ -47,7 +47,7 @@ fun MultiSelectListPreference(
                                 true -> selectedValues + current.key
                                 false -> selectedValues - current.key
                             }
-                            onValuesChanged(result)
+                            item.onValueChanged(result)
                         }
                         Row(Modifier
                             .fillMaxWidth()

@@ -265,7 +265,7 @@ private fun PodcastScreen(
                                 state = state,
                                 onFollowPodcast = onFollowPodcast,
                                 onUnfollowPodcast = onUnfollowPodcast,
-                                onSettingsButtonClick = onSettingsButtonClick,
+                                onSettingsButtonClick = { navigateTo(Screen.PodcastSettings(state.feedUrl)) },
                                 onNotificationButtonClick = onNotificationButtonClick,
                                 onShareItemClick = onShareItemClick,
                                 onWebsiteItemClick = onWebsiteItemClick

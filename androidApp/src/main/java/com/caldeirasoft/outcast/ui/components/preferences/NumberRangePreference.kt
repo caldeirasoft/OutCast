@@ -25,7 +25,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 fun NumberRangePreference(
     item: NumberRangeFloatPreferenceItem,
     value: Float?,
-    onValueChanged: (Float) -> Unit,
 ) {
     val currentValue = remember(value) { mutableStateOf(value ?: item.defaultValue) }
     Preference(
@@ -38,7 +37,7 @@ fun NumberRangePreference(
                 value = currentValue.value,
                 onValueChanged = {
                     currentValue.value = it
-                    onValueChanged(currentValue.value)
+                    item.onValueChanged(currentValue.value)
                 },
             )
         }

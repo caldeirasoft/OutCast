@@ -27,6 +27,7 @@ object RepositoryModule {
         podcastDao: PodcastDao,
         episodeDao: EpisodeDao,
         queueDao: QueueDao,
+        podcastSettingsDao: PodcastSettingsDao,
         json: Json,
     ) =
         PodcastsRepository(podcastsFetcher,
@@ -35,6 +36,7 @@ object RepositoryModule {
             podcastDao,
             episodeDao,
             queueDao,
+            podcastSettingsDao,
             json)
 
     @Provides

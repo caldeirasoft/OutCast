@@ -23,6 +23,7 @@ import com.caldeirasoft.outcast.ui.screen.episodes.base.PlayedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.episodes.base.SavedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
+import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsScreen
 import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataScreen
 import com.google.accompanist.insets.navigationBarsPadding
@@ -170,6 +171,15 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up
                     )
+                }
+                composable(
+                    route = "${ScreenName.PODCAST_SETTINGS.name}/{feedUrl}",
+                    arguments = listOf(navArgument("feedUrl") { type = NavType.StringType })
+                ) {
+                    PodcastSettingsScreen(
+                        viewModel = hiltNavGraphViewModel(),
+                        navigateTo = actions.select,
+                        navigateBack = actions.up)
                 }
                 composable(ScreenName.LATEST_EPISODES.name) {
                     LatestEpisodesScreen(

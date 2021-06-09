@@ -22,7 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 fun SeekBarPreference(
     item: SeekbarFloatPreferenceItem,
     value: Float?,
-    onValueChanged: (Float) -> Unit,
 ) {
     val currentValue = remember(value) { mutableStateOf(value ?: item.defaultValue) }
     Preference(
@@ -32,7 +31,7 @@ fun SeekBarPreference(
                 item = item,
                 sliderValue = currentValue.value,
                 onValueChanged = { currentValue.value = it },
-                onValueChangeFinished = { onValueChanged(currentValue.value) }
+                onValueChangeFinished = { item.onValueChanged(currentValue.value) }
             )
         },
     )

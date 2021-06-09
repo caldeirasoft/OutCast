@@ -20,7 +20,6 @@ import java.lang.Integer.parseInt
 fun NumberPreference(
     item: NumberPreferenceItem,
     value: Int?,
-    onValueChanged: (Int) -> Unit,
 ) {
     val currentValue = remember(value) { mutableStateOf(value ?: item.defaultValue) }
     val showDialog = remember { mutableStateOf(false) }
@@ -41,7 +40,7 @@ fun NumberPreference(
                     value = currentValue.value.toString(),
                     onValueChange = {
                         if (item.enabled) {
-                            onValueChanged(parseInt(it))
+                            item.onValueChanged(parseInt(it))
                         }
                     },
                     keyboardOptions = KeyboardOptions(

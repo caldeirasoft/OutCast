@@ -45,8 +45,10 @@ class Actions(navController: NavController) {
                     navController.navigate(screen.id.name)
                 }
             }
-            is PodcastSettings ->
-                navController.navigate("${screen.id.name}/${screen.podcastId}")
+            is PodcastSettings -> {
+                val feedUrl = screen.feedUrl.urlEncode()
+                navController.navigate("${screen.id.name}/$feedUrl")
+            }
             else ->
                 navController.navigate(screen.id.name)
         }

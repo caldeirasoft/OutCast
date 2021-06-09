@@ -18,13 +18,20 @@ data class PodcastSettings(
   @ColumnInfo(name = "isFollowed") val isFollowed: Boolean = false,
   @ColumnInfo(name = "followed_at") val followedAt: Instant? = null,
   @ColumnInfo(name = "notifications") val notifications: Boolean = true,
-  @ColumnInfo(name = "new_episodes") val newEpisodesOptions: Int = NewEpisodesOptions.ADD_TO_INBOX.ordinal,
+  @ColumnInfo(name = "new_episodes") val newEpisodes: Int = NewEpisodesOptions.ADD_TO_INBOX.ordinal,
   @ColumnInfo(name = "episode_limit") val episodeLimit: Int = PodcastEpisodeLimitOptions.DEFAULT_SETTING.ordinal,
   @ColumnInfo(name = "skip_intro") val skipIntro: Int = 0,
   @ColumnInfo(name = "skip_outro") val skipOutro: Int = 0,
   @ColumnInfo(name = "podcast_filter") val podcastFilter: Int = PodcastFilter.ALL.ordinal,
   @ColumnInfo(name = "podcast_sort") val podcastSortOrder: Int = SortOrder.DESC.ordinal,
 ) {
+
+  val newEpisodesOption: NewEpisodesOptions
+    get() = NewEpisodesOptions.values()[this.newEpisodes]
+
+  val episodeLimitOption: PodcastEpisodeLimitOptions
+    get() = PodcastEpisodeLimitOptions.values()[this.episodeLimit]
+
   companion object {
     const val TABLE_NAME: String = "podcast_settings"
 

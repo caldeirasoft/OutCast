@@ -17,18 +17,16 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
-fun ListPreference(
-    item: SingleListPreferenceItem,
-    value: String?,
-    onValueChanged: (String) -> Unit,
+fun <T> ListPreference(
+    item: SingleListPreferenceItem<T>
 ) {
-    val selectedValue = value ?: item.defaultValue
+    val selectedValue = item.defaultValue
     val showDialog = remember { mutableStateOf(false) }
     val closeDialog = { showDialog.value = false }
 
     Preference(
         item = item,
-        summary = item.entries[value],
+        summary = item.entries[selectedValue],
         onClick = { showDialog.value = true },
     )
 
@@ -41,7 +39,7 @@ fun ListPreference(
                     item.entries.forEach { current ->
                         val isSelected = selectedValue == current.key
                         val onSelected = {
-                            onValueChanged(current.key)
+                            item.onValueChanged(current.key)
                             closeDialog()
                         }
                         Row(Modifier

@@ -83,11 +83,22 @@
     <string name="screen_history">History</string>
     <string name="screen_settings">Settings</string>
 
+    <string name="settings_new_episodes">New episodes</string>
+    <string name="settings_new_episodes_desc">When a new episode is released</string>
+    <string name="settings_new_episodes_inbox">Add to inbox</string>
+    <string name="settings_new_episodes_queue_next">Queue next</string>
+    <string name="settings_new_episodes_queue_last">Queue last</string>
+    <string name="settings_new_episodes_archive">Archive</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_notifications_desc">Get notified of new episodes</string>
     <string name="settings_episode_limit">Episode limit</string>
     <string name="settings_episode_limit_desc">Limit what number of episodes of each podcast to keep</string>
     <string name="settings_episode_no_limit">No limit</string>
+    <string name="settings_episode_limit_one_day">One day</string>
+    <string name="settings_episode_limit_one_week">One week</string>
+    <string name="settings_episode_limit_two_weeks">Two weeks</string>
+    <string name="settings_episode_limit_one_month">One month</string>
+    <string name="settings_episode_limit_default_x">Default (%1$s)</string>
     <string name="settings_playback_effects">Playback effects</string>
     <string name="settings_playback_effects_desc">Set custom playback effects</string>
     <string name="settings_playback_speed">Playback speed</string>
