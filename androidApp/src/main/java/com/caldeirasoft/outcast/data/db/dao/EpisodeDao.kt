@@ -28,7 +28,15 @@ interface EpisodeDao : EntityDao<Episode> {
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl")
     fun getEpisodesWithUrl(feedUrl: String): Flow<List<Episode>>
 
-    @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime DESC")
+    @Query("""
+        SELECT e.* 
+        FROM episode e
+         LEFT JOIN podcast p USING (feedUrl)
+        WHERE feedUrl = :feedUrl 
+        ORDER BY 
+            CASE WHEN p.podcast_sort = 0 THEN e.releaseDateTime END ASC,
+            CASE WHEN p.podcast_sort = 1 THEN e.releaseDateTime END DESC
+    """)
     fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode>
 
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime ASC")

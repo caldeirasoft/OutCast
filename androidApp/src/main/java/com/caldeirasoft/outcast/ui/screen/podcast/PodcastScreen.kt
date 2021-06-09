@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -78,7 +79,6 @@ fun PodcastScreen(
         onFollowPodcast = viewModel::follow,
         onUnfollowPodcast = viewModel::unfollow,
         onNotificationButtonClick = viewModel::toggleNotifications,
-        onSettingsButtonClick = { },
         onShareItemClick = viewModel::sharePodcast,
         onWebsiteItemClick = viewModel::openPodcastWebsite,
         onSortButtonClick = viewModel::togglePodcastSortOrder,
@@ -167,7 +167,6 @@ private fun PodcastScreen(
     onFollowPodcast: () -> Unit,
     onUnfollowPodcast: () -> Unit,
     onNotificationButtonClick: () -> Unit,
-    onSettingsButtonClick: () -> Unit,
     onShareItemClick: () -> Unit,
     onWebsiteItemClick: () -> Unit,
     onSortButtonClick: () -> Unit,
@@ -304,9 +303,8 @@ private fun PodcastScreen(
                                 )
                             },
                             actions = {
-                                if (state.followingStatus == FollowStatus.FOLLOWED) {
-                                    // filter button
-                                    /*Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
+                                // filter button
+                                /*Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
                                         IconButton(onClick = { expanded = !expanded }) {
                                             Icon(
                                                 imageVector = Icons.Default.MoreVert,
@@ -344,14 +342,14 @@ private fun PodcastScreen(
                                             }
                                         }
                                     }*/
-                                    // sort button
-                                    IconButton(onClick = onSortButtonClick) {
-                                        Icon(
-                                            imageVector = if (state.sortOrder == SortOrder.DESC)
-                                                Icons.Default.Sort else Icons.Default.SortByAlpha,
-                                            contentDescription = null
-                                        )
-                                    }
+
+                                // sort button
+                                IconButton(onClick = onSortButtonClick) {
+                                    Icon(
+                                        painter = painterResource(id = if (state.sortOrder == SortOrder.DESC)
+                                                R.drawable.ic_sort_asc else R.drawable.ic_sort_desc),
+                                        contentDescription = null
+                                    )
                                 }
                             },
                             backgroundColor = Color.Transparent,

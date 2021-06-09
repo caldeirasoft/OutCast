@@ -9,6 +9,8 @@ import androidx.room.PrimaryKey
 import com.caldeirasoft.outcast.data.db.customparcelers.InstantParceler
 import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 import com.caldeirasoft.outcast.domain.common.Constants
+import com.caldeirasoft.outcast.domain.enums.PodcastFilter
+import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.Artwork
 import com.caldeirasoft.outcast.domain.models.store.StoreData
@@ -52,13 +54,21 @@ data class Podcast(
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
   @ColumnInfo(name = "isFollowed") val isFollowed: Boolean = false,
   @ColumnInfo(name = "followedAt") val followedAt: Instant? = null,
-  @ColumnInfo(name = "updatedAt") val updatedAt: Instant
-) {
+  @ColumnInfo(name = "updatedAt") val updatedAt: Instant,
+  @ColumnInfo(name = "podcast_filter") val podcastFilter: Int = PodcastFilter.ALL.ordinal,
+  @ColumnInfo(name = "podcast_sort") val podcastSortOrder: Int = SortOrder.DESC.ordinal,
+  ) {
 
   val genre: Category?
     get() = category?.let { Category.values()[it] }
 
   companion object {
+    val Podcast.podcastSortOrderOption: SortOrder
+      get() = SortOrder.values()[this.podcastSortOrder]
+
+    val Podcast.podcastFilterOption: PodcastFilter
+      get() = PodcastFilter.values()[this.podcastFilter]
+
     val Default = Podcast(
       feedUrl = "",
       name = "",

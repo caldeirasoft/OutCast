@@ -63,4 +63,11 @@ interface PodcastDao : EntityDao<Podcast> {
 
     @Query("DELETE FROM podcast WHERE feedUrl = :feedUrl")
     suspend fun deleteWithUrl(feedUrl: String)
+
+    @Query("UPDATE podcast SET podcast_sort = :sortOrder WHERE feedUrl = :feedUrl")
+    fun updateSortOrder(feedUrl: String, sortOrder: Int)
+
+    @Query("UPDATE podcast SET podcast_filter = :filter WHERE feedUrl = :feedUrl")
+    fun updateFilter(feedUrl: String, filter: Int)
+
 }

@@ -22,8 +22,6 @@ data class PodcastSettings(
   @ColumnInfo(name = "episode_limit") val episodeLimit: Int = PodcastEpisodeLimitOptions.DEFAULT_SETTING.ordinal,
   @ColumnInfo(name = "skip_intro") val skipIntro: Int = 0,
   @ColumnInfo(name = "skip_outro") val skipOutro: Int = 0,
-  @ColumnInfo(name = "podcast_filter") val podcastFilter: Int = PodcastFilter.ALL.ordinal,
-  @ColumnInfo(name = "podcast_sort") val podcastSortOrder: Int = SortOrder.DESC.ordinal,
 ) {
 
   val newEpisodesOption: NewEpisodesOptions

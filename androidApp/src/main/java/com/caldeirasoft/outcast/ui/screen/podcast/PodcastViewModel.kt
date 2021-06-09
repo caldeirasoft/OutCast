@@ -3,13 +3,11 @@ package com.caldeirasoft.outcast.ui.screen.podcast
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.map
+import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.repository.DataStoreRepository
-import com.caldeirasoft.outcast.data.repository.DownloadRepository
-import com.caldeirasoft.outcast.data.repository.PodcastsRepository
+import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.podcastFilterOption
+import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.podcastSortOrderOption
+import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.podcast
@@ -41,9 +39,11 @@ class PodcastViewModel @Inject constructor(
     private val updatePodcastFilterUseCase: UpdatePodcastFilterUseCase,
     private val podcastsRepository: PodcastsRepository,
     private val dataStoreRepository: DataStoreRepository,
+    private val settingsRepository: SettingsRepository,
     saveEpisodeUseCase: SaveEpisodeUseCase,
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
     downloadRepository: DownloadRepository,
+    episodesRepository: EpisodesRepository,
 ) : EpisodeListViewModel<PodcastState, PodcastEvent>(
     initialState = PodcastState(
         feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
@@ -61,11 +61,17 @@ class PodcastViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        selectSubscribe(PodcastState::sortOrder)
-            .distinctUntilChanged()
-            .filterNotNull()
-            .flatMapLatest { sortOrder -> loadPodcastEpisodesPagingDataUseCase
-                .execute(initialState.feedUrl, sortOrder) }
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                maxSize = 4000,
+                prefetchDistance = 5
+            ),
+            initialKey = null,
+            pagingSourceFactory = episodesRepository.getEpisodesDataSourceWithUrl(initialState.feedUrl).asPagingSourceFactory()
+        )
+            .flow
             .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
             .cachedIn(viewModelScope)
 
@@ -88,24 +94,10 @@ class PodcastViewModel @Inject constructor(
                     isLoading = false,
                     podcast = it,
                     followingStatus = if (it.isFollowed) FollowStatus.FOLLOWED else FollowStatus.UNFOLLOWED,
-                    showAllEpisodes = it.isFollowed
+                    showAllEpisodes = it.isFollowed,
+                    sortOrder = it.podcastSortOrderOption,
+                    filter = it.podcastFilterOption
                 )
-            }
-
-
-        loadSettingsUseCase.settings
-            .setOnEach {
-                copy(prefs = it)
-            }
-
-        getPodcastSortOrderUseCase.execute(initialState.feedUrl)
-            .setOnEach {
-                copy(sortOrder = it)
-            }
-
-        getPodcastFilterUseCase.execute(initialState.feedUrl)
-            .setOnEach {
-                copy(filter = it)
             }
     }
 
@@ -171,20 +163,19 @@ class PodcastViewModel @Inject constructor(
 
     fun togglePodcastSortOrder() {
         viewModelScope.withState {
-            updatePodcastSortOrderUseCase.execute(
-                feedUrl = it.feedUrl,
-                sortOrder = if (it.sortOrder == SortOrder.DESC) SortOrder.ASC else SortOrder.DESC
-            )
+            podcastsRepository.updatePodcastSortOrder(it.feedUrl, if (it.sortOrder == SortOrder.DESC) SortOrder.ASC else SortOrder.DESC)
+        }
+    }
+
+    fun updateSortOrder(sortOrder: SortOrder) {
+        viewModelScope.withState {
+            podcastsRepository.updatePodcastSortOrder(it.feedUrl, sortOrder)
         }
     }
 
     fun updateFilter(filter: PodcastFilter) {
         viewModelScope.withState {
-            updatePodcastFilterUseCase.execute(
-                feedUrl = it.feedUrl,
-                filter = filter
-            )
-            emitEvent(EpisodesEvent.RefreshList)
+            podcastsRepository.updatePodcastFilter(it.feedUrl, filter)
         }
     }
 

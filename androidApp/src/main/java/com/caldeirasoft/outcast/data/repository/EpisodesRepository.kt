@@ -37,4 +37,8 @@ class EpisodesRepository @Inject constructor(
     // get latest episodes (unplayed) / last 3 months
     fun getLatestEpisodesDataSource(): DataSource.Factory<Int, Episode> =
         episodeDao.getLatestEpisodesDataSource()
+
+    // get episodes from podcasts
+    fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode> =
+        episodeDao.getEpisodesDataSourceWithUrl(feedUrl)
 }

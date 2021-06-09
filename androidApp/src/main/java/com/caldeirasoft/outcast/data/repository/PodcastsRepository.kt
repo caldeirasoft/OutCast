@@ -14,6 +14,8 @@ import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
 import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
+import com.caldeirasoft.outcast.domain.enums.PodcastFilter
+import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import kotlinx.coroutines.*
@@ -182,6 +184,24 @@ class PodcastsRepository @Inject constructor(
             preferences.remove(podcastPreferenceKeys.skipEnding)
         }
     }
+
+    /**
+     * update podcast sortOrder
+     */
+    suspend fun updatePodcastSortOrder(feedUrl: String, sortOrder: SortOrder) {
+        scope.launch {
+            podcastDao.updateSortOrder(feedUrl, sortOrder.ordinal)
+        }
+    }
+
+    /**
+     * update podcast filter
+     */
+    suspend fun updatePodcastFilter(feedUrl: String, filter: PodcastFilter) {
+        podcastDao.updateFilter(feedUrl, filter.ordinal)
+    }
+
+
 
     fun getPodcastPreferences(feedUrl: String) {
 
