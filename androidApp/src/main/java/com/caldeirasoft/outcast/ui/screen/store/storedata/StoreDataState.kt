@@ -7,7 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 data class StoreDataState(
-    val storeData: StoreData? = null,
+    val storeData: StoreData,
     val url: String? = null,
     val title: String = "",
     val followingStatus: List<Long> = emptyList(),
@@ -16,7 +16,7 @@ data class StoreDataState(
     val currentCategoryId: Int = DEFAULT_GENRE,
     val newVersionAvailable: Boolean = false,
 ) {
-    constructor(data: StoreData?) : this(storeData = data, url = data?.url, title = data?.label.orEmpty())
+    constructor(data: StoreData) : this(storeData = data, url = data.url, title = data.label)
 
     val currentCategory: StoreCategory
         get() = categories.first { it.id == currentCategoryId }

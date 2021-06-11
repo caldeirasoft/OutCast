@@ -17,9 +17,8 @@ class LoadStorePagingDataUseCase @Inject constructor(
 ) {
     fun executeAsync(
         url: String,
-        storeData: StoreData?,
+        storeData: StoreData,
         storeFront: String,
-        newVersionAvailable: (() -> Unit)? = null,
         dataLoadedCallback: ((StoreData) -> Unit)? = null,
     ): Flow<PagingData<StoreItem>> =
         Pager(
@@ -31,10 +30,6 @@ class LoadStorePagingDataUseCase @Inject constructor(
                 StoreDataPagingSource(
                     loadDataFromNetwork = {
                         when {
-                            storeData == null -> storeRepository.getGroupingDataAsync(
-                                storeData?.genreId,
-                                storeFront,
-                                newVersionAvailable)
                             url.isNotEmpty() -> storeRepository.getStoreDataAsync(
                                 url,
                                 storeFront)

@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.domain.models.store
 
 import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.common.Constants.Companion.GENRE_URL
+import com.caldeirasoft.outcast.domain.common.Constants.Companion.PODCASTS_URL
 import com.caldeirasoft.outcast.domain.common.Constants.Companion.TOP_CHARTS_URL
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
@@ -46,7 +47,7 @@ data class StoreData(
         val Default = StoreData(
             id = 0L,
             label = "",
-            genreId = Constants.DEFAULT_GENRE,
+            url = PODCASTS_URL,
             storeFront = "",
         )
 

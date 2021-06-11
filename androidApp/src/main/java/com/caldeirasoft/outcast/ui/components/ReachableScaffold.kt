@@ -5,7 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -48,6 +51,59 @@ fun ReachableScaffold(
 }
 
 @Composable
+fun ScaffoldWithLargeHeader(
+    modifier: Modifier = Modifier,
+    headerRatioOrientation: Orientation = Orientation.Vertical,
+    headerRatio: Float = 1/3f,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
+    listState: LazyListState = rememberLazyListState(),
+    topBar: @Composable (() -> Unit)? = null,
+    itemContent: @Composable BoxWithConstraintsScope.(Int) -> Unit = {}
+) {
+    val appBarAlpha = listState.topAppBarAlpha
+    val backgroundColor: Color = Color.blendARGB(
+        MaterialTheme.colors.surface.copy(alpha = 0f),
+        MaterialTheme.colors.surface,
+        appBarAlpha)
+
+    Scaffold(
+        modifier = modifier,
+        scaffoldState = scaffoldState,
+        snackbarHost = snackbarHost,
+    ) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTag = "Store Directory screen" })
+        {
+            BoxWithConstraints {
+                val screenHeight = constraints.maxHeight
+                val screenWidth = constraints.maxWidth
+                val headerHeight =
+                    if (headerRatioOrientation == Orientation.Vertical)
+                        (screenHeight * headerRatio).toInt()
+                    else (screenWidth * headerRatio).toInt()
+
+                itemContent(headerHeight)
+            }
+
+            topBar?.let {
+                Column(
+                    modifier = Modifier
+                        .background(backgroundColor)
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .navigationBarsPadding(bottom = false)
+                ) {
+                    topBar()
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
 fun ReachableAppBar(
     title: @Composable () -> Unit,
     navigationIcon: @Composable (() -> Unit)? = null,
@@ -59,7 +115,8 @@ fun ReachableAppBar(
             Box(modifier = Modifier
                 .padding(
                     start = 16.dp,
-                    end = 16.dp)
+                    end = 16.dp
+                )
                 .align(Alignment.Center)
                 .alpha(alphaLargeHeader)) {
                 ProvideTextStyle(typography.h4, title)

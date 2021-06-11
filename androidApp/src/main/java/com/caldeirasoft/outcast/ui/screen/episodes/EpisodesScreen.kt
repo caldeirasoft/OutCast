@@ -1,8 +1,12 @@
 package com.caldeirasoft.outcast.ui.screen.episodes.base
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -29,6 +33,7 @@ import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import com.caldeirasoft.outcast.ui.screen.episodes.*
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
+import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
 import com.caldeirasoft.outcast.ui.util.ifLoading
 import com.caldeirasoft.outcast.ui.util.rememberLazyListStateWithPagingItems
@@ -200,8 +205,13 @@ fun EpisodesScreen(
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    Scaffold(
+    val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
+    ScaffoldWithLargeHeader(
+        modifier = Modifier
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         scaffoldState = scaffoldState,
+        listState = listState,
         snackbarHost = {
             // reuse default SnackbarHost to have default animation and timing handling
             SnackbarHost(it) { data ->
@@ -212,126 +222,104 @@ fun EpisodesScreen(
                 )
             }
         },
-    ) {
-        BoxWithConstraints {
-            val screenHeight = constraints.maxHeight
-            val headerRatio: Float = 1 / 3f
-            val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
-
-            val collapsingToolbarState = rememberCollapsingToolbarState()
-            AppbarContainer(
-                modifier = Modifier.fillMaxWidth(),
-                scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-                collapsingToolbarState = collapsingToolbarState
-            ) {
-                CollapsingToolbar(collapsingToolbarState = collapsingToolbarState) {
-                    var textSize by remember { mutableStateOf(25.sp) }
-
+        topBar = {
+            EpisodesTopAppBar(
+                title = title,
+                lazyListState = listState
+            )
+        }
+    ) { headerHeight ->
+        LazyColumn(state = listState) {
+            // header
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = headerHeight.toDp())
+                ) {
                     Text(
                         text = title,
                         modifier = Modifier
-                            .heightIn(min = AppBarHeight)
-                            .road(Alignment.CenterStart, Alignment.BottomStart)
-                            .progress { value ->
-                                textSize = (18 + (36 - 18) * value).sp
-                            }
+                            .align(Alignment.BottomStart)
                             .padding(top = 16.dp, bottom = 16.dp)
-                            .padding(start = 16.dp, end = 16.dp)
-                            .statusBarsPadding(),
-                        fontSize = textSize
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(height = headerHeight.value.toDp())
-                            .pin()
-                    ) {
-                    }
-
-                    EpisodesTopAppBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pin()
-                            .statusBarsPadding()
-                            .navigationBarsPadding(bottom = false),
-                        state = state,
-                        collapsingToolbarState = collapsingToolbarState
+                            .padding(start = 16.dp, end = 16.dp),
+                        style = typography.h4
                     )
                 }
+            }
 
-                val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .appBarBody()
-                ) {
-                    // filter : categories (if exist)
-                    item {
-                        ChipGroup(
-                            selectedValue = state.category,
-                            values = state.categories,
-                            onClick = { category -> onCategoryFilterClick?.invoke(category) }) {
-                            Text(text = it.text)
-                        }
-                    }
-                    // episodes
-                    items(lazyPagingItems = lazyPagingItems) { uiModel ->
-                        uiModel?.let {
-                            when(uiModel) {
-                                is EpisodeUiModel.EpisodeItem -> {
-                                    EpisodeItem(
-                                        episode = uiModel.episode,
-                                        download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
-                                        onEpisodeClick = {
-                                            navigateTo(Screen.EpisodeScreen(uiModel.episode))
-                                        },
-                                        onContextMenuClick = {
-                                            onEpisodeItemMoreButtonClick(uiModel.episode)
-                                        }
-                                    )
-                                    Divider()
+            // filter : categories (if exist)
+            item {
+                ChipGroup(
+                    selectedValue = state.category,
+                    values = state.categories,
+                    onClick = { category -> onCategoryFilterClick?.invoke(category) }) {
+                    Text(text = it.text)
+                }
+            }
+            // episodes
+            items(lazyPagingItems = lazyPagingItems) { uiModel ->
+                uiModel?.let {
+                    when (uiModel) {
+                        is EpisodeUiModel.EpisodeItem -> {
+                            EpisodeItem(
+                                episode = uiModel.episode,
+                                download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
+                                onEpisodeClick = {
+                                    navigateTo(Screen.EpisodeScreen(uiModel.episode))
+                                },
+                                onContextMenuClick = {
+                                    onEpisodeItemMoreButtonClick(uiModel.episode)
                                 }
-                                is EpisodeUiModel.SeparatorItem ->
-                                    Text(text = uiModel.date.formatRelativeDate(context),
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                        style = MaterialTheme.typography.body2
-                                    )
-                            }
+                            )
+                            Divider()
                         }
-                    }
-
-                    lazyPagingItems
-                        .ifLoading {
-                            item {
-                                PodcastEpisodesLoadingScreen()
-                            }
-                        }
-
-                    item {
-                        // bottom app bar spacer
-                        Spacer(modifier = Modifier.height(56.dp))
+                        is EpisodeUiModel.SeparatorItem ->
+                            Text(
+                                text = uiModel.date.formatRelativeDate(context),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.body2
+                            )
                     }
                 }
+            }
+
+            lazyPagingItems
+                .ifLoading {
+                    item {
+                        PodcastEpisodesLoadingScreen()
+                    }
+                }
+
+            item {
+                // bottom app bar spacer
+                Spacer(modifier = Modifier.height(56.dp))
             }
         }
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun EpisodesTopAppBar(
-    modifier: Modifier,
-    state: EpisodesState,
-    collapsingToolbarState: CollapsingToolbarState
+    modifier: Modifier = Modifier,
+    title: String,
+    lazyListState: LazyListState
 ) {
-    Timber.d("progress: ${collapsingToolbarState.progress}, alpha:${collapsingToolbarState.collapsedAlpha}")
+    Timber.d("progress: ${lazyListState.headerScrollRatio}, alpha:${lazyListState.topAppBarAlpha}")
     Column(
         modifier = modifier
     ) {
         TopAppBar(
             modifier = Modifier,
             title = {
+                AnimatedVisibility(
+                    visible = (lazyListState.topAppBarAlpha == 1f),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Text(text = title)
+                }
             },
             actions = { },
             backgroundColor = Color.Transparent,
@@ -339,7 +327,7 @@ private fun EpisodesTopAppBar(
             elevation = 0.dp
         )
 
-        if (collapsingToolbarState.progress == 0f)
+        if (lazyListState.topAppBarAlpha == 1f)
             Divider()
     }
 }

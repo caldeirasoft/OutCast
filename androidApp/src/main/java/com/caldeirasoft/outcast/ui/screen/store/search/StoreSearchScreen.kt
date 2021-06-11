@@ -44,82 +44,75 @@ fun StoreSearchScreen(
     navigateTo: (Screen) -> Unit,
 ) {
     val listState = rememberLazyListState(0)
-
-    Scaffold(
+    ScaffoldWithLargeHeader(
+        listState = listState,
         modifier = Modifier
             .statusBarsPadding()
             .navigationBarsPadding()
-    ) {
-        BoxWithConstraints {
-            val screenHeight = constraints.maxHeight
-            val headerRatio: Float = 1 / 3f
-            val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 56.dp)
-            )
-            {
-                // header
-                item {
-                    Box(
+    ) { headerHeight ->
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+        )
+        {
+            // header
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = headerHeight.toDp())
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.screen_search),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(height = headerHeight.value.toDp())
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.screen_search),
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(top = 16.dp, bottom = 16.dp)
-                                .padding(start = 16.dp, end = 16.dp),
-                            style = typography.h4
-                        )
-                    }
-                }
-
-                // search bar
-                stickyHeader {
-                    SearchBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                            .align(Alignment.BottomStart)
+                            .padding(top = 16.dp, bottom = 16.dp)
+                            .padding(start = 16.dp, end = 16.dp),
+                        style = typography.h4
                     )
                 }
+            }
 
-                val categoriesIds = listOf(-1) + Category.values()
-                    .filter { !it.nested }
-                    .map { it.id }
+            // search bar
+            stickyHeader {
+                SearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
 
-                item {
-                    // header
-                    StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
-                }
-                gridItems(
-                    items = categoriesIds,
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalInnerPadding = 8.dp,
-                    verticalInnerPadding = 8.dp,
-                    columns = 2
-                ) { categoryId ->
-                    when (categoryId) {
-                        -1 -> TopChartCardItem(
-                            navigateToTopChart = { navigateTo(Screen.StoreDataScreen(StoreData.TopCharts)) }
-                        )
-                        else -> {
-                            Category.fromId(categoryId)?.let { category ->
-                                CategoryCardItem(
-                                    category = category,
-                                    navigateToCategory = {
-                                        navigateTo(
-                                            Screen.StoreDataScreen(
-                                                category
-                                            )
+            val categoriesIds = listOf(-1) + Category.values()
+                .filter { !it.nested }
+                .map { it.id }
+
+            item {
+                // header
+                StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
+            }
+            gridItems(
+                items = categoriesIds,
+                contentPadding = PaddingValues(16.dp),
+                horizontalInnerPadding = 8.dp,
+                verticalInnerPadding = 8.dp,
+                columns = 2
+            ) { categoryId ->
+                when (categoryId) {
+                    -1 -> TopChartCardItem(
+                        navigateToTopChart = { navigateTo(Screen.StoreDataScreen(StoreData.TopCharts)) }
+                    )
+                    else -> {
+                        Category.fromId(categoryId)?.let { category ->
+                            CategoryCardItem(
+                                category = category,
+                                navigateToCategory = {
+                                    navigateTo(
+                                        Screen.StoreDataScreen(
+                                            category
                                         )
-                                    }
-                                )
-                            }
+                                    )
+                                }
+                            )
                         }
                     }
                 }

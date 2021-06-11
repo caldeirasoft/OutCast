@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
@@ -29,7 +30,9 @@ class StoreDataViewModel @Inject constructor(
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
     val followUseCase: FollowUseCase,
 ) : BaseViewModelEvents<StoreDataState, StoreDataEvent>(
-    initialState = StoreDataState(data = savedStateHandle.getObject("storeData")))
+    initialState = StoreDataState(
+        data = savedStateHandle.getObject("storeData") ?: StoreData.Default
+    ))
 {
 
     private val followLoadingStatus: MutableStateFlow<List<Long>> =
@@ -60,11 +63,6 @@ class StoreDataViewModel @Inject constructor(
                     url = url.orEmpty(),
                     storeData = initialState.storeData,
                     storeFront = storeFront,
-                    newVersionAvailable = {
-                        viewModelScope.setState {
-                            copy(newVersionAvailable = true)
-                        }
-                    },
                     dataLoadedCallback = { page ->
                         viewModelScope.setState {
                             copy(storeData = page,
