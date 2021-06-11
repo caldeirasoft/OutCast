@@ -105,159 +105,135 @@ private fun LibraryScreen(
     onToggleDisplayButtonClick: () -> Unit,
     onPlayedEpisodesButtonClick: () -> Unit,
 ) {
-    Scaffold(modifier = Modifier) {
+    Scaffold(modifier = Modifier
+        .statusBarsPadding()
+        .navigationBarsPadding()
+    ) {
         BoxWithConstraints {
             val screenHeight = constraints.maxHeight
             val headerRatio: Float = 1 / 3f
             val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
 
-            val collapsingToolbarState = rememberCollapsingToolbarState()
-            AppbarContainer(
-                modifier = Modifier.fillMaxWidth(),
-                scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-                collapsingToolbarState = collapsingToolbarState
-            ) {
-                CollapsingToolbar(collapsingToolbarState = collapsingToolbarState) {
-                    var textSize by remember { mutableStateOf(25.sp) }
-                    var paddingStart by remember { mutableStateOf(16.dp) }
-
-                    Text(
-                        text = stringResource(id = R.string.screen_library),
-                        modifier = Modifier
-                            .heightIn(min = AppBarHeight)
-                            .road(Alignment.CenterStart, Alignment.BottomStart)
-                            .progress { value ->
-                                textSize = (18 + (36 - 18) * value).sp
-                            }
-                            .padding(top = 16.dp, bottom = 16.dp)
-                            .padding(start = 16.dp, end = 16.dp)
-                            .statusBarsPadding(),
-                        fontSize = textSize
-                    )
-
+            LazyColumn(
+                modifier = Modifier
+            )
+            {
+                // header
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(height = headerHeight.value.toDp())
-                            .pin()
                     ) {
+                        Text(
+                            text = stringResource(id = R.string.screen_library),
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(top = 16.dp, bottom = 16.dp)
+                                .padding(start = 16.dp, end = 16.dp),
+                            fontSize = 36.sp
+                        )
                     }
-
-                    LibraryTopAppBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pin()
-                            .statusBarsPadding()
-                            .navigationBarsPadding(bottom = false),
-                        state = state,
-                        collapsingToolbarState = collapsingToolbarState,
-                        onPlayedEpisodesButtonClick = onPlayedEpisodesButtonClick
-                    )
                 }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .appBarBody()
-                )
-                {
-                    val libraryIds = listOf(
-                        LibraryItemType.SAVED_EPISODES.name
-                    ) + state.sortedPodcasts.map { it.feedUrl }
+                val libraryIds = listOf(
+                    LibraryItemType.SAVED_EPISODES.name
+                ) + state.sortedPodcasts.map { it.feedUrl }
 
-                    val libraryItemsMap = LibraryItemType.values().map { it.name to it }.toMap()
-                    val podcastsMap = state.sortedPodcasts.map { it.feedUrl to it }.toMap()
+                val libraryItemsMap = LibraryItemType.values().map { it.name to it }.toMap()
+                val podcastsMap = state.sortedPodcasts.map { it.feedUrl to it }.toMap()
 
-                    item {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // sort button
-                            LibrarySortButton(
-                                state = state,
-                                onClick = onSortButtonClick)
-                            // spacer
-                            Spacer(Modifier.weight(1f))
-                            // grid/list button
-                            LibraryDisplayButton(
-                                state = state,
-                                onClick = onToggleDisplayButtonClick)
-                        }
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // sort button
+                        LibrarySortButton(
+                            state = state,
+                            onClick = onSortButtonClick
+                        )
+                        // spacer
+                        Spacer(Modifier.weight(1f))
+                        // grid/list button
+                        LibraryDisplayButton(
+                            state = state,
+                            onClick = onToggleDisplayButtonClick
+                        )
                     }
+                }
 
-                    if (state.displayAsGrid) {
-                        gridItems(
-                            items = libraryIds,
-                            contentPadding = PaddingValues(16.dp),
-                            horizontalInnerPadding = 16.dp,
-                            verticalInnerPadding = 16.dp,
-                            columns = 2
-                        ) { itemId ->
-                            when (itemId) {
-                                LibraryItemType.SIDELOADS.name,
-                                LibraryItemType.SAVED_EPISODES.name ->
-                                    libraryItemsMap[itemId]?.let { item ->
-                                        LibraryGridItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    when (item) {
-                                                        LibraryItemType.SAVED_EPISODES ->
-                                                            navigateTo(Screen.SavedEpisodes)
-                                                        else -> {
-                                                        }
+                if (state.displayAsGrid) {
+                    gridItems(
+                        items = libraryIds,
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalInnerPadding = 16.dp,
+                        verticalInnerPadding = 16.dp,
+                        columns = 2
+                    ) { itemId ->
+                        when (itemId) {
+                            LibraryItemType.SIDELOADS.name,
+                            LibraryItemType.SAVED_EPISODES.name ->
+                                libraryItemsMap[itemId]?.let { item ->
+                                    LibraryGridItem(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(onClick = {
+                                                when (item) {
+                                                    LibraryItemType.SAVED_EPISODES ->
+                                                        navigateTo(Screen.SavedEpisodes)
+                                                    else -> {
                                                     }
-                                                }),
-                                            item = item,
-                                            state = state,
-                                        )
-                                    }
-                                else -> {
-                                    podcastsMap[itemId]?.let { item ->
-                                        PodcastGridItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    navigateTo(Screen.PodcastScreen(item))
-                                                }),
-                                            podcast = item,
-                                            sort = state.sortBy
-                                        )
-                                    }
+                                                }
+                                            }),
+                                        item = item,
+                                        state = state,
+                                    )
+                                }
+                            else -> {
+                                podcastsMap[itemId]?.let { item ->
+                                    PodcastGridItem(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(onClick = {
+                                                navigateTo(Screen.PodcastScreen(item))
+                                            }),
+                                        podcast = item,
+                                        sort = state.sortBy
+                                    )
                                 }
                             }
                         }
                     }
-                    else {
-                        items(items = libraryIds) { itemId ->
-                            when (itemId) {
-                                LibraryItemType.SIDELOADS.name,
-                                LibraryItemType.SAVED_EPISODES.name ->
-                                    libraryItemsMap[itemId]?.let { item ->
-                                        LibraryListItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    when (item) {
-                                                        LibraryItemType.SAVED_EPISODES ->
-                                                            navigateTo(Screen.SavedEpisodes)
-                                                        else -> { }
+                } else {
+                    items(items = libraryIds) { itemId ->
+                        when (itemId) {
+                            LibraryItemType.SIDELOADS.name,
+                            LibraryItemType.SAVED_EPISODES.name ->
+                                libraryItemsMap[itemId]?.let { item ->
+                                    LibraryListItem(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(onClick = {
+                                                when (item) {
+                                                    LibraryItemType.SAVED_EPISODES ->
+                                                        navigateTo(Screen.SavedEpisodes)
+                                                    else -> {
                                                     }
-                                                }),
-                                            item = item,
-                                            state = state,
-                                        )
-                                    }
-                                else -> {
-                                    podcastsMap[itemId]?.let { item ->
-                                        PodcastListItem(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable(onClick = {
-                                                    navigateTo(Screen.PodcastScreen(item))
-                                                }),
-                                            podcast = item,
-                                            sort = state.sortBy
-                                        )
-                                    }
+                                                }
+                                            }),
+                                        item = item,
+                                        state = state,
+                                    )
+                                }
+                            else -> {
+                                podcastsMap[itemId]?.let { item ->
+                                    PodcastListItem(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(onClick = {
+                                                navigateTo(Screen.PodcastScreen(item))
+                                            }),
+                                        podcast = item,
+                                        sort = state.sortBy
+                                    )
                                 }
                             }
                         }
