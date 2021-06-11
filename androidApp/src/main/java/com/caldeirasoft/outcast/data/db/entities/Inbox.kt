@@ -4,7 +4,7 @@ import androidx.room.*
 
 
 @Entity(
-  tableName = "queue",
+  tableName = "inbox",
   primaryKeys = ["feedUrl", "guid"],
   foreignKeys = [
     ForeignKey(
@@ -16,9 +16,8 @@ import androidx.room.*
     )
   ],
 )
-data class Queue(
+data class Inbox(
   @ColumnInfo(name = "feedUrl") val feedUrl: String,
   @ColumnInfo(name = "guid") val guid: String,
-  @ColumnInfo(name = "added_by_user") val addByUser: Boolean = false,
-  @ColumnInfo(name = "queueIndex") val queueIndex: Int = 0
+  @ColumnInfo(name = "added_by_user") val addByUser: Boolean = false
 )

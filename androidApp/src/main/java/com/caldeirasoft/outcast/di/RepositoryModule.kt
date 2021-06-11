@@ -26,7 +26,9 @@ object RepositoryModule {
         dataStore: DataStore<Preferences>,
         podcastDao: PodcastDao,
         episodeDao: EpisodeDao,
+        inboxDao: InboxDao,
         queueDao: QueueDao,
+        settingsDao: SettingsDao,
         podcastSettingsDao: PodcastSettingsDao,
         json: Json,
     ) =
@@ -35,7 +37,9 @@ object RepositoryModule {
             dataStore,
             podcastDao,
             episodeDao,
+            inboxDao,
             queueDao,
+            settingsDao,
             podcastSettingsDao,
             json)
 

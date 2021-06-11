@@ -5,15 +5,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
-import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
-import com.caldeirasoft.outcast.data.db.dao.PodcastDao
-import com.caldeirasoft.outcast.data.db.dao.PodcastSettingsDao
-import com.caldeirasoft.outcast.data.db.dao.QueueDao
-import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
-import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
+import com.caldeirasoft.outcast.data.db.dao.*
+import com.caldeirasoft.outcast.data.db.entities.*
+import com.caldeirasoft.outcast.data.db.entities.Settings.Companion.episodeLimitOption
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
+import com.caldeirasoft.outcast.domain.enums.NewEpisodesOptions
+import com.caldeirasoft.outcast.domain.enums.PodcastEpisodeLimitOptions
 import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.podcast
@@ -21,6 +18,7 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Inject
@@ -31,7 +29,9 @@ class PodcastsRepository @Inject constructor(
     val dataStore: DataStore<Preferences>,
     val podcastDao: PodcastDao,
     val episodeDao: EpisodeDao,
+    val inboxDao: InboxDao,
     val queueDao: QueueDao,
+    val settingsDao: SettingsDao,
     val podcastSettingsDao: PodcastSettingsDao,
     val json: Json,
 ) {
@@ -110,6 +110,23 @@ class PodcastsRepository @Inject constructor(
         /*TODO: transaction */
         podcastDao.upsert(podcast)
         episodeDao.upsertAll(episodes)
+        podcastDao.updatePodcastReleaseDate(podcast.feedUrl, podcast.releaseDateTime)
+
+        val podcastSettings = podcastSettingsDao.getPodcastSettingsWithUrl(podcast.feedUrl).firstOrNull()
+        val settings = settingsDao.getAllSettings().filterNotNull().first();
+        if (podcastSettings != null) {
+            val episodeLimit = podcastSettings.episodeLimitOption
+                .takeUnless { it == PodcastEpisodeLimitOptions.DEFAULT_SETTING }
+                ?: settings.episodeLimitOption
+            when(podcastSettings.newEpisodesOption) {
+                NewEpisodesOptions.ADD_TO_INBOX ->
+                    inboxDao.deleteEpisodesWithUrlAndLimit(podcast.feedUrl, episodeLimit.ordinal)
+                NewEpisodesOptions.ADD_TO_QUEUE_LAST,
+                NewEpisodesOptions.ADD_TO_QUEUE_NEXT ->
+                    queueDao.deleteEpisodesWithUrlAndLimit(podcast.feedUrl, episodeLimit.ordinal)
+                else -> Unit
+            }
+        }
     }
 
     /**
@@ -155,6 +172,7 @@ class PodcastsRepository @Inject constructor(
         // subscribe to podcast
         podcastDao.followPodcast(feedUrl = feedUrl, followedAt = Clock.System.now())
         podcastSettingsDao.insert(PodcastSettings(feedUrl = feedUrl))
+        inboxDao.addMostRecentEpisode(feedUrl)
     }
 
     /**
@@ -167,6 +185,7 @@ class PodcastsRepository @Inject constructor(
         // subscribe to podcast
         podcastDao.followPodcast(feedUrl = storePodcast.feedUrl, followedAt = Clock.System.now())
         podcastSettingsDao.insert(PodcastSettings(feedUrl = storePodcast.feedUrl))
+        inboxDao.addMostRecentEpisode(storePodcast.feedUrl)
     }
 
     /**
@@ -188,7 +207,7 @@ class PodcastsRepository @Inject constructor(
     /**
      * update podcast sortOrder
      */
-    suspend fun updatePodcastSortOrder(feedUrl: String, sortOrder: SortOrder) {
+    fun updatePodcastSortOrder(feedUrl: String, sortOrder: SortOrder) {
         scope.launch {
             podcastDao.updateSortOrder(feedUrl, sortOrder.ordinal)
         }
@@ -202,6 +221,14 @@ class PodcastsRepository @Inject constructor(
     }
 
 
+    /**
+     * addMostRecentEpisodeToInbox
+     */
+    fun addMostRecentEpisodeToInbox(feedUrl: String) {
+        scope.launch {
+            inboxDao.addMostRecentEpisode(feedUrl = feedUrl)
+        }
+    }
 
     fun getPodcastPreferences(feedUrl: String) {
 
