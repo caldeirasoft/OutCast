@@ -19,6 +19,7 @@ package com.caldeirasoft.outcast.data.util;
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.network.rss.ITunesParser
+import com.caldeirasoft.outcast.data.util.PodcastsFetcher.Companion.RFC_1123_DATE_TIME
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.rss.channel.ITunesChannelData
 import com.caldeirasoft.outcast.domain.models.rss.item.ITunesItemData
@@ -36,7 +37,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.HttpException
-import java.time.format.DateTimeFormatter
+import timber.log.Timber
+import java.time.chrono.IsoChronology
+import java.time.format.*
+import java.time.temporal.ChronoField
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
 import java.time.Instant as jtInstant
@@ -103,6 +107,63 @@ class PodcastsFetcher(
 
     companion object {
         const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
+
+        val dow = HashMap<Long, String>().apply {
+            put(1L, "Mon")
+            put(2L, "Tue")
+            put(3L, "Wed")
+            put(4L, "Thu")
+            put(5L, "Fri")
+            put(6L, "Sat")
+            put(7L, "Sun")
+        }
+
+        val moy = HashMap<Long, String>().apply {
+            put(1L, "Jan")
+            put(2L, "Feb")
+            put(3L, "Mar")
+            put(4L, "Apr")
+            put(5L, "May")
+            put(6L, "Jun")
+            put(7L, "Jul")
+            put(8L, "Aug")
+            put(9L, "Sep")
+            put(10L, "Oct")
+            put(11L, "Nov")
+            put(12L, "Dec")
+        }
+
+        /**
+         * [DateTimeFormatter.RFC_1123_DATE_TIME] with support for zone ids (e.g. PST).
+         */
+        val RFC_1123_DATE_TIME = DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .parseLenient()
+            .optionalStart()
+            .appendText(ChronoField.DAY_OF_WEEK, dow)
+            .appendLiteral(", ")
+            .optionalEnd()
+            .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+            .appendLiteral(' ')
+            .appendText(ChronoField.MONTH_OF_YEAR, moy)
+            .appendLiteral(' ')
+            .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
+            .appendLiteral(' ')
+            .appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .appendLiteral(':')
+            .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .optionalStart()
+            .appendLiteral(':')
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+            .optionalEnd()
+            .appendLiteral(' ')
+            .optionalStart()
+            .appendZoneText(TextStyle.SHORT) // optionally handle UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
+            .optionalEnd()
+            .optionalStart()
+            .appendOffset("+HHMM", "GMT")
+            .toFormatter().withResolverStyle(ResolverStyle.SMART)
+            .withChronology(IsoChronology.INSTANCE)
     }
 }
 
@@ -119,11 +180,7 @@ private fun ITunesChannelData.toPodcastResponse(
     feedUrl: String,
     currentPodcast: Podcast? = null,
 ): PodcastRssResponse {
-    val releaseDateTime = items
-        ?.first()
-        ?.pubDate
-        ?.let { fromEpochSeconds(jtInstant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(it)).epochSecond) }
-        ?: Instant.DISTANT_PAST
+    val releaseDateTime = getReleaseDateTime(this.items?.first())
 
     val category = categories
         ?.mapNotNull { it.name }
@@ -163,9 +220,6 @@ private fun ITunesChannelData.toPodcastResponse(
  * Map a [ITunesItemData] instance to our own [Episode] data class.
  */
 private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
-    val releaseDateTime = pubDate
-        ?.let { fromEpochSeconds(jtInstant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(it)).epochSecond) }
-        ?: Instant.DISTANT_PAST
     return Episode(
         guid = guid?.value.orEmpty(),
         name = title.orEmpty(),
@@ -176,7 +230,7 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         artistId = podcast.artistId,
         description = description?.trim()?.trimIndent(),
         feedUrl = podcast.feedUrl,
-        releaseDateTime = releaseDateTime,
+        releaseDateTime = getReleaseDateTime(this),
         artworkUrl = image ?: podcast.artworkUrl,
         isExplicit = explicit ?: false,
         mediaUrl = enclosure?.url.orEmpty(),
@@ -191,6 +245,25 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         isSaved = false,
     )
 }
+
+fun getReleaseDateTime(item: ITunesItemData?): Instant =
+    runCatching {
+        item?.pubDate
+            //?.let { convertZonedDate(it) }
+            ?.let {
+                fromEpochSeconds(
+                    jtInstant.from(
+                        RFC_1123_DATE_TIME.parse(
+                            it
+                        )
+                    ).epochSecond
+                )
+            }
+            ?: Instant.DISTANT_PAST
+    }.getOrElse {
+        Timber.e("Problem during date parsing of %s caused by %s", item?.title.orEmpty(), it.message)
+        Clock.System.now()
+    }
 
 fun parseDurationString(duration: String): Int {
     val timeParts = duration.split(":".toRegex())
