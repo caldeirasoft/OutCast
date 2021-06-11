@@ -20,6 +20,6 @@ class LoadLatestEpisodeCategoriesUseCase @Inject constructor(
 ) {
     fun getLatestEpisodesCategories(): Flow<List<Category?>> =
         episodeDao
-            .getLatestEpisodesCategories()
+            .getInboxEpisodesCategories()
             .map { categories -> categories.map { index -> index?.let { Category.values()[index] } } }
 }

@@ -16,6 +16,7 @@ import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -32,24 +33,21 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
-            val controller = rememberAndroidSystemUiController()
-            CompositionLocalProvider(LocalSystemUiController provides controller) {
-                OutCastTheme {
-                    // Get the current SystemUiController
-                    val systemUiController = LocalSystemUiController.current
-                    val useDarkIcons = MaterialTheme.colors.isLight
-                    SideEffect {
-                        // Update all of the system bar colors to be transparent, and use
-                        // dark icons if we're in light theme
-                        systemUiController.setStatusBarColor(
-                            color = Color.Transparent,
-                            darkIcons = useDarkIcons
-                        )
-                    }
+            OutCastTheme {
+                // Get the current SystemUiController
+                val systemUiController = rememberSystemUiController()
+                val useDarkIcons = MaterialTheme.colors.isLight
+                SideEffect {
+                    // Update all of the system bar colors to be transparent, and use
+                    // dark icons if we're in light theme
+                    systemUiController.setStatusBarColor(
+                        color = Color.Transparent,
+                        darkIcons = useDarkIcons
+                    )
+                }
 
-                    ProvideWindowInsets {
-                        MainNavHost(ScreenName.LATEST_EPISODES)
-                    }
+                ProvideWindowInsets {
+                    MainNavHost(ScreenName.INBOX)
                 }
             }
         }

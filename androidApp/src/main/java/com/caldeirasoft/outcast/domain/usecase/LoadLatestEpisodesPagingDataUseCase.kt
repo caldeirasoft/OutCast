@@ -25,6 +25,6 @@ class LoadLatestEpisodesPagingDataUseCase @Inject constructor(
                 prefetchDistance = 5
             ),
             initialKey = null,
-            pagingSourceFactory = episodeDao.getLatestEpisodesDataSource().asPagingSourceFactory()
+            pagingSourceFactory = episodeDao.getInboxEpisodesDataSource().asPagingSourceFactory()
         ).flow
 }

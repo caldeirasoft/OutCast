@@ -18,6 +18,7 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
+import com.caldeirasoft.outcast.ui.screen.episodes.base.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.episodes.base.LatestEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.episodes.base.PlayedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.episodes.base.SavedEpisodesScreen
@@ -181,8 +182,8 @@ fun MainNavHost(startScreen: ScreenName) {
                         navigateTo = actions.select,
                         navigateBack = actions.up)
                 }
-                composable(ScreenName.LATEST_EPISODES.name) {
-                    LatestEpisodesScreen(
+                composable(ScreenName.INBOX.name) {
+                    InboxScreen(
                         viewModel = hiltNavGraphViewModel(),
                         navigateTo = actions.select,
                         navigateBack = actions.up)

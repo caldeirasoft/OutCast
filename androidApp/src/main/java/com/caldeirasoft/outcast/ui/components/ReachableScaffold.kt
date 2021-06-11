@@ -58,7 +58,7 @@ fun ScaffoldWithLargeHeader(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
     listState: LazyListState = rememberLazyListState(),
-    topBar: @Composable (() -> Unit)? = null,
+    topBar: @Composable () -> Unit = {},
     itemContent: @Composable BoxWithConstraintsScope.(Int) -> Unit = {}
 ) {
     val appBarAlpha = listState.topAppBarAlpha
@@ -87,16 +87,11 @@ fun ScaffoldWithLargeHeader(
                 itemContent(headerHeight)
             }
 
-            topBar?.let {
-                Column(
-                    modifier = Modifier
-                        .background(backgroundColor)
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .navigationBarsPadding(bottom = false)
-                ) {
-                    topBar()
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                topBar()
             }
         }
     }

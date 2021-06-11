@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -28,11 +27,11 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
 import com.caldeirasoft.outcast.ui.screen.episodes.*
+import com.caldeirasoft.outcast.ui.screen.inbox.InboxViewModel
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
+import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
 import com.caldeirasoft.outcast.ui.util.ifLoading
@@ -54,6 +53,7 @@ fun EpisodesScreen(
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
+    hideTopBar: Boolean = false
 ) {
     val state by viewModel.state.collectAsState()
     val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
@@ -69,6 +69,7 @@ fun EpisodesScreen(
         lazyPagingItems = lazyPagingItems,
         navigateTo = navigateTo,
         navigateBack = navigateBack,
+        hideTopBar = hideTopBar,
         onCategoryFilterClick = onCategoryFilterClick,
         onEpisodeItemMoreButtonClick = { episode ->
             coroutineScope.OpenBottomSheetMenu(
@@ -147,7 +148,7 @@ fun EpisodesScreen(
 @ExperimentalCoroutinesApi
 @Composable
 fun LatestEpisodesScreen(
-    viewModel: LatestEpisodesViewModel,
+    viewModel: InboxViewModel,
     navigateTo: (Screen) -> Unit,
     navigateBack: () -> Unit,
 ) {
@@ -203,6 +204,7 @@ fun EpisodesScreen(
     navigateBack: () -> Unit,
     onEpisodeItemMoreButtonClick: (Episode) -> Unit,
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
+    hideTopBar: Boolean = false
 ) {
     val context = LocalContext.current
     val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
@@ -223,10 +225,13 @@ fun EpisodesScreen(
             }
         },
         topBar = {
-            EpisodesTopAppBar(
-                title = title,
-                lazyListState = listState
-            )
+            if (!hideTopBar) {
+                EpisodesTopAppBar(
+                    modifier = Modifier,
+                    title = title,
+                    lazyListState = listState
+                )
+            }
         }
     ) { headerHeight ->
         LazyColumn(state = listState) {
@@ -252,7 +257,7 @@ fun EpisodesScreen(
             item {
                 ChipGroup(
                     selectedValue = state.category,
-                    values = state.categories,
+                    values = state.categories.sortedBy { it.text },
                     onClick = { category -> onCategoryFilterClick?.invoke(category) }) {
                     Text(text = it.text)
                 }
@@ -307,6 +312,11 @@ private fun EpisodesTopAppBar(
     lazyListState: LazyListState
 ) {
     Timber.d("progress: ${lazyListState.headerScrollRatio}, alpha:${lazyListState.topAppBarAlpha}")
+    val appBarAlpha = lazyListState.topAppBarAlpha
+    val backgroundColor: Color = Color.blendARGB(
+        MaterialTheme.colors.surface.copy(alpha = 0f),
+        MaterialTheme.colors.surface,
+        appBarAlpha)
     Column(
         modifier = modifier
     ) {
@@ -314,7 +324,7 @@ private fun EpisodesTopAppBar(
             modifier = Modifier,
             title = {
                 AnimatedVisibility(
-                    visible = (lazyListState.topAppBarAlpha == 1f),
+                    visible = (appBarAlpha == 1f),
                     enter = fadeIn(),
                     exit = fadeOut(),
                 ) {
@@ -322,12 +332,12 @@ private fun EpisodesTopAppBar(
                 }
             },
             actions = { },
-            backgroundColor = Color.Transparent,
+            backgroundColor = backgroundColor,
             contentColor = MaterialTheme.colors.onSurface,
             elevation = 0.dp
         )
 
-        if (lazyListState.topAppBarAlpha == 1f)
+        if (appBarAlpha == 1f)
             Divider()
     }
 }

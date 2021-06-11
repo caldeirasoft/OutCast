@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.store.storedata
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
@@ -47,6 +48,7 @@ import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -112,16 +114,27 @@ fun StoreDataScreen(
         StoreData.TopCharts.url -> stringResource(id = R.string.store_tab_charts)
         else -> state.title
     }
+    val hideTopBar = state.url == StoreData.Default.url
     RestoreStatusBarColorOnDispose()
     val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
 
     ScaffoldWithLargeHeader(
         listState = listState,
         topBar = {
-            StoreDataScreenTopAppBar(
-                title = title,
-                state = state,
-                lazyListState = listState)
+            if (!hideTopBar) {
+                StoreDataScreenTopAppBar(
+                    title = title,
+                    state = state,
+                    lazyListState = listState
+                )
+            }
+            else {
+                Spacer(Modifier
+                    .statusBarsHeight()
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colors.surface)
+                )
+            }
         }
     ) { headerHeight ->
         val artwork = state.storeData.artwork
@@ -392,6 +405,10 @@ private fun StoreDataScreenTopAppBar(
     lazyListState: LazyListState
 ) {
     val appBarAlpha = lazyListState.topAppBarAlpha
+    val backgroundColor: Color = Color.blendARGB(
+        MaterialTheme.colors.surface.copy(alpha = 0f),
+        MaterialTheme.colors.surface,
+        appBarAlpha)
 
     // top app bar
     val artwork = state.storeData?.artwork
@@ -408,6 +425,9 @@ private fun StoreDataScreenTopAppBar(
 
     Column(
         modifier = modifier
+            .background(backgroundColor)
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false)
     ) {
         TopAppBar(
             modifier = Modifier,

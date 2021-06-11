@@ -10,12 +10,14 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
 import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
+import com.caldeirasoft.outcast.data.db.dao.InboxDao
 import com.caldeirasoft.outcast.data.db.dao.PodcastDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import kotlinx.coroutines.*
@@ -34,9 +36,15 @@ class EpisodesRepository @Inject constructor(
     private var refreshingJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    // get latest episodes (unplayed) / last 3 months
-    fun getLatestEpisodesDataSource(): DataSource.Factory<Int, Episode> =
-        episodeDao.getLatestEpisodesDataSource()
+    // get inbox episodes
+    fun getInboxEpisodesDataSource(): DataSource.Factory<Int, Episode> =
+        episodeDao.getInboxEpisodesDataSource()
+
+    // get inbox categories
+    fun getInboxEpisodesCategories(): Flow<List<Category?>> =
+        episodeDao.getInboxEpisodesCategories()
+            .map { categories -> categories.map { index -> index?.let { Category.values()[index] } } }
+
 
     // get episodes from podcasts
     fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode> =

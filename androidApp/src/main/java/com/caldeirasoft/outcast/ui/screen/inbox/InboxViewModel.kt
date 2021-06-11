@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes
+package com.caldeirasoft.outcast.ui.screen.inbox
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -8,16 +8,19 @@ import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.usecase.*
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
 import com.caldeirasoft.outcast.ui.screen.episodes.base.*
 import com.caldeirasoft.outcast.ui.util.isDateTheSame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class LatestEpisodesViewModel @Inject constructor(
+class InboxViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadLatestEpisodeCategoriesUseCase: LoadLatestEpisodeCategoriesUseCase,
     saveEpisodeUseCase: SaveEpisodeUseCase,
@@ -51,7 +54,8 @@ class LatestEpisodesViewModel @Inject constructor(
             .cachedIn(viewModelScope)
 
     init {
-        loadLatestEpisodeCategoriesUseCase.getLatestEpisodesCategories()
+        episodesRepository
+            .getInboxEpisodesCategories()
             .map { it.filterNotNull() }
             .setOnEach { categories ->
                 copy(
@@ -82,7 +86,7 @@ class LatestEpisodesViewModel @Inject constructor(
                 prefetchDistance = 5
             ),
             initialKey = null,
-            pagingSourceFactory = episodesRepository.getLatestEpisodesDataSource().asPagingSourceFactory()
+            pagingSourceFactory = episodesRepository.getInboxEpisodesDataSource().asPagingSourceFactory()
         ).flow
 
 

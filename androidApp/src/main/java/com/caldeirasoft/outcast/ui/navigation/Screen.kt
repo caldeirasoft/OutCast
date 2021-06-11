@@ -2,14 +2,8 @@ package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Subscriptions
-import androidx.compose.material.icons.filled.WatchLater
-import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Subscriptions
-import androidx.compose.material.icons.outlined.WatchLater
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.twotone.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.R
@@ -27,13 +21,13 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 enum class ScreenName {
+    INBOX,
     LIBRARY,
     STORE_DATA,
     STORE_SEARCH,
     QUEUE,
     PODCAST,
     EPISODE,
-    LATEST_EPISODES,
     SAVED_EPISODES,
     PLAYED_EPISODES,
     MORE,
@@ -109,10 +103,10 @@ sealed class BottomNavigationScreen(
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 ) {
-    object Latest : BottomNavigationScreen(ScreenName.LATEST_EPISODES,
-        R.string.screen_latest_episodes,
-        Icons.Outlined.WatchLater,
-        Icons.Filled.WatchLater)
+    object Latest : BottomNavigationScreen(ScreenName.INBOX,
+        R.string.screen_inbox,
+        Icons.Outlined.Inbox,
+        Icons.Filled.Inbox)
 
     object Library : BottomNavigationScreen(ScreenName.LIBRARY,
         R.string.screen_library,
