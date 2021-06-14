@@ -213,7 +213,7 @@ fun SetupBottomNavBar(
 ) {
     BottomNavigation(backgroundColor = MaterialTheme.colors.surface) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
+        val currentRoute = navBackStackEntry?.destination?.route
         items.forEach { screen ->
             BottomNavigationItem(
                 icon = {

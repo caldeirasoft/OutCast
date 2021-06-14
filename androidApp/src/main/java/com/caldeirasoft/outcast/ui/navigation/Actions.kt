@@ -2,7 +2,6 @@ package com.caldeirasoft.outcast.ui.navigation
 
 import android.content.Context
 import androidx.navigation.NavController
-import androidx.navigation.compose.navigate
 import com.caldeirasoft.outcast.ui.navigation.Screen.*
 import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.encodeObject
 import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.jsonUrlEncodeObject
@@ -56,13 +55,14 @@ class Actions(navController: NavController) {
 
     val selectBottomNav: (BottomNavigationScreen, String?) -> Unit = { screen, currentRoute ->
         navController.navigate(screen.id.name) {
+            launchSingleTop = true
+            restoreState = true
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
             // on the back stack as users select items
-            popUpTo = navController.graph.startDestination
-            // Avoid multiple copies of the same destination when
-            // reselecting the same item
-            launchSingleTop = true
+            popUpTo(navController.graph.startDestinationId) {
+                saveState = true
+            }
         }
     }
 

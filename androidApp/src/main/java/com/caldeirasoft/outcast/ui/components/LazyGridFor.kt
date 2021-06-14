@@ -76,8 +76,8 @@ fun <T : Any> LazyListScope.gridItems(
         verticalInnerPadding = verticalInnerPadding,
         horizontalInnerPadding = horizontalInnerPadding
     ) { index ->
-        val item = lazyPagingItems[index]
-        itemContent(item)
+        val item = lazyPagingItems.getAsState(index = index)
+        itemContent(item.value)
     }
 }
 
@@ -96,8 +96,8 @@ fun <T : Any> LazyListScope.gridItemsIndexed(
         verticalInnerPadding = verticalInnerPadding,
         horizontalInnerPadding = horizontalInnerPadding
     ) { index ->
-        val item = lazyPagingItems[index]
-        itemContent(index, item)
+        val item = lazyPagingItems.getAsState(index = index)
+        itemContent(index, item.value)
     }
 }
 
@@ -121,7 +121,10 @@ fun <T : Any> LazyListScope.gridItems(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(start = contentPadding.calculateStartPadding(LayoutDirection.Ltr), end = contentPadding.calculateEndPadding(LayoutDirection.Ltr))
+                    .padding(
+                        start = contentPadding.calculateStartPadding(LayoutDirection.Ltr),
+                        end = contentPadding.calculateEndPadding(LayoutDirection.Ltr)
+                    )
             ) {
                 for (column in 0 until columns) {
                     Box(modifier = Modifier.weight(1f)) {
@@ -192,9 +195,10 @@ fun LazyListScope.gridItems(
 
 fun LazyListScope.spacerItem(height: Dp) {
     item {
-        Spacer(Modifier
-            .height(height)
-            .fillParentMaxWidth())
+        Spacer(
+            Modifier
+                .height(height)
+                .fillParentMaxWidth())
     }
 }
 
@@ -211,7 +215,8 @@ fun VerticalDivider(
         Modifier
     }
     Box(
-        modifier.then(indentMod)
+        modifier
+            .then(indentMod)
             .fillMaxHeight()
             .width(thickness)
             .background(color = color)

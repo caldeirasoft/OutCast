@@ -14,8 +14,6 @@ import com.caldeirasoft.outcast.ui.navigation.MainNavHost
 import com.caldeirasoft.outcast.ui.navigation.ScreenName
 import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.systemuicontroller.LocalSystemUiController
-import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
