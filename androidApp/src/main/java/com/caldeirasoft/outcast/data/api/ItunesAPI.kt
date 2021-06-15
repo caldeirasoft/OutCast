@@ -1,9 +1,6 @@
 package com.caldeirasoft.outcast.data.api
 
-import com.caldeirasoft.outcast.domain.dto.GenreResult
-import com.caldeirasoft.outcast.domain.dto.LockupResult
-import com.caldeirasoft.outcast.domain.dto.ResultIdsResult
-import com.caldeirasoft.outcast.domain.dto.StorePageDto
+import com.caldeirasoft.outcast.domain.dto.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -23,6 +20,26 @@ interface ItunesAPI {
         "Content-Type: application/json;charset=utf-8",
         "Accept: application/json")
     suspend fun storeData(@Header("X-Apple-Store-Front") storeFront: String, @Url url: String): Response<StorePageDto>
+
+    @GET("https://search.itunes.apple.com/WebObjects/MZStore.woa/wa/search")
+    @Headers(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json")
+    suspend fun searchData(
+        @Header("X-Apple-Store-Front") storeFront: String,
+        @Query("term") term: String,
+        @Query("clientApplication") clientApplication: String = "Podcasts",
+    ): Response<StorePageDto>
+
+    @GET("https://search.itunes.apple.com/WebObjects/MZSearchHints.woa/wa/hints?f=json")
+    @Headers(
+        "Content-Type: application/json;charset=utf-8",
+        "Accept: application/json")
+    suspend fun searchHints(
+        @Header("X-Apple-Store-Front") storeFront: String,
+        @Query("term") term: String,
+        @Query("clientApplication") clientApplication: String = "Podcasts",
+    ): Response<List<SearchHintResult>>
 
     @GET("/WebObjects/MZStoreServices.woa/ws/genres")
     @Headers(

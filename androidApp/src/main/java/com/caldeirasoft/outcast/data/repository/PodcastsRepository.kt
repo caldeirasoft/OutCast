@@ -39,6 +39,21 @@ class PodcastsRepository @Inject constructor(
     private var refreshingJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    /**
+     * Get followed podcasts
+     */
+    fun getFollowedPodcasts(): Flow<List<Podcast>> =
+        podcastDao.getFollowedPodcasts()
+
+    /**
+     * Get followed podcast ids
+     */
+    fun getFollowedPodcastIds(): Flow<List<Long>> =
+        podcastDao.getFollowedPodcastIds()
+
+    /**
+     * Get single podcast with url
+     */
     fun loadPodcast(feedUrl: String): Flow<Podcast?> =
         podcastDao.getPodcastWithUrl(feedUrl)
 

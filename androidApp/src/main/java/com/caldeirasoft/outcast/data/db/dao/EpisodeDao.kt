@@ -67,6 +67,14 @@ interface EpisodeDao : EntityDao<Episode> {
     fun getInboxEpisodesCategories(): Flow<List<Int?>>
 
     @Query("""
+        SELECT e.*
+        FROM episode e
+        INNER JOIN episode_fts USING (name, podcastName)
+        WHERE episode_fts MATCH :query
+    """)
+    fun searchEpisodes(query: String): Flow<List<Episode>>
+
+    @Query("""
         UPDATE episode 
         SET playback_position = :playbackPosition AND updatedAt = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') 
         WHERE feedUrl = :feedUrl AND guid = :guid

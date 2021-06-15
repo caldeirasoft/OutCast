@@ -34,6 +34,14 @@ interface PodcastDao : EntityDao<Podcast> {
     @Query("SELECT p.podcastId FROM podcast p WHERE isFollowed = 1 AND podcastId IS NOT NULL")
     fun getFollowedPodcastIds(): Flow<List<Long>>
 
+    @Query("""
+        SELECT p.*
+        FROM podcast p
+        INNER JOIN podcast_fts USING (name)
+        WHERE podcast_fts MATCH :query
+    """)
+    fun searchPodcasts(query: String): Flow<List<Podcast>>
+
     @Transaction
     @Query("SELECT * FROM podcast p WHERE podcastId = :id")
     fun getPodcastWithId(id: Long): Flow<PodcastWithEpisodes?>

@@ -38,6 +38,7 @@ class StoreRepository @Inject constructor(
         const val DIRECTORY_CACHE_KEY = "directory"
         const val TOP_CHARTS_CACHE_KEY = "charts"
         const val GENRE_URL = "https://podcasts.apple.com/genre/id{genre}"
+        const val SEARCH_URL = "https://search.itunes.apple.com/WebObjects/MZStore.woa/wa/search"
     }
 
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -60,55 +61,31 @@ class StoreRepository @Inject constructor(
     }
 
     /**
-     * getGroupingDataAsync
+     * getSearchResultsAsync
      */
-    suspend fun getGroupingDataAsync(
-        genre: Int?,
+    suspend fun getSearchResultsAsync(
+        term: String,
         storeFront: String,
-        newVersionAvailable: (() -> Unit)?,
     ): StoreData {
-        val url = GENRE_URL.replace("{genre}", (genre ?: DEFAULT_GENRE).toString())
-        return when (genre) {
-            DEFAULT_GENRE -> {
-                var groupingDataCache: StoreData? = null
-                try {
-                    groupingDataCache = context.dataStore.data.firstOrNull()
-                        .takeUnless { it?.timestamp == Instant.DISTANT_PAST }
-                        .takeUnless { it?.storeFront != storeFront }
-                }
-                catch (e: Exception) {
+        val storeResponse = itunesAPI.searchData(storeFront = storeFront, term = term)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val storePageDto = storeResponse.body() ?: throw HttpException(storeResponse)
+        return getSearchDataAsync(storePageDto)
+    }
 
-                }
-
-                val groupingData = groupingDataCache ?: getStoreDataAsync(url, storeFront)
-                newVersionAvailable?.let {
-                    if (groupingDataCache != null) {
-                        scope.launch {
-                            val now =
-                                Clock.System.now().toLocalDateTime(TimeZone.UTC)
-                            val today = now.date
-                            if (groupingDataCache.fetchedAt.toLocalDateTime(TimeZone.UTC).date != today) {
-                                val newGroupingPage = getStoreDataAsync(url, storeFront)
-                                if (newGroupingPage.timestamp.toLocalDateTime(TimeZone.UTC).date !=
-                                    groupingDataCache.timestamp.toLocalDateTime(TimeZone.UTC).date
-                                ) {
-                                    context.dataStore.updateData { newGroupingPage }
-                                    newVersionAvailable.invoke()
-                                } else {
-                                    context.dataStore.updateData { groupingDataCache.copy(fetchedAt = Clock.System.now()) }
-                                }
-                            }
-                        }
-                    } else {
-                        context.dataStore.updateData { groupingData }
-                    }
-                }
-                groupingData
-            }
-            else -> {
-                getStoreDataAsync(url, storeFront)
-            }
-        }
+    /**
+     * getSearchResultsAsync
+     */
+    suspend fun getSearchTermHintsAsync(
+        term: String,
+        storeFront: String,
+    ): List<String> {
+        val storeResponse = itunesAPI.searchHints(storeFront = storeFront, term = term)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val searchHintResult = storeResponse.body() ?: throw HttpException(storeResponse)
+        return searchHintResult.map { it.term }
     }
 
     /**
@@ -139,6 +116,9 @@ class StoreRepository @Inject constructor(
                     else ->
                         throw Exception("Invalid artist")
                 }
+            }
+            "search_page" -> {
+                getSearchDataAsync(storePageDto)
             }
             else -> throw Exception("Invalid store data")
         }
@@ -514,6 +494,45 @@ class StoreRepository @Inject constructor(
             storeList = collectionSequence.toList(),
             storeCategories = storeCategories,
             sortByPopularity = true,
+            timestamp = timestamp,
+            lookup = getStoreLookupFromLookupResult(
+                lockupResult = storePageDto.storePlatformData?.lockup,
+                storeFront = "")
+        )
+    }
+
+    /**
+     * getSearchDataAsync
+     */
+    private fun getSearchDataAsync(storePageDto: StorePageDto): StoreData
+    {
+        val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
+        val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
+        val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
+
+        val collectionSequence: Sequence<StoreCollection> = sequence {
+            val entries = storePageDto.pageData
+                ?.bubbles
+            entries?.forEach { element ->
+                yield(
+                    StoreCollectionItems(
+                        id = 0,
+                        label = element.name,
+                        itemsIds = element.results.map { it.id },
+                        storeFront = "",
+                        sortByPopularity = false
+                    )
+                )
+            }
+        }
+
+        return StoreData(
+            id = 0,
+            label = storePageDto.pageData?.pageTitle.orEmpty(),
+            description = null,
+            artwork = null,
+            storeFront = "",
+            storeList = collectionSequence.toList(),
             timestamp = timestamp,
             lookup = getStoreLookupFromLookupResult(
                 lockupResult = storePageDto.storePlatformData?.lockup,

@@ -19,14 +19,16 @@ import javax.inject.Singleton
 @androidx.room.Database(
     entities = [
         Podcast::class,
+        PodcastFTS::class,
         Episode::class,
+        EpisodeFTS::class,
         Queue::class,
         Inbox::class,
         Download::class,
         Settings::class,
         PodcastSettings::class,
     ],
-    version = 2
+    version = 3
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDatabase : RoomDatabase() {
@@ -185,6 +187,20 @@ BEGIN
 			AND e.releaseDateTime > p.releaseDateTime;
 END;
             """.trimIndent()
+                )
+
+                // podcast fts
+                db.execSQL(
+                    """
+                        INSERT INTO podcast_fts(podcast_fts) VALUES ('rebuild');
+                    """.trimIndent()
+                )
+
+                // episode fts
+                db.execSQL(
+                    """
+                        INSERT INTO episode_fts(episode_fts) VALUES ('rebuild');
+                    """.trimIndent()
                 )
             }
         }

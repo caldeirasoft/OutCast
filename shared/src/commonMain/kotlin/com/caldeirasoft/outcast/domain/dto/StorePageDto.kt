@@ -29,6 +29,11 @@ class LockupResult (
 )
 
 @Serializable
+class SearchHintResult (
+    val term: String = ""
+)
+
+@Serializable
 class PropertiesResult(
     val revNum: String = "",
     val timestamp: Instant? = null,
@@ -64,7 +69,8 @@ class PageDataResult(
     val metricsBase: MetricsBaseResult? = null,
     val unAvailableContentIds: Map<String, Long>? = null,
     val selectedChart: TopChartResult? = null,
-    val topCharts: List<TopChartResult> = arrayListOf()
+    val topCharts: List<TopChartResult> = arrayListOf(),
+    val bubbles: List<BubbleResult> = arrayListOf()
 )
 
 @Serializable
@@ -175,6 +181,20 @@ class ContentDataResult(
     val chunkId: String? = null,
     val dkId: Int? = null,
     val dkEternalId: String? = null,
+)
+
+@Serializable
+class BubbleResult(
+    val name: String = "",
+    val totalCount: Int = 0,
+    val results: List<BubbleItemResult> = arrayListOf(),
+)
+
+@Serializable
+class BubbleItemResult(
+    val forceIAEToShow: Boolean = false,
+    val id: Long = 0,
+    val entity: String = "",
 )
 
 @Serializable
