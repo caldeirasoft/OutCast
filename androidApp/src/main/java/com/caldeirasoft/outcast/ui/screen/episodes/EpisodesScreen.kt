@@ -9,7 +9,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AddToQueue
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.QueuePlayNext
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.runtime.*
@@ -19,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -27,18 +31,15 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episodes.*
-import com.caldeirasoft.outcast.ui.screen.inbox.InboxViewModel
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.util.*
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
-import com.caldeirasoft.outcast.ui.util.ifLoading
-import com.caldeirasoft.outcast.ui.util.rememberLazyListStateWithPagingItems
-import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import cz.levinzonr.router.core.Route
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
@@ -50,8 +51,9 @@ import timber.log.Timber
 fun EpisodesScreen(
     viewModel: EpisodeListViewModel<EpisodesState, EpisodesEvent>,
     title: String,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navigateToPodcast: (String) -> Unit,
+    navigateToEpisode: (Episode) -> Unit,
+    navigateUp: () -> Unit,
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
     hideTopBar: Boolean = false
 ) {
@@ -67,8 +69,9 @@ fun EpisodesScreen(
         scaffoldState = scaffoldState,
         title = title,
         lazyPagingItems = lazyPagingItems,
-        navigateTo = navigateTo,
-        navigateBack = navigateBack,
+        navigateToPodcast = navigateToPodcast,
+        navigateToEpisode = navigateToEpisode,
+        navigateUp = navigateUp,
         hideTopBar = hideTopBar,
         onCategoryFilterClick = onCategoryFilterClick,
         onEpisodeItemMoreButtonClick = { episode ->
@@ -146,62 +149,48 @@ fun EpisodesScreen(
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-@Composable
-fun LatestEpisodesScreen(
-    viewModel: InboxViewModel,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
-) {
-    EpisodesScreen(
-        title = stringResource(id = R.string.screen_latest_episodes),
-        viewModel = viewModel,
-        navigateTo = navigateTo,
-        navigateBack = navigateBack,
-        onCategoryFilterClick = viewModel::filterByCategory
-    )
-}
-
-@FlowPreview
-@ExperimentalCoroutinesApi
+@Route(name = "saved_episodes")
 @Composable
 fun SavedEpisodesScreen(
     viewModel: SavedEpisodesViewModel,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navController: NavController,
 ) {
     EpisodesScreen(
         title = stringResource(id = R.string.screen_saved_episodes),
         viewModel = viewModel,
-        navigateTo = navigateTo,
-        navigateBack = navigateBack,
+        navigateToPodcast = { navController.navigateToPodcast(it) },
+        navigateToEpisode = { navController.navigateToEpisode(it) },
+        navigateUp = { navController.navigateUp() },
     )
 }
 
 @FlowPreview
 @ExperimentalCoroutinesApi
+@Route(name = "played_episodes")
 @Composable
 fun PlayedEpisodesScreen(
     viewModel: SavedEpisodesViewModel,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navController: NavController,
 ) {
     EpisodesScreen(
         title = stringResource(id = R.string.screen_played_episodes),
         viewModel = viewModel,
-        navigateTo = navigateTo,
-        navigateBack = navigateBack,
+        navigateToPodcast = { navController.navigateToPodcast(it) },
+        navigateToEpisode = { navController.navigateToEpisode(it) },
+        navigateUp = { navController.navigateUp() },
     )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun EpisodesScreen(
+private fun EpisodesScreen(
     state: EpisodesState,
     scaffoldState: ScaffoldState,
     title: String,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navigateToPodcast: (String) -> Unit,
+    navigateToEpisode: (Episode) -> Unit,
+    navigateUp: () -> Unit,
     onEpisodeItemMoreButtonClick: (Episode) -> Unit,
     onCategoryFilterClick: ((Category?) -> Unit)? = null,
     hideTopBar: Boolean = false
@@ -229,7 +218,8 @@ fun EpisodesScreen(
                 EpisodesTopAppBar(
                     modifier = Modifier,
                     title = title,
-                    lazyListState = listState
+                    lazyListState = listState,
+                    navigateUp = navigateUp
                 )
             }
         }
@@ -270,8 +260,11 @@ fun EpisodesScreen(
                             EpisodeItem(
                                 episode = uiModel.episode,
                                 download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
+                                onPodcastClick = {
+                                    navigateToPodcast(uiModel.episode.feedUrl)
+                                },
                                 onEpisodeClick = {
-                                    navigateTo(Screen.EpisodeScreen(uiModel.episode))
+                                    navigateToEpisode(uiModel.episode)
                                 },
                                 onContextMenuClick = {
                                     onEpisodeItemMoreButtonClick(uiModel.episode)
@@ -309,7 +302,8 @@ fun EpisodesScreen(
 private fun EpisodesTopAppBar(
     modifier: Modifier = Modifier,
     title: String,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    navigateUp: () -> Unit,
 ) {
     Timber.d("progress: ${lazyListState.headerScrollRatio}, alpha:${lazyListState.topAppBarAlpha}")
     val appBarAlpha = lazyListState.topAppBarAlpha
@@ -331,6 +325,12 @@ private fun EpisodesTopAppBar(
                     Text(text = title)
                 }
             },
+            navigationIcon = {
+                IconButton(onClick = navigateUp) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                }
+            },
+
             actions = { },
             backgroundColor = backgroundColor,
             contentColor = MaterialTheme.colors.onSurface,

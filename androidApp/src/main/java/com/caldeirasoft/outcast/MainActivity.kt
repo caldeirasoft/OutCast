@@ -6,12 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
-import com.caldeirasoft.outcast.ui.navigation.MainNavHost
-import com.caldeirasoft.outcast.ui.navigation.ScreenName
+import com.caldeirasoft.outcast.ui.navigation.NavigationHost
 import com.caldeirasoft.outcast.ui.theme.OutCastTheme
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -45,7 +43,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 ProvideWindowInsets {
-                    MainNavHost(ScreenName.INBOX)
+                    NavigationHost()
                 }
             }
         }

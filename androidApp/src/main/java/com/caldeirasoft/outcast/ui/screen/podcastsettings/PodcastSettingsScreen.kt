@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
@@ -36,22 +37,30 @@ import com.caldeirasoft.outcast.ui.screen.podcast.PodcastState
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastViewModel
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import cz.levinzonr.router.core.Route
+import cz.levinzonr.router.core.RouteArg
+import cz.levinzonr.router.core.RouteArgType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
+@Route(
+    name = "podcast_settings",
+    args = [
+        RouteArg("feedUrl", RouteArgType.StringType, false),
+    ]
+)
 @Composable
 fun PodcastSettingsScreen(
     viewModel: PodcastSettingsViewModel,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navController: NavController,
 ) {
     val state by viewModel.state.collectAsState()
     PodcastSettingsScreen(
         state = state,
-        navigateUp = navigateBack
+        navigateUp = { navController.navigateUp() }
     ) {
         viewModel.updateSettings(it)
     }

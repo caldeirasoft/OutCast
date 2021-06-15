@@ -1,7 +1,12 @@
 package com.caldeirasoft.outcast.ui.screen.podcast
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.*
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +17,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -31,31 +40,45 @@ import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
+import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
-import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import com.caldeirasoft.outcast.ui.theme.*
+import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
+import com.caldeirasoft.outcast.ui.theme.blendARGB
+import com.caldeirasoft.outcast.ui.theme.getColor
+import com.caldeirasoft.outcast.ui.theme.toxyY
+import com.caldeirasoft.outcast.ui.theme.xyYtoColor
 import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
-import kotlinx.coroutines.*
+import cz.levinzonr.router.core.Route
+import cz.levinzonr.router.core.RouteArg
+import cz.levinzonr.router.core.RouteArgType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import timber.log.Timber
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
+@Route(
+    name = "podcast",
+    args = [
+        RouteArg("feedUrl", RouteArgType.StringType, false),
+    ]
+)
 @Composable
 fun PodcastScreen(
     viewModel: PodcastViewModel,
     storePodcast: StorePodcast? = null,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navController: NavController,
 ) {
     val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -74,8 +97,10 @@ fun PodcastScreen(
         state = state,
         scaffoldState = scaffoldState,
         lazyPagingItems = lazyPagingItems,
-        navigateBack = navigateBack,
-        navigateTo = navigateTo,
+        navigateTo = { navController.navigate(it) },
+        navigateToEpisode = { navController.navigateToEpisode(it, true)},
+        navigateToStore = { navController.navigateToStore(it) },
+        navigateUp = { navController.navigateUp() },
         onFollowPodcast = viewModel::follow,
         onUnfollowPodcast = viewModel::unfollow,
         onNotificationButtonClick = viewModel::toggleNotifications,
@@ -162,8 +187,10 @@ private fun PodcastScreen(
     state: PodcastState,
     scaffoldState: ScaffoldState,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navigateTo: (String) -> Unit,
+    navigateToEpisode: (Episode) -> Unit,
+    navigateToStore: (StoreData) -> Unit,
+    navigateUp: () -> Unit,
     onFollowPodcast: () -> Unit,
     onUnfollowPodcast: () -> Unit,
     onNotificationButtonClick: () -> Unit,
@@ -229,9 +256,7 @@ private fun PodcastScreen(
                                     .height(headerHeight.value.toDp()),
                                 state = state,
                                 collapsingToolbarState = collapsingToolbarState,
-                                openStoreDataDetail = {
-                                    navigateTo(Screen.StoreDataScreen(it))
-                                }
+                                openStoreDataDetail = navigateToStore
                             )
                         }
                         else {
@@ -247,7 +272,7 @@ private fun PodcastScreen(
                             .pin(),
                         state = state,
                         collapsingToolbarState = collapsingToolbarState,
-                        navigateUp = navigateBack
+                        navigateUp = navigateUp
                     )
                 }
                 val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
@@ -264,7 +289,7 @@ private fun PodcastScreen(
                                 state = state,
                                 onFollowPodcast = onFollowPodcast,
                                 onUnfollowPodcast = onUnfollowPodcast,
-                                onSettingsButtonClick = { navigateTo(Screen.PodcastSettings(state.feedUrl)) },
+                                onSettingsButtonClick = { navigateTo(RoutesActions.toPodcast_settings(it.feedUrl)) },
                                 onNotificationButtonClick = onNotificationButtonClick,
                                 onShareItemClick = onShareItemClick,
                                 onWebsiteItemClick = onWebsiteItemClick
@@ -286,7 +311,7 @@ private fun PodcastScreen(
                             ) {
                                 ChipButton(selected = false,
                                     onClick = {
-                                        navigateTo(Screen.StoreDataScreen(genre))
+                                        navigateToStore(genre.toStoreData())
                                     })
                                 {
                                     Text(text = genre.name)
@@ -364,7 +389,7 @@ private fun PodcastScreen(
                                 is EpisodeUiModel.EpisodeItem -> {
                                     PodcastEpisodeItem(
                                         episode = uiModel.episode,
-                                        onEpisodeClick = { navigateTo(Screen.EpisodeScreen(uiModel.episode)) },
+                                        onEpisodeClick = { navigateToEpisode(uiModel.episode) },
                                         onContextMenuClick = { onEpisodeItemMoreButtonClick(uiModel.episode) }
                                     )
                                     Divider()

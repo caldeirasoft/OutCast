@@ -2,8 +2,6 @@ package com.caldeirasoft.outcast.ui.screen.store.search
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -12,36 +10,33 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
-import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.AppbarContainer
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.CollapsingToolbar
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.ScrollStrategy
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.rememberCollapsingToolbarState
-import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeader
+import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
+import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
 import com.caldeirasoft.outcast.ui.theme.typography
+import com.caldeirasoft.outcast.ui.util.navigateToStore
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import cz.levinzonr.router.core.Route
 
 @OptIn(ExperimentalFoundationApi::class)
+@Route(name = "search")
 @Composable
 fun StoreSearchScreen(
-    navigateTo: (Screen) -> Unit,
+    navController: NavController
 ) {
     val listState = rememberLazyListState(0)
     ScaffoldWithLargeHeader(
@@ -99,18 +94,14 @@ fun StoreSearchScreen(
             ) { categoryId ->
                 when (categoryId) {
                     -1 -> TopChartCardItem(
-                        navigateToTopChart = { navigateTo(Screen.StoreDataScreen(StoreData.TopCharts)) }
+                        navigateToTopChart = { navController.navigateToStore(StoreData.TopCharts) }
                     )
                     else -> {
                         Category.fromId(categoryId)?.let { category ->
                             CategoryCardItem(
                                 category = category,
                                 navigateToCategory = {
-                                    navigateTo(
-                                        Screen.StoreDataScreen(
-                                            category
-                                        )
-                                    )
+                                    navController.navigateToStore(category)
                                 }
                             )
                         }
@@ -161,12 +152,12 @@ fun TopChartCardItem(
         border = ButtonDefaults.outlinedBorder,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
+        onClick = {
+            navigateToTopChart(StoreItemType.PODCAST)
+        },
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(24 / 9f)
-            .clickable(onClick = {
-                navigateToTopChart(StoreItemType.PODCAST)
-            })
     )
     {
         ListItem(
@@ -192,12 +183,12 @@ fun CategoryCardItem(
         border = ButtonDefaults.outlinedBorder,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
+        onClick = {
+            navigateToCategory(category)
+        },
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(24 / 9f)
-            .clickable(onClick = {
-                navigateToCategory(category)
-            })
     )
     {
         ListItem(

@@ -9,8 +9,11 @@ import com.caldeirasoft.outcast.domain.usecase.FetchPodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
 import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
-import com.caldeirasoft.outcast.ui.navigation.Screen.Companion.urlDecode
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
+import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
+import com.caldeirasoft.outcast.ui.screen.store.storedata.args.EpisodeRouteArgs
+import com.caldeirasoft.outcast.ui.screen.store.storedata.args.PodcastRouteArgs
+import com.caldeirasoft.outcast.ui.util.urlDecode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -27,10 +30,12 @@ class EpisodeViewModel @Inject constructor(
     private val removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
 ) : BaseViewModelEvents<EpisodeViewState, EpisodeEvent>(
     // The string "episode" is the name of the argument in the route
-    EpisodeViewState(
-        feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
-        guid = savedStateHandle.get<String>("guid")?.urlDecode().orEmpty(),
-    )
+    initialState = EpisodeRouteArgs.fromSavedStatedHandle(savedStateHandle).let {
+        EpisodeViewState(
+            feedUrl = it.feedUrl,
+            guid = it.guid.urlDecode()
+        )
+    }
 ) {
 
     private var isInitialized: Boolean = false

@@ -15,6 +15,8 @@ import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
+import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
+import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLDecoder
@@ -83,45 +85,6 @@ sealed class Screen (val id: ScreenName) {
 
 
     companion object {
-        inline fun <reified T> encodeObject(item: T): String =
-            Json.encodeToString(item)
 
-        inline fun <reified T> jsonUrlEncodeObject(item: T): String =
-            URLEncoder.encode(Json.encodeToString(item), "UTF-8")
-
-        fun String.urlEncode(): String =
-            URLEncoder.encode(this, "UTF-8")
-
-        fun String.urlDecode(): String =
-            URLDecoder.decode(this, "UTF-8")
     }
 }
-
-sealed class BottomNavigationScreen(
-    val id: ScreenName,
-    @StringRes val resourceId: Int,
-    val icon: ImageVector,
-    val selectedIcon: ImageVector = icon,
-) {
-    object Latest : BottomNavigationScreen(ScreenName.INBOX,
-        R.string.screen_inbox,
-        Icons.Outlined.Inbox,
-        Icons.Filled.Inbox)
-
-    object Library : BottomNavigationScreen(ScreenName.LIBRARY,
-        R.string.screen_library,
-        Icons.Outlined.Subscriptions,
-        Icons.Filled.Subscriptions)
-
-    object Discover : BottomNavigationScreen(ScreenName.STORE_DATA,
-        R.string.screen_discover,
-        Icons.Outlined.Explore,
-        Icons.Filled.Explore
-    )
-
-    object Search : BottomNavigationScreen(ScreenName.STORE_SEARCH,
-        R.string.screen_search,
-        Icons.Outlined.Search,
-        Icons.TwoTone.Search)
-}
-

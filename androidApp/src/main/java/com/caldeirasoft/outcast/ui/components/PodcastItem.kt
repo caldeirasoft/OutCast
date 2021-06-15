@@ -111,13 +111,15 @@ fun PodcastGridItem(
     index: Int? = null,
     isFollowing: Boolean = false,
     isFollowingLoading: Boolean = false,
+    onClick: () -> Unit,
     onFollowPodcast: (StorePodcast) -> Unit = { },
 )
 {
     Column(modifier = modifier) {
         Card(
             backgroundColor = colors[1],
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            onClick = onClick
         )
         {
             Box(modifier = Modifier

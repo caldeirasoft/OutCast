@@ -4,7 +4,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -26,6 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -39,7 +40,6 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
-import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.colors
@@ -52,17 +52,25 @@ import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import cz.levinzonr.router.core.Route
+import cz.levinzonr.router.core.RouteArg
+import cz.levinzonr.router.core.RouteArgType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
+@Route(
+    name = "store",
+    args = [
+        RouteArg("storeData", RouteArgType.StringType, true, "\"{}\"")
+    ]
+)
 @Composable
 fun StoreDataScreen(
-    viewModel: StoreDataViewModel,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    viewModel: StoreDataViewModel = hiltViewModel(),
+    navController: NavController,
 ) {
     val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -73,8 +81,10 @@ fun StoreDataScreen(
     StoreDataScreen(
         state = state,
         lazyPagingItems = lazyPagingItems,
-        navigateBack = navigateBack,
-        navigateTo = navigateTo,
+        navigateUp = { navController.navigateUp() },
+        navigateToStore = { navController.navigateToStore(it) },
+        navigateToPodcast = { navController.navigateToPodcast(it) },
+        navigateToEpisode = { navController.navigateToEpisode(it) },
         onFollowPodcast = viewModel::followPodcast,
         onCategoryClick = {
             coroutineScope.OpenBottomSheetCategoriesFilter(
@@ -104,8 +114,10 @@ fun StoreDataScreen(
 fun StoreDataScreen(
     state: StoreDataState,
     lazyPagingItems: LazyPagingItems<StoreItem>,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navigateToStore: (StoreData) -> Unit,
+    navigateToPodcast: (StorePodcast) -> Unit,
+    navigateToEpisode: (StoreEpisode) -> Unit,
+    navigateUp: () -> Unit,
     onFollowPodcast: (StorePodcast) -> Unit,
     onCategoryClick: () -> Unit
 ) {
@@ -125,14 +137,16 @@ fun StoreDataScreen(
                 StoreDataScreenTopAppBar(
                     title = title,
                     state = state,
-                    lazyListState = listState
+                    lazyListState = listState,
+                    navigateUp = navigateUp
                 )
             }
             else {
-                Spacer(Modifier
-                    .statusBarsHeight()
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colors.surface)
+                Spacer(
+                    Modifier
+                        .statusBarsHeight()
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.surface)
                 )
             }
         }
@@ -201,7 +215,7 @@ fun StoreDataScreen(
 
             // description
             item {
-                state.storeData?.description?.let { description ->
+                state.storeData.description?.let { description ->
                     Box(
                         modifier = Modifier
                             .padding(16.dp)
@@ -231,35 +245,23 @@ fun StoreDataScreen(
                 .ifNotLoading {
                     // content
                     when {
-                        state.storeData != null && state.storeData.isMultiRoom -> {
+                        state.storeData.isMultiRoom -> {
                             items(lazyPagingItems = lazyPagingItems) { collection ->
                                 when (collection) {
                                     is StoreCollectionFeatured ->
                                         StoreCollectionFeaturedContent(
                                             storeCollection = collection,
-                                            openStoreDataDetail = {
-                                                navigateTo(Screen.StoreDataScreen(it))
-                                            },
-                                            openPodcastDetail = {
-                                                navigateTo(Screen.PodcastScreen(it))
-                                            },
-                                            openEpisodeDetail = {
-                                                navigateTo(Screen.EpisodeScreen(it))
-                                            },
+                                            openStoreDataDetail = navigateToStore,
+                                            openPodcastDetail = navigateToPodcast,
+                                            openEpisodeDetail = navigateToEpisode,
                                         )
                                     is StoreCollectionItems -> {
                                         // content
                                         StoreCollectionItemsContent(
                                             storeCollection = collection,
-                                            openStoreDataDetail = {
-                                                navigateTo(Screen.StoreDataScreen(it))
-                                            },
-                                            openPodcastDetail = {
-                                                navigateTo(Screen.PodcastScreen(it))
-                                            },
-                                            openEpisodeDetail = {
-                                                navigateTo(Screen.EpisodeScreen(it))
-                                            },
+                                            openStoreDataDetail = navigateToStore,
+                                            openPodcastDetail = navigateToPodcast,
+                                            openEpisodeDetail = navigateToEpisode,
                                             followingStatus = state.followingStatus,
                                             followLoadingStatus = state.followLoadingStatus,
                                             onFollowPodcast = {
@@ -271,15 +273,9 @@ fun StoreDataScreen(
                                         // rooms
                                         StoreCollectionDataContent(
                                             storeCollection = collection,
-                                            openStoreDataDetail = {
-                                                navigateTo(Screen.StoreDataScreen(it))
-                                            },
-                                            openPodcastDetail = {
-                                                navigateTo(Screen.PodcastScreen(it))
-                                            },
-                                            openEpisodeDetail = {
-                                                navigateTo(Screen.EpisodeScreen(it))
-                                            },
+                                            openStoreDataDetail = navigateToStore,
+                                            openPodcastDetail = navigateToPodcast,
+                                            openEpisodeDetail = navigateToEpisode,
                                         )
                                     }
                                 }
@@ -300,10 +296,8 @@ fun StoreDataScreen(
                                         is StorePodcast -> {
                                             PodcastGridItem(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clickable(onClick = {
-                                                        navigateTo(Screen.PodcastScreen(item))
-                                                    }),
+                                                    .fillMaxWidth(),
+                                                onClick = { navigateToPodcast(item) },
                                                 podcast = item,
                                                 index = (index + 1).takeIf { sortByPopularity },
                                                 isFollowing = state.followingStatus.contains(
@@ -325,10 +319,10 @@ fun StoreDataScreen(
                                             StoreEpisodeItem(
                                                 modifier = Modifier,
                                                 onEpisodeClick = {
-                                                    navigateTo(Screen.EpisodeScreen(item))
+                                                    navigateToEpisode(item)
                                                 },
                                                 onThumbnailClick = {
-                                                    navigateTo(Screen.PodcastScreen(item.storePodcast))
+                                                    navigateToPodcast(item.storePodcast)
                                                 },
                                                 episode = item.episode,
                                                 index = (index + 1).takeIf { sortByPopularity },
@@ -402,7 +396,8 @@ private fun StoreDataScreenTopAppBar(
     modifier: Modifier = Modifier,
     title: String,
     state: StoreDataState,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    navigateUp: () -> Unit,
 ) {
     val appBarAlpha = lazyListState.topAppBarAlpha
     val backgroundColor: Color = Color.blendARGB(
@@ -441,7 +436,7 @@ private fun StoreDataScreenTopAppBar(
                 }
             },
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = navigateUp) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = null)
                 }
             },
@@ -580,8 +575,8 @@ fun StoreCollectionPodcastContent(
                 is StorePodcast ->
                     PodcastGridItem(
                         modifier = Modifier
-                            .width(150.dp)
-                            .clickable(onClick = { openPodcastDetail(item) }),
+                            .width(150.dp),
+                        onClick = { openPodcastDetail(item) },
                         podcast = item,
                         index = if (storeCollection.sortByPopularity) index + 1 else null,
                         isFollowing = followingStatus.contains(item.id),
@@ -664,14 +659,14 @@ fun StoreCollectionFeaturedContent(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxSize(0.95f)
-                    .padding(horizontal = 4.dp)
-                    .clickable {
-                        when (item) {
-                            is StoreData -> openStoreDataDetail(item)
-                            is StorePodcast -> openPodcastDetail(item)
-                            is StoreEpisode -> openEpisodeDetail(item)
-                        }
+                    .padding(horizontal = 4.dp),
+                onClick = {
+                    when (item) {
+                        is StoreData -> openStoreDataDetail(item)
+                        is StorePodcast -> openPodcastDetail(item)
+                        is StoreEpisode -> openEpisodeDetail(item)
                     }
+                }
             )
             {
                 Image(
@@ -705,15 +700,14 @@ fun StoreCollectionDataContent(
             Card(
                 backgroundColor = colors[0],
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .width(200.dp)
-                    .clickable(onClick = {
-                        when (item) {
-                            is StoreData -> openStoreDataDetail(item)
-                            is StorePodcast -> openPodcastDetail(item)
-                            is StoreEpisode -> openEpisodeDetail(item)
-                        }
-                    })
+                modifier = Modifier.width(200.dp),
+                onClick = {
+                    when (item) {
+                        is StoreData -> openStoreDataDetail(item)
+                        is StorePodcast -> openPodcastDetail(item)
+                        is StoreEpisode -> openEpisodeDetail(item)
+                    }
+                }
             )
             {
                 Image(

@@ -26,27 +26,37 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.navigation.Screen
 import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
 import com.caldeirasoft.outcast.ui.theme.blendARGB
+import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
+import cz.levinzonr.router.core.Route
+import cz.levinzonr.router.core.RouteArg
+import cz.levinzonr.router.core.RouteArgType
 import kotlinx.coroutines.flow.collect
 
+@Route(
+    name = "episode",
+    args = [
+        RouteArg("feedUrl", RouteArgType.StringType, false),
+        RouteArg("guid", RouteArgType.StringType, false)
+    ]
+)
 @Composable
 fun EpisodeScreen(
     viewModel: EpisodeViewModel,
     storeEpisode: StoreEpisode? = null,
     fromSamePodcast: Boolean = false,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navController: NavController,
 ) {
     val state by viewModel.state.collectAsState()
     val scaffoldState = rememberScaffoldState()
@@ -58,7 +68,7 @@ fun EpisodeScreen(
         state = state,
         scaffoldState = scaffoldState,
         onPodcastClick = viewModel::openPodcastDetails,
-        navigateBack = navigateBack,
+        navigateUp = { navController.navigateUp() },
         onSaveButtonClick = viewModel::toggleSaveEpisode,
         onMoreButtonClick = { episode ->
             coroutineScope.OpenBottomSheetMenu(
@@ -102,8 +112,8 @@ fun EpisodeScreen(
         viewModel.events.collect { event ->
             when(event) {
                 is EpisodeEvent.OpenPodcastDetail -> {
-                    if (fromSamePodcast) navigateBack()
-                    else navigateTo(Screen.PodcastScreen(event.podcast))
+                    if (fromSamePodcast) navController.navigateUp()
+                    else navController.navigateToPodcast(event.podcast)
                 }
                 is EpisodeEvent.PlayEpisodeEvent ->
                     scaffoldState.snackbarHostState.showSnackbar("Play episode")
@@ -132,7 +142,7 @@ fun EpisodeScreen(
 fun EpisodeScreen(
     state: EpisodeViewState,
     scaffoldState: ScaffoldState,
-    navigateBack: () -> Unit,
+    navigateUp: () -> Unit,
     onPodcastClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
     onMoreButtonClick: (Episode) -> Unit,
@@ -218,7 +228,7 @@ fun EpisodeScreen(
         EpisodeTopAppBar(
             state = state,
             listState = listState,
-            navigateBack = navigateBack,
+            navigateUp = navigateUp,
         )
     }
 }
@@ -323,7 +333,7 @@ private fun EpisodeExpandedHeader(
 fun EpisodeTopAppBar(
     state: EpisodeViewState,
     listState: LazyListState,
-    navigateBack: () -> Unit,
+    navigateUp: () -> Unit,
 ) {
     val appBarAlpha = listState.topAppBarAlpha
     val backgroundColor: Color = Color.blendARGB(
@@ -361,7 +371,7 @@ fun EpisodeTopAppBar(
                 }
             },
             navigationIcon = {
-                IconButton(onClick = navigateBack) {
+                IconButton(onClick = navigateUp) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = null)
                 }
             },

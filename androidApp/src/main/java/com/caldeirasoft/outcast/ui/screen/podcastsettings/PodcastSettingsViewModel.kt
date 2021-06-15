@@ -19,10 +19,13 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.screen.BaseViewModel
+import com.caldeirasoft.outcast.ui.screen.episode.EpisodeViewState
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.storedata.args.Podcast_settingsRouteArgs
+import com.caldeirasoft.outcast.ui.util.urlDecode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -35,7 +38,7 @@ class PodcastSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
 ) : BaseViewModel<PodcastSettingsState>(
     initialState = PodcastSettingsState(
-        feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
+        feedUrl = Podcast_settingsRouteArgs.fromSavedStatedHandle(savedStateHandle).feedUrl
     )
 ) {
 

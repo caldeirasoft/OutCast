@@ -58,10 +58,10 @@ fun TopChartPodcastScreen(
                         is StorePodcast -> {
                             PodcastGridItem(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(onClick = {
-                                        navigateTo(Screen.PodcastScreen(item))
-                                    }),
+                                    .fillMaxWidth(),
+                                onClick = {
+                                    navigateTo(Screen.PodcastScreen(item))
+                                },
                                 podcast = item,
                                 index = index + 1,
                                 isFollowing = state.followingStatus.contains(item.id),

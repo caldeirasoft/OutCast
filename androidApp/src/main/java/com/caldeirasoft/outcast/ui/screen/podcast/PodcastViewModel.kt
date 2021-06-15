@@ -18,6 +18,8 @@ import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.storedata.args.PodcastRouteArgs
+import com.caldeirasoft.outcast.ui.util.unserialize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -46,8 +48,8 @@ class PodcastViewModel @Inject constructor(
     episodesRepository: EpisodesRepository,
 ) : EpisodeListViewModel<PodcastState, PodcastEvent>(
     initialState = PodcastState(
-        feedUrl = savedStateHandle.get<String>("feedUrl").orEmpty(),
-        isLoading = true
+        feedUrl = PodcastRouteArgs.fromSavedStatedHandle(savedStateHandle).feedUrl,
+        isLoading = true,
     ),
     saveEpisodeUseCase = saveEpisodeUseCase,
     removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,

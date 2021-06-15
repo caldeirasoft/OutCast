@@ -20,32 +20,40 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.presentation.viewmodel.LibraryViewModel
-import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
-import com.caldeirasoft.outcast.ui.navigation.Screen
+import com.caldeirasoft.outcast.ui.components.PodcastDefaults
+import com.caldeirasoft.outcast.ui.components.PodcastThumbnail
+import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeader
+import com.caldeirasoft.outcast.ui.components.bottomsheet.BottomSheetMenuItem
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
+import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
+import com.caldeirasoft.outcast.ui.components.bottomsheet.OpenBottomSheetMenu
+import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.CollapsingToolbarState
+import com.caldeirasoft.outcast.ui.components.gridItems
+import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
+import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import cz.levinzonr.router.core.Route
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @FlowPreview
 @ExperimentalCoroutinesApi
+@Route(name = "library")
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel,
-    navigateTo: (Screen) -> Unit,
-    navigateBack: () -> Unit,
+    navController: NavController,
 ) {
     val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -55,10 +63,11 @@ fun LibraryScreen(
 
     LibraryScreen(
         state = state,
-        navigateTo = navigateTo,
+        navigateTo = { navController.navigate(it) },
+        navigateToPodcast = { navController.navigateToPodcast(it) },
         onToggleDisplayButtonClick = viewModel::toggleDisplay,
         onPlayedEpisodesButtonClick = {
-            navigateTo(Screen.PlayedEpisodes)
+
         },
         onSortButtonClick = {
             coroutineScope.OpenBottomSheetMenu(
@@ -100,7 +109,8 @@ fun LibraryScreen(
 @Composable
 private fun LibraryScreen(
     state: LibraryState,
-    navigateTo: (Screen) -> Unit,
+    navigateTo: (String) -> Unit,
+    navigateToPodcast: (Podcast) -> Unit,
     onSortButtonClick: () -> Unit,
     onToggleDisplayButtonClick: () -> Unit,
     onPlayedEpisodesButtonClick: () -> Unit,
@@ -171,7 +181,7 @@ private fun LibraryScreen(
                                         .clickable(onClick = {
                                             when (item) {
                                                 LibraryItemType.SAVED_EPISODES ->
-                                                    navigateTo(Screen.SavedEpisodes)
+                                                    navigateTo(RoutesActions.toLibrary())
                                                 else -> {
                                                 }
                                             }
@@ -186,7 +196,7 @@ private fun LibraryScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable(onClick = {
-                                            navigateTo(Screen.PodcastScreen(item))
+                                            navigateToPodcast(item)
                                         }),
                                     podcast = item,
                                     sort = state.sortBy
@@ -207,7 +217,7 @@ private fun LibraryScreen(
                                         .clickable(onClick = {
                                             when (item) {
                                                 LibraryItemType.SAVED_EPISODES ->
-                                                    navigateTo(Screen.SavedEpisodes)
+                                                    navigateTo(RoutesActions.toSaved_episodes())
                                                 else -> {
                                                 }
                                             }
@@ -222,7 +232,7 @@ private fun LibraryScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable(onClick = {
-                                            navigateTo(Screen.PodcastScreen(item))
+                                            navigateToPodcast(item)
                                         }),
                                     podcast = item,
                                     sort = state.sortBy

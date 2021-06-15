@@ -12,8 +12,11 @@ import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadStorePagingDataUseCase
-import com.caldeirasoft.outcast.ui.navigation.getObject
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
+import com.caldeirasoft.outcast.ui.screen.store.storedata.args.StoreRouteArgs
+import com.caldeirasoft.outcast.ui.util.getObject
+import com.caldeirasoft.outcast.ui.util.unserialize
+import cz.levinzonr.router.core.RouteArg
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -30,8 +33,12 @@ class StoreDataViewModel @Inject constructor(
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
     val followUseCase: FollowUseCase,
 ) : BaseViewModelEvents<StoreDataState, StoreDataEvent>(
+
     initialState = StoreDataState(
-        data = savedStateHandle.getObject("storeData") ?: StoreData.Default
+        data = runCatching {
+            val routeArgs = StoreRouteArgs.fromSavedStatedHandle(savedStateHandle)
+            routeArgs.storeData.unserialize<StoreData>()
+        }.getOrDefault(StoreData.Default)
     ))
 {
 
@@ -39,6 +46,7 @@ class StoreDataViewModel @Inject constructor(
         MutableStateFlow(emptyList())
 
     init {
+
         fetchFollowedPodcastsUseCase
             .getFollowedPodcastIds()
             .distinctUntilChanged()
