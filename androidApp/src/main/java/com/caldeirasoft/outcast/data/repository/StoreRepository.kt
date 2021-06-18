@@ -27,7 +27,6 @@ import javax.inject.Inject
 
 class StoreRepository @Inject constructor(
     val itunesAPI: ItunesAPI,
-    val searchAPI: ItunesSearchAPI,
     val context: Context,
     val json: Json,
     mainDispatcher: CoroutineDispatcher,
@@ -42,9 +41,6 @@ class StoreRepository @Inject constructor(
     }
 
     private val scope = CoroutineScope(Dispatchers.Main)
-
-    // Setup datacache
-    val Context.dataStore by dataStore("my_file.json", serializer = StoreDataSerializer(json))
 
     /**
      * getStoreDataAsync
@@ -116,9 +112,6 @@ class StoreRepository @Inject constructor(
                     else ->
                         throw Exception("Invalid artist")
                 }
-            }
-            "search_page" -> {
-                getSearchDataAsync(storePageDto)
             }
             else -> throw Exception("Invalid store data")
         }
@@ -507,22 +500,33 @@ class StoreRepository @Inject constructor(
     private fun getSearchDataAsync(storePageDto: StorePageDto): StoreData
     {
         val storeFront = storePageDto.pageData?.metricsBase?.storeFrontHeader.orEmpty()
-        val lockupResult = storePageDto.storePlatformData?.lockup?.results ?: emptyMap()
         val timestamp = storePageDto.properties?.timestamp ?: Instant.DISTANT_PAST
 
         val collectionSequence: Sequence<StoreCollection> = sequence {
             val entries = storePageDto.pageData
                 ?.bubbles
+                ?.sortedBy { it.name }
             entries?.forEach { element ->
-                yield(
-                    StoreCollectionItems(
-                        id = 0,
-                        label = element.name,
-                        itemsIds = element.results.map { it.id },
-                        storeFront = "",
-                        sortByPopularity = false
-                    )
-                )
+                when (element.name) {
+                    "podcast" ->
+                        yield(
+                            StoreCollectionItems(
+                                id = 0,
+                                label = element.name,
+                                itemsIds = element.results.map { it.id },
+                                storeFront = "",
+                            )
+                        )
+                    "podcastEpisode" ->
+                        yield(
+                            StoreCollectionEpisodes(
+                                id = 0,
+                                label = element.name,
+                                itemsIds = element.results.map { it.id },
+                                storeFront = "",
+                            )
+                        )
+                }
             }
         }
 

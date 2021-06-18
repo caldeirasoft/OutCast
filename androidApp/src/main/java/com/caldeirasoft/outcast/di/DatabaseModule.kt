@@ -62,5 +62,9 @@ object DatabaseModule {
 
     @Provides
     @Singleton
+    fun provideSearchDao(database: OutcastDatabase) = database.searchDao()
+
+    @Provides
+    @Singleton
     fun providePodcastSettingsDao(database: OutcastDatabase) = database.podcastSettingsDao()
 }

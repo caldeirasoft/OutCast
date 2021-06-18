@@ -9,7 +9,7 @@ import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
 import com.caldeirasoft.outcast.ui.screen.episodes.base.*

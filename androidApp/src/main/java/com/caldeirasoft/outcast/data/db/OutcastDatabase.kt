@@ -1,9 +1,7 @@
 package com.caldeirasoft.outcast.data.db
 
 import android.content.ContentValues
-import android.content.Context
 import androidx.room.OnConflictStrategy
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -11,10 +9,6 @@ import com.caldeirasoft.outcast.data.db.dao.*
 import com.caldeirasoft.outcast.data.db.entities.*
 import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 import com.caldeirasoft.outcast.domain.enums.*
-import dagger.Provides
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
 
 @androidx.room.Database(
     entities = [
@@ -27,8 +21,9 @@ import javax.inject.Singleton
         Download::class,
         Settings::class,
         PodcastSettings::class,
+        SearchEntity::class,
     ],
-    version = 3
+    version = 4
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDatabase : RoomDatabase() {
@@ -38,6 +33,7 @@ abstract class OutcastDatabase : RoomDatabase() {
     abstract fun inboxDao(): InboxDao
     abstract fun downloadDao(): DownloadDao
     abstract fun settingsDao(): SettingsDao
+    abstract fun searchDao(): SearchDao
     abstract fun podcastSettingsDao(): PodcastSettingsDao
 
     companion object {
@@ -51,7 +47,7 @@ abstract class OutcastDatabase : RoomDatabase() {
                 settingsValues.put("sync_podcasts", true)
                 settingsValues.put("background_sync", BackgroundRefreshOptions.EVERY_1_HOUR.ordinal)
                 settingsValues.put("sync_with_cloud", true)
-                settingsValues.put("episode_limit", EpisodeLimitOptions.ONE_MONTH.ordinal)
+                settingsValues.put("episode_limit", EpisodeLimitOption.ONE_MONTH.ordinal)
                 settingsValues.put("download_queue_episodes", true)
                 settingsValues.put("download_saved_episodes", true)
                 settingsValues.put(

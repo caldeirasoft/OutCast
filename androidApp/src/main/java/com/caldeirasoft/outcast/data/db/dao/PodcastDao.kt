@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.data.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.*
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.PodcastItunesMetadata
@@ -40,7 +41,7 @@ interface PodcastDao : EntityDao<Podcast> {
         INNER JOIN podcast_fts USING (name)
         WHERE podcast_fts MATCH :query
     """)
-    fun searchPodcasts(query: String): Flow<List<Podcast>>
+    fun searchPodcasts(query: String): DataSource.Factory<Int, Podcast>
 
     @Transaction
     @Query("SELECT * FROM podcast p WHERE podcastId = :id")

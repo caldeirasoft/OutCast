@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store.search
+package com.caldeirasoft.outcast.ui.screen.search
 
 import androidx.lifecycle.ViewModel
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase

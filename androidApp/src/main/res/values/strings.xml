@@ -84,6 +84,11 @@
     <string name="screen_history">History</string>
     <string name="screen_settings">Settings</string>
 
+    <!-- search -->
+    <string name="search_query">Search</string>
+
+
+    <!-- settings -->
     <string name="settings_new_episodes">New episodes</string>
     <string name="settings_new_episodes_desc">When a new episode is released</string>
     <string name="settings_new_episodes_inbox">Add to inbox</string>
@@ -108,6 +113,10 @@
     <string name="settings_skip_intro">Skip intro</string>
     <string name="settings_skip_ending">Skip ending</string>
     <string name="settings_unfollow">Unfollow this podcast</string>
+
+    <!-- tab -->
+    <string name="tab_title_all_podcasts">All podcasts</string>
+    <string name="tab_title_library">Your library</string>
 
     <!-- actions -->
     <string name="action_download">Download</string>

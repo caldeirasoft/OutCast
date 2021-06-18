@@ -1,8 +1,6 @@
 package com.caldeirasoft.outcast.ui.navigation
 
-import android.os.Bundle
 import androidx.annotation.StringRes
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
@@ -15,37 +13,12 @@ import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material.icons.twotone.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltNavGraphViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.base.InboxScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.base.PlayedEpisodesScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.base.SavedEpisodesScreen
-import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsScreen
-import com.caldeirasoft.outcast.ui.screen.store.search.StoreSearchScreen
-import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
-import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreDataScreen
-import com.google.accompanist.insets.navigationBarsPadding
-import kotlinx.coroutines.FlowPreview
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
-import java.net.URLDecoder
 
 sealed class BottomNavigationScreen(
     val route: String,

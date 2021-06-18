@@ -9,6 +9,7 @@ import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.domain.usecase.LoadSavedEpisodesPagingDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
+import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow

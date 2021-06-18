@@ -31,6 +31,7 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
+import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.*
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
 import com.caldeirasoft.outcast.ui.theme.blendARGB

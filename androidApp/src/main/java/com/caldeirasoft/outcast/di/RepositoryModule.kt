@@ -57,11 +57,19 @@ object RepositoryModule {
     @Provides
     fun provideStoreRepository(
         itunesAPI: ItunesAPI,
-        searchAPI: ItunesSearchAPI,
         @ApplicationContext context: Context,
         json: Json,
     ) =
-        StoreRepository(itunesAPI, searchAPI, context, json, Dispatchers.Main)
+        StoreRepository(itunesAPI, context, json, Dispatchers.Main)
+
+    @Provides
+    fun provideSearchRepository(
+        podcastDao: PodcastDao,
+        episodeDao: EpisodeDao,
+        searchDao: SearchDao,
+        json: Json,
+    ) =
+        SearchRepository(podcastDao, episodeDao, searchDao, json)
 
     @Provides
     fun provideDataStoreRepository(

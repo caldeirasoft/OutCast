@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store.search
+package com.caldeirasoft.outcast.ui.screen.search
 
 
 data class StoreSearchViewState(

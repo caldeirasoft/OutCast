@@ -4,6 +4,7 @@ import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -13,11 +14,15 @@ interface StorePagingSource
 {
     val scope: CoroutineScope
     val getStoreItems: suspend (List<Long>, String, StoreData?) -> List<StoreItem>
+    val itemsLimit: Int?
 
     suspend fun getItemsFromIds(
         ids: List<Long>,
         storeData: StoreData
-    ): List<StoreItem> = getItemsFromIds(ids, storeData.storeFront, storeData)
+    ): List<StoreUiModel> = getItemsFromIds(ids, storeData.storeFront, storeData)
+        .map {
+            StoreUiModel.StoreUiItem(it)
+        }
 
     suspend fun getItemsFromIds(
         ids: List<Long>,
@@ -26,7 +31,9 @@ interface StorePagingSource
     ): List<StoreItem> {
         val idsSplit = ids.chunked(20)
         val deferredList = idsSplit.map {
-            scope.async(Dispatchers.IO) { getStoreItems(it, storeFront, storeData) }
+            scope.async(Dispatchers.IO) {
+                getStoreItems(it, storeFront, storeData)
+            }
         }
         val lstOfReturnData = deferredList.awaitAll()
         return lstOfReturnData.flatten()
@@ -36,28 +43,47 @@ interface StorePagingSource
         startPosition: Int,
         endPosition: Int,
         storeData: StoreData,
-    ): List<StoreCollection> {
+    ): List<StoreUiModel> {
         val ids: MutableSet<Long> = mutableSetOf()
 
         storeData
             .storeList
             .subList(startPosition, endPosition)
             .filterIsInstance<StoreCollectionItems>()
-            .flatMap { it.itemsIds.take(15) }
+            .flatMap {
+                itemsLimit
+                    ?.let { limit -> it.itemsIds.take(limit) }
+                    ?: it.itemsIds
+            }
             .let { list -> ids.addAll(list) }
 
-        val fetchItems = getItemsFromIds(ids.toList(), storeData)
+        storeData
+            .storeList
+            .subList(startPosition, endPosition)
+            .filterIsInstance<StoreCollectionEpisodes>()
+            .flatMap {
+                itemsLimit
+                    ?.let { limit -> it.itemsIds.take(limit) }
+                    ?: it.itemsIds
+            }
+            .let { list -> ids.addAll(list) }
+
+        val fetchItems = getItemsFromIds(ids.toList(), storeData.storeFront, storeData)
         val storeItemsMap = fetchItems
             .filterIsInstance<StoreItemArtwork>()
             .map { it.id to it }
             .toMap()
 
-        val itemsSequence: Sequence<StoreCollection> = sequence {
+        val itemsSequence: Sequence<StoreUiModel> = sequence {
             for (i in startPosition until endPosition) {
                 when (val collection = storeData.storeList[i]) {
-                    is StoreCollectionFeatured,
-                    is StoreCollectionData ->
-                        yield(collection)
+                    is StoreCollectionFeatured -> {
+                        yield(StoreUiModel.StoreUiItem(collection))
+                    }
+                    is StoreCollectionData -> {
+                        yield(StoreUiModel.TitleItem(collection))
+                        yield(StoreUiModel.StoreUiItem(collection))
+                    }
                     is StoreCollectionItems -> {
                         val newCollection = collection.itemsIds
                             .filter { storeItemsMap.contains(it) }
@@ -65,8 +91,26 @@ interface StorePagingSource
                             .let {
                                 collection.copy(items = it)
                             }
-                        if (newCollection.items.isNotEmpty())
-                            yield(newCollection)
+                        if (newCollection.items.isNotEmpty()) {
+                            yield(StoreUiModel.TitleItem(newCollection))
+                            yield(StoreUiModel.StoreUiItem(newCollection))
+                        }
+                    }
+                    is StoreCollectionEpisodes -> {
+                        val newCollection = collection.itemsIds
+                            .filter { storeItemsMap.contains(it) }
+                            .mapNotNull { storeItemsMap[it] }
+                            .let {
+                                collection.copy(items = it)
+                            }
+                        if (newCollection.items.isNotEmpty()) {
+                            yield(StoreUiModel.TitleItem(collection))
+                            yieldAll(newCollection.items.mapIndexed { index, storeItemArtwork ->
+                                StoreUiModel.StoreUiItem(
+                                    storeItemArtwork,
+                                    (index + 1).takeIf { collection.sortByPopularity },
+                                ) })
+                        }
                     }
                 }
             }

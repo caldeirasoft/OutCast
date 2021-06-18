@@ -15,11 +15,9 @@ import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
+import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.PodcastRouteArgs
-import com.caldeirasoft.outcast.ui.util.unserialize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*

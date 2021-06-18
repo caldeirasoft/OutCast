@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.store.search
+package com.caldeirasoft.outcast.ui.screen.search
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -25,6 +25,7 @@ import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeader
 import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
 import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
+import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.navigateToStore
 import com.caldeirasoft.outcast.ui.util.toDp
@@ -35,7 +36,7 @@ import cz.levinzonr.router.core.Route
 @OptIn(ExperimentalFoundationApi::class)
 @Route(name = "search")
 @Composable
-fun StoreSearchScreen(
+fun SearchScreen(
     navController: NavController
 ) {
     val listState = rememberLazyListState(0)
@@ -73,7 +74,8 @@ fun StoreSearchScreen(
             stickyHeader {
                 SearchBar(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    onClick = { navController.navigate(RoutesActions.toSearch_results()) }
                 )
             }
 
@@ -113,11 +115,14 @@ fun StoreSearchScreen(
 }
 
 @Composable
-private fun SearchBar(modifier: Modifier = Modifier)
+private fun SearchBar(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+)
 {
     // search button
     OutlinedButton(
-        onClick = {},
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),

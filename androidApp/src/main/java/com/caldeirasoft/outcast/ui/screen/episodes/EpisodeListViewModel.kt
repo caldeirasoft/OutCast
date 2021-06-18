@@ -7,13 +7,11 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
-import com.caldeirasoft.outcast.domain.util.castAs
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
-import com.caldeirasoft.outcast.ui.screen.episode.EpisodeEvent
+import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlin.reflect.typeOf
 
 abstract class EpisodeListViewModel<State: Any, Event: EpisodesEvent>(
     initialState: State,

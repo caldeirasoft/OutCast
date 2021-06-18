@@ -72,7 +72,7 @@ interface EpisodeDao : EntityDao<Episode> {
         INNER JOIN episode_fts USING (name, podcastName)
         WHERE episode_fts MATCH :query
     """)
-    fun searchEpisodes(query: String): Flow<List<Episode>>
+    fun searchEpisodes(query: String): DataSource.Factory<Int, Episode>
 
     @Query("""
         UPDATE episode 

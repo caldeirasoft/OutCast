@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes
+package com.caldeirasoft.outcast.ui.screen.base
 
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import kotlinx.datetime.Instant

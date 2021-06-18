@@ -10,6 +10,7 @@ class StoreChartsPagingSource(
     val storeFront: String,
     private val loadDataFromNetwork: suspend () -> List<Long>,
     override val getStoreItems: suspend (List<Long>, String, StoreData?) -> List<StoreItem>,
+    override val itemsLimit: Int? = null,
 ) : BasePagingSource<StoreItem>(), StorePagingSource {
 
     override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {

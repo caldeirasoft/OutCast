@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.util
 
+import android.os.Bundle
 import androidx.navigation.NavController
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
@@ -37,10 +38,8 @@ fun NavController.navigateToPodcast(podcast: Podcast) {
 }
 
 fun NavController.navigateToPodcast(storePodcast: StorePodcast) {
-    storePodcast.let {
-        this.currentBackStackEntry
-            ?.arguments
-            ?.putString("podcast", encodeObject(it))
+    this.currentBackStackEntry?.arguments = Bundle().apply {
+        putString("podcast", encodeObject(storePodcast))
     }
     val feedUrl = storePodcast.feedUrl.urlEncode()
     this.navigate(RoutesActions.toPodcast(feedUrl))
@@ -58,9 +57,9 @@ fun NavController.navigateToStore(category: Category) {
 }
 
 fun NavController.navigateToEpisode(episode: Episode, fromSamePodcast: Boolean = false) {
-    this.currentBackStackEntry
-        ?.arguments
-        ?.putBoolean("fromSamePodcast", fromSamePodcast)
+    this.currentBackStackEntry?.arguments = Bundle().apply {
+        putBoolean("fromSamePodcast", fromSamePodcast)
+    }
 
     val feedUrl = episode.feedUrl.urlEncode()
     val guid = episode.guid.urlEncode()
@@ -68,9 +67,9 @@ fun NavController.navigateToEpisode(episode: Episode, fromSamePodcast: Boolean =
 }
 
 fun NavController.navigateToEpisode(storeEpisode: StoreEpisode) {
-    this.currentBackStackEntry
-        ?.arguments
-        ?.putString("episode", encodeObject(storeEpisode))
+    this.currentBackStackEntry?.arguments = Bundle().apply {
+        putString("episode", encodeObject(storeEpisode))
+    }
 
     val feedUrl = storeEpisode.feedUrl.urlEncode()
     val guid = storeEpisode.guid.urlEncode()

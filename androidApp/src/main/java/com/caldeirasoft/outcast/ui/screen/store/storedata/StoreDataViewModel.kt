@@ -2,26 +2,30 @@ package com.caldeirasoft.outcast.ui.screen.store.storedata
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
+import com.caldeirasoft.outcast.data.repository.DataStoreRepository
+import com.caldeirasoft.outcast.data.repository.PodcastsRepository
+import com.caldeirasoft.outcast.data.repository.StoreRepository
+import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
 import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadStorePagingDataUseCase
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
+import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.StoreRouteArgs
-import com.caldeirasoft.outcast.ui.util.getObject
 import com.caldeirasoft.outcast.ui.util.unserialize
-import cz.levinzonr.router.core.RouteArg
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -29,9 +33,11 @@ import javax.inject.Inject
 class StoreDataViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    private val loadStorePagingDataUseCase: LoadStorePagingDataUseCase,
     private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
     val followUseCase: FollowUseCase,
+    val storeRepository: StoreRepository,
+    val podcastsRepository: PodcastsRepository,
+    val dataStoreRepository: DataStoreRepository
 ) : BaseViewModelEvents<StoreDataState, StoreDataEvent>(
 
     initialState = StoreDataState(
@@ -47,7 +53,7 @@ class StoreDataViewModel @Inject constructor(
 
     init {
 
-        fetchFollowedPodcastsUseCase
+        podcastsRepository
             .getFollowedPodcastIds()
             .distinctUntilChanged()
             .setOnEach {
@@ -63,41 +69,61 @@ class StoreDataViewModel @Inject constructor(
 
     // paged list
     @OptIn(FlowPreview::class)
-    val discover: Flow<PagingData<StoreItem>> =
+    val discover: Flow<PagingData<StoreUiModel>> =
         fetchStoreFrontUseCase.getStoreFront()
             .distinctUntilChanged()
             .combine(urlFlow) { storeFront, url ->
-                loadStorePagingDataUseCase.executeAsync(
-                    url = url.orEmpty(),
-                    storeData = initialState.storeData,
-                    storeFront = storeFront,
-                    dataLoadedCallback = { page ->
-                        viewModelScope.setState {
-                            copy(storeData = page,
-                                title = page.label,
-                                categories = page.storeCategories)
-                        }
-                    })
+                Pager(
+                    config = PagingConfig(
+                        pageSize = 10,
+                        enablePlaceholders = false,
+                    ),
+                    pagingSourceFactory = {
+                        StoreDataPagingSource(
+                            loadDataFromNetwork = {
+                                when {
+                                    url != null && url.isNotEmpty() -> storeRepository.getStoreDataAsync(
+                                        url,
+                                        storeFront
+                                    )
+                                    else -> initialState.storeData
+                                }
+                            },
+                            dataLoadedCallback = { page ->
+                                viewModelScope.setState {
+                                    copy(
+                                        storeData = page,
+                                        title = page.label,
+                                        categories = page.storeCategories
+                                    )
+                                }
+                            },
+                            getStoreItems = { lookupIds, storeFront, storeData ->
+                                storeRepository.getListStoreItemDataAsync(
+                                    lookupIds,
+                                    storeFront,
+                                    storeData
+                                )
+                            }
+                        )
+                    }
+                ).flow
             }
             .flattenMerge()
             .cachedIn(viewModelScope)
 
 
-    private fun clearNewVersionNotification() {
-        viewModelScope.setState {
-            copy(newVersionAvailable = false)
-        }
-    }
-
     fun followPodcast(item: StorePodcast) {
-        followUseCase.execute(item)
-            .onStart { setPodcastFollowLoading(item, true) }
-            .catch { setPodcastFollowLoading(item, false) }
-            .onEach {
+        viewModelScope.launch {
+            runCatching {
+                setPodcastFollowLoading(item, true)
+                podcastsRepository.followPodcast(item, updatePodcast = true)
                 delay(1000)
                 setPodcastFollowLoading(item, false)
+            }.onFailure {
+                setPodcastFollowLoading(item, false)
             }
-            .launchIn(viewModelScope)
+        }
     }
 
     private suspend fun openCategoriesDialog() {

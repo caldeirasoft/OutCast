@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.data.util
 import androidx.paging.PagingState
 import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.models.store.StoreData
+import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
@@ -10,14 +11,15 @@ import timber.log.Timber
 class StoreDataPagingSource(
     private val loadDataFromNetwork: suspend () -> StoreData,
     override val getStoreItems: suspend (List<Long>, String, StoreData?) -> List<StoreItem>,
-    private val dataLoadedCallback: ((StoreData) -> Unit)?
-) : BasePagingSource<StoreItem>(), StorePagingSource {
+    private val dataLoadedCallback: ((StoreData) -> Unit)?,
+    override val itemsLimit: Int? = 15
+) : BasePagingSource<StoreUiModel>(), StorePagingSource {
     override val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreItem> {
+    override suspend fun loadFromNetwork(params: LoadParams<Int>): List<StoreUiModel> {
         val storeData = loadDataFromNetwork()
         dataLoadedCallback?.invoke(storeData)
-        val items = mutableListOf<StoreItem>()
+        val items = mutableListOf<StoreUiModel>()
         when {
             storeData.isMultiRoom -> {
                 val endPosition =
@@ -41,6 +43,6 @@ class StoreDataPagingSource(
         return items
     }
 
-    override fun getRefreshKey(state: PagingState<Int, StoreItem>): Int? =
+    override fun getRefreshKey(state: PagingState<Int, StoreUiModel>): Int? =
         state.anchorPosition
 }

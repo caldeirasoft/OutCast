@@ -280,7 +280,7 @@ private fun LibraryTopAppBar(
 }
 
 @Composable
-fun PodcastGridItem(
+private fun PodcastGridItem(
     modifier: Modifier = Modifier,
     podcast: Podcast,
     sort: LibrarySort,

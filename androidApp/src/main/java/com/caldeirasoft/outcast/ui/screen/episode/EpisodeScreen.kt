@@ -2,9 +2,7 @@ package com.caldeirasoft.outcast.ui.screen.episode
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -67,6 +65,7 @@ fun EpisodeScreen(
     EpisodeScreen(
         state = state,
         scaffoldState = scaffoldState,
+        episode = state.episode,
         onPodcastClick = viewModel::openPodcastDetails,
         navigateUp = { navController.navigateUp() },
         onSaveButtonClick = viewModel::toggleSaveEpisode,
@@ -142,6 +141,7 @@ fun EpisodeScreen(
 fun EpisodeScreen(
     state: EpisodeViewState,
     scaffoldState: ScaffoldState,
+    episode: Episode?,
     navigateUp: () -> Unit,
     onPodcastClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
@@ -165,64 +165,42 @@ fun EpisodeScreen(
     ) {
         //
         val listState = rememberLazyListState(0)
-        LazyColumn(
-            state = listState,
+        val scrollState = rememberScrollState()
+        Column(
             modifier = Modifier
-                .fillMaxSize()) {
-
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+        ) {
             // header
-            item {
-                EpisodeExpandedHeader(
-                    state = state,
-                    listState = listState,
-                    onPodcastClick = onPodcastClick,
+            EpisodeExpandedHeader(
+                state = state,
+                listState = listState,
+                onPodcastClick = onPodcastClick,
+            )
+
+
+            episode?.let {
+                EpisodeActionAppBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    episode = it,
+                    onSaveButtonClick = onSaveButtonClick,
+                    onContextMenuClick = {
+                        onMoreButtonClick(it)
+                    }
                 )
             }
 
-            when {
-                state.isLoading ->
-                    item {
-                        //PodcastLoadingScreen()
-                    }
-                state.error != null ->
-                    state.error.let {
-                        item {
-                            ErrorScreen(t = it)
-                        }
-                    }
-                else -> {
-                    // buttons
-                    item {
-                        state.episode?.let {
-                            EpisodeActionAppBar(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                                    .padding(bottom = 16.dp),
-                                episode = it,
-                                onSaveButtonClick = onSaveButtonClick,
-                                onContextMenuClick = {
-                                    onMoreButtonClick(it)
-                                }
-                            )
-                        }
-                    }
-
-                    /* description if present */
-                    item {
-                        state.episode?.description?.let { description ->
-                            EpisodeDescriptionContent(description = description)
-                        }
-                    }
-
-                    // custom artwork
-
-                    item {
-                        // bottom app bar spacer
-                        Spacer(modifier = Modifier.height(56.dp))
-                    }
-                }
+            /* description if present */
+            episode?.description?.let { description ->
+                EpisodeDescriptionContent(description = description)
             }
+
+            // custom artwork
+            // bottom app bar spacer
+            Spacer(modifier = Modifier.height(56.dp))
         }
 
         EpisodeTopAppBar(

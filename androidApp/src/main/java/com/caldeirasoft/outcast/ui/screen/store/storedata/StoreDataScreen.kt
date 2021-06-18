@@ -33,13 +33,13 @@ import androidx.paging.compose.items
 import androidx.paging.compose.itemsIndexed
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.common.Constants.Companion.DEFAULT_GENRE
-import com.caldeirasoft.outcast.domain.interfaces.StoreItem
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
+import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.colors
@@ -113,7 +113,7 @@ fun StoreDataScreen(
 @Composable
 fun StoreDataScreen(
     state: StoreDataState,
-    lazyPagingItems: LazyPagingItems<StoreItem>,
+    lazyPagingItems: LazyPagingItems<StoreUiModel>,
     navigateToStore: (StoreData) -> Unit,
     navigateToPodcast: (StorePodcast) -> Unit,
     navigateToEpisode: (StoreEpisode) -> Unit,
@@ -246,92 +246,135 @@ fun StoreDataScreen(
                     // content
                     when {
                         state.storeData.isMultiRoom -> {
-                            items(lazyPagingItems = lazyPagingItems) { collection ->
-                                when (collection) {
-                                    is StoreCollectionFeatured ->
-                                        StoreCollectionFeaturedContent(
-                                            storeCollection = collection,
-                                            openStoreDataDetail = navigateToStore,
-                                            openPodcastDetail = navigateToPodcast,
-                                            openEpisodeDetail = navigateToEpisode,
-                                        )
-                                    is StoreCollectionItems -> {
-                                        // content
-                                        StoreCollectionItemsContent(
-                                            storeCollection = collection,
-                                            openStoreDataDetail = navigateToStore,
-                                            openPodcastDetail = navigateToPodcast,
-                                            openEpisodeDetail = navigateToEpisode,
-                                            followingStatus = state.followingStatus,
-                                            followLoadingStatus = state.followLoadingStatus,
-                                            onFollowPodcast = {
-                                                onFollowPodcast(it)
-                                            },
-                                        )
+                            items(lazyPagingItems = lazyPagingItems) { storeUiModel ->
+                                when (storeUiModel) {
+                                    is StoreUiModel.TitleItem -> {
+                                        // header
+                                        when (val collection = storeUiModel.item) {
+                                            is StoreCollectionData -> {
+                                                StoreHeadingSection(title = collection.label)
+                                            }
+                                            is StoreCollectionItems -> {
+                                                StoreHeadingSectionWithLink(
+                                                    title = collection.label,
+                                                    onClick = {
+                                                        navigateToStore(collection.room)
+                                                    })
+                                            }
+                                            is StoreCollectionEpisodes -> {
+                                                StoreHeadingSectionWithLink(
+                                                    title = collection.label,
+                                                    onClick = {
+                                                        navigateToStore(collection.room)
+                                                    })
+                                            }
+                                        }
                                     }
-                                    is StoreCollectionData -> {
-                                        // rooms
-                                        StoreCollectionDataContent(
-                                            storeCollection = collection,
-                                            openStoreDataDetail = navigateToStore,
-                                            openPodcastDetail = navigateToPodcast,
-                                            openEpisodeDetail = navigateToEpisode,
-                                        )
+                                    is StoreUiModel.StoreUiItem -> {
+                                        // content
+                                        when (val storeItem = storeUiModel.item) {
+                                            is StoreCollectionFeatured -> {
+                                                StoreCollectionFeaturedContent(
+                                                    storeCollection = storeItem,
+                                                    openStoreDataDetail = navigateToStore,
+                                                    openPodcastDetail = navigateToPodcast,
+                                                    openEpisodeDetail = navigateToEpisode,
+                                                )
+                                            }
+                                            is StoreCollectionData -> {
+                                                StoreCollectionDataContent(
+                                                    storeCollection = storeItem,
+                                                    openStoreDataDetail = navigateToStore,
+                                                    openPodcastDetail = navigateToPodcast,
+                                                    openEpisodeDetail = navigateToEpisode,
+                                                )
+                                            }
+                                            is StoreCollectionItems -> {
+                                                StoreCollectionItemsContent(
+                                                    storeCollection = storeItem,
+                                                    openStoreDataDetail = navigateToStore,
+                                                    openPodcastDetail = navigateToPodcast,
+                                                    openEpisodeDetail = navigateToEpisode,
+                                                    followingStatus = state.followingStatus,
+                                                    followLoadingStatus = state.followLoadingStatus,
+                                                    onFollowPodcast = {
+                                                        onFollowPodcast(it)
+                                                    },
+                                                )
+                                            }
+                                            is StoreEpisode -> {
+                                                StoreEpisodeItem(
+                                                    episode = storeItem.episode,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    onThumbnailClick = { navigateToPodcast(storeItem.storePodcast) },
+                                                    onEpisodeClick = { navigateToEpisode(storeItem) },
+                                                    index = storeUiModel.index
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                         else -> {
-                            val sortByPopularity =
-                                (state.storeData?.sortByPopularity ?: false)
-                            when (lazyPagingItems.peek(0)) {
-                                is StorePodcast -> gridItemsIndexed(
-                                    lazyPagingItems = lazyPagingItems,
-                                    contentPadding = PaddingValues(16.dp),
-                                    horizontalInnerPadding = 16.dp,
-                                    verticalInnerPadding = 16.dp,
-                                    columns = 2
-                                ) { index, item ->
-                                    when (item) {
-                                        is StorePodcast -> {
-                                            PodcastGridItem(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                onClick = { navigateToPodcast(item) },
-                                                podcast = item,
-                                                index = (index + 1).takeIf { sortByPopularity },
-                                                isFollowing = state.followingStatus.contains(
-                                                    item.id
-                                                ),
-                                                isFollowingLoading = state.followLoadingStatus.contains(
-                                                    item.id
-                                                ),
-                                                onFollowPodcast = {
-                                                    onFollowPodcast(it)
-                                                },
-                                            )
+                            val sortByPopularity = state.storeData.sortByPopularity
+                            val firstUiModel = lazyPagingItems.peek(0) as StoreUiModel
+                            when {
+                                firstUiModel is StoreUiModel.StoreUiItem &&
+                                        firstUiModel.item is StorePodcast ->
+                                    gridItemsIndexed(
+                                        lazyPagingItems = lazyPagingItems,
+                                        contentPadding = PaddingValues(16.dp),
+                                        horizontalInnerPadding = 16.dp,
+                                        verticalInnerPadding = 16.dp,
+                                        columns = 2
+                                    ) { index, uiModel ->
+                                        if (uiModel is StoreUiModel.StoreUiItem) {
+                                            when (val item = uiModel.item) {
+                                                is StorePodcast -> {
+                                                    PodcastGridItem(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth(),
+                                                        onClick = { navigateToPodcast(item) },
+                                                        podcast = item,
+                                                        index = (index + 1).takeIf { sortByPopularity },
+                                                        isFollowing = state.followingStatus.contains(
+                                                            item.id
+                                                        ),
+                                                        isFollowingLoading = state.followLoadingStatus.contains(
+                                                            item.id
+                                                        ),
+                                                        onFollowPodcast = {
+                                                            onFollowPodcast(it)
+                                                        },
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                                is StoreEpisode -> itemsIndexed(lazyPagingItems = lazyPagingItems) { index, item ->
-                                    when (item) {
-                                        is StoreEpisode -> {
-                                            StoreEpisodeItem(
-                                                modifier = Modifier,
-                                                onEpisodeClick = {
-                                                    navigateToEpisode(item)
-                                                },
-                                                onThumbnailClick = {
-                                                    navigateToPodcast(item.storePodcast)
-                                                },
-                                                episode = item.episode,
-                                                index = (index + 1).takeIf { sortByPopularity },
-                                            )
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Divider()
+                                firstUiModel is StoreUiModel.StoreUiItem &&
+                                        firstUiModel.item is StoreEpisode ->
+                                    itemsIndexed(lazyPagingItems = lazyPagingItems) { index, uiModel ->
+                                        if (uiModel is StoreUiModel.StoreUiItem) {
+                                            when (val item = uiModel.item) {
+                                                is StoreEpisode -> {
+                                                    StoreEpisodeItem(
+                                                        modifier = Modifier,
+                                                        onEpisodeClick = {
+                                                            navigateToEpisode(item)
+                                                        },
+                                                        onThumbnailClick = {
+                                                            navigateToPodcast(item.storePodcast)
+                                                        },
+                                                        episode = item.episode,
+                                                        index = (index + 1).takeIf { sortByPopularity },
+                                                    )
+                                                    Spacer(modifier = Modifier.height(8.dp))
+                                                    Divider()
+                                                }
+                                            }
                                         }
                                     }
-                                }
                             }
                         }
                     }
@@ -530,12 +573,6 @@ fun StoreCollectionItemsContent(
     openEpisodeDetail: (StoreEpisode) -> Unit,
     onFollowPodcast: (StorePodcast) -> Unit = { },
 ) {
-    StoreHeadingSectionWithLink(
-        title = storeCollection.label,
-        onClick = {
-            openStoreDataDetail(storeCollection.room)
-        })
-
     if (storeCollection.items.filterIsInstance<StorePodcast>().isNotEmpty()) {
         StoreCollectionPodcastContent(
             storeCollection = storeCollection,
@@ -688,9 +725,6 @@ fun StoreCollectionDataContent(
     openPodcastDetail: (StorePodcast) -> Unit,
     openEpisodeDetail: (StoreEpisode) -> Unit,
 ) {
-    // header
-    StoreHeadingSection(title = storeCollection.label)
-
     // room content
     LazyRow(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),

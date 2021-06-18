@@ -1,40 +1,24 @@
 package com.caldeirasoft.outcast.ui.screen.podcastsettings
 
-import android.content.Context
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.data.common.PodcastPreferenceKeys
 import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
 import com.caldeirasoft.outcast.data.db.entities.Settings
-import com.caldeirasoft.outcast.domain.enums.EpisodeLimitOptions
 import com.caldeirasoft.outcast.domain.enums.NewEpisodesOptions
 import com.caldeirasoft.outcast.domain.enums.PodcastEpisodeLimitOptions
 import com.caldeirasoft.outcast.domain.model.*
-import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
-import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResource
-import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResourceZero
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceScreen
-import com.caldeirasoft.outcast.ui.navigation.Screen
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastState
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastViewModel
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import cz.levinzonr.router.core.Route
@@ -43,7 +27,6 @@ import cz.levinzonr.router.core.RouteArgType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
 @Route(
