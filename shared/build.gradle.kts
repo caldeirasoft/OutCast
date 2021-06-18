@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform")
+    kotlin("multiplatform") apply true
     kotlin("plugin.serialization") apply true
     id("com.android.library")
 }
