@@ -34,7 +34,6 @@ fun CoroutineScope.OpenBottomSheetMenu(
         )
     }
     this.launch {
-        delay(500)
         drawerState.show()
     }
 }
