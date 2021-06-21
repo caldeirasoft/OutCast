@@ -5,13 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.data.repository.DataStoreRepository
-import com.caldeirasoft.outcast.data.repository.PodcastsRepository
-import com.caldeirasoft.outcast.data.repository.SearchRepository
-import com.caldeirasoft.outcast.data.repository.StoreRepository
+import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
 import com.caldeirasoft.outcast.ui.screen.BaseViewModel
 import com.caldeirasoft.outcast.ui.screen.base.SearchUiModel
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
@@ -27,11 +23,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchResultsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
     val storeRepository: StoreRepository,
     val podcastsRepository: PodcastsRepository,
-    val dataStoreRepository: DataStoreRepository,
-    val searchRepository: SearchRepository,
+    private val searchRepository: SearchRepository,
+    private val settingsRepository: SettingsRepository
 ) : BaseViewModel<SearchResultsState>(
     initialState = SearchResultsState())
 {
@@ -47,14 +42,11 @@ class SearchResultsViewModel @Inject constructor(
         .map { it.query }
         .distinctUntilChanged()
 
-    private val storeFrontFlow = fetchStoreFrontUseCase
-        .getStoreFront()
-        .distinctUntilChanged()
-
     // paged list
     @OptIn(FlowPreview::class)
     val searchResults: Flow<PagingData<StoreUiModel>> =
-        combine(queryFlow, storeFrontFlow) { query, storeFront ->
+        queryFlow.map { query ->
+            val storeFront = settingsRepository.storeFrontFlow.first()
             Pager(
                 config = PagingConfig(
                     pageSize = 10,
@@ -108,7 +100,7 @@ class SearchResultsViewModel @Inject constructor(
                             .map { SearchUiModel.HistoryItem(it) as SearchUiModel }
                     else -> {
                         val historyResults = searchRepository.searchHistory(query)
-                        val storeFront = fetchStoreFrontUseCase.getStoreFront().first()
+                        val storeFront = settingsRepository.storeFrontFlow.first()
                         val hintResults = storeRepository.getSearchTermHintsAsync(query, storeFront)
                         historyResults
                             .map { SearchUiModel.HistoryItem(it) }

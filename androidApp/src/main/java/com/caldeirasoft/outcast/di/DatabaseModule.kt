@@ -26,7 +26,7 @@ object DatabaseModule {
             OutcastDatabase::class.java,
             "outcast.db"
         )
-        .addCallback(OutcastDatabase.callback)
+        .addCallback(OutcastDatabase.getCallback(context))
         .fallbackToDestructiveMigration()
         .build()
 

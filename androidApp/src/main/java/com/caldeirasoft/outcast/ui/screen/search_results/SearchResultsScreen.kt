@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -32,7 +33,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -46,7 +49,6 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.screen.base.SearchUiModel
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreCollectionItemsContent
-import com.caldeirasoft.outcast.ui.screen.store.topcharts.pagerTabIndicatorOffset
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
@@ -55,6 +57,7 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import cz.levinzonr.router.core.Route
 import kotlinx.coroutines.launch
@@ -638,4 +641,34 @@ private fun PodcastSearchGridItem(
             )
         }
     }
+}
+
+/**
+ * This indicator syncs up the tab indicator with the [HorizontalPager] position.
+ * We may add this in the library at some point.
+ */
+@OptIn(ExperimentalPagerApi::class)
+fun Modifier.pagerTabIndicatorOffset(
+    pagerState: PagerState,
+    tabPositions: List<TabPosition>,
+): Modifier = composed {
+    val targetIndicatorOffset: Dp
+    val indicatorWidth: Dp
+
+    val currentTab = tabPositions[pagerState.currentPage]
+    val nextTab = tabPositions.getOrNull(pagerState.currentPage + 1)
+    if (nextTab != null) {
+        // If we have a next tab, lerp between the size and offset
+        targetIndicatorOffset = lerp(currentTab.left, nextTab.left, pagerState.currentPageOffset)
+        indicatorWidth = lerp(currentTab.width, nextTab.width, pagerState.currentPageOffset)
+    } else {
+        // Otherwise we just use the current tab/page
+        targetIndicatorOffset = currentTab.left
+        indicatorWidth = currentTab.width
+    }
+
+    fillMaxWidth()
+        .wrapContentSize(Alignment.BottomStart)
+        .offset(x = targetIndicatorOffset)
+        .width(indicatorWidth)
 }

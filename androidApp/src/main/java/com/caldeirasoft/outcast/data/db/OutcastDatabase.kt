@@ -1,6 +1,7 @@
 package com.caldeirasoft.outcast.data.db
 
 import android.content.ContentValues
+import android.content.Context
 import androidx.room.OnConflictStrategy
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -9,6 +10,7 @@ import com.caldeirasoft.outcast.data.db.dao.*
 import com.caldeirasoft.outcast.data.db.entities.*
 import com.caldeirasoft.outcast.data.db.typeconverters.InstantConverter
 import com.caldeirasoft.outcast.domain.enums.*
+import kotlinx.datetime.Clock
 
 @androidx.room.Database(
     entities = [
@@ -37,9 +39,10 @@ abstract class OutcastDatabase : RoomDatabase() {
     abstract fun podcastSettingsDao(): PodcastSettingsDao
 
     companion object {
-        val callback = object : RoomDatabase.Callback() {
+        fun getCallback(context: Context) = object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
+                val nowMillis = Clock.System.now().toEpochMilliseconds()
 
                 // insert settings
                 val settingsValues = ContentValues()
@@ -63,6 +66,11 @@ abstract class OutcastDatabase : RoomDatabase() {
                     "external_controls",
                     ExternalControlsOptions.SKIP_FORWARD_BACK.ordinal
                 )
+                settingsValues.put(
+                    "store_country",
+                    context.resources.configuration.locales.get(0).country)
+                settingsValues.put("last_sync_at", nowMillis)
+                settingsValues.put("last_refresh_at", nowMillis)
                 settingsValues.put("theme", Theme.AUTO.ordinal)
                 db.insert("settings", OnConflictStrategy.ABORT, settingsValues)
 

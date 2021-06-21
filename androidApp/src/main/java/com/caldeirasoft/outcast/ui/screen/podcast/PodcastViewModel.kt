@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.screen.podcast
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.podcastFilterOption
@@ -27,18 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PodcastViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val loadPodcastFromDbUseCase: LoadPodcastFromDbUseCase,
-    private val loadPodcastEpisodesPagingDataUseCase: LoadPodcastEpisodesPagingDataUseCase,
-    private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
-    private val followUseCase: FollowUseCase,
-    private val unfollowUseCase: UnfollowUseCase,
-    private val loadSettingsUseCase: LoadSettingsUseCase,
-    private val getPodcastSortOrderUseCase: GetPodcastSortOrderUseCase,
-    private val updatePodcastSortOrderUseCase: UpdatePodcastSortOrderUseCase,
-    private val getPodcastFilterUseCase: GetPodcastFilterUseCase,
-    private val updatePodcastFilterUseCase: UpdatePodcastFilterUseCase,
     private val podcastsRepository: PodcastsRepository,
-    private val dataStoreRepository: DataStoreRepository,
     private val settingsRepository: SettingsRepository,
     saveEpisodeUseCase: SaveEpisodeUseCase,
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
@@ -56,8 +46,6 @@ class PodcastViewModel @Inject constructor(
 
     private var isInitialized: Boolean = false
     private var isPodcastSet: Boolean = false
-
-    val dataStore = loadSettingsUseCase.dataStore
 
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
@@ -77,14 +65,14 @@ class PodcastViewModel @Inject constructor(
 
 
     init {
-        loadPodcastFromDbUseCase.execute(initialState.feedUrl)
+        podcastsRepository
+            .loadPodcast(initialState.feedUrl)
             .onEach {
                 // 1rst launch
                 if ((it != null) && (!isInitialized)) {
                     // podcast in db : update if necessary
-                    fetchPodcastDataUseCase
-                        .execute(it)
-                        .launchIn(viewModelScope)
+                    podcastsRepository
+                        .updatePodcastItunesMetadata(it)
                 }
                 isInitialized = true
             }
@@ -103,18 +91,17 @@ class PodcastViewModel @Inject constructor(
 
     fun setPodcast(storePodcast: StorePodcast) {
         if (!isPodcastSet) {
-            fetchPodcastDataUseCase
-                .execute(storePodcast.podcast)
-                .onStart {
-                    setState {
-                        copy(
-                            isLoading = true,
-                            podcast = storePodcast.podcast
-                        )
-                    }
+            viewModelScope.launch {
+                setState {
+                    copy(
+                        isLoading = true,
+                        podcast = storePodcast.podcast
+                    )
                 }
-                .onCompletion { isPodcastSet = true }
-                .launchIn(viewModelScope)
+                podcastsRepository
+                    .updatePodcastItunesMetadata(storePodcast.podcast)
+                isPodcastSet = true
+            }
         }
     }
 
@@ -126,14 +113,15 @@ class PodcastViewModel @Inject constructor(
     }
 
     fun follow() {
-        followUseCase.execute(initialState.feedUrl)
-            .onStart { setState { copy(followingStatus = FollowStatus.FOLLOWING) } }
-            .launchIn(viewModelScope)
+        viewModelScope.launch {
+            setState { copy(followingStatus = FollowStatus.FOLLOWING) }
+            podcastsRepository.followPodcast(feedUrl = initialState.feedUrl)
+        }
     }
 
     fun unfollow() {
         viewModelScope.launch {
-            unfollowUseCase.execute(feedUrl = initialState.feedUrl)
+            podcastsRepository.unfollowPodcast(feedUrl = initialState.feedUrl)
         }
     }
 

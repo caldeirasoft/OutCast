@@ -4,6 +4,7 @@ package com.caldeirasoft.outcast.data.db.entities
 import androidx.room.*
 import com.caldeirasoft.outcast.domain.enums.*
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
@@ -26,6 +27,9 @@ data class Settings(
     @ColumnInfo(name = "skip_back_button") val skipBackButton: Int = SkipOptions.SKIP_15_SECONDS.ordinal,
     @ColumnInfo(name = "skip_forward_button") val skipForwardButton: Int = SkipOptions.SKIP_30_SECONDS.ordinal,
     @ColumnInfo(name = "external_controls") val externalControlsOptions: Int = ExternalControlsOptions.SKIP_FORWARD_BACK.ordinal,
+    @ColumnInfo(name = "store_country") val storeCountry: String = "",
+    @ColumnInfo(name = "last_sync_at") val lastSyncAt: Instant,
+    @ColumnInfo(name = "last_refresh_at") val lastRefreshAt: Instant,
     @ColumnInfo(name = "theme") val theme: Int = Theme.AUTO.ordinal,
 ) {
   companion object {

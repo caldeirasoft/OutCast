@@ -72,13 +72,6 @@ object RepositoryModule {
         SearchRepository(podcastDao, episodeDao, searchDao, json)
 
     @Provides
-    fun provideDataStoreRepository(
-        @ApplicationContext context: Context,
-        dataStore: DataStore<Preferences>,
-    ) =
-        DataStoreRepository(context, dataStore)
-
-    @Provides
     fun provideDownloadsRepository(
         @ApplicationContext context: Context,
         downloadDao: DownloadDao

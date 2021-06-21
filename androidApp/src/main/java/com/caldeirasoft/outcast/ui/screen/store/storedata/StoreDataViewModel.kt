@@ -6,16 +6,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.caldeirasoft.outcast.data.repository.DataStoreRepository
 import com.caldeirasoft.outcast.data.repository.PodcastsRepository
+import com.caldeirasoft.outcast.data.repository.SettingsRepository
 import com.caldeirasoft.outcast.data.repository.StoreRepository
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
-import com.caldeirasoft.outcast.domain.usecase.FetchStoreFrontUseCase
-import com.caldeirasoft.outcast.domain.usecase.FollowUseCase
 import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.StoreRouteArgs
@@ -32,12 +29,9 @@ import javax.inject.Inject
 @HiltViewModel
 class StoreDataViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    fetchStoreFrontUseCase: FetchStoreFrontUseCase,
-    private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
-    val followUseCase: FollowUseCase,
     val storeRepository: StoreRepository,
     val podcastsRepository: PodcastsRepository,
-    val dataStoreRepository: DataStoreRepository
+    val settingsRepository: SettingsRepository,
 ) : BaseViewModelEvents<StoreDataState, StoreDataEvent>(
 
     initialState = StoreDataState(
@@ -70,8 +64,8 @@ class StoreDataViewModel @Inject constructor(
     // paged list
     @OptIn(FlowPreview::class)
     val discover: Flow<PagingData<StoreUiModel>> =
-        fetchStoreFrontUseCase.getStoreFront()
-            .distinctUntilChanged()
+        settingsRepository
+            .storeFrontFlow
             .combine(urlFlow) { storeFront, url ->
                 Pager(
                     config = PagingConfig(

@@ -1,10 +1,7 @@
 package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
-import androidx.datastore.dataStore
 import com.caldeirasoft.outcast.data.api.ItunesAPI
-import com.caldeirasoft.outcast.data.api.ItunesSearchAPI
-import com.caldeirasoft.outcast.data.util.local.StoreDataSerializer
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
@@ -15,12 +12,8 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 import javax.inject.Inject
