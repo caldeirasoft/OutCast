@@ -105,8 +105,7 @@ fun EpisodesScreen(
                             titleId = R.string.action_remove_saved_episode,
                             icon = Icons.Outlined.BookmarkRemove,
                             onClick = { viewModel.removeSavedEpisode(episode) },
-                        )
-                    ,
+                        ),
                     BottomSheetSeparator,
                     BottomSheetMenuItem(
                         titleId = R.string.action_share_episode,

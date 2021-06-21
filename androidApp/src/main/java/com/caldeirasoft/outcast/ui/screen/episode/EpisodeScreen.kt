@@ -12,7 +12,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,11 +22,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
@@ -61,9 +65,6 @@ fun EpisodeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scaffoldState = rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
 
     EpisodeScreen(
         state = state,
@@ -72,36 +73,38 @@ fun EpisodeScreen(
         onPodcastClick = viewModel::openPodcastDetails,
         navigateUp = { navController.navigateUp() },
         onSaveButtonClick = viewModel::toggleSaveEpisode,
-        onMoreButtonClick = { episode ->
-            coroutineScope.OpenBottomSheetMenu(
-                header = { // header : episode
-                    EpisodeItem(
-                        episode = episode,
-                        showActions = false,
-                    )
-                },
-                items = listOf(
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_play_next,
-                        icon = Icons.Default.QueuePlayNext,
-                        onClick = { viewModel.playNext() },
-                    ),
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_play_last,
-                        icon = Icons.Default.AddToQueue,
-                        onClick = { viewModel.playLast() },
-                    ),
-                    BottomSheetSeparator,
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_share_episode,
-                        icon = Icons.Default.Share,
-                        onClick = { viewModel.shareEpisode() },
-                    )
-                ),
-                drawerState = drawerState,
-                drawerContent = drawerContent
+        contextMenuItems = listOf(
+            ContextMenuItem(
+                titleId = R.string.action_play_next,
+                icon = Icons.Default.QueuePlayNext,
+                onClickAction = { viewModel.playNext() },
+            ),
+            ContextMenuItem(
+                titleId = R.string.action_play_last,
+                icon = Icons.Default.AddToQueue,
+                onClickAction = { viewModel.playLast() },
+            ),
+            ContextMenuSeparator,
+            if (state.episode?.isSaved == false)
+                ContextMenuItem(
+                    titleId = R.string.action_save_episode,
+                    icon = Icons.Outlined.BookmarkAdd,
+                    onClickAction = { /*viewModel.saveEpisode(episode)*/ },
+                )
+            else
+                ContextMenuItem(
+                    titleId = R.string.action_remove_saved_episode,
+                    icon = Icons.Outlined.BookmarkRemove,
+                    onClickAction = { /*viewModel.removeSavedEpisode(episode)*/ },
+                )
+            ,
+            ContextMenuSeparator,
+            ContextMenuItem(
+                titleId = R.string.action_share_episode,
+                icon = Icons.Default.Share,
+                onClickAction = { viewModel.shareEpisode() },
             )
-        }
+        )
     )
 
     storeEpisode?.let {
@@ -112,7 +115,7 @@ fun EpisodeScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
-            when(event) {
+            when (event) {
                 is EpisodeEvent.OpenPodcastDetail -> {
                     if (fromSamePodcast) navController.navigateUp()
                     else navController.navigateToPodcast(event.podcast)
@@ -148,7 +151,7 @@ fun EpisodeScreen(
     navigateUp: () -> Unit,
     onPodcastClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
-    onMoreButtonClick: (Episode) -> Unit,
+    contextMenuItems: List<BaseContextMenuItem>,
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
@@ -188,9 +191,7 @@ fun EpisodeScreen(
                         .padding(bottom = 16.dp),
                     episode = it,
                     onSaveButtonClick = onSaveButtonClick,
-                    onContextMenuClick = {
-                        onMoreButtonClick(it)
-                    }
+                    contextMenuItems = contextMenuItems
                 )
             }
 
@@ -419,9 +420,10 @@ private fun EpisodeActionAppBar(
     modifier: Modifier = Modifier,
     episode: Episode,
     onSaveButtonClick: () -> Unit,
-    onContextMenuClick: () -> Unit,
+    contextMenuItems: List<BaseContextMenuItem> = emptyList(),
 ) {
     val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    var expandedContextMenu by remember { mutableStateOf(false) }
     TopAppBar(
         modifier = Modifier,
         title = {
@@ -440,12 +442,43 @@ private fun EpisodeActionAppBar(
                 )
             }
             // more button
-            IconButton(onClick = onContextMenuClick) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = null,
-                    tint = tintColor,
-                )
+            Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
+                IconButton(onClick = { expandedContextMenu = !expandedContextMenu }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null,
+                        tint = tintColor,
+                    )
+                }
+                DropdownMenu(
+                    modifier = Modifier.widthIn(min = 250.dp),
+                    expanded = expandedContextMenu,
+                    onDismissRequest = { expandedContextMenu = false }
+                ) {
+                    contextMenuItems.forEach { value ->
+                        when(value) {
+                            is ContextMenuItem ->
+                                DropdownMenuItem(
+                                    modifier = Modifier,
+                                    onClick = {
+                                        expandedContextMenu = false
+                                        value.onClickAction()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = value.icon,
+                                        contentDescription = stringResource(id = value.titleId),
+                                        modifier = Modifier
+                                            .padding(end = 8.dp)
+                                            .size(20.dp)
+                                    )
+                                    Text(text = stringResource(id = value.titleId))
+                                }
+                            is ContextMenuSeparator ->
+                                Divider()
+                        }
+                    }
+                }
             }
         },
         backgroundColor = Color.Transparent,
