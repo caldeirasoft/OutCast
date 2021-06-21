@@ -2,19 +2,20 @@ package com.caldeirasoft.outcast.ui.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.DownloadForOffline
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -174,7 +175,8 @@ fun EpisodeItem(
             Text(text = episode
                 .releaseDateTime
                 .formatRelativeDateTime(context)
-                .toUpperCase(Locale.getDefault()))
+                .uppercase(Locale.getDefault())
+            )
         },
         descriptionText = {
             episode.description?.let {
@@ -227,53 +229,21 @@ fun PodcastEpisodeItem(
             Text(text = episode
                 .releaseDateTime
                 .formatRelativeDateTime(context)
-                .toUpperCase(Locale.getDefault()))
+                .uppercase(Locale.getDefault()),
+            )
         },
         descriptionText = {
             episode.description?.let {
-                Text(text = HtmlCompat.fromHtml(
-                    it,
-                    HtmlCompat.FROM_HTML_MODE_COMPACT
-                ).toString(), maxLines = 2)
+                Text(
+                    text = HtmlCompat.fromHtml(
+                        it,
+                        HtmlCompat.FROM_HTML_MODE_COMPACT
+                    ).toString(),
+                    maxLines = 2
+                )
             }
         }
     )
-
-    /*
-    ListItem(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onEpisodeClick() },
-        text = {
-            Text(text = episode.name, maxLines = 2)
-        },
-        secondaryText = {
-            val context = LocalContext.current
-            Text(
-                text = with(AnnotatedString.Builder()) {
-                    append(episode.duration.formatDuration())
-                    append(" ● ")
-                    append(episode.releaseDateTime.formatRelativeDisplay(context))
-                    append("\n")
-                    episode.description?.let {
-                        append(it)
-                    }
-                    toAnnotatedString()
-                },
-                maxLines = 3,
-            )
-        },
-        icon = {
-            PodcastThumbnail(
-                imageModel = episode.getArtworkUrl(),
-                modifier = Modifier
-                    .size(EpisodeDefaults.SmallThumbnailSize)
-                    .clickable(onClick = { })
-            )
-        }
-    )
-    */
-
 }
 
 @Composable

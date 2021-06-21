@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
@@ -30,13 +31,15 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.screen.podcast.GetPodcastVibrantColor
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import cz.levinzonr.router.core.Route
 import cz.levinzonr.router.core.RouteArg
 import cz.levinzonr.router.core.RouteArgType
@@ -147,9 +150,6 @@ fun EpisodeScreen(
     onSaveButtonClick: () -> Unit,
     onMoreButtonClick: (Episode) -> Unit,
 ) {
-    val dominantColor = remember(state.podcast) { GetPodcastVibrantColor(podcastData = state.podcast) }
-    val dominantColorOrDefault = dominantColor ?: MaterialTheme.colors.primary
-
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = {
@@ -173,12 +173,13 @@ fun EpisodeScreen(
         ) {
             // header
             EpisodeExpandedHeader(
-                state = state,
+                episode = episode,
                 listState = listState,
                 onPodcastClick = onPodcastClick,
             )
 
 
+            // action bar
             episode?.let {
                 EpisodeActionAppBar(
                     modifier = Modifier
@@ -194,9 +195,7 @@ fun EpisodeScreen(
             }
 
             /* description if present */
-            episode?.description?.let { description ->
-                EpisodeDescriptionContent(description = description)
-            }
+            EpisodeDescriptionContent(description = episode?.description)
 
             // custom artwork
             // bottom app bar spacer
@@ -213,7 +212,7 @@ fun EpisodeScreen(
 
 @Composable
 private fun EpisodeExpandedHeader(
-    state: EpisodeViewState,
+    episode: Episode?,
     listState: LazyListState,
     onPodcastClick: () -> Unit,
 ) {
@@ -265,12 +264,17 @@ private fun EpisodeExpandedHeader(
                     .align(Alignment.Start)
             ) {
                 Image(
-                    painter = rememberCoilPainter(request = state.episode?.artworkUrl.orEmpty()),
-                    contentDescription = state.episode?.podcastName,
+                    painter = rememberCoilPainter(request = episode?.artworkUrl.orEmpty()),
+                    contentDescription = episode?.podcastName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .width(120.dp)
                         .aspectRatio(1f)
+                        .placeholder(
+                            visible = (episode == null),
+                            shape = RoundedCornerShape(8.dp),
+                            highlight = PlaceholderHighlight.shimmer(),
+                        )
                 )
             }
 
@@ -278,11 +282,27 @@ private fun EpisodeExpandedHeader(
 
             // episode name
             Box(modifier = Modifier.heightIn(min = 50.dp)) {
-                Text(
-                    text = state.episode?.name.orEmpty(),
-                    style = MaterialTheme.typography.h5,
-                    modifier = Modifier.align(Alignment.BottomStart)
-                )
+                if (episode != null) {
+                    Text(
+                        text = episode.name,
+                        style = MaterialTheme.typography.h5,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                    )
+                }
+                else {
+                    Text(
+                        text = LoremIpsum(8).values.joinToString(" "),
+                        style = MaterialTheme.typography.h5,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .placeholder(
+                                visible = true,
+                                highlight = PlaceholderHighlight.shimmer(),
+                            )
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -290,7 +310,7 @@ private fun EpisodeExpandedHeader(
             // podcast name
             Text(
                 text = with(AnnotatedString.Builder()) {
-                    append(state.episode?.podcastName.orEmpty())
+                    append(episode?.podcastName.orEmpty())
                     append(" ›")
                     toAnnotatedString()
                 },
@@ -302,7 +322,7 @@ private fun EpisodeExpandedHeader(
                 maxLines = 2,
                 color = dominantColor
             )
-            // date
+            //TODO: date
         }
     }
 }
@@ -363,16 +383,34 @@ fun EpisodeTopAppBar(
 }
 
 @Composable
-private fun EpisodeDescriptionContent(description: String) {
+private fun EpisodeDescriptionContent(description: String?) {
     Box(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
             .animateContentSize()
     ) {
-        OverflowHtmlText(text = description,
-            overflow = TextOverflow.Clip,
-            textAlign = TextAlign.Start,
-            maxLines = 5)
+        if (description != null) {
+            OverflowHtmlText(
+                text = description,
+                overflow = TextOverflow.Clip,
+                textAlign = TextAlign.Start,
+                maxLines = 5
+            )
+        }
+        else {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                repeat(4) {
+                    Text(
+                        text = LoremIpsum(8).values.joinToString(" "),
+                        maxLines = 1,
+                        modifier = Modifier.placeholder(
+                            visible = true,
+                            highlight = PlaceholderHighlight.shimmer(),
+                        )
+                    )
+                }
+            }
+        }
     }
 }
 

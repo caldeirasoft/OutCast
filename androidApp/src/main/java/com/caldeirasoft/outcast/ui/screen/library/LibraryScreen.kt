@@ -242,6 +242,11 @@ private fun LibraryScreen(
                     }
                 }
             }
+
+            item {
+                // bottom app bar spacer
+                Spacer(modifier = Modifier.height(56.dp))
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -27,8 +28,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -48,6 +51,7 @@ import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
 import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.storedata.HeaderEditorialArtwork
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
@@ -58,6 +62,9 @@ import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import cz.levinzonr.router.core.Route
 import cz.levinzonr.router.core.RouteArg
 import cz.levinzonr.router.core.RouteArgType
@@ -201,10 +208,22 @@ private fun PodcastScreen(
     onEpisodeItemMoreButtonClick: (Episode) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
 
     val podcastData = state.podcast
-    Scaffold(
+    ScaffoldWithLargeHeader(
+        listState = listState,
         scaffoldState = scaffoldState,
+        topBar = {
+            PodcastScreenTopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                state = state,
+                lazyListState = listState,
+                navigateUp = navigateUp
+            )
+        },
+        headerRatio = 1/2f,
         snackbarHost = {
             // reuse default SnackbarHost to have default animation and timing handling
             SnackbarHost(it) { data ->
@@ -215,201 +234,115 @@ private fun PodcastScreen(
                 )
             }
         },
-    ) {
-        //
-        BoxWithConstraints {
-            val screenHeight = constraints.maxHeight
-            val headerRatio: Float = 1 / 2f
-            val headerHeight = remember { mutableStateOf((screenHeight * headerRatio).toInt()) }
-            var expandedAlpha by remember { mutableStateOf(1f) }
+    ) { headerHeight ->
 
-            val collapsingToolbarState = rememberCollapsingToolbarState()
-
-            AppbarContainer(
-                modifier = Modifier.fillMaxWidth(),
-                scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-                collapsingToolbarState = collapsingToolbarState
-            ) {
-                CollapsingToolbar(collapsingToolbarState = collapsingToolbarState) {
-                    Box(
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .navigationBarsPadding()
+        ) {
+            // header
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    PodcastHeader(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(height = headerHeight.value.toDp())
-                            .pin()
-                    ) {
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(height = headerHeight.value.toDp())
-                            .parallax()
-                            .progress {
-                                expandedAlpha = it
-                            }
-                            .alpha(expandedAlpha)
-                    ) {
-                        if ((podcastData != null) && (!state.isLoading)) {
-                            // header
-                            PodcastHeader(
-                                modifier = Modifier
-                                    .height(headerHeight.value.toDp()),
-                                state = state,
-                                collapsingToolbarState = collapsingToolbarState,
-                                openStoreDataDetail = navigateToStore
-                            )
-                        }
-                        else {
-                            PodcastHeaderLoadingScreen(headerHeight.value.toDp())
-                        }
-                    }
-
-                    PodcastScreenTopAppBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .navigationBarsPadding(bottom = false)
-                            .pin(),
+                            .height(headerHeight.toDp()),
                         state = state,
-                        collapsingToolbarState = collapsingToolbarState,
-                        navigateUp = navigateUp
+                        lazyListState = listState,
+                        openStoreDataDetail = navigateToStore
                     )
                 }
-                val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .appBarBody()
-                ) {
-                    // action buttons
-                    item {
-                        podcastData?.let {
-                            PodcastActionAppBar(
-                                state = state,
-                                onFollowPodcast = onFollowPodcast,
-                                onUnfollowPodcast = onUnfollowPodcast,
-                                onSettingsButtonClick = { navigateTo(RoutesActions.toPodcast_settings(it.feedUrl)) },
-                                onNotificationButtonClick = onNotificationButtonClick,
-                                onShareItemClick = onShareItemClick,
-                                onWebsiteItemClick = onWebsiteItemClick
-                            )
-                        }
-                    }
-                    // description
-                    item {
-                        podcastData?.description?.let { description ->
-                            PodcastDescriptionContent(description = description)
-                        }
-                    }
-                    // genre
-                    item {
-                        podcastData?.genre?.let { genre ->
-                            Box(modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 8.dp)
-                            ) {
-                                ChipButton(selected = false,
-                                    onClick = {
-                                        navigateToStore(genre.toStoreData())
-                                    })
-                                {
-                                    Text(text = genre.name)
-                                }
-                            }
-                        }
-                    }
-                    // episode title + actions
-                    item {
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    stringResource(id = R.string.podcast_episodes),
-                                )
-                            },
-                            actions = {
-                                // filter button
-                                /*Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
-                                        IconButton(onClick = { expanded = !expanded }) {
-                                            Icon(
-                                                imageVector = Icons.Default.MoreVert,
-                                                contentDescription = null
-                                            )
-                                        }
-                                        DropdownMenu(
-                                            expanded = expanded,
-                                            onDismissRequest = { expanded = false }) {
-                                            DropdownMenuItem(onClick = {
-                                                expanded = false
-                                                onShareItemClick()
-                                            }) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Share,
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .size(20.dp)
-                                                )
-                                                Text(text = stringResource(id = R.string.action_share))
-                                            }
-                                            DropdownMenuItem(onClick = {
-                                                expanded = false
-                                                onWebsiteItemClick()
-                                            }) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Public,
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .size(20.dp)
-                                                )
-                                                Text(text = stringResource(id = R.string.action_open_website))
-                                            }
-                                        }
-                                    }*/
+            }
 
-                                // sort button
-                                IconButton(onClick = onSortButtonClick) {
-                                    Icon(
-                                        painter = painterResource(id = if (state.sortOrder == SortOrder.DESC)
-                                                R.drawable.ic_sort_asc else R.drawable.ic_sort_desc),
-                                        contentDescription = null
-                                    )
-                                }
-                            },
-                            backgroundColor = Color.Transparent,
-                            elevation = 0.dp
-                        )
-                    }
+            // action buttons
+            item {
+                podcastData?.let {
+                    PodcastActionAppBar(
+                        state = state,
+                        onFollowPodcast = onFollowPodcast,
+                        onUnfollowPodcast = onUnfollowPodcast,
+                        onSettingsButtonClick = { navigateTo(RoutesActions.toPodcast_settings(it.feedUrl)) },
+                        onNotificationButtonClick = onNotificationButtonClick,
+                        onShareItemClick = onShareItemClick,
+                        onWebsiteItemClick = onWebsiteItemClick
+                    )
+                }
+            }
+            // description
+            item {
+                PodcastDescriptionContent(description = podcastData?.description)
+            }
 
-                    // episodes
-                    items(lazyPagingItems = lazyPagingItems) { uiModel ->
-                        uiModel?.let {
-                            when(uiModel) {
-                                is EpisodeUiModel.EpisodeItem -> {
-                                    PodcastEpisodeItem(
-                                        episode = uiModel.episode,
-                                        onEpisodeClick = { navigateToEpisode(uiModel.episode) },
-                                        onContextMenuClick = { onEpisodeItemMoreButtonClick(uiModel.episode) }
-                                    )
-                                    Divider()
-                                }
-                            }
+            // genre
+            item {
+                podcastData?.genre?.let { genre ->
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp)
+                    ) {
+                        ChipButton(selected = false,
+                            onClick = {
+                                navigateToStore(genre.toStoreData())
+                            })
+                        {
+                            Text(text = genre.name)
                         }
-                    }
-
-                    lazyPagingItems
-                        .ifLoading {
-                            item {
-                                PodcastEpisodesLoadingScreen()
-                            }
-                        }
-
-                    item {
-                        // bottom app bar spacer
-                        Spacer(modifier = Modifier.height(56.dp))
                     }
                 }
+            }
+            // episode title + actions
+            item {
+                TopAppBar(
+                    title = {
+                        Text(
+                            stringResource(id = R.string.podcast_episodes),
+                        )
+                    },
+                    actions = {
+                        // sort button
+                        IconButton(onClick = onSortButtonClick) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (state.sortOrder == SortOrder.DESC)
+                                        R.drawable.ic_sort_asc else R.drawable.ic_sort_desc
+                                ),
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    backgroundColor = Color.Transparent,
+                    elevation = 0.dp
+                )
+            }
+
+            // episodes
+            items(lazyPagingItems = lazyPagingItems) { uiModel ->
+                uiModel?.let {
+                    if (uiModel is EpisodeUiModel.EpisodeItem) {
+                        PodcastEpisodeItem(
+                            episode = uiModel.episode,
+                            onEpisodeClick = { navigateToEpisode(uiModel.episode) },
+                            onContextMenuClick = { onEpisodeItemMoreButtonClick(uiModel.episode) }
+                        )
+                        Divider()
+                    }
+                }
+            }
+
+            lazyPagingItems
+                .ifLoading {
+                    item {
+                        LoadingScreen()
+                    }
+                }
+
+            item {
+                // bottom app bar spacer
+                Spacer(modifier = Modifier.height(56.dp))
             }
         }
     }
@@ -419,99 +352,109 @@ private fun PodcastScreen(
 private fun PodcastHeader(
     modifier: Modifier,
     state: PodcastState,
-    collapsingToolbarState: CollapsingToolbarState,
+    lazyListState: LazyListState,
     openStoreDataDetail: (StoreData) -> Unit,
 ) {
     val podcastData = state.podcast
     val artistData = state.artistData
 
-    val expandedAlpha = collapsingToolbarState.expandedAlpha
-    podcastData?.let {
-        val bgDominantColor = podcastData.artworkDominantColor
-            ?.let { Color.getColor(it) }
-            ?: MaterialTheme.colors.onSurface
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        0.0f to bgDominantColor.copy(alpha = 0.5f),
-                        0.2f to bgDominantColor.copy(alpha = 0.5f),
-                        0.6f to Color.Transparent,
-                        startY = 0.0f,
-                        endY = Float.POSITIVE_INFINITY
-                    )
-                ),
-        ) {
-            val appBarColor = MaterialTheme.colors.surface.copy(alpha = 0.87f)
-
-            // Draw a scrim over the status bar which matches the app bar
-            Spacer(
-                Modifier
-                    //.background(appBarColor)
-                    .fillMaxWidth()
-                    .statusBarsHeight()
-            )
-
-            // spacer behind top app bar
-            Spacer(Modifier.height(56.dp))
-
-            // thumbnail
-            Card(
-                backgroundColor = Color.Transparent,
-                shape = RoundedCornerShape(8.dp),
-                elevation = 2.dp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp)
-                    .align(Alignment.Start)
-            ) {
-                Image(
-                    painter = rememberCoilPainter(request = podcastData.artworkUrl),
-                    contentDescription = podcastData.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
+    val expandedAlpha = lazyListState.expandedHeaderAlpha
+    val bgDominantColor = podcastData?.artworkDominantColor
+        ?.let { Color.getColor(it) }
+        ?: MaterialTheme.colors.onSurface
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    0.0f to bgDominantColor.copy(alpha = 0.5f),
+                    0.2f to bgDominantColor.copy(alpha = 0.5f),
+                    0.6f to Color.Transparent,
+                    startY = 0.0f,
+                    endY = Float.POSITIVE_INFINITY
                 )
-            }
+            ),
+    ) {
+        // Draw a scrim over the status bar which matches the app bar
+        Spacer(
+            Modifier
+                //.background(appBarColor)
+                .fillMaxWidth()
+                .statusBarsHeight()
+        )
 
-            Spacer(modifier = Modifier.height(8.dp))
+        // spacer behind top app bar
+        Spacer(Modifier.height(56.dp))
 
-            // podcast
-            Text(
-                text = podcastData.name,
+        // thumbnail
+        Card(
+            backgroundColor = Color.Transparent,
+            shape = RoundedCornerShape(8.dp),
+            elevation = 2.dp,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+                .align(Alignment.Start)
+        ) {
+            Image(
+                painter = rememberCoilPainter(request = podcastData?.artworkUrl),
+                contentDescription = podcastData?.name,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .align(Alignment.Start),
-                textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.h5,
-            )
-
-            // artist name + link
-            val clickableArtistMod = artistData?.let {
-                Modifier.clickable { openStoreDataDetail(it) }
-            } ?: Modifier
-
-            Text(
-                text = with(AnnotatedString.Builder()) {
-                    append(podcastData.artistName)
-                    artistData?.let {
-                        append(" ›")
-                    }
-                    toAnnotatedString()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 4.dp)
-                    .then(clickableArtistMod),
-                style = MaterialTheme.typography.body1,
-                maxLines = 1,
-                color = artistData?.let { MaterialTheme.colors.primary } ?: Color.Unspecified,
-                textAlign = TextAlign.Start
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .alpha(expandedAlpha)
+                    .placeholder(
+                        visible = (podcastData == null),
+                        shape = RoundedCornerShape(8.dp),
+                        highlight = PlaceholderHighlight.shimmer(),
+                    )
             )
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // podcast
+        Text(
+            text = podcastData?.name.orEmpty(),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.Start)
+                .placeholder(
+                    visible = (podcastData == null),
+                    highlight = PlaceholderHighlight.shimmer(),
+                ),
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.h5,
+        )
+
+        // artist name + link
+        val clickableArtistMod = artistData?.let {
+            Modifier.clickable { openStoreDataDetail(it) }
+        } ?: Modifier
+
+        Text(
+            text = with(AnnotatedString.Builder()) {
+                append(podcastData?.artistName.orEmpty())
+                artistData?.let {
+                    append(" ›")
+                }
+                toAnnotatedString()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 4.dp)
+                .then(clickableArtistMod)
+                .placeholder(
+                    visible = (podcastData == null),
+                    highlight = PlaceholderHighlight.shimmer(),
+                ),
+            style = MaterialTheme.typography.body1,
+            maxLines = 1,
+            color = artistData?.let { MaterialTheme.colors.primary } ?: Color.Unspecified,
+            textAlign = TextAlign.Start
+        )
     }
 }
 
@@ -519,11 +462,10 @@ private fun PodcastHeader(
 private fun PodcastScreenTopAppBar(
     modifier: Modifier,
     state: PodcastState,
-    collapsingToolbarState: CollapsingToolbarState,
+    lazyListState: LazyListState,
     navigateUp: () -> Unit,
 ) {
-    Timber.d("progress: ${collapsingToolbarState.progress}, alpha:${collapsingToolbarState.collapsedAlpha}")
-    val appBarAlpha = collapsingToolbarState.collapsedAlpha
+    val appBarAlpha = lazyListState.topAppBarAlpha
     val backgroundColor: Color = Color.blendARGB(
         MaterialTheme.colors.surface.copy(alpha = 0f),
         MaterialTheme.colors.surface,
@@ -535,6 +477,9 @@ private fun PodcastScreenTopAppBar(
 
     Column(
         modifier = modifier
+            .background(backgroundColor)
+            .statusBarsPadding()
+            .navigationBarsPadding(bottom = false)
     ) {
         TopAppBar(
             modifier = Modifier,
@@ -553,7 +498,7 @@ private fun PodcastScreenTopAppBar(
             contentColor = contentEndColor,
             elevation = 0.dp
         )
-        if (collapsingToolbarState.progress == 0f)
+        if (appBarAlpha == 1f)
             Divider()
     }
 }
@@ -561,16 +506,29 @@ private fun PodcastScreenTopAppBar(
 
 
 @Composable
-private fun PodcastDescriptionContent(description: String) {
+private fun PodcastDescriptionContent(description: String?) {
     Box(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
             .animateContentSize()
     ) {
-        OverflowHtmlText(text = description,
-            overflow = TextOverflow.Clip,
-            textAlign = TextAlign.Start,
-            maxLines = 2)
+        if (description != null) {
+            OverflowHtmlText(
+                text = description,
+                overflow = TextOverflow.Clip,
+                textAlign = TextAlign.Start,
+                maxLines = 2
+            )
+        }
+        else {
+            Text(
+                text = LoremIpsum(10).values.joinToString(" "),
+                modifier = Modifier.placeholder(
+                    visible = true,
+                    highlight = PlaceholderHighlight.shimmer(),
+                )
+            )
+        }
     }
 }
 
@@ -744,20 +702,6 @@ fun PodcastMetaData(podcastData: Podcast,
     }
 }
 
-fun GetPodcastVibrantColor(podcastData: Podcast?): Color? =
-    podcastData
-        ?.artworkDominantColor
-        ?.let { Color.getColor(it).takeUnless { it == Color.White || it == Color.Black } }
-        ?.let { color ->
-            Timber.d(String.format("color : #%06X", (0xFFFFFF and color.toArgb())))
-            if (color.luminance() > 0.7)
-                color.toxyY().let { xyYtoColor(it[0], it[1], 0.5f) }
-                    .also {
-                        Timber.d(String.format("Dim color : #%06X", (0xFFFFFF and it.toArgb())))
-                    }
-            else color
-        }
-
 @Composable
 @ReadOnlyComposable
 fun contentColorForExtended(backgroundColor: Color): Color =
@@ -769,106 +713,6 @@ fun contentColorForExtended(backgroundColor: Color): Color =
         }
     }
 
-@Composable
-fun PodcastHeaderLoadingScreen(headerHeightDp: Dp) {
-    LoadingListShimmer { list, floatAnim ->
-        val brush = Brush.verticalGradient(list, 0f, floatAnim)
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 3.dp)
-        ) {
-            // Header
-            Column(modifier = Modifier.height(headerHeightDp)) {
-
-                // Draw a scrim over the status bar which matches the app bar
-                Spacer(
-                    Modifier
-                        //.background(appBarColor)
-                        .fillMaxWidth()
-                        .statusBarsHeight()
-                )
-
-                // spacer behind top app bar
-                Spacer(Modifier.height(56.dp))
-
-                // thumbnail
-                Card(
-                    backgroundColor = Color.Transparent,
-                    shape = RoundedCornerShape(8.dp),
-                    elevation = 2.dp,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp)
-                        .align(Alignment.Start)
-                ) {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .aspectRatio(1f)
-                            .background(brush = brush)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // podcast
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 3.dp)
-                        .height(18.dp)
-                        .background(brush = brush)
-                )
-
-                // artist name
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 3.dp)
-                        .height(14.dp)
-                        .background(brush = brush)
-                )
-
-                // rating / category
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 3.dp)
-                        .height(14.dp)
-                        .background(brush = brush)
-                )
-            }
-
-            // Buttons
-            Surface(
-                modifier = Modifier
-                    .size(height = 35.dp, width = 100.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RoundedCornerShape(50)
-            ) {
-                Spacer(modifier = Modifier
-                    .fillMaxSize()
-                    .background(brush = brush))
-            }
-
-            // description
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                repeat(3) {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp)
-                        .background(brush = brush))
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun PodcastEpisodesLoadingScreen() {

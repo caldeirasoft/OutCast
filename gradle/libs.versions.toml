@@ -59,6 +59,7 @@ accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 accompanist-insets = { module = "com.google.accompanist:accompanist-insets", version.ref = "accompanist" }
+accompanist-placeholder = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist" }
 
 exoplayer-core = { module = 'com.google.android.exoplayer:exoplayer', version.ref = "exoplayer" }
 exoplayer-okhttp = { module = 'com.google.android.exoplayer:extension-okhttp', version.ref = "exoplayer" }
@@ -88,4 +89,10 @@ retrofit = ["retrofit-core", "retrofit-kotlinx-serialization"]
 room = ["room-runtime", "room-ktx"]
 stetho = ["stetho-core", "stetho-okhttp3"]
 exoplayer = ["exoplayer-core", "exoplayer-okhttp"]
-accompanist = ["accompanist-coil", "accompanist-pager", "accompanist-systemuicontroller", "accompanist-insets"]
+accompanist = [
+    "accompanist-coil",
+    "accompanist-pager",
+    "accompanist-systemuicontroller",
+    "accompanist-insets",
+    "accompanist-placeholder"
+]

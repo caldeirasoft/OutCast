@@ -286,7 +286,7 @@ private fun EpisodesScreen(
             lazyPagingItems
                 .ifLoading {
                     item {
-                        PodcastEpisodesLoadingScreen()
+                        LoadingScreen()
                     }
                 }
 
