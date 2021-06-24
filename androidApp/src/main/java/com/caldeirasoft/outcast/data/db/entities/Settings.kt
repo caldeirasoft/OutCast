@@ -17,7 +17,7 @@ data class Settings(
     @ColumnInfo(name = "sync_podcasts") val syncPodcasts: Boolean = true,
     @ColumnInfo(name = "background_sync") val backgroundSync: Int = BackgroundRefreshOptions.EVERY_1_HOUR.ordinal,
     @ColumnInfo(name = "sync_with_cloud") val syncWithCloud: Boolean = true,
-    @ColumnInfo(name = "episode_limit") val episodeLimit: Int = EpisodeLimitOption.ONE_MONTH.ordinal,
+    @ColumnInfo(name = "episode_limit") val episodeLimit: Int = EpisodeLimitOptions.ONE_MONTH.ordinal,
     @ColumnInfo(name = "download_queue_episodes") val downloadQueuedEpisodes: Boolean = true,
     @ColumnInfo(name = "download_saved_episodes") val downloadSavedEpisodes: Boolean = true,
     @ColumnInfo(name = "delete_played_episodes") val deletePlayedEpisodesDelay: Int = DeleteEpisodesDelay.AFTER_1_DAY.ordinal,
@@ -38,8 +38,8 @@ data class Settings(
     val Settings.backgroundSyncOption: BackgroundRefreshOptions
       get() = BackgroundRefreshOptions.values()[this.backgroundSync]
 
-    val Settings.episodeLimitOption: EpisodeLimitOption
-      get() = EpisodeLimitOption.values()[this.episodeLimit]
+    val Settings.episodeLimitOption: EpisodeLimitOptions
+      get() = EpisodeLimitOptions.values()[this.episodeLimit]
 
     val Settings.deletePlayedEpisodesDelayOption: DeleteEpisodesDelay
       get() = DeleteEpisodesDelay.values()[this.deletePlayedEpisodesDelay]

@@ -40,6 +40,8 @@ class PodcastSettingsViewModel @Inject constructor(
 
     override suspend fun performAction(action: Action) = when (action) {
         is Action.UpdateSettings -> updateSettings(action.settings)
+        is Action.NavigateToNewEpisodes -> emitEvent(Event.NavigateToNewEpisodes(feedUrl = initialState.feedUrl))
+        is Action.NavigateToEpisodeLimit -> emitEvent(Event.NavigateToEpisodeLimit(feedUrl = initialState.feedUrl))
         is Action.Exit -> emitEvent(Event.Exit)
     }
 
@@ -56,11 +58,15 @@ class PodcastSettingsViewModel @Inject constructor(
     )
 
     sealed class Event {
+        data class NavigateToNewEpisodes(val feedUrl: String) : Event()
+        data class NavigateToEpisodeLimit(val feedUrl: String) : Event()
         object Exit : Event()
     }
 
     sealed class Action {
         data class UpdateSettings(val settings: PodcastSettings) : Action()
+        object NavigateToNewEpisodes : Action()
+        object NavigateToEpisodeLimit : Action()
         object Exit : Action()
     }
 }

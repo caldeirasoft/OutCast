@@ -50,7 +50,7 @@ abstract class OutcastDatabase : RoomDatabase() {
                 settingsValues.put("sync_podcasts", true)
                 settingsValues.put("background_sync", BackgroundRefreshOptions.EVERY_1_HOUR.ordinal)
                 settingsValues.put("sync_with_cloud", true)
-                settingsValues.put("episode_limit", EpisodeLimitOption.ONE_MONTH.ordinal)
+                settingsValues.put("episode_limit", EpisodeLimitOptions.ONE_MONTH.ordinal)
                 settingsValues.put("download_queue_episodes", true)
                 settingsValues.put("download_saved_episodes", true)
                 settingsValues.put(

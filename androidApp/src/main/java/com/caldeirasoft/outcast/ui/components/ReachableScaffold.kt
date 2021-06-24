@@ -1,9 +1,14 @@
 package com.caldeirasoft.outcast.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -18,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsViewModel
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.toDp
@@ -93,6 +99,91 @@ fun ScaffoldWithLargeHeader(
             ) {
                 topBar()
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ScaffoldWithLargeHeaderAndLazyColumn(
+    modifier: Modifier = Modifier,
+    title: String,
+    headerRatioOrientation: Orientation = Orientation.Vertical,
+    headerRatio: Float = 1/3f,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
+    listState: LazyListState = rememberLazyListState(),
+    showTopBar: Boolean = true,
+    navigateUp: () -> Unit = {},
+    topBarActions: @Composable RowScope.() -> Unit = {},
+    itemsContent: LazyListScope.() -> Unit = {}
+) {
+    ScaffoldWithLargeHeader(
+        modifier = modifier,
+        scaffoldState = scaffoldState,
+        listState = listState,
+        snackbarHost = snackbarHost,
+        headerRatioOrientation = headerRatioOrientation,
+        headerRatio = headerRatio,
+        topBar = {
+            if (showTopBar) {
+                val appBarAlpha = listState.topAppBarAlpha
+                val backgroundColor: Color = Color.blendARGB(
+                    MaterialTheme.colors.surface.copy(alpha = 0f),
+                    MaterialTheme.colors.surface,
+                    appBarAlpha
+                )
+                Column(
+                    modifier = Modifier
+                ) {
+                    TopAppBar(
+                        modifier = Modifier,
+                        title = {
+                            AnimatedVisibility(
+                                visible = (appBarAlpha == 1f),
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                            ) {
+                                Text(text = title)
+                            }
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = navigateUp) {
+                                Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                            }
+                        },
+                        actions = topBarActions,
+                        backgroundColor = backgroundColor,
+                        contentColor = MaterialTheme.colors.onSurface,
+                        elevation = 0.dp
+                    )
+
+                    if (appBarAlpha == 1f)
+                        Divider()
+                }
+            }
+        }
+    ) { headerHeight ->
+        LazyColumn(state = listState) {
+            // header
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = headerHeight.toDp())
+                ) {
+                    Text(
+                        text = title,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(top = 16.dp, bottom = 16.dp)
+                            .padding(start = 16.dp, end = 16.dp),
+                        style = typography.h4
+                    )
+                }
+            }
+
+            itemsContent()
         }
     }
 }

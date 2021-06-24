@@ -1,6 +1,6 @@
 package com.caldeirasoft.outcast.domain.enums
 
-enum class EpisodeLimitOption {
+enum class EpisodeLimitOptions {
     OFF,
     MOST_RECENT,
     MOST_2_RECENT,

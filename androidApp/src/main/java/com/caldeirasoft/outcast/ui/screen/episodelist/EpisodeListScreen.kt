@@ -98,7 +98,9 @@ private fun EpisodeListScreen(
     val drawerState = LocalBottomSheetState.current
     val drawerContent = LocalBottomSheetContent.current
     val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
-    ScaffoldWithLargeHeader(
+
+    ScaffoldWithLargeHeaderAndLazyColumn(
+        title = title,
         modifier = Modifier
             .statusBarsPadding()
             .navigationBarsPadding(),
@@ -114,127 +116,101 @@ private fun EpisodeListScreen(
                 )
             }
         },
-        topBar = {
-            if (!hideTopBar) {
-                EpisodesTopAppBar(
-                    modifier = Modifier,
-                    title = title,
-                    lazyListState = listState,
-                    navigateUp = { performAction(EpisodeListViewModel.Action.Exit) }
-                )
+        navigateUp = {
+            performAction(EpisodeListViewModel.Action.Exit)
+        },
+        showTopBar = !hideTopBar,
+    ) {
+        // filter : categories (if exist)
+        item {
+            ChipGroup(
+                selectedValue = state.category,
+                values = state.categories.sortedBy { it.text },
+                onClick = { category ->
+                    performAction(EpisodeListViewModel.Action.FilterCategory(category))
+                }) {
+                Text(text = it.text)
             }
         }
-    ) { headerHeight ->
-        LazyColumn(state = listState) {
-            // header
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = headerHeight.toDp())
-                ) {
-                    Text(
-                        text = title,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(top = 16.dp, bottom = 16.dp)
-                            .padding(start = 16.dp, end = 16.dp),
-                        style = typography.h4
-                    )
-                }
-            }
-
-            // filter : categories (if exist)
-            item {
-                ChipGroup(
-                    selectedValue = state.category,
-                    values = state.categories.sortedBy { it.text },
-                    onClick = { category ->
-                        performAction(EpisodeListViewModel.Action.FilterCategory(category))
-                    }) {
-                    Text(text = it.text)
-                }
-            }
-            // episodes
-            items(lazyPagingItems = lazyPagingItems) { uiModel ->
-                uiModel?.let {
-                    when (uiModel) {
-                        is EpisodeUiModel.EpisodeItem -> {
-                            EpisodeItem(
-                                episode = uiModel.episode,
-                                download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
-                                onPodcastClick = {
-                                    performAction(EpisodeListViewModel.Action.OpenPodcastDetail(uiModel.episode))
-                                },
-                                onEpisodeClick = {
-                                    performAction(EpisodeListViewModel.Action.OpenEpisodeDetail(uiModel.episode))
-                                },
-                                onContextMenuClick = {
-                                    coroutineScope.OpenBottomSheetMenu(
-                                        header = { // header : episode
-                                            EpisodeItem(
-                                                episode = uiModel.episode,
-                                                showActions = false,
-                                            )
-                                        },
-                                        items = listOf(
-                                            BottomSheetMenuItem(
-                                                titleId = R.string.action_play_next,
-                                                icon = Icons.Default.QueuePlayNext,
-                                                onClick = { performAction(EpisodeListViewModel.Action.PlayNextEpisode(uiModel.episode)) },
-                                            ),
-                                            BottomSheetMenuItem(
-                                                titleId = R.string.action_play_last,
-                                                icon = Icons.Default.AddToQueue,
-                                                onClick = { performAction(EpisodeListViewModel.Action.PlayLastEpisode(uiModel.episode)) },
-                                            ),
-                                            if (uiModel.episode.isSaved.not())
-                                                BottomSheetMenuItem(
-                                                    titleId = R.string.action_save_episode,
-                                                    icon = Icons.Outlined.BookmarkAdd,
-                                                    onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
-                                                )
-                                            else
-                                                BottomSheetMenuItem(
-                                                    titleId = R.string.action_remove_saved_episode,
-                                                    icon = Icons.Outlined.BookmarkRemove,
-                                                    onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
-                                                ),
-                                            BottomSheetSeparator,
-                                            BottomSheetMenuItem(
-                                                titleId = R.string.action_share_episode,
-                                                icon = Icons.Default.Share,
-                                                onClick = { performAction(EpisodeListViewModel.Action.ShareEpisode(uiModel.episode)) },
-                                            )
+        // episodes
+        items(lazyPagingItems = lazyPagingItems) { uiModel ->
+            uiModel?.let {
+                when (uiModel) {
+                    is EpisodeUiModel.EpisodeItem -> {
+                        EpisodeItem(
+                            episode = uiModel.episode,
+                            download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
+                            onPodcastClick = {
+                                performAction(EpisodeListViewModel.Action.OpenPodcastDetail(uiModel.episode))
+                            },
+                            onEpisodeClick = {
+                                performAction(EpisodeListViewModel.Action.OpenEpisodeDetail(uiModel.episode))
+                            },
+                            onContextMenuClick = {
+                                coroutineScope.OpenBottomSheetMenu(
+                                    header = { // header : episode
+                                        EpisodeItem(
+                                            episode = uiModel.episode,
+                                            showActions = false,
+                                        )
+                                    },
+                                    items = listOf(
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_play_next,
+                                            icon = Icons.Default.QueuePlayNext,
+                                            onClick = { performAction(EpisodeListViewModel.Action.PlayNextEpisode(uiModel.episode)) },
                                         ),
-                                        drawerState = drawerState,
-                                        drawerContent = drawerContent
-                                    )
-                                }
-                            )
-                            Divider()
-                        }
-                        is EpisodeUiModel.SeparatorItem ->
-                            Text(
-                                text = uiModel.date.formatRelativeDate(context),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                style = MaterialTheme.typography.body2
-                            )
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_play_last,
+                                            icon = Icons.Default.AddToQueue,
+                                            onClick = { performAction(EpisodeListViewModel.Action.PlayLastEpisode(uiModel.episode)) },
+                                        ),
+                                        if (uiModel.episode.isSaved.not())
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_save_episode,
+                                                icon = Icons.Outlined.BookmarkAdd,
+                                                onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                            )
+                                        else
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_remove_saved_episode,
+                                                icon = Icons.Outlined.BookmarkRemove,
+                                                onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                            ),
+                                        BottomSheetSeparator,
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_share_episode,
+                                            icon = Icons.Default.Share,
+                                            onClick = { performAction(EpisodeListViewModel.Action.ShareEpisode(uiModel.episode)) },
+                                        )
+                                    ),
+                                    drawerState = drawerState,
+                                    drawerContent = drawerContent
+                                )
+                            }
+                        )
+                        Divider()
                     }
+                    is EpisodeUiModel.SeparatorItem ->
+                        Text(
+                            text = uiModel.date.formatRelativeDate(context),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.body2
+                        )
+                }
+            }
+        }
+
+        lazyPagingItems
+            .ifLoading {
+                item {
+                    LoadingScreen()
                 }
             }
 
-            lazyPagingItems
-                .ifLoading {
-                    item {
-                        LoadingScreen()
-                    }
-                }
-
-            item {
-                // bottom app bar spacer
-                Spacer(modifier = Modifier.height(56.dp))
-            }
+        item {
+            // bottom app bar spacer
+            Spacer(modifier = Modifier.height(56.dp))
         }
     }
 }

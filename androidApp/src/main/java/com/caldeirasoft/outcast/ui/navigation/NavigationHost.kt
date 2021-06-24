@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.*
+import androidx.navigation.navigation
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
@@ -14,7 +15,10 @@ import com.caldeirasoft.outcast.ui.screen.episodelist.base.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.played_episodes.PlayedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
+import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsEpisodeLimitScreen
+import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsNewEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsScreen
+import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsViewModel
 import com.caldeirasoft.outcast.ui.screen.saved_episodes.SavedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.search.SearchScreen
 import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsScreen
@@ -122,6 +126,30 @@ fun NavigationHost() {
                 ) {
                     PodcastSettingsScreen(
                         viewModel = hiltViewModel(),
+                        navController = navController
+                    )
+                }
+                composable(
+                    route = Routes.podcast_settings_new_episodes.path,
+                    arguments = Routes.podcast_settings_new_episodes.navArgs
+                ) {
+                    val parentViewModel = hiltViewModel<PodcastSettingsViewModel>(
+                        navController.getBackStackEntry(Routes.podcast_settings.path)
+                    )
+                    PodcastSettingsNewEpisodesScreen(
+                        viewModel = parentViewModel,
+                        navController = navController
+                    )
+                }
+                composable(
+                    route = Routes.podcast_settings_episode_limit.path,
+                    arguments = Routes.podcast_settings_episode_limit.navArgs
+                ) {
+                    val parentViewModel = hiltViewModel<PodcastSettingsViewModel>(
+                        navController.getBackStackEntry(Routes.podcast_settings.path)
+                    )
+                    PodcastSettingsEpisodeLimitScreen(
+                        viewModel = parentViewModel,
                         navController = navController
                     )
                 }

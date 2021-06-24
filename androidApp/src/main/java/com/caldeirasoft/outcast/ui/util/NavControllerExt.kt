@@ -50,6 +50,15 @@ fun NavController.navigateToPodcastSettings(feedUrl: String) {
     this.navigate(RoutesActions.toPodcast_settings(feedUrlEncode))
 }
 
+fun NavController.navigateToPodcastSettingsNewEpisodes(feedUrl: String) {
+    val feedUrlEncode = feedUrl.urlEncode()
+    this.navigate(RoutesActions.toPodcast_settings_new_episodes(feedUrlEncode))
+}
+
+fun NavController.navigateToPodcastSettingsEpisodeLimit(feedUrl: String) {
+    val feedUrlEncode = feedUrl.urlEncode()
+    this.navigate(RoutesActions.toPodcast_settings_episode_limit(feedUrlEncode))
+}
 
 fun NavController.navigateToStore(storeData: StoreData) {
     val storeDataEncoded = jsonUrlEncodeObject(storeData)

@@ -25,24 +25,21 @@ fun Preference(
     onClick: () -> Unit = { },
     trailing: @Composable (() -> Unit)? = null,
 ) {
-    StatusWrapper(enabled = enabled) {
-        ListItem(
-            text = {
-                Text(text = title,
-                    maxLines = if (singleLineTitle) 1 else Int.MAX_VALUE)
-            },
-            secondaryText = {
-                summary
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.let {
-                        Text(text = it)
-                    }
-            },
-            icon = { PreferenceIcon(imageVector = icon) },
-            modifier = Modifier.clickable(onClick = { if (enabled) onClick() }),
-            trailing = trailing,
-        )
-    }
+    Preference(
+        title = title,
+        summary = {
+            summary
+                ?.takeIf { it.isNotEmpty() }
+                ?.let {
+                    Text(text = it)
+                }
+        },
+        singleLineTitle = singleLineTitle,
+        icon = icon,
+        enabled = enabled,
+        onClick = onClick,
+        trailing = trailing
+    )
 }
 
 @ExperimentalMaterialApi
@@ -89,7 +86,7 @@ private fun PreferenceIcon(imageVector: ImageVector?) {
 
 
 @Composable
-fun StatusWrapper(enabled: Boolean = true, content: @Composable () -> Unit) {
+private fun StatusWrapper(enabled: Boolean = true, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled) {
         content()
     }
