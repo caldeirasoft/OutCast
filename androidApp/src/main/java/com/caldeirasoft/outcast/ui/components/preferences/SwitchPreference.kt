@@ -3,6 +3,7 @@ package com.caldeirasoft.outcast.ui.components.preferences
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.caldeirasoft.outcast.domain.model.SwitchPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -10,18 +11,27 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Composable
 fun SwitchPreference(
-    item: SwitchPreferenceItem,
-    value: Boolean?,
+    title: String,
+    summary: String,
+    icon: ImageVector? = null,
+    singleLineTitle: Boolean = false,
+    enabled: Boolean = true,
+    value: Boolean = false,
+    onValueChanged: (Boolean) -> Unit,
 ) {
-    val currentValue = value ?: item.defaultValue
+    val currentValue = value
     Preference(
-        item = item,
-        onClick = { item.onValueChanged(!currentValue) }
+        title = title,
+        summary = summary,
+        singleLineTitle = singleLineTitle,
+        enabled = enabled,
+        icon = icon,
+        onClick = { onValueChanged(!currentValue) }
     ) {
         Switch(
             checked = currentValue,
-            onCheckedChange = { item.onValueChanged(!currentValue) },
-            enabled = item.enabled
+            onCheckedChange = { onValueChanged(!currentValue) },
+            enabled = enabled
         )
     }
 }

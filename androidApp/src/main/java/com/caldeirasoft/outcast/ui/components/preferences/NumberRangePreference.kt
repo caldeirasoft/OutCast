@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.model.NumberRangeFloatPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,21 +24,34 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Composable
 fun NumberRangePreference(
-    item: NumberRangeFloatPreferenceItem,
-    value: Float?,
+    title: String,
+    summary: String? = null,
+    icon: ImageVector? = null,
+    singleLineTitle: Boolean = false,
+    enabled: Boolean = true,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    steps: Int = 0,
+    valueRepresentation: @Composable (Float) -> String,
+    onValueChanged: (Float) -> Unit,
 ) {
-    val currentValue = remember(value) { mutableStateOf(value ?: item.defaultValue) }
+    val currentValue = remember(value) { mutableStateOf(value) }
     Preference(
-        item = item,
+        title = title,
+        singleLineTitle = singleLineTitle,
+        enabled = enabled,
+        icon = icon,
         summary = {
         },
         trailing = {
             PreferenceTrailing(
-                item = item,
                 value = currentValue.value,
+                valueRange = valueRange,
+                steps = steps,
+                valueRepresentation = valueRepresentation,
                 onValueChanged = {
                     currentValue.value = it
-                    item.onValueChanged(currentValue.value)
+                    onValueChanged(currentValue.value)
                 },
             )
         }
@@ -46,18 +60,20 @@ fun NumberRangePreference(
 
 @Composable
 private fun PreferenceTrailing(
-    item: NumberRangeFloatPreferenceItem,
-    value: Float,
+    value: Float = 0F,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    steps: Int = 0,
+    valueRepresentation: @Composable (Float) -> String,
     onValueChanged: (Float) -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { onValueChanged((value - item.steps).coerceIn(item.valueRange)) }) {
+        IconButton(onClick = { onValueChanged((value - steps).coerceIn(valueRange)) }) {
             Icon(imageVector = Icons.Default.RemoveCircleOutline, contentDescription = "remove")
         }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = item.valueRepresentation(value))
+        Text(text = valueRepresentation(value))
         Spacer(modifier = Modifier.width(8.dp))
-        IconButton(onClick = { onValueChanged((value + item.steps).coerceIn(item.valueRange)) }) {
+        IconButton(onClick = { onValueChanged((value + steps).coerceIn(valueRange)) }) {
             Icon(imageVector = Icons.Default.AddCircleOutline, contentDescription = "add")
         }
     }

@@ -48,6 +48,9 @@ import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
+import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
+import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
+import com.caldeirasoft.outcast.ui.screen.store.storedata.args.Podcast_settingsRouteArgs
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*
@@ -95,6 +98,8 @@ fun PodcastScreen(
                     navController.navigateToPodcast(event.episode.feedUrl)
                 is PodcastViewModel.Event.OpenEpisodeDetail ->
                     navController.navigateToEpisode(event.episode)
+                is PodcastViewModel.Event.OpenSettings ->
+                    navController.navigateToPodcastSettings(event.feedUrl)
                 is PodcastViewModel.Event.Exit ->
                     navController.navigateUp()
             }

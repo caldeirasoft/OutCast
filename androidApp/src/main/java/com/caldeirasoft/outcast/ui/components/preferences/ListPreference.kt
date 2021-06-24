@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.model.SingleListPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,28 +19,36 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Composable
 fun <T> ListPreference(
-    item: SingleListPreferenceItem<T>
+    title: String,
+    icon: ImageVector? = null,
+    singleLineTitle: Boolean = false,
+    enabled: Boolean = true,
+    entries: Map<T, String>,
+    value: T,
+    onValueChanged: (T) -> Unit,
 ) {
-    val selectedValue = item.defaultValue
     val showDialog = remember { mutableStateOf(false) }
     val closeDialog = { showDialog.value = false }
 
     Preference(
-        item = item,
-        summary = item.entries[selectedValue],
+        title = title,
+        singleLineTitle = singleLineTitle,
+        enabled = enabled,
+        icon = icon,
+        summary = entries[value],
         onClick = { showDialog.value = true },
     )
 
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { closeDialog() },
-            title = { Text(text = item.title) },
+            title = { Text(text = title) },
             text = {
                 Column {
-                    item.entries.forEach { current ->
-                        val isSelected = selectedValue == current.key
+                    entries.forEach { current ->
+                        val isSelected = value == current.key
                         val onSelected = {
-                            item.onValueChanged(current.key)
+                            onValueChanged(current.key)
                             closeDialog()
                         }
                         Row(Modifier

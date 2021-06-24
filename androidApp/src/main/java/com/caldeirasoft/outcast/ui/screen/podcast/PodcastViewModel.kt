@@ -103,6 +103,9 @@ class PodcastViewModel @Inject constructor(
             emitEvent(Event.OpenEpisodeDetail(action.episode))
         is Action.OpenEpisodeContextMenu ->
             emitEvent(Event.OpenEpisodeContextMenu(action.episode))
+        is Action.OpenSettings -> emitEvent(Event.OpenSettings(initialState.feedUrl))
+        is Action.ToggleNotifications -> Unit
+        is Action.FilterCategory -> Unit
         is Action.PlayEpisode -> playEpisode(action.episode)
         is Action.PauseEpisode -> playEpisode(action.episode)
         is Action.PlayNextEpisode -> playNext(action.episode)
@@ -110,7 +113,6 @@ class PodcastViewModel @Inject constructor(
         is Action.ToggleSaveEpisode -> toggleSaveEpisode(action.episode)
         is Action.ShareEpisode -> shareEpisode()
         is Action.Exit -> emitEvent(Event.Exit)
-        else -> Unit
     }
 
     fun setPodcast(storePodcast: StorePodcast) {
@@ -222,7 +224,7 @@ class PodcastViewModel @Inject constructor(
         data class OpenEpisodeDetail(val episode: Episode) : Event()
         data class OpenEpisodeContextMenu(val episode: Episode) : Event()
         data class OpenStoreData(val storeData: StoreData) : Event()
-        object OpenSettings : Event()
+        data class OpenSettings(val feedUrl: String) : Event()
         data class SharePodcast(val podcast: Podcast) : Event()
         data class OpenWebsite(val websiteUrl: String) : Event()
         object ToggleNotifications : Event()
