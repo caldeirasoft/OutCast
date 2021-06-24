@@ -16,47 +16,49 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
+import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
 
-sealed class BottomNavigationScreen(
+sealed class RootScreen(
     val route: String,
     @StringRes val resourceId: Int,
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 ) {
-    object Inbox : BottomNavigationScreen(
-        RoutesActions.toInbox(),
+    object Inbox : RootScreen(
+        Routes.inbox.path,
         R.string.screen_inbox,
         Icons.Outlined.Inbox,
         Icons.Filled.Inbox)
 
-    object Library : BottomNavigationScreen(
-        RoutesActions.toLibrary(),
+    object Library : RootScreen(
+        Routes.library.path,
         R.string.screen_library,
         Icons.Outlined.Subscriptions,
         Icons.Filled.Subscriptions)
 
-    object Discover : BottomNavigationScreen(
-        RoutesActions.toStore(),
+    object Discover : RootScreen(
+        Routes.discover.path,
         R.string.screen_discover,
         Icons.Outlined.Explore,
         Icons.Filled.Explore
     )
 
-    object Search : BottomNavigationScreen(
-        RoutesActions.toSearch(),
+    object Search : RootScreen(
+        Routes.search.path,
         R.string.screen_search,
         Icons.Outlined.Search,
         Icons.TwoTone.Search)
 }
 
 val bottomNavItems = listOf(
-    BottomNavigationScreen.Inbox,
-    BottomNavigationScreen.Library,
-    BottomNavigationScreen.Discover,
-    BottomNavigationScreen.Search,
+    RootScreen.Inbox,
+    RootScreen.Library,
+    RootScreen.Discover,
+    RootScreen.Search,
 )
 
 @Composable
@@ -65,27 +67,35 @@ fun SetupBottomNavBar(
 ) {
     BottomNavigation(backgroundColor = MaterialTheme.colors.surface) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+        val currentDestination = navBackStackEntry?.destination
+        val backQueue = navController.backQueue
+        val rootDestinationsQueue = navController
+            .backQueue
+            .map { it.destination.route }
+            .filter { route -> bottomNavItems.any { it.route == route } }
 
         bottomNavItems.forEach { screen ->
             BottomNavigationItem(
                 icon = {
                     Icon(
-                        imageVector = if (currentRoute == screen.route) screen.selectedIcon else screen.icon,
+                        imageVector = if (rootDestinationsQueue.lastOrNull() == screen.route)
+                            screen.selectedIcon
+                        else screen.icon,
                         contentDescription = stringResource(id = screen.resourceId),
                     )
                 },
-                selected = currentRoute == screen.route,
+                selected = (rootDestinationsQueue.lastOrNull() == screen.route),
                 selectedContentColor = MaterialTheme.colors.primary,
                 unselectedContentColor = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
                 onClick = {
                     navController.navigate(screen.route) {
+                        // Avoid multiple copies of the same destination when re-selecting the same item
                         launchSingleTop = true
                         restoreState = true
                         // Pop up to the start destination of the graph to
                         // avoid building up a large stack of destinations
                         // on the back stack as users select items
-                        popUpTo(navController.graph.startDestinationId) {
+                        popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
                     }

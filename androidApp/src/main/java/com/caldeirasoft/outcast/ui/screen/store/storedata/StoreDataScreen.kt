@@ -64,14 +64,35 @@ import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
 @Route(
+    name = "discover",
+)
+@Composable
+fun DiscoverScreen(
+    viewModel: StoreDataViewModel = hiltViewModel(),
+    navController: NavController,
+) {
+    StoreDataScreen(viewModel = viewModel, navController = navController)
+}
+
+@OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
+@Route(
     name = "store",
     args = [
         RouteArg("storeData", RouteArgType.StringType, true, "\"{}\"")
     ]
 )
 @Composable
-fun StoreDataScreen(
+fun StoreScreen(
     viewModel: StoreDataViewModel = hiltViewModel(),
+    navController: NavController,
+) {
+    StoreDataScreen(viewModel = viewModel, navController = navController)
+}
+
+@OptIn(ExperimentalAnimationApi::class, FlowPreview::class)
+@Composable
+private fun StoreDataScreen(
+    viewModel: StoreDataViewModel,
     navController: NavController,
 ) {
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
@@ -104,7 +125,7 @@ fun StoreDataScreen(
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
-fun StoreDataScreen(
+private fun StoreDataScreen(
     state: StoreDataViewModel.State,
     lazyPagingItems: LazyPagingItems<StoreUiModel>,
     performAction: (StoreDataViewModel.Action) -> Unit,
