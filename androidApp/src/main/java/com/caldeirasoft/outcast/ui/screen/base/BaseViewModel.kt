@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen
+package com.caldeirasoft.outcast.ui.screen.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,15 +10,26 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KProperty1
 
+/**
+ * @param State The type which is emitted from this viewmodel's [state] flow
+ * @param Event The type which is emitted from this viewmodel's [events] flow
+ * @param Action The type which is accepted by this viewmodel's [performAction] function
+ */
 @OptIn(InternalCoroutinesApi::class)
-abstract class BaseViewModel<State: Any>(
+abstract class BaseViewModel<State: Any, Event: Any, Action: Any>(
     val initialState: State
 ) : ViewModel() {
-    private val _state = MutableStateFlow(initialState)
     private val stateMutex = Mutex()
 
+    private val _state = MutableStateFlow(initialState)
     val state: StateFlow<State>
         get() = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<Event>()
+    val events: SharedFlow<Event>
+        get() = _events.asSharedFlow()
+
+    abstract suspend fun performAction(action: Action)
 
     @OptIn(InternalCoroutinesApi::class)
     protected fun <T> Flow<T>.setOnEach(reducer: State.(T) -> State) {
@@ -59,18 +70,10 @@ abstract class BaseViewModel<State: Any>(
     protected fun <A> selectSubscribe(prop1: KProperty1<State, A>): Flow<A> {
         return _state.map { prop1.get(it) }.distinctUntilChanged()
     }
-}
-
-@OptIn(InternalCoroutinesApi::class)
-abstract class BaseViewModelEvents<State: Any, Event: Any>(
-    initialState: State
-) : BaseViewModel<State>(initialState) {
-    private val _events = MutableSharedFlow<Event>()
-
-    val events: SharedFlow<Event>
-        get() = _events.asSharedFlow()
 
     fun emitEvent(event: Event) {
         viewModelScope.launch { _events.emit(event) }
     }
+
+    abstract fun activate()
 }

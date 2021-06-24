@@ -10,12 +10,12 @@ import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
 import com.caldeirasoft.outcast.ui.screen.episode.EpisodeScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.base.InboxScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.base.PlayedEpisodesScreen
-import com.caldeirasoft.outcast.ui.screen.episodes.base.SavedEpisodesScreen
+import com.caldeirasoft.outcast.ui.screen.episodelist.base.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
+import com.caldeirasoft.outcast.ui.screen.played_episodes.PlayedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsScreen
+import com.caldeirasoft.outcast.ui.screen.saved_episodes.SavedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.search.SearchScreen
 import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsScreen
 import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes

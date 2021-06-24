@@ -49,4 +49,14 @@ class EpisodesRepository @Inject constructor(
     // get episodes from podcasts
     fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode> =
         episodeDao.getEpisodesDataSourceWithUrl(feedUrl)
+
+    // save episode to library
+    suspend fun saveEpisodeToLibrary(episode: Episode) {
+        episodeDao.saveEpisodeToLibrary(episode.feedUrl, episode.guid)
+    }
+
+    // remove episode from saved episodes
+    suspend fun deleteFromLibrary(episode: Episode) {
+        episodeDao.deleteFromLibrary(episode.feedUrl, episode.guid)
+    }
 }

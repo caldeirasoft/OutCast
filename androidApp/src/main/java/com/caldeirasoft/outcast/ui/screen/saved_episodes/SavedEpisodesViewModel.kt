@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes
+package com.caldeirasoft.outcast.ui.screen.saved_episodes
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -6,10 +6,10 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
+import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.usecase.LoadSavedEpisodesPagingDataUseCase
-import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
-import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
-import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -20,13 +20,11 @@ import javax.inject.Inject
 class SavedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadSavedEpisodesPagingDataUseCase: LoadSavedEpisodesPagingDataUseCase,
-    saveEpisodeUseCase: SaveEpisodeUseCase,
-    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    episodesRepository: EpisodesRepository,
     downloadRepository: DownloadRepository,
-) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
-    initialState = EpisodesState(),
-    saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+) : EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>(
+    initialState = State(),
+    episodesRepository = episodesRepository,
     downloadRepository = downloadRepository
 ) {
     @OptIn(FlowPreview::class)
@@ -35,4 +33,11 @@ class SavedEpisodesViewModel @Inject constructor(
             .execute()
             .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
             .cachedIn(viewModelScope)
+
+    override fun activate() {
+        downloadsFlow
+            .setOnEach { downloads ->
+                copy(downloads = downloads)
+            }
+    }
 }

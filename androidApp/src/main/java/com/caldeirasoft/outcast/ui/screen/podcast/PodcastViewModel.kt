@@ -3,20 +3,22 @@ package com.caldeirasoft.outcast.ui.screen.podcast
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.podcastFilterOption
 import com.caldeirasoft.outcast.data.db.entities.Podcast.Companion.podcastSortOrderOption
+import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
+import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.podcast
+import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.PodcastRouteArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,17 +32,14 @@ class PodcastViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val podcastsRepository: PodcastsRepository,
     private val settingsRepository: SettingsRepository,
-    saveEpisodeUseCase: SaveEpisodeUseCase,
-    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
     downloadRepository: DownloadRepository,
     episodesRepository: EpisodesRepository,
-) : EpisodeListViewModel<PodcastState, PodcastEvent>(
-    initialState = PodcastState(
+) : EpisodeListViewModel<PodcastViewModel.State, PodcastViewModel.Event, PodcastViewModel.Action>(
+    initialState = State(
         feedUrl = PodcastRouteArgs.fromSavedStatedHandle(savedStateHandle).feedUrl,
         isLoading = true,
     ),
-    saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+    episodesRepository = episodesRepository,
     downloadRepository = downloadRepository
 ), PreferenceViewModel {
 
@@ -64,7 +63,7 @@ class PodcastViewModel @Inject constructor(
             .cachedIn(viewModelScope)
 
 
-    init {
+    override fun activate() {
         podcastsRepository
             .loadPodcast(initialState.feedUrl)
             .onEach {
@@ -89,6 +88,31 @@ class PodcastViewModel @Inject constructor(
             }
     }
 
+    override suspend fun performAction(action: Action) = when (action){
+        is Action.SetPodcast -> setPodcast(action.podcast)
+        is Action.Follow -> follow()
+        is Action.Unfollow -> unfollow()
+        is Action.OpenWebsite -> openPodcastWebsite()
+        is Action.SharePodcast -> sharePodcast()
+        is Action.OpenStoreData -> Unit
+        is Action.ToggleSortOrder -> togglePodcastSortOrder()
+        is Action.FilterEpisodes -> updateFilter(action.filter)
+        is Action.OpenPodcastDetail ->
+            emitEvent(Event.OpenPodcastDetail(action.episode))
+        is Action.OpenEpisodeDetail ->
+            emitEvent(Event.OpenEpisodeDetail(action.episode))
+        is Action.OpenEpisodeContextMenu ->
+            emitEvent(Event.OpenEpisodeContextMenu(action.episode))
+        is Action.PlayEpisode -> playEpisode(action.episode)
+        is Action.PauseEpisode -> playEpisode(action.episode)
+        is Action.PlayNextEpisode -> playNext(action.episode)
+        is Action.PlayLastEpisode -> playLast(action.episode)
+        is Action.ToggleSaveEpisode -> toggleSaveEpisode(action.episode)
+        is Action.ShareEpisode -> shareEpisode()
+        is Action.Exit -> emitEvent(Event.Exit)
+        else -> Unit
+    }
+
     fun setPodcast(storePodcast: StorePodcast) {
         if (!isPodcastSet) {
             viewModelScope.launch {
@@ -106,12 +130,6 @@ class PodcastViewModel @Inject constructor(
     }
 
 
-    suspend fun openEpisodeDetails(episode: Episode) {
-        withState {
-            emitEvent(PodcastEvent.OpenEpisodeDetail(episode))
-        }
-    }
-
     fun follow() {
         viewModelScope.launch {
             setState { copy(followingStatus = FollowStatus.FOLLOWING) }
@@ -128,7 +146,7 @@ class PodcastViewModel @Inject constructor(
     fun toggleNotifications() {
         viewModelScope.withState {
             it.podcast?.let { podcast ->
-                emitEvent(PodcastEvent.ToggleNotifications)
+                emitEvent(Event.ToggleNotifications)
             }
         }
     }
@@ -136,7 +154,7 @@ class PodcastViewModel @Inject constructor(
     fun sharePodcast() {
         viewModelScope.withState {
             it.podcast?.let { podcast ->
-                emitEvent(PodcastEvent.SharePodcast(podcast))
+                emitEvent(Event.SharePodcast(podcast))
             }
         }
     }
@@ -144,14 +162,16 @@ class PodcastViewModel @Inject constructor(
     fun openPodcastWebsite() {
         viewModelScope.withState {
             it.podcast?.podcastWebsiteURL?.let { url ->
-                emitEvent(PodcastEvent.OpenWebsite(url))
+                emitEvent(Event.OpenWebsite(url))
             }
         }
     }
 
     fun togglePodcastSortOrder() {
         viewModelScope.withState {
-            podcastsRepository.updatePodcastSortOrder(it.feedUrl, if (it.sortOrder == SortOrder.DESC) SortOrder.ASC else SortOrder.DESC)
+            podcastsRepository.updatePodcastSortOrder(
+                it.feedUrl,
+                if (it.sortOrder == SortOrder.DESC) SortOrder.ASC else SortOrder.DESC)
         }
     }
 
@@ -171,5 +191,65 @@ class PodcastViewModel @Inject constructor(
         viewModelScope.launch {
             //updateSettingsUseCase.updatePreference(key, value)
         }
+    }
+
+    data class State(
+        val feedUrl: String,
+        val podcast: Podcast? = null,
+        val isLoading: Boolean = false,
+        val error: Throwable? = null,
+        val storeFront: String? = null,
+        val episodes: List<Episode> = emptyList(),
+        val showAllEpisodes: Boolean = false,
+        val followingStatus: FollowStatus = FollowStatus.UNFOLLOWED,
+        val podcastSettings: PodcastSettings? = null,
+        val sortOrder: SortOrder? = null,
+        val filter: PodcastFilter = PodcastFilter.ALL
+    ) {
+        val artistData: StoreData? =
+            podcast?.artistUrl?.let {
+                StoreData(
+                    id = podcast.artistId ?: 0L,
+                    label = podcast.artistName,
+                    url = podcast.artistUrl.orEmpty(),
+                    storeFront = ""
+                )
+            }
+    }
+
+    sealed class Event : EpisodeListViewModel.Event() {
+        data class OpenPodcastDetail(val episode: Episode) : Event()
+        data class OpenEpisodeDetail(val episode: Episode) : Event()
+        data class OpenEpisodeContextMenu(val episode: Episode) : Event()
+        data class OpenStoreData(val storeData: StoreData) : Event()
+        object OpenSettings : Event()
+        data class SharePodcast(val podcast: Podcast) : Event()
+        data class OpenWebsite(val websiteUrl: String) : Event()
+        object ToggleNotifications : Event()
+        object Exit : Event()
+    }
+
+    sealed class Action : EpisodeListViewModel.Action() {
+        data class SetPodcast(val podcast: StorePodcast) : Action()
+        data class OpenStoreData(val storeData: StoreData) : Action()
+        data class OpenPodcastDetail(val episode: Episode) : Action()
+        data class OpenEpisodeDetail(val episode: Episode) : Action()
+        data class OpenEpisodeContextMenu(val episode: Episode) : Action()
+        data class PlayEpisode(val episode: Episode) : Action()
+        data class PauseEpisode(val episode: Episode) : Action()
+        data class PlayNextEpisode(val episode: Episode) : Action()
+        data class PlayLastEpisode(val episode: Episode) : Action()
+        data class ToggleSaveEpisode(val episode: Episode) : Action()
+        data class ShareEpisode(val episode: Episode) : Action()
+        data class FilterCategory(val category: Category?): Action()
+        object OpenSettings : Action()
+        object SharePodcast : Action()
+        object OpenWebsite : Action()
+        object ToggleSortOrder : Action()
+        object Follow : Action()
+        object Unfollow : Action()
+        data class FilterEpisodes(val filter: PodcastFilter) : Action()
+        object ToggleNotifications : Action()
+        object Exit : Action()
     }
 }

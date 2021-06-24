@@ -60,6 +60,7 @@
     <string name="library_item_latest">Latest episodes</string>
     <string name="library_item_saved">Saved episodes</string>
     <string name="library_item_sideloads">Sideloads</string>
+    <string name="library_item_played">Played episodes</string>
     <string name="library_item_podcasts">Podcasts</string>
 
     <!-- filter -->

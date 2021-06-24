@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
@@ -35,6 +36,7 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
+import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.google.accompanist.coil.rememberCoilPainter
@@ -63,95 +65,77 @@ fun EpisodeScreen(
     fromSamePodcast: Boolean = false,
     navController: NavController,
 ) {
-    val state by viewModel.state.collectAsState()
     val scaffoldState = rememberScaffoldState()
-
-    EpisodeScreen(
-        state = state,
-        scaffoldState = scaffoldState,
-        episode = state.episode,
-        onPodcastClick = viewModel::openPodcastDetails,
-        navigateUp = { navController.navigateUp() },
-        onSaveButtonClick = viewModel::toggleSaveEpisode,
-        contextMenuItems = listOf(
-            ContextMenuItem(
-                titleId = R.string.action_play_next,
-                icon = Icons.Default.QueuePlayNext,
-                onClickAction = { viewModel.playNext() },
-            ),
-            ContextMenuItem(
-                titleId = R.string.action_play_last,
-                icon = Icons.Default.AddToQueue,
-                onClickAction = { viewModel.playLast() },
-            ),
-            ContextMenuSeparator,
-            if (state.episode?.isSaved == false)
-                ContextMenuItem(
-                    titleId = R.string.action_save_episode,
-                    icon = Icons.Outlined.BookmarkAdd,
-                    onClickAction = { /*viewModel.saveEpisode(episode)*/ },
-                )
-            else
-                ContextMenuItem(
-                    titleId = R.string.action_remove_saved_episode,
-                    icon = Icons.Outlined.BookmarkRemove,
-                    onClickAction = { /*viewModel.removeSavedEpisode(episode)*/ },
-                )
-            ,
-            ContextMenuSeparator,
-            ContextMenuItem(
-                titleId = R.string.action_share_episode,
-                icon = Icons.Default.Share,
-                onClickAction = { viewModel.shareEpisode() },
-            )
-        )
-    )
-
-    storeEpisode?.let {
-        LaunchedEffect(storeEpisode) {
-            viewModel.setEpisode(it)
-        }
-    }
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
             when (event) {
-                is EpisodeEvent.OpenPodcastDetail -> {
+                is EpisodeViewModel.Event.OpenPodcastDetail -> {
                     if (fromSamePodcast) navController.navigateUp()
                     else navController.navigateToPodcast(event.podcast)
                 }
-                is EpisodeEvent.PlayEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play episode")
-                is EpisodeEvent.PlayNextEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play next episode")
-                is EpisodeEvent.PlayLastEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play last episode")
-                is EpisodeEvent.DownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Download episode")
-                is EpisodeEvent.RemoveDownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Remove download episode")
-                is EpisodeEvent.CancelDownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Cancel download episode")
-                is EpisodeEvent.SaveEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Save episode")
-                is EpisodeEvent.RemoveFromSavedEpisodesEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Remove from saved episode")
-                is EpisodeEvent.ShareEpisodeEvent ->
+                is EpisodeViewModel.Event.Exit ->
+                    navController.navigateUp()
+                is EpisodeViewModel.Event.ShareEpisode ->
+                    //Toast.makeText()
                     scaffoldState.snackbarHostState.showSnackbar("Share episode")
             }
+        }
+    ) { state, performAction ->
+        EpisodeScreen(
+            state = state,
+            scaffoldState = scaffoldState,
+            episode = state.episode,
+            performAction = performAction,
+            contextMenuItems = listOf(
+                ContextMenuItem(
+                    titleId = R.string.action_play_next,
+                    icon = Icons.Default.QueuePlayNext,
+                    onClickAction = { performAction(EpisodeViewModel.Action.PlayNextEpisode) },
+                ),
+                ContextMenuItem(
+                    titleId = R.string.action_play_last,
+                    icon = Icons.Default.AddToQueue,
+                    onClickAction = { performAction(EpisodeViewModel.Action.PlayLastEpisode) },
+                ),
+                ContextMenuSeparator,
+                if (state.episode?.isSaved == false)
+                    ContextMenuItem(
+                        titleId = R.string.action_save_episode,
+                        icon = Icons.Outlined.BookmarkAdd,
+                        onClickAction = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
+                    )
+                else
+                    ContextMenuItem(
+                        titleId = R.string.action_remove_saved_episode,
+                        icon = Icons.Outlined.BookmarkRemove,
+                        onClickAction = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
+                    )
+                ,
+                ContextMenuSeparator,
+                ContextMenuItem(
+                    titleId = R.string.action_share_episode,
+                    icon = Icons.Default.Share,
+                    onClickAction = { performAction(EpisodeViewModel.Action.ShareEpisode) },
+                )
+            )
+        )
+    }
+
+    storeEpisode?.let {
+        LaunchedEffect(storeEpisode) {
+            viewModel.performAction(EpisodeViewModel.Action.SetEpisode(it))
         }
     }
 }
 
 @Composable
 fun EpisodeScreen(
-    state: EpisodeViewState,
+    state: EpisodeViewModel.State,
     scaffoldState: ScaffoldState,
     episode: Episode?,
-    navigateUp: () -> Unit,
-    onPodcastClick: () -> Unit,
-    onSaveButtonClick: () -> Unit,
     contextMenuItems: List<BaseContextMenuItem>,
+    performAction: (EpisodeViewModel.Action) -> Unit
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
@@ -178,7 +162,7 @@ fun EpisodeScreen(
             EpisodeExpandedHeader(
                 episode = episode,
                 listState = listState,
-                onPodcastClick = onPodcastClick,
+                onPodcastClick = { performAction(EpisodeViewModel.Action.OpenPodcastDetail) },
             )
 
 
@@ -190,7 +174,7 @@ fun EpisodeScreen(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp),
                     episode = it,
-                    onSaveButtonClick = onSaveButtonClick,
+                    onSaveButtonClick = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
                     contextMenuItems = contextMenuItems
                 )
             }
@@ -206,7 +190,7 @@ fun EpisodeScreen(
         EpisodeTopAppBar(
             state = state,
             listState = listState,
-            navigateUp = navigateUp,
+            navigateUp = { performAction(EpisodeViewModel.Action.Exit) },
         )
     }
 }
@@ -215,7 +199,7 @@ fun EpisodeScreen(
 private fun EpisodeExpandedHeader(
     episode: Episode?,
     listState: LazyListState,
-    onPodcastClick: () -> Unit,
+    onPodcastClick: () -> Unit
 ) {
     val dominantColor = MaterialTheme.colors.primary
 
@@ -330,7 +314,7 @@ private fun EpisodeExpandedHeader(
 
 @Composable
 fun EpisodeTopAppBar(
-    state: EpisodeViewState,
+    state: EpisodeViewModel.State,
     listState: LazyListState,
     navigateUp: () -> Unit,
 ) {
@@ -342,18 +326,6 @@ fun EpisodeTopAppBar(
 
     // top app bar
     val contentColor = contentColorFor(MaterialTheme.colors.surface)
-    /*
-    val artwork = state.podcast.artworkDominantColor
-    val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
-    val contentColor: Color =
-        artwork?.textColor1
-            ?.let {
-                val contentStartColor = Color.getColor(it)
-                Color.blendARGB(contentStartColor,
-                    contentEndColor,
-                    appBarAlpha)
-            }
-            ?: contentEndColor*/
 
     Column(
         modifier = Modifier

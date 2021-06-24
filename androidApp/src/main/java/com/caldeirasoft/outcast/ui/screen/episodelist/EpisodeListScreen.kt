@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes.base
+package com.caldeirasoft.outcast.ui.screen.episodelist
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -27,13 +27,10 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.data.db.entities.Episode
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodes.*
-import com.caldeirasoft.outcast.ui.screen.podcast.PodcastEpisodesLoadingScreen
+import com.caldeirasoft.outcast.ui.screen.base.Screen
+import com.caldeirasoft.outcast.ui.screen.saved_episodes.SavedEpisodesViewModel
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
@@ -43,159 +40,63 @@ import com.google.accompanist.insets.statusBarsPadding
 import cz.levinzonr.router.core.Route
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collect
 import timber.log.Timber
 
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Composable
-fun EpisodesScreen(
-    viewModel: EpisodeListViewModel<EpisodesState, EpisodesEvent>,
+fun EpisodeListScreen(
+    navController: NavController,
+    viewModel: EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>,
     title: String,
-    navigateToPodcast: (String) -> Unit,
-    navigateToEpisode: (Episode) -> Unit,
-    navigateUp: () -> Unit,
-    onCategoryFilterClick: ((Category?) -> Unit)? = null,
     hideTopBar: Boolean = false
 ) {
-    val state by viewModel.state.collectAsState()
-    val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
-    val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
-    EpisodesScreen(
-        state = state,
-        scaffoldState = scaffoldState,
-        title = title,
-        lazyPagingItems = lazyPagingItems,
-        navigateToPodcast = navigateToPodcast,
-        navigateToEpisode = navigateToEpisode,
-        navigateUp = navigateUp,
-        hideTopBar = hideTopBar,
-        onCategoryFilterClick = onCategoryFilterClick,
-        onEpisodeItemMoreButtonClick = { episode ->
-            coroutineScope.OpenBottomSheetMenu(
-                header = { // header : episode
-                    EpisodeItem(
-                        episode = episode,
-                        showActions = false,
-                    )
-                },
-                items = listOf(
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_play_next,
-                        icon = Icons.Default.QueuePlayNext,
-                        onClick = { viewModel.playNext(episode) },
-                    ),
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_play_last,
-                        icon = Icons.Default.AddToQueue,
-                        onClick = { viewModel.playLast(episode) },
-                    ),
-                    if (episode.isSaved.not())
-                        BottomSheetMenuItem(
-                            titleId = R.string.action_save_episode,
-                            icon = Icons.Outlined.BookmarkAdd,
-                            onClick = { viewModel.saveEpisode(episode) },
-                        )
-                    else
-                        BottomSheetMenuItem(
-                            titleId = R.string.action_remove_saved_episode,
-                            icon = Icons.Outlined.BookmarkRemove,
-                            onClick = { viewModel.removeSavedEpisode(episode) },
-                        ),
-                    BottomSheetSeparator,
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_share_episode,
-                        icon = Icons.Default.Share,
-                        onClick = { viewModel.shareEpisode(episode) },
-                    )
-                ),
-                drawerState = drawerState,
-                drawerContent = drawerContent
-            )
-        }
-    )
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
+    val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
             when (event) {
-                is EpisodesEvent.RefreshList ->
+                is EpisodeListViewModel.Event.OpenPodcastDetail ->
+                    navController.navigateToPodcast(event.episode.feedUrl)
+                is EpisodeListViewModel.Event.OpenEpisodeDetail ->
+                    navController.navigateToEpisode(event.episode)
+                is EpisodeListViewModel.Event.Exit ->
+                    navController.navigateUp()
+                is EpisodeListViewModel.Event.RefreshList ->
                     lazyPagingItems.refresh()
-                is EpisodesEvent.PlayEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play episode")
-                is EpisodesEvent.PlayNextEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play next episode")
-                is EpisodesEvent.PlayLastEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play last episode")
-                is EpisodesEvent.DownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Download episode")
-                is EpisodesEvent.RemoveDownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Remove download episode")
-                is EpisodesEvent.CancelDownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Cancel download episode")
-                is EpisodesEvent.SaveEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Save episode")
-                is EpisodesEvent.RemoveFromSavedEpisodesEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Remove from saved episode")
-                is EpisodesEvent.ShareEpisodeEvent ->
+                is EpisodeListViewModel.Event.ShareEpisode ->
+                    //Toast.makeText()
                     scaffoldState.snackbarHostState.showSnackbar("Share episode")
             }
         }
+    ) { state, performAction ->
+
+        EpisodeListScreen(
+            state = state,
+            scaffoldState = scaffoldState,
+            title = title,
+            lazyPagingItems = lazyPagingItems,
+            performAction = performAction,
+            hideTopBar = hideTopBar,
+        )
     }
-}
-
-@FlowPreview
-@ExperimentalCoroutinesApi
-@Route(name = "saved_episodes")
-@Composable
-fun SavedEpisodesScreen(
-    viewModel: SavedEpisodesViewModel,
-    navController: NavController,
-) {
-    EpisodesScreen(
-        title = stringResource(id = R.string.screen_saved_episodes),
-        viewModel = viewModel,
-        navigateToPodcast = { navController.navigateToPodcast(it) },
-        navigateToEpisode = { navController.navigateToEpisode(it) },
-        navigateUp = { navController.navigateUp() },
-    )
-}
-
-@FlowPreview
-@ExperimentalCoroutinesApi
-@Route(name = "played_episodes")
-@Composable
-fun PlayedEpisodesScreen(
-    viewModel: SavedEpisodesViewModel,
-    navController: NavController,
-) {
-    EpisodesScreen(
-        title = stringResource(id = R.string.screen_played_episodes),
-        viewModel = viewModel,
-        navigateToPodcast = { navController.navigateToPodcast(it) },
-        navigateToEpisode = { navController.navigateToEpisode(it) },
-        navigateUp = { navController.navigateUp() },
-    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun EpisodesScreen(
-    state: EpisodesState,
+private fun EpisodeListScreen(
+    state: EpisodeListViewModel.State,
     scaffoldState: ScaffoldState,
     title: String,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
-    navigateToPodcast: (String) -> Unit,
-    navigateToEpisode: (Episode) -> Unit,
-    navigateUp: () -> Unit,
-    onEpisodeItemMoreButtonClick: (Episode) -> Unit,
-    onCategoryFilterClick: ((Category?) -> Unit)? = null,
+    performAction: (EpisodeListViewModel.Action) -> Unit,
     hideTopBar: Boolean = false
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
     val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
     ScaffoldWithLargeHeader(
         modifier = Modifier
@@ -219,7 +120,7 @@ private fun EpisodesScreen(
                     modifier = Modifier,
                     title = title,
                     lazyListState = listState,
-                    navigateUp = navigateUp
+                    navigateUp = { performAction(EpisodeListViewModel.Action.Exit) }
                 )
             }
         }
@@ -248,7 +149,9 @@ private fun EpisodesScreen(
                 ChipGroup(
                     selectedValue = state.category,
                     values = state.categories.sortedBy { it.text },
-                    onClick = { category -> onCategoryFilterClick?.invoke(category) }) {
+                    onClick = { category ->
+                        performAction(EpisodeListViewModel.Action.FilterCategory(category))
+                    }) {
                     Text(text = it.text)
                 }
             }
@@ -261,13 +164,52 @@ private fun EpisodesScreen(
                                 episode = uiModel.episode,
                                 download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
                                 onPodcastClick = {
-                                    navigateToPodcast(uiModel.episode.feedUrl)
+                                    performAction(EpisodeListViewModel.Action.OpenPodcastDetail(uiModel.episode))
                                 },
                                 onEpisodeClick = {
-                                    navigateToEpisode(uiModel.episode)
+                                    performAction(EpisodeListViewModel.Action.OpenEpisodeDetail(uiModel.episode))
                                 },
                                 onContextMenuClick = {
-                                    onEpisodeItemMoreButtonClick(uiModel.episode)
+                                    coroutineScope.OpenBottomSheetMenu(
+                                        header = { // header : episode
+                                            EpisodeItem(
+                                                episode = uiModel.episode,
+                                                showActions = false,
+                                            )
+                                        },
+                                        items = listOf(
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_play_next,
+                                                icon = Icons.Default.QueuePlayNext,
+                                                onClick = { performAction(EpisodeListViewModel.Action.PlayNextEpisode(uiModel.episode)) },
+                                            ),
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_play_last,
+                                                icon = Icons.Default.AddToQueue,
+                                                onClick = { performAction(EpisodeListViewModel.Action.PlayLastEpisode(uiModel.episode)) },
+                                            ),
+                                            if (uiModel.episode.isSaved.not())
+                                                BottomSheetMenuItem(
+                                                    titleId = R.string.action_save_episode,
+                                                    icon = Icons.Outlined.BookmarkAdd,
+                                                    onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                                )
+                                            else
+                                                BottomSheetMenuItem(
+                                                    titleId = R.string.action_remove_saved_episode,
+                                                    icon = Icons.Outlined.BookmarkRemove,
+                                                    onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                                ),
+                                            BottomSheetSeparator,
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_share_episode,
+                                                icon = Icons.Default.Share,
+                                                onClick = { performAction(EpisodeListViewModel.Action.ShareEpisode(uiModel.episode)) },
+                                            )
+                                        ),
+                                        drawerState = drawerState,
+                                        drawerContent = drawerContent
+                                    )
                                 }
                             )
                             Divider()

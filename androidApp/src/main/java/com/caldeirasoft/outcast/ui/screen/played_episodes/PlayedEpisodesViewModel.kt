@@ -1,4 +1,4 @@
-package com.caldeirasoft.outcast.ui.screen.episodes
+package com.caldeirasoft.outcast.ui.screen.played_episodes
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -7,8 +7,10 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
+import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.util.isDateTheSame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -21,13 +23,11 @@ import javax.inject.Inject
 class PlayedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
-    saveEpisodeUseCase: SaveEpisodeUseCase,
-    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    episodesRepository: EpisodesRepository,
     downloadRepository: DownloadRepository,
-) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
-    initialState = EpisodesState(),
-    saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+) : EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>(
+    initialState = State(),
+    episodesRepository = episodesRepository,
     downloadRepository = downloadRepository
 ) {
 
@@ -38,6 +38,13 @@ class PlayedEpisodesViewModel @Inject constructor(
             .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) }}
             .insertDateSeparators()
             .cachedIn(viewModelScope)
+
+    override fun activate() {
+        downloadsFlow
+            .setOnEach { downloads ->
+                copy(downloads = downloads)
+            }
+    }
 
     private fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
         map {

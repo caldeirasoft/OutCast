@@ -19,6 +19,10 @@ import com.caldeirasoft.outcast.domain.enums.PodcastEpisodeLimitOptions
 import com.caldeirasoft.outcast.domain.model.*
 import com.caldeirasoft.outcast.ui.components.foundation.quantityStringResource
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceScreen
+import com.caldeirasoft.outcast.ui.screen.base.Screen
+import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsViewModel
+import com.caldeirasoft.outcast.ui.util.navigateToEpisode
+import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import cz.levinzonr.router.core.Route
@@ -40,21 +44,26 @@ fun PodcastSettingsScreen(
     viewModel: PodcastSettingsViewModel,
     navController: NavController,
 ) {
-    val state by viewModel.state.collectAsState()
-    PodcastSettingsScreen(
-        state = state,
-        navigateUp = { navController.navigateUp() }
-    ) {
-        viewModel.updateSettings(it)
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
+            when (event) {
+                is PodcastSettingsViewModel.Event.Exit ->
+                    navController.navigateUp()
+            }
+        }
+    ) {  state, performAction ->
+        PodcastSettingsScreen(
+            state = state,
+            performAction = performAction)
     }
 }
 
 @ExperimentalCoroutinesApi
 @Composable
 fun PodcastSettingsScreen(
-    state: PodcastSettingsState,
-    navigateUp: () -> Unit,
-    onPodcastSettingsChanged: (PodcastSettings) -> Unit,
+    state: PodcastSettingsViewModel.State,
+    performAction: (PodcastSettingsViewModel.Action) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -67,7 +76,7 @@ fun PodcastSettingsScreen(
                     Text(text = stringResource(id = R.string.podcast_settings))
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigateUp) {
+                    IconButton(onClick = { performAction(PodcastSettingsViewModel.Action.Exit) }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = null)
                     }
                 },
@@ -82,7 +91,9 @@ fun PodcastSettingsScreen(
                 items = getPreferenceItems(
                     podcastSettings = state.podcastSettings,
                     settings = state.settings,
-                    onPodcastSettingsChanged = onPodcastSettingsChanged,
+                    onPodcastSettingsChanged = {
+                        performAction(PodcastSettingsViewModel.Action.UpdateSettings(it))
+                    },
                 )
             )
         }

@@ -1,5 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.library
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -33,9 +34,12 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.bottomsheet.OpenBottomSheetMenu
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.CollapsingToolbarState
 import com.caldeirasoft.outcast.ui.components.gridItems
+import com.caldeirasoft.outcast.ui.screen.base.Screen
+import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
+import com.caldeirasoft.outcast.ui.util.navigateToEpisode
 import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.coil.rememberCoilPainter
@@ -47,6 +51,16 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+enum class LibraryItemType (
+    @StringRes val titleId: Int,
+    val action: LibraryViewModel.Action? = null,
+) {
+    SAVED_EPISODES(R.string.library_item_saved, LibraryViewModel.Action.OpenSavedEpisodes),
+    PLAYED_EPISODES(R.string.library_item_played, LibraryViewModel.Action.OpenPlayedEpisodes),
+    SIDELOADS(R.string.library_item_sideloads, LibraryViewModel.Action.OpenSideLoads),
+    PODCASTS(R.string.library_item_podcasts)
+}
+
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Route(name = "library")
@@ -55,65 +69,31 @@ fun LibraryScreen(
     viewModel: LibraryViewModel,
     navController: NavController,
 ) {
-    val state by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
-
-    LibraryScreen(
-        state = state,
-        navigateTo = { navController.navigate(it) },
-        navigateToPodcast = { navController.navigateToPodcast(it) },
-        onToggleDisplayButtonClick = viewModel::toggleDisplay,
-        onPlayedEpisodesButtonClick = {
-
-        },
-        onSortButtonClick = {
-            coroutineScope.OpenBottomSheetMenu(
-                header = { // header : podcast
-                    Text(
-                        text = stringResource(id = R.string.action_sort_by),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                },
-                items = LibrarySort.values().map { sort ->
-                    BottomSheetMenuItem(
-                        titleId = sort.titleId,
-                        icon = sort
-                            .takeIf { it == state.sortBy }
-                            ?.let {
-                                when (state.sortByDesc) {
-                                    true -> Icons.Default.ArrowDownward
-                                    false -> Icons.Default.ArrowUpward
-                                }
-                            },
-                        onClick = {
-                            coroutineScope.launch { drawerState.hide() }
-                            if (sort == state.sortBy)
-                                viewModel.changePodcastSort(!state.sortByDesc)
-                            else
-                                viewModel.changePodcastSort(sort)
-                        },
-                    )
-                },
-                drawerState = drawerState,
-                drawerContent = drawerContent
-            )
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
+            when (event) {
+                is LibraryViewModel.Event.OpenPodcastDetail ->
+                    navController.navigateToPodcast(event.podcast)
+                is LibraryViewModel.Event.OpenSavedEpisodes ->
+                    navController.navigate(RoutesActions.toSaved_episodes())
+                is LibraryViewModel.Event.OpenPlayedEpisodes ->
+                    navController.navigate(RoutesActions.toPlayed_episodes())
+            }
         }
-    )
-
+    ) { state, performAction ->
+        LibraryScreen(
+            state = state,
+            performAction = performAction
+        )
+    }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun LibraryScreen(
-    state: LibraryState,
-    navigateTo: (String) -> Unit,
-    navigateToPodcast: (Podcast) -> Unit,
-    onSortButtonClick: () -> Unit,
-    onToggleDisplayButtonClick: () -> Unit,
-    onPlayedEpisodesButtonClick: () -> Unit,
+    state: LibraryViewModel.State,
+    performAction: (LibraryViewModel.Action) -> Unit
 ) {
     ScaffoldWithLargeHeader(
         modifier = Modifier
@@ -151,14 +131,14 @@ private fun LibraryScreen(
                     // sort button
                     LibrarySortButton(
                         state = state,
-                        onClick = onSortButtonClick
+                        performAction = performAction,
                     )
                     // spacer
                     Spacer(Modifier.weight(1f))
                     // grid/list button
                     LibraryDisplayButton(
                         state = state,
-                        onClick = onToggleDisplayButtonClick
+                        onClick = { performAction(LibraryViewModel.Action.ToggleDisplay) }
                     )
                 }
             }
@@ -176,30 +156,19 @@ private fun LibraryScreen(
                         LibraryItemType.SAVED_EPISODES.name ->
                             libraryItemsMap[itemId]?.let { item ->
                                 LibraryGridItem(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = {
-                                            when (item) {
-                                                LibraryItemType.SAVED_EPISODES ->
-                                                    navigateTo(RoutesActions.toLibrary())
-                                                else -> {
-                                                }
-                                            }
-                                        }),
                                     item = item,
                                     state = state,
+                                    performAction = performAction
                                 )
                             }
                         else -> {
                             podcastsMap[itemId]?.let { item ->
                                 PodcastGridItem(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = {
-                                            navigateToPodcast(item)
-                                        }),
                                     podcast = item,
-                                    sort = state.sortBy
+                                    sort = state.sortBy,
+                                    onClick = {
+                                        performAction(LibraryViewModel.Action.OpenPodcastDetail(item))
+                                    }
                                 )
                             }
                         }
@@ -212,30 +181,19 @@ private fun LibraryScreen(
                         LibraryItemType.SAVED_EPISODES.name ->
                             libraryItemsMap[itemId]?.let { item ->
                                 LibraryListItem(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = {
-                                            when (item) {
-                                                LibraryItemType.SAVED_EPISODES ->
-                                                    navigateTo(RoutesActions.toSaved_episodes())
-                                                else -> {
-                                                }
-                                            }
-                                        }),
                                     item = item,
                                     state = state,
+                                    performAction = performAction
                                 )
                             }
                         else -> {
                             podcastsMap[itemId]?.let { item ->
                                 PodcastListItem(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = {
-                                            navigateToPodcast(item)
-                                        }),
                                     podcast = item,
-                                    sort = state.sortBy
+                                    sort = state.sortBy,
+                                    onClick = {
+                                        performAction(LibraryViewModel.Action.OpenPodcastDetail(item))
+                                    }
                                 )
                             }
                         }
@@ -289,13 +247,15 @@ private fun PodcastGridItem(
     modifier: Modifier = Modifier,
     podcast: Podcast,
     sort: LibrarySort,
+    onClick: () -> Unit
 )
 {
     val context = LocalContext.current
     Column(modifier = modifier) {
         Card(
             backgroundColor = colors[1],
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            onClick = onClick
         )
         {
             Image(
@@ -334,10 +294,17 @@ private fun PodcastGridItem(
 @Composable
 fun LibraryGridItem(
     item: LibraryItemType,
-    state: LibraryState,
-    modifier: Modifier = Modifier
+    state: LibraryViewModel.State,
+    performAction: (LibraryViewModel.Action) -> Unit
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable(onClick = {
+            item.action?.let {
+                performAction(item.action)
+            }
+        })
+    ) {
         LibraryThumbnail(item = item, modifier = Modifier)
         Text(
             text = stringResource(id = item.titleId),
@@ -362,11 +329,14 @@ fun LibraryGridItem(
 private fun PodcastListItem(
     modifier: Modifier = Modifier,
     podcast: Podcast,
-    sort: LibrarySort
+    sort: LibrarySort,
+    onClick: () -> Unit
 ) {
     val context = LocalContext.current
     ListItem(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         text = {
             Text(text = podcast.name,
                 maxLines = 2
@@ -393,11 +363,17 @@ private fun PodcastListItem(
 @Composable
 fun LibraryListItem(
     item: LibraryItemType,
-    state: LibraryState,
-    modifier: Modifier = Modifier
+    state: LibraryViewModel.State,
+    performAction: (LibraryViewModel.Action) -> Unit
 ) {
     ListItem(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = {
+                item.action?.let {
+                    performAction(item.action)
+                }
+            }),
         text = {
             Text(
                 text = stringResource(id = item.titleId),
@@ -449,7 +425,7 @@ private fun LibraryThumbnail(
 @Composable
 private fun LibraryListItemSecondaryText(
     item: LibraryItemType,
-    state: LibraryState,
+    state: LibraryViewModel.State,
 ) {
     when (item) {
         LibraryItemType.SAVED_EPISODES -> {
@@ -466,16 +442,52 @@ private fun LibraryListItemSecondaryText(
 
 @Composable
 private fun LibrarySortButton(
-    state: LibraryState,
-    onClick : () -> Unit
+    state: LibraryViewModel.State,
+    performAction: (LibraryViewModel.Action) -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
     val imageVector =
         if (state.sortByDesc) Icons.Default.ArrowDownward
         else Icons.Default.ArrowUpward
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .clickable(onClick = {
+                coroutineScope.OpenBottomSheetMenu(
+                    header = { // header : podcast
+                        Text(
+                            text = stringResource(id = R.string.action_sort_by),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    },
+                    items = LibrarySort
+                        .values()
+                        .map { sort ->
+                            BottomSheetMenuItem(
+                                titleId = sort.titleId,
+                                icon = sort
+                                    .takeIf { it == state.sortBy }
+                                    ?.let {
+                                        when (state.sortByDesc) {
+                                            true -> Icons.Default.ArrowDownward
+                                            false -> Icons.Default.ArrowUpward
+                                        }
+                                    },
+                                onClick = {
+                                    coroutineScope.launch { drawerState.hide() }
+                                    if (sort == state.sortBy)
+                                        performAction(LibraryViewModel.Action.ChangeSortOrder(!state.sortByDesc))
+                                    else
+                                        performAction(LibraryViewModel.Action.ChangeSort(sort))
+                                },
+                            )
+                        },
+                    drawerState = drawerState,
+                    drawerContent = drawerContent
+                )
+            })
             .padding(horizontal = 16.dp)
     ) {
         Text(text = stringResource(id = state.sortBy.titleId))
@@ -491,7 +503,7 @@ private fun LibrarySortButton(
 
 @Composable
 private fun LibraryDisplayButton(
-    state: LibraryState,
+    state: LibraryViewModel.State,
     onClick : () -> Unit
 ) {
     val imageVector =

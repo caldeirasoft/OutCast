@@ -23,32 +23,6 @@ import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
-enum class StoreGenreItem(
-    val genreId: Int,
-    @StringRes val titleId: Int,
-    @DrawableRes val drawableId: Int,
-) {
-    Arts(1301, R.string.store_genre_1301, R.drawable.ic_color_palette),
-    Business(1321, R.string.store_genre_1321, R.drawable.ic_analytics),
-    Comedy(1303, R.string.store_genre_1303, R.drawable.ic_theater),
-    Education(1304, R.string.store_genre_1304, R.drawable.ic_mortarboard),
-    Fiction(1483, R.string.store_genre_1483, R.drawable.ic_fiction),
-    Government(1511, R.string.store_genre_1511, R.drawable.ic_city_hall),
-    Health_Fitness(1512, R.string.store_genre_1512, R.drawable.ic_first_aid_kit),
-    History(1487, R.string.store_genre_1487, R.drawable.ic_history),
-    Kids_Family(1305, R.string.store_genre_1305, R.drawable.ic_family),
-    Leisure(1502, R.string.store_genre_1502, R.drawable.ic_game_controller),
-    Music(1310, R.string.store_genre_1310, R.drawable.ic_guitar),
-    News(1489, R.string.store_genre_1489, R.drawable.ic_news),
-    Religion_Spirtuality(1314, R.string.store_genre_1314, R.drawable.ic_religion),
-    Science(1533, R.string.store_genre_1533, R.drawable.ic_flasks),
-    Society_Culture(1324, R.string.store_genre_1324, R.drawable.ic_social_care),
-    Sports(1545, R.string.store_genre_1545, R.drawable.ic_sport),
-    TV_Film(1309, R.string.store_genre_1309, R.drawable.ic_video_camera),
-    Technology(1318, R.string.store_genre_1318, R.drawable.ic_artificial_intelligence),
-    True_Crime(1488, R.string.store_genre_1488, R.drawable.ic_handcuffs)
-}
-
 @ExperimentalCoroutinesApi
 @Composable
 @OptIn(FlowPreview::class)

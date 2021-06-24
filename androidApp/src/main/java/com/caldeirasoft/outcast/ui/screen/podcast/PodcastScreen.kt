@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +23,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,17 +30,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
@@ -47,16 +44,12 @@ import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreD
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
-import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
-import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.base.Screen
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import com.caldeirasoft.outcast.ui.screen.store.storedata.HeaderEditorialArtwork
-import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.theme.toxyY
-import com.caldeirasoft.outcast.ui.theme.xyYtoColor
 import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -71,8 +64,6 @@ import cz.levinzonr.router.core.RouteArgType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import timber.log.Timber
 
 @OptIn(ExperimentalAnimationApi::class, FlowPreview::class, InternalCoroutinesApi::class)
 @Route(
@@ -87,11 +78,7 @@ fun PodcastScreen(
     storePodcast: StorePodcast? = null,
     navController: NavController,
 ) {
-    val state by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
 
     storePodcast?.let {
@@ -100,90 +87,25 @@ fun PodcastScreen(
         }
     }
 
-    PodcastScreen(
-        state = state,
-        scaffoldState = scaffoldState,
-        lazyPagingItems = lazyPagingItems,
-        navigateTo = { navController.navigate(it) },
-        navigateToEpisode = { navController.navigateToEpisode(it, true)},
-        navigateToStore = { navController.navigateToStore(it) },
-        navigateUp = { navController.navigateUp() },
-        onFollowPodcast = viewModel::follow,
-        onUnfollowPodcast = viewModel::unfollow,
-        onNotificationButtonClick = viewModel::toggleNotifications,
-        onShareItemClick = viewModel::sharePodcast,
-        onWebsiteItemClick = viewModel::openPodcastWebsite,
-        onSortButtonClick = viewModel::togglePodcastSortOrder,
-        onFilterItemClick = viewModel::updateFilter,
-        onEpisodeItemMoreButtonClick = { episode ->
-            coroutineScope.OpenBottomSheetMenu(
-                header = { // header : episode
-                    EpisodeItem(episode = episode, showActions = false)
-                },
-                items = listOf(
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_play_next,
-                        icon = Icons.Default.QueuePlayNext,
-                        onClick = { viewModel.playNext(episode) },
-                    ),
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_play_last,
-                        icon = Icons.Default.AddToQueue,
-                        onClick = { viewModel.playLast(episode) },
-                    ),
-                    if (episode.isSaved.not())
-                        BottomSheetMenuItem(
-                            titleId = R.string.action_save_episode,
-                            icon = Icons.Default.Favorite,
-                            onClick = { viewModel.saveEpisode(episode) },
-                        )
-                    else
-                        BottomSheetMenuItem(
-                            titleId = R.string.action_remove_saved_episode,
-                            icon = Icons.Default.FavoriteBorder,
-                            onClick = { viewModel.removeSavedEpisode(episode) },
-                        )
-                    ,
-                    BottomSheetSeparator,
-                    BottomSheetMenuItem(
-                        titleId = R.string.action_share_episode,
-                        icon = Icons.Default.Share,
-                        onClick = { viewModel.shareEpisode(episode) },
-                    )
-                ),
-                drawerState = drawerState,
-                drawerContent = drawerContent
-            )
-        }
-    )
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
             when (event) {
-                is PodcastEvent.SharePodcast ->
-                    scaffoldState.snackbarHostState.showSnackbar("Share podcast")
-                is PodcastEvent.OpenWebsite ->
-                    scaffoldState.snackbarHostState.showSnackbar("Open ${event.websiteUrl}")
-                is EpisodesEvent.PlayEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play episode")
-                is EpisodesEvent.PlayNextEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play next episode")
-                is EpisodesEvent.PlayLastEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Play last episode")
-                is EpisodesEvent.DownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Download episode")
-                is EpisodesEvent.RemoveDownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Remove download episode")
-                is EpisodesEvent.CancelDownloadEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Cancel download episode")
-                is EpisodesEvent.SaveEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Save episode")
-                is EpisodesEvent.RemoveFromSavedEpisodesEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Remove from saved episode")
-                is EpisodesEvent.ShareEpisodeEvent ->
-                    scaffoldState.snackbarHostState.showSnackbar("Share episode")
+                is PodcastViewModel.Event.OpenPodcastDetail ->
+                    navController.navigateToPodcast(event.episode.feedUrl)
+                is PodcastViewModel.Event.OpenEpisodeDetail ->
+                    navController.navigateToEpisode(event.episode)
+                is PodcastViewModel.Event.Exit ->
+                    navController.navigateUp()
             }
         }
+    ) { state, performAction ->
+        PodcastScreen(
+            state = state,
+            scaffoldState = scaffoldState,
+            lazyPagingItems = lazyPagingItems,
+            performAction = performAction
+        )
     }
 }
 
@@ -191,26 +113,18 @@ fun PodcastScreen(
 @ExperimentalCoroutinesApi
 @Composable
 private fun PodcastScreen(
-    state: PodcastState,
+    state: PodcastViewModel.State,
     scaffoldState: ScaffoldState,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
-    navigateTo: (String) -> Unit,
-    navigateToEpisode: (Episode) -> Unit,
-    navigateToStore: (StoreData) -> Unit,
-    navigateUp: () -> Unit,
-    onFollowPodcast: () -> Unit,
-    onUnfollowPodcast: () -> Unit,
-    onNotificationButtonClick: () -> Unit,
-    onShareItemClick: () -> Unit,
-    onWebsiteItemClick: () -> Unit,
-    onSortButtonClick: () -> Unit,
-    onFilterItemClick: (PodcastFilter) -> Unit,
-    onEpisodeItemMoreButtonClick: (Episode) -> Unit,
+    performAction: (PodcastViewModel.Action) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val drawerState = LocalBottomSheetState.current
+    val drawerContent = LocalBottomSheetContent.current
     val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
 
     val podcastData = state.podcast
+
     ScaffoldWithLargeHeader(
         listState = listState,
         scaffoldState = scaffoldState,
@@ -220,7 +134,7 @@ private fun PodcastScreen(
                     .fillMaxWidth(),
                 state = state,
                 lazyListState = listState,
-                navigateUp = navigateUp
+                navigateUp = { performAction(PodcastViewModel.Action.Exit) }
             )
         },
         headerRatio = 1/2f,
@@ -252,7 +166,7 @@ private fun PodcastScreen(
                             .height(headerHeight.toDp()),
                         state = state,
                         lazyListState = listState,
-                        openStoreDataDetail = navigateToStore
+                        openStoreDataDetail = { performAction(PodcastViewModel.Action.OpenStoreData(it)) }
                     )
                 }
             }
@@ -262,12 +176,7 @@ private fun PodcastScreen(
                 podcastData?.let {
                     PodcastActionAppBar(
                         state = state,
-                        onFollowPodcast = onFollowPodcast,
-                        onUnfollowPodcast = onUnfollowPodcast,
-                        onSettingsButtonClick = { navigateTo(RoutesActions.toPodcast_settings(it.feedUrl)) },
-                        onNotificationButtonClick = onNotificationButtonClick,
-                        onShareItemClick = onShareItemClick,
-                        onWebsiteItemClick = onWebsiteItemClick
+                        performAction = performAction,
                     )
                 }
             }
@@ -286,7 +195,7 @@ private fun PodcastScreen(
                     ) {
                         ChipButton(selected = false,
                             onClick = {
-                                navigateToStore(genre.toStoreData())
+                                performAction(PodcastViewModel.Action.OpenStoreData(genre.toStoreData()))
                             })
                         {
                             Text(text = genre.name)
@@ -304,7 +213,7 @@ private fun PodcastScreen(
                     },
                     actions = {
                         // sort button
-                        IconButton(onClick = onSortButtonClick) {
+                        IconButton(onClick = { performAction(PodcastViewModel.Action.ToggleSortOrder) }) {
                             Icon(
                                 painter = painterResource(
                                     id = if (state.sortOrder == SortOrder.DESC)
@@ -325,8 +234,51 @@ private fun PodcastScreen(
                     if (uiModel is EpisodeUiModel.EpisodeItem) {
                         PodcastEpisodeItem(
                             episode = uiModel.episode,
-                            onEpisodeClick = { navigateToEpisode(uiModel.episode) },
-                            onContextMenuClick = { onEpisodeItemMoreButtonClick(uiModel.episode) }
+                            onEpisodeClick = {
+                                performAction(PodcastViewModel.Action.OpenEpisodeDetail(uiModel.episode))
+                            },
+                            onContextMenuClick = {
+                                coroutineScope.OpenBottomSheetMenu(
+                                    header = { // header : episode
+                                        EpisodeItem(
+                                            episode = uiModel.episode,
+                                            showActions = false,
+                                        )
+                                    },
+                                    items = listOf(
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_play_next,
+                                            icon = Icons.Default.QueuePlayNext,
+                                            onClick = { performAction(PodcastViewModel.Action.PlayNextEpisode(uiModel.episode)) },
+                                        ),
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_play_last,
+                                            icon = Icons.Default.AddToQueue,
+                                            onClick = { performAction(PodcastViewModel.Action.PlayLastEpisode(uiModel.episode)) },
+                                        ),
+                                        if (uiModel.episode.isSaved.not())
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_save_episode,
+                                                icon = Icons.Outlined.BookmarkAdd,
+                                                onClick = { performAction(PodcastViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                            )
+                                        else
+                                            BottomSheetMenuItem(
+                                                titleId = R.string.action_remove_saved_episode,
+                                                icon = Icons.Outlined.BookmarkRemove,
+                                                onClick = { performAction(PodcastViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                            ),
+                                        BottomSheetSeparator,
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_share_episode,
+                                            icon = Icons.Default.Share,
+                                            onClick = { performAction(PodcastViewModel.Action.ShareEpisode(uiModel.episode)) },
+                                        )
+                                    ),
+                                    drawerState = drawerState,
+                                    drawerContent = drawerContent
+                                )
+                            }
                         )
                         Divider()
                     }
@@ -351,7 +303,7 @@ private fun PodcastScreen(
 @Composable
 private fun PodcastHeader(
     modifier: Modifier,
-    state: PodcastState,
+    state: PodcastViewModel.State,
     lazyListState: LazyListState,
     openStoreDataDetail: (StoreData) -> Unit,
 ) {
@@ -461,7 +413,7 @@ private fun PodcastHeader(
 @Composable
 private fun PodcastScreenTopAppBar(
     modifier: Modifier,
-    state: PodcastState,
+    state: PodcastViewModel.State,
     lazyListState: LazyListState,
     navigateUp: () -> Unit,
 ) {
@@ -536,13 +488,8 @@ private fun PodcastDescriptionContent(description: String?) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PodcastActionAppBar(
-    state: PodcastState,
-    onFollowPodcast: () -> Unit,
-    onUnfollowPodcast: () -> Unit,
-    onNotificationButtonClick: () -> Unit,
-    onSettingsButtonClick: () -> Unit,
-    onShareItemClick: () -> Unit,
-    onWebsiteItemClick: () -> Unit,
+    state: PodcastViewModel.State,
+    performAction: (PodcastViewModel.Action) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     // action buttons
@@ -554,9 +501,9 @@ fun PodcastActionAppBar(
                 selected = (state.followingStatus == FollowStatus.FOLLOWED),
                 onClick = {
                     if (state.followingStatus == FollowStatus.UNFOLLOWED)
-                        onFollowPodcast()
+                        performAction(PodcastViewModel.Action.Follow)
                     else if (state.followingStatus == FollowStatus.FOLLOWED)
-                        onUnfollowPodcast()
+                        performAction(PodcastViewModel.Action.Unfollow)
                 },
                 icon = {
                     Crossfade(targetState = state.followingStatus) { followStatus ->
@@ -591,14 +538,14 @@ fun PodcastActionAppBar(
         actions = {
             if (state.followingStatus == FollowStatus.FOLLOWED) {
                 // notification button
-                IconButton(onClick = onNotificationButtonClick) {
+                IconButton(onClick = { performAction(PodcastViewModel.Action.ToggleNotifications) }) {
                     Icon(
                         imageVector = Icons.Default.NotificationsOff,
                         contentDescription = null
                     )
                 }
                 // settings button
-                IconButton(onClick = onSettingsButtonClick) {
+                IconButton(onClick = { performAction(PodcastViewModel.Action.OpenSettings) }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = null
@@ -618,7 +565,7 @@ fun PodcastActionAppBar(
                     onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(onClick = {
                         expanded = false
-                        onShareItemClick()
+                        performAction(PodcastViewModel.Action.SharePodcast)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Share,
@@ -631,7 +578,7 @@ fun PodcastActionAppBar(
                     }
                     DropdownMenuItem(onClick = {
                         expanded = false
-                        onWebsiteItemClick()
+                        performAction(PodcastViewModel.Action.OpenWebsite)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Public,

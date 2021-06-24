@@ -2,6 +2,10 @@ package com.caldeirasoft.outcast.ui.screen.episode
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
+import com.caldeirasoft.outcast.data.repository.DownloadRepository
+import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
@@ -9,10 +13,8 @@ import com.caldeirasoft.outcast.domain.usecase.FetchPodcastDataUseCase
 import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
 import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
 import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
-import com.caldeirasoft.outcast.ui.screen.BaseViewModelEvents
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
+import com.caldeirasoft.outcast.ui.screen.base.BaseViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.EpisodeRouteArgs
-import com.caldeirasoft.outcast.ui.screen.store.storedata.args.PodcastRouteArgs
 import com.caldeirasoft.outcast.ui.util.urlDecode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterNotNull
@@ -28,10 +30,12 @@ class EpisodeViewModel @Inject constructor(
     private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
     private val saveEpisodeUseCase: SaveEpisodeUseCase,
     private val removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
-) : BaseViewModelEvents<EpisodeViewState, EpisodeEvent>(
+    private val downloadRepository: DownloadRepository,
+    private val episodesRepository: EpisodesRepository,
+) : BaseViewModel<EpisodeViewModel.State, EpisodeViewModel.Event, EpisodeViewModel.Action>(
     // The string "episode" is the name of the argument in the route
     initialState = EpisodeRouteArgs.fromSavedStatedHandle(savedStateHandle).let {
-        EpisodeViewState(
+        State(
             feedUrl = it.feedUrl,
             guid = it.guid.urlDecode()
         )
@@ -41,26 +45,36 @@ class EpisodeViewModel @Inject constructor(
     private var isInitialized: Boolean = false
     private var isEpisodeSet: Boolean = false
 
-    init {
+    override fun activate() {
         val initialState = state.value
-        viewModelScope.launch {
-            loadEpisodeFromDbUseCase
-                .execute(
-                    feedUrl = initialState.feedUrl,
-                    guid = initialState.guid
+        loadEpisodeFromDbUseCase
+            .execute(
+                feedUrl = initialState.feedUrl,
+                guid = initialState.guid
+            )
+            .filterNotNull()
+            .setOnEach {
+                copy(
+                    isLoading = false,
+                    episode = it.episode,
+                    podcast = it.podcast
                 )
-                .filterNotNull()
-                .setOnEach {
-                    copy(
-                        isLoading = false,
-                        episode = it.episode,
-                        podcast = it.podcast
-                    )
-                }
-        }
+            }
     }
 
-    fun setEpisode(storeEpisode: StoreEpisode) {
+    override suspend fun performAction(action: Action) = when (action) {
+        is Action.SetEpisode -> setEpisode(action.episode)
+        is Action.OpenPodcastDetail -> openPodcastDetails()
+        is Action.PlayEpisode -> playEpisode()
+        is Action.PauseEpisode -> playEpisode()
+        is Action.PlayNextEpisode -> playNext()
+        is Action.PlayLastEpisode -> playLast()
+        is Action.ToggleSaveEpisode -> toggleSaveEpisode()
+        is Action.ShareEpisode -> shareEpisode()
+        is Action.Exit -> emitEvent(Event.Exit)
+    }
+
+    private fun setEpisode(storeEpisode: StoreEpisode) {
         if (!isEpisodeSet) {
             fetchPodcastDataUseCase
                 .execute(storeEpisode.storePodcast.podcast)
@@ -78,51 +92,42 @@ class EpisodeViewModel @Inject constructor(
         }
     }
 
-    fun openPodcastDetails() {
+    private fun openPodcastDetails() {
         viewModelScope.withState {
             it.podcast?.let { podcast ->
-                emitEvent(EpisodeEvent.OpenPodcastDetail(podcast))
+                emitEvent(Event.OpenPodcastDetail(podcast))
             }
         }
     }
 
-    fun playEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.PlayEpisodeEvent)
+    private fun playEpisode() {
+    }
+
+    private fun playNext() {
+    }
+
+    private fun playLast() {
+    }
+
+    private fun saveEpisode() {
+        viewModelScope.withState {
+            it.episode?.let { episode ->
+                episodesRepository.saveEpisodeToLibrary(episode)
+                downloadRepository.startDownload(episode)
+            }
         }
     }
 
-    fun playNext() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.PlayNextEpisodeEvent)
+    private fun removeSavedEpisode() {
+        viewModelScope.withState {
+            it.episode?.let { episode ->
+                episodesRepository.deleteFromLibrary(episode)
+                downloadRepository.removeDownload(episode)
+            }
         }
     }
 
-    fun playLast() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.PlayLastEpisodeEvent)
-        }
-    }
-
-    fun downloadEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.DownloadEpisodeEvent)
-        }
-    }
-
-    fun cancelDownloadEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.CancelDownloadEpisodeEvent)
-        }
-    }
-
-    fun removeDownloadEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeEvent.RemoveDownloadEpisodeEvent)
-        }
-    }
-
-    fun toggleSaveEpisode() {
+    private fun toggleSaveEpisode() {
         viewModelScope.withState {
             it.episode?.let { episode ->
                 if (episode.isSaved.not()) saveEpisodeUseCase.execute(episode)
@@ -131,9 +136,36 @@ class EpisodeViewModel @Inject constructor(
         }
     }
 
-    fun shareEpisode() {
+    private fun shareEpisode() {
         viewModelScope.launch {
-            emitEvent(EpisodeEvent.ShareEpisodeEvent)
+            emitEvent(Event.ShareEpisode)
         }
+    }
+
+    data class State(
+        val feedUrl: String,
+        val guid: String,
+        val episode: Episode? = null,
+        val podcast: Podcast? = null,
+        val isLoading: Boolean = false,
+        val error: Throwable? = null,
+    )
+
+    sealed class Event {
+        data class OpenPodcastDetail(val podcast: Podcast) : Event()
+        object ShareEpisode : Event()
+        object Exit : Event()
+    }
+
+    sealed class Action {
+        object OpenPodcastDetail : Action()
+        data class SetEpisode(val episode: StoreEpisode) : Action()
+        object PlayEpisode : Action()
+        object PauseEpisode : Action()
+        object PlayNextEpisode : Action()
+        object PlayLastEpisode : Action()
+        object ToggleSaveEpisode : Action()
+        object ShareEpisode : Action()
+        object Exit : Action()
     }
 }

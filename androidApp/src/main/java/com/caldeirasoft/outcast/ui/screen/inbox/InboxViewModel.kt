@@ -8,11 +8,9 @@ import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.usecase.*
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.base.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesEvent
-import com.caldeirasoft.outcast.ui.screen.episodes.EpisodesState
-import com.caldeirasoft.outcast.ui.screen.episodes.base.*
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.base.*
 import com.caldeirasoft.outcast.ui.util.isDateTheSame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -27,10 +25,9 @@ class InboxViewModel @Inject constructor(
     removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
     private val episodesRepository: EpisodesRepository,
     private val downloadRepository: DownloadRepository,
-) : EpisodeListViewModel<EpisodesState, EpisodesEvent>(
-    initialState = EpisodesState(),
-    saveEpisodeUseCase = saveEpisodeUseCase,
-    removeSaveEpisodeUseCase = removeSaveEpisodeUseCase,
+) : EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>(
+    initialState = State(),
+    episodesRepository = episodesRepository,
     downloadRepository = downloadRepository
 ) {
     @OptIn(FlowPreview::class)
@@ -53,7 +50,7 @@ class InboxViewModel @Inject constructor(
             .insertDateSeparators()
             .cachedIn(viewModelScope)
 
-    init {
+    override fun activate() {
         episodesRepository
             .getInboxEpisodesCategories()
             .map { it.filterNotNull() }
@@ -70,11 +67,17 @@ class InboxViewModel @Inject constructor(
             }
     }
 
-    fun filterByCategory(category: Category?) {
+    override suspend fun performAction(action: Action) = when (action) {
+        is Action.FilterCategory ->
+            filterByCategory(action.category)
+        else -> super.performAction(action)
+    }
+
+    private fun filterByCategory(category: Category?) {
         viewModelScope.setState {
             copy(category = category)
         }
-        emitEvent(EpisodesEvent.RefreshList)
+        emitEvent(Event.RefreshList)
     }
 
     private fun getLatestEpisodes(): Flow<PagingData<Episode>> =

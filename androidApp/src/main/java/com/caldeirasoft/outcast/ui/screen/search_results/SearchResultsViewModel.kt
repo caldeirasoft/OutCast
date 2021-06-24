@@ -7,8 +7,9 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.data.util.StoreDataPagingSource
+import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.screen.BaseViewModel
+import com.caldeirasoft.outcast.ui.screen.base.BaseViewModel
 import com.caldeirasoft.outcast.ui.screen.base.SearchUiModel
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,10 +28,9 @@ class SearchResultsViewModel @Inject constructor(
     val podcastsRepository: PodcastsRepository,
     private val searchRepository: SearchRepository,
     private val settingsRepository: SettingsRepository
-) : BaseViewModel<SearchResultsState>(
-    initialState = SearchResultsState())
+) : BaseViewModel<SearchResultsViewModel.State, SearchResultsViewModel.Event, SearchResultsViewModel.Action>(
+    initialState = State())
 {
-
     private val followLoadingStatus: MutableStateFlow<List<Long>> =
         MutableStateFlow(emptyList())
 
@@ -83,7 +83,7 @@ class SearchResultsViewModel @Inject constructor(
         getSearchResults(searchRepository::searchEpisodes)
             .cachedIn(viewModelScope)
 
-    init {
+    override fun activate() {
         podcastsRepository
             .getFollowedPodcastIds()
             .distinctUntilChanged()
@@ -117,6 +117,18 @@ class SearchResultsViewModel @Inject constructor(
             }
 
         followLoadingStatus.setOnEach { copy(followLoadingStatus = it) }
+    }
+
+    override suspend fun performAction(action: Action) = when (action) {
+        is Action.Search ->
+            if (action.isHint) searchHint(action.query)
+            else search(action.query)
+        is Action.OpenPodcastDetail -> emitEvent(Event.OpenPodcastDetail(action.podcast))
+        is Action.OpenEpisodeDetail -> emitEvent(Event.OpenEpisodeDetail(action.episode))
+        is Action.OpenStorePodcastDetail -> emitEvent(Event.OpenStorePodcastDetail(action.podcast))
+        is Action.OpenStoreEpisodeDetail -> emitEvent(Event.OpenStoreEpisodeDetail(action.episode))
+        is Action.Follow -> followPodcast(action.podcast)
+        is Action.Exit -> emitEvent(Event.Exit)
     }
 
     fun search(term: String) {
@@ -170,4 +182,32 @@ class SearchResultsViewModel @Inject constructor(
                 pagingSourceFactory = searchFunction(query).asPagingSourceFactory()
             ).flow
         }.flattenMerge()
+
+    data class State(
+        val queryHint: String = "",
+        val query: String = "",
+        val followingStatus: List<Long> = emptyList(),
+        val followLoadingStatus: List<Long> = emptyList(),
+        val podcasts: List<Podcast> = emptyList(),
+        val episodes: List<Episode> = emptyList(),
+        val hints: List<SearchUiModel> = emptyList()
+    )
+
+    sealed class Event {
+        data class OpenPodcastDetail(val podcast: Podcast) : Event()
+        data class OpenEpisodeDetail(val episode: Episode) : Event()
+        data class OpenStorePodcastDetail(val podcast: StorePodcast) : Event()
+        data class OpenStoreEpisodeDetail(val episode: StoreEpisode) : Event()
+        object Exit : Event()
+    }
+
+    sealed class Action {
+        data class Search(var query: String, var isHint: Boolean): Action()
+        data class Follow(var podcast: StorePodcast): Action()
+        data class OpenPodcastDetail(val podcast: Podcast) : Action()
+        data class OpenEpisodeDetail(val episode: Episode) : Action()
+        data class OpenStorePodcastDetail(val podcast: StorePodcast) : Action()
+        data class OpenStoreEpisodeDetail(val episode: StoreEpisode) : Action()
+        object Exit : Action()
+    }
 }

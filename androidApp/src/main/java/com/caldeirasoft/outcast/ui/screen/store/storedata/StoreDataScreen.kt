@@ -39,7 +39,9 @@ import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.*
+import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
+import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsViewModel
 import com.caldeirasoft.outcast.ui.screen.store.categories.CategoriesListBottomSheet
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.colors
@@ -72,37 +74,28 @@ fun StoreDataScreen(
     viewModel: StoreDataViewModel = hiltViewModel(),
     navController: NavController,
 ) {
-    val state by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val drawerState = LocalBottomSheetState.current
-    val drawerContent = LocalBottomSheetContent.current
     val lazyPagingItems = viewModel.discover.collectAsLazyPagingItems()
 
-    StoreDataScreen(
-        state = state,
-        lazyPagingItems = lazyPagingItems,
-        navigateUp = { navController.navigateUp() },
-        navigateToStore = { navController.navigateToStore(it) },
-        navigateToPodcast = { navController.navigateToPodcast(it) },
-        navigateToEpisode = { navController.navigateToEpisode(it) },
-        onFollowPodcast = viewModel::followPodcast,
-        onCategoryClick = {
-            coroutineScope.OpenBottomSheetCategoriesFilter(
-                state = state,
-                drawerState = drawerState,
-                drawerContent = drawerContent,
-                onCategorySelected = viewModel::selectCategoryFilter
-            )
-        },
-    )
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when(event) {
-                is StoreDataEvent.OpenCategories ->
-                    this@LaunchedEffect.launch { drawerState.show() }
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
+            when (event) {
+                is StoreDataViewModel.Event.OpenPodcastDetail ->
+                    navController.navigateToPodcast(event.storePodcast)
+                is StoreDataViewModel.Event.OpenEpisodeDetail ->
+                    navController.navigateToEpisode(event.storeEpisode)
+                is StoreDataViewModel.Event.OpenStoreData ->
+                    navController.navigateToStore(event.storeData)
+                is StoreDataViewModel.Event.Exit ->
+                    navController.navigateUp()
             }
         }
+    ) { state, performAction ->
+        StoreDataScreen(
+            state = state,
+            lazyPagingItems = lazyPagingItems,
+            performAction = performAction,
+        )
     }
 }
 
@@ -112,14 +105,9 @@ fun StoreDataScreen(
 @ExperimentalCoroutinesApi
 @Composable
 fun StoreDataScreen(
-    state: StoreDataState,
+    state: StoreDataViewModel.State,
     lazyPagingItems: LazyPagingItems<StoreUiModel>,
-    navigateToStore: (StoreData) -> Unit,
-    navigateToPodcast: (StorePodcast) -> Unit,
-    navigateToEpisode: (StoreEpisode) -> Unit,
-    navigateUp: () -> Unit,
-    onFollowPodcast: (StorePodcast) -> Unit,
-    onCategoryClick: () -> Unit
+    performAction: (StoreDataViewModel.Action) -> Unit,
 ) {
     val title = when (state.url) {
         StoreData.Default.url -> stringResource(id = R.string.store_tab_discover)
@@ -138,7 +126,9 @@ fun StoreDataScreen(
                     title = title,
                     state = state,
                     lazyListState = listState,
-                    navigateUp = navigateUp
+                    navigateUp = {
+                        performAction(StoreDataViewModel.Action.Exit)
+                    }
                 )
             }
             else {
@@ -186,18 +176,35 @@ fun StoreDataScreen(
                 }
             }
 
-            // filter
-            item {
-                // filter by category
-                if (state.categories.isNotEmpty()) {
+            // filter by category
+            if (state.categories.isNotEmpty()) {
+                // filter
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp, start = 16.dp, end = 16.dp)
                     ) {
+                        val coroutineScope = rememberCoroutineScope()
+                        val drawerState = LocalBottomSheetState.current
+                        val drawerContent = LocalBottomSheetContent.current
                         ChipButton(
                             selected = (state.currentCategoryId != DEFAULT_GENRE),
-                            onClick = onCategoryClick
+                            onClick = {
+                                coroutineScope.OpenBottomSheetCategoriesFilter(
+                                    categories = state.categories,
+                                    selectedCategory = state.currentCategory,
+                                    drawerState = drawerState,
+                                    drawerContent = drawerContent,
+                                    onCategorySelected = {
+                                        performAction(
+                                            StoreDataViewModel.Action.SelectCategory(
+                                                it
+                                            )
+                                        )
+                                    }
+                                )
+                            }
                         )
                         {
                             Text(
@@ -258,14 +265,14 @@ fun StoreDataScreen(
                                                 StoreHeadingSectionWithLink(
                                                     title = collection.label,
                                                     onClick = {
-                                                        navigateToStore(collection.room)
+                                                        performAction(StoreDataViewModel.Action.OpenStoreData(collection.room))
                                                     })
                                             }
                                             is StoreCollectionEpisodes -> {
                                                 StoreHeadingSectionWithLink(
                                                     title = collection.label,
                                                     onClick = {
-                                                        navigateToStore(collection.room)
+                                                        performAction(StoreDataViewModel.Action.OpenStoreData(collection.room))
                                                     })
                                             }
                                         }
@@ -276,29 +283,80 @@ fun StoreDataScreen(
                                             is StoreCollectionFeatured -> {
                                                 StoreCollectionFeaturedContent(
                                                     storeCollection = storeItem,
-                                                    openStoreDataDetail = navigateToStore,
-                                                    openPodcastDetail = navigateToPodcast,
-                                                    openEpisodeDetail = navigateToEpisode,
+                                                    openStoreDataDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenStoreData(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    openPodcastDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    openEpisodeDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
                                                 )
                                             }
                                             is StoreCollectionData -> {
                                                 StoreCollectionDataContent(
                                                     storeCollection = storeItem,
-                                                    openStoreDataDetail = navigateToStore,
-                                                    openPodcastDetail = navigateToPodcast,
-                                                    openEpisodeDetail = navigateToEpisode,
+                                                    openStoreDataDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenStoreData(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    openPodcastDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    openEpisodeDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
                                                 )
                                             }
                                             is StoreCollectionItems -> {
                                                 StoreCollectionItemsContent(
                                                     storeCollection = storeItem,
-                                                    openStoreDataDetail = navigateToStore,
-                                                    openPodcastDetail = navigateToPodcast,
-                                                    openEpisodeDetail = navigateToEpisode,
+                                                    openPodcastDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    openEpisodeDetail = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
                                                     followingStatus = state.followingStatus,
                                                     followLoadingStatus = state.followLoadingStatus,
                                                     onFollowPodcast = {
-                                                        onFollowPodcast(it)
+                                                        performAction(
+                                                            StoreDataViewModel.Action.FollowPodcast(
+                                                                it
+                                                            )
+                                                        )
                                                     },
                                                 )
                                             }
@@ -306,8 +364,20 @@ fun StoreDataScreen(
                                                 StoreEpisodeItem(
                                                     episode = storeItem.episode,
                                                     modifier = Modifier.fillMaxWidth(),
-                                                    onThumbnailClick = { navigateToPodcast(storeItem.storePodcast) },
-                                                    onEpisodeClick = { navigateToEpisode(storeItem) },
+                                                    onThumbnailClick = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                storeItem.storePodcast
+                                                            )
+                                                        )
+                                                    },
+                                                    onEpisodeClick = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                                storeItem
+                                                            )
+                                                        )
+                                                    },
                                                     index = storeUiModel.index
                                                 )
                                             }
@@ -335,7 +405,13 @@ fun StoreDataScreen(
                                                     PodcastGridItem(
                                                         modifier = Modifier
                                                             .fillMaxWidth(),
-                                                        onClick = { navigateToPodcast(item) },
+                                                        onClick = {
+                                                            performAction(
+                                                                StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                    item
+                                                                )
+                                                            )
+                                                        },
                                                         podcast = item,
                                                         index = (index + 1).takeIf { sortByPopularity },
                                                         isFollowing = state.followingStatus.contains(
@@ -345,7 +421,11 @@ fun StoreDataScreen(
                                                             item.id
                                                         ),
                                                         onFollowPodcast = {
-                                                            onFollowPodcast(it)
+                                                            performAction(
+                                                                StoreDataViewModel.Action.FollowPodcast(
+                                                                    it
+                                                                )
+                                                            )
                                                         },
                                                     )
                                                 }
@@ -361,10 +441,18 @@ fun StoreDataScreen(
                                                     StoreEpisodeItem(
                                                         modifier = Modifier,
                                                         onEpisodeClick = {
-                                                            navigateToEpisode(item)
+                                                            performAction(
+                                                                StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                                    item
+                                                                )
+                                                            )
                                                         },
                                                         onThumbnailClick = {
-                                                            navigateToPodcast(item.storePodcast)
+                                                            performAction(
+                                                                StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                    item.storePodcast
+                                                                )
+                                                            )
                                                         },
                                                         episode = item.episode,
                                                         index = (index + 1).takeIf { sortByPopularity },
@@ -437,8 +525,8 @@ fun HeaderEditorialArtwork(
 @Composable
 private fun StoreDataScreenTopAppBar(
     modifier: Modifier = Modifier,
+    state: StoreDataViewModel.State,
     title: String,
-    state: StoreDataState,
     lazyListState: LazyListState,
     navigateUp: () -> Unit,
 ) {
@@ -498,7 +586,7 @@ private fun StoreDataScreenTopAppBar(
 @Composable
 fun RefreshButton(
     modifier: Modifier,
-    storeDataState: StoreDataState,
+    storeDataState: StoreDataViewModel.State,
     listState: LazyListState,
     onClick: () -> Unit,
 ) {
@@ -568,7 +656,6 @@ fun StoreCollectionItemsContent(
     storeCollection: StoreCollectionItems,
     followingStatus: List<Long> = emptyList(),
     followLoadingStatus: List<Long> = emptyList(),
-    openStoreDataDetail: (StoreData) -> Unit,
     openPodcastDetail: (StorePodcast) -> Unit,
     openEpisodeDetail: (StoreEpisode) -> Unit,
     onFollowPodcast: (StorePodcast) -> Unit = { },
@@ -758,7 +845,8 @@ fun StoreCollectionDataContent(
 }
 
 fun CoroutineScope.OpenBottomSheetCategoriesFilter(
-    state: StoreDataState,
+    categories: List<StoreCategory>,
+    selectedCategory: StoreCategory,
     drawerState: ModalBottomSheetState,
     drawerContent: ModalBottomSheetContent,
     onCategorySelected: (StoreCategory) -> Unit
@@ -766,14 +854,13 @@ fun CoroutineScope.OpenBottomSheetCategoriesFilter(
 {
     drawerContent.updateContent {
         CategoriesListBottomSheet(
-            categories = state.categories,
-            selectedCategory = state.currentCategory,
+            categories = categories,
+            selectedCategory = selectedCategory,
             navigateUp = { launch { drawerState.hide() } },
             onCategorySelected = onCategorySelected
         )
     }
     this.launch {
-        delay(500)
         drawerState.show()
     }
 }

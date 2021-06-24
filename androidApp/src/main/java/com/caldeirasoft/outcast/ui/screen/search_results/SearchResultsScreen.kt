@@ -46,9 +46,12 @@ import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.store.*
 import com.caldeirasoft.outcast.ui.components.*
+import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.base.SearchUiModel
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreCollectionItemsContent
+import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreCollectionPodcastContent
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
@@ -71,65 +74,69 @@ fun SearchResultsScreen(
     viewModel: SearchResultsViewModel,
     navController: NavController
 ) {
-    val state by viewModel.state.collectAsState()
     val searchResults = viewModel.searchResults.collectAsLazyPagingItems()
     val localPodcastsResults = viewModel.localSearchPodcastsResults.collectAsLazyPagingItems()
     val localEpisodesResults = viewModel.localSearchEpisodesResults.collectAsLazyPagingItems()
-    val focusRequester = remember { FocusRequester.Default }
-    var isSearchActive by rememberSaveable { mutableStateOf(true) }
-    val searchQuery = rememberSaveable { mutableStateOf(state.query ?: "") }
 
-    SearchResultsScreen(
-        state = state,
-        searchQuery = searchQuery,
-        searchResults = searchResults,
-        localPodcastsResults = localPodcastsResults,
-        localEpisodesResults = localEpisodesResults,
-        navigateToStore = { navController.navigateToStore(it) },
-        navigateToStorePodcast = { navController.navigateToPodcast(it) },
-        navigateToStoreEpisode = { navController.navigateToEpisode(it) },
-        navigateToPodcast = { navController.navigateToPodcast(it) },
-        navigateToEpisode = { navController.navigateToEpisode(it) },
-        navigateUp = { navController.navigateUp() },
-        onSearch = { query ->
-            if (query.isNotEmpty()) {
-                isSearchActive = false
-                viewModel.search(query)
+    Screen(
+        viewModel = viewModel,
+        onEvent = { event ->
+            when (event) {
+                is SearchResultsViewModel.Event.OpenPodcastDetail ->
+                    navController.navigateToPodcast(event.podcast)
+                is SearchResultsViewModel.Event.OpenEpisodeDetail ->
+                    navController.navigateToEpisode(event.episode)
+                is SearchResultsViewModel.Event.OpenStorePodcastDetail ->
+                    navController.navigateToPodcast(event.podcast)
+                is SearchResultsViewModel.Event.OpenStoreEpisodeDetail ->
+                    navController.navigateToEpisode(event.episode)
+                is SearchResultsViewModel.Event.Exit ->
+                    navController.navigateUp()
             }
-        },
-        onSearchHint = viewModel::searchHint,
-        onToggleSearch = {
-            isSearchActive = it
-        },
-        onFollowPodcast = { /*TODO*/ },
-        focusRequester = focusRequester,
-        isSearchActive = isSearchActive
-    )
+        }
+    ) { state, performAction ->
+
+        var isSearchActive by rememberSaveable { mutableStateOf(true) }
+        val searchQuery = rememberSaveable { mutableStateOf(state.query ?: "") }
+        SearchResultsScreen(
+            state = state,
+            searchQuery = searchQuery,
+            searchResults = searchResults,
+            localPodcastsResults = localPodcastsResults,
+            localEpisodesResults = localEpisodesResults,
+            performAction = performAction,
+            onSearch = { query ->
+                if (query.isNotEmpty()) {
+                    isSearchActive = false
+                    viewModel.search(query)
+                }
+            },
+            onSearchHint = viewModel::searchHint,
+            onToggleSearch = {
+                isSearchActive = it
+            },
+            isSearchActive = isSearchActive
+        )
+    }
 }
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchResultsScreen(
-    state: SearchResultsState,
+    state: SearchResultsViewModel.State,
     searchQuery: MutableState<String>,
     searchResults: LazyPagingItems<StoreUiModel>,
     localPodcastsResults: LazyPagingItems<Podcast>,
     localEpisodesResults: LazyPagingItems<Episode>,
-    navigateToStore: (StoreData) -> Unit,
-    navigateToStorePodcast: (StorePodcast) -> Unit,
-    navigateToStoreEpisode: (StoreEpisode) -> Unit,
-    navigateToPodcast: (Podcast) -> Unit,
-    navigateToEpisode: (Episode) -> Unit,
-    navigateUp: () -> Unit,
+    performAction: (SearchResultsViewModel.Action) -> Unit,
     onSearch: (String) -> Unit,
     onSearchHint: (String) -> Unit,
     onToggleSearch: (Boolean) -> Unit,
-    onFollowPodcast: (StorePodcast) -> Unit,
-    focusRequester: FocusRequester,
     isSearchActive: Boolean,
 ) {
     var isSearchFocused by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester.Default }
 
     Scaffold(
         modifier = Modifier
@@ -191,7 +198,7 @@ fun SearchResultsScreen(
                             if (isSearchActive) {
                                 onToggleSearch(false)
                             } else {
-                                navigateUp()
+                                performAction(SearchResultsViewModel.Action.Exit)
                             }
                         }
                     ) {
@@ -241,12 +248,7 @@ fun SearchResultsScreen(
                 searchResults = searchResults,
                 localPodcastsResults = localPodcastsResults,
                 localEpisodesResults = localEpisodesResults,
-                navigateToStore = navigateToStore,
-                navigateToStorePodcast = navigateToStorePodcast,
-                navigateToStoreEpisode = navigateToStoreEpisode,
-                navigateToPodcast = navigateToPodcast,
-                navigateToEpisode = navigateToEpisode,
-                onFollowPodcast = onFollowPodcast
+                performAction = performAction
             )
         }
         else {
@@ -346,16 +348,11 @@ fun SearchHintsScreen(
 @OptIn(ExperimentalPagerApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchResultsTabs(
-    state: SearchResultsState,
+    state: SearchResultsViewModel.State,
     searchResults: LazyPagingItems<StoreUiModel>,
     localPodcastsResults: LazyPagingItems<Podcast>,
     localEpisodesResults: LazyPagingItems<Episode>,
-    navigateToStore: (StoreData) -> Unit,
-    navigateToStorePodcast: (StorePodcast) -> Unit,
-    navigateToStoreEpisode: (StoreEpisode) -> Unit,
-    navigateToPodcast: (Podcast) -> Unit,
-    navigateToEpisode: (Episode) -> Unit,
-    onFollowPodcast: (StorePodcast) -> Unit,
+    performAction: (SearchResultsViewModel.Action) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val titles = listOf(
@@ -408,10 +405,7 @@ fun SearchResultsTabs(
                     SearchResultsAllPodcastTab(
                         state = state,
                         searchResults = searchResults,
-                        navigateToStore = navigateToStore,
-                        navigateToStorePodcast = navigateToStorePodcast,
-                        navigateToStoreEpisode = navigateToStoreEpisode,
-                        onFollowPodcast = onFollowPodcast
+                        performAction = performAction
                     )
                 }
                 1 -> { // your library
@@ -419,8 +413,7 @@ fun SearchResultsTabs(
                         state = state,
                         localPodcastsResults = localPodcastsResults,
                         localEpisodesResults = localEpisodesResults,
-                        navigateToPodcast = navigateToPodcast,
-                        navigateToEpisode = navigateToEpisode,
+                        performAction = performAction
                     )
                 }
             }
@@ -430,12 +423,9 @@ fun SearchResultsTabs(
 
 @Composable
 fun SearchResultsAllPodcastTab(
-    state: SearchResultsState,
+    state: SearchResultsViewModel.State,
     searchResults: LazyPagingItems<StoreUiModel>,
-    navigateToStore: (StoreData) -> Unit,
-    navigateToStorePodcast: (StorePodcast) -> Unit,
-    navigateToStoreEpisode: (StoreEpisode) -> Unit,
-    onFollowPodcast: (StorePodcast) -> Unit,
+    performAction: (SearchResultsViewModel.Action) -> Unit,
 ) {
     val listState = searchResults.rememberLazyListStateWithPagingItems()
     LazyColumn(
@@ -477,15 +467,23 @@ fun SearchResultsAllPodcastTab(
                             // content
                             when (val storeItem = storeUiModel.item) {
                                 is StoreCollectionItems -> {
-                                    StoreCollectionItemsContent(
+                                    StoreCollectionPodcastContent(
                                         storeCollection = storeItem,
-                                        openStoreDataDetail = navigateToStore,
-                                        openPodcastDetail = navigateToStorePodcast,
-                                        openEpisodeDetail = navigateToStoreEpisode,
+                                        openPodcastDetail = {
+                                            performAction(
+                                                SearchResultsViewModel.Action.OpenStorePodcastDetail(
+                                                    it
+                                                )
+                                            )
+                                        },
                                         followingStatus = state.followingStatus,
                                         followLoadingStatus = state.followLoadingStatus,
                                         onFollowPodcast = {
-                                            onFollowPodcast(it)
+                                            performAction(
+                                                SearchResultsViewModel.Action.Follow(
+                                                    it
+                                                )
+                                            )
                                         },
                                     )
                                 }
@@ -493,8 +491,8 @@ fun SearchResultsAllPodcastTab(
                                     StoreEpisodeItem(
                                         episode = storeItem.episode,
                                         modifier = Modifier.fillMaxWidth(),
-                                        onThumbnailClick = { navigateToStorePodcast(storeItem.storePodcast) },
-                                        onEpisodeClick = { navigateToStoreEpisode(storeItem) },
+                                        onThumbnailClick = { performAction(SearchResultsViewModel.Action.OpenStoreEpisodeDetail(storeItem)) },
+                                        onEpisodeClick = { performAction(SearchResultsViewModel.Action.OpenStoreEpisodeDetail(storeItem)) },
                                         index = storeUiModel.index
                                     )
                                 }
@@ -508,11 +506,10 @@ fun SearchResultsAllPodcastTab(
 
 @Composable
 fun SearchResultsYourLibraryTab(
-    state: SearchResultsState,
+    state: SearchResultsViewModel.State,
     localPodcastsResults: LazyPagingItems<Podcast>,
     localEpisodesResults: LazyPagingItems<Episode>,
-    navigateToPodcast: (Podcast) -> Unit,
-    navigateToEpisode: (Episode) -> Unit,
+    performAction: (SearchResultsViewModel.Action) -> Unit,
 ) {
     val listState = localEpisodesResults.rememberLazyListStateWithPagingItems()
     LazyColumn(
@@ -552,7 +549,7 @@ fun SearchResultsYourLibraryTab(
                                 PodcastSearchGridItem(
                                     modifier = Modifier
                                         .width(150.dp),
-                                    onClick = { navigateToPodcast(item) },
+                                    onClick = { performAction(SearchResultsViewModel.Action.OpenPodcastDetail(item)) },
                                     podcast = item,
                                 )
                             }
@@ -585,7 +582,7 @@ fun SearchResultsYourLibraryTab(
                             episode = episode,
                             modifier = Modifier.fillMaxWidth(),
                             onPodcastClick = null,
-                            onEpisodeClick = { navigateToEpisode(episode) },
+                            onEpisodeClick = { performAction(SearchResultsViewModel.Action.OpenEpisodeDetail(it)) },
                         )
                     }
                 }
