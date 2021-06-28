@@ -2,13 +2,10 @@ package com.caldeirasoft.outcast.ui.screen.played_episodes
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.insertSeparators
-import androidx.paging.map
+import androidx.paging.*
+import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
-import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.util.isDateTheSame
@@ -22,8 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val loadLatestEpisodesPagingDataUseCase: LoadLatestEpisodesPagingDataUseCase,
-    episodesRepository: EpisodesRepository,
+    private val episodesRepository: EpisodesRepository,
     downloadRepository: DownloadRepository,
 ) : EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>(
     initialState = State(),
@@ -33,8 +29,7 @@ class PlayedEpisodesViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        loadLatestEpisodesPagingDataUseCase.getLatestEpisodes()
-            .onEach { Timber.d("LoadLatestEpisodesPagingDataUseCase : $it episodes") }
+        getPlayedEpisodes()
             .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) }}
             .insertDateSeparators()
             .cachedIn(viewModelScope)
@@ -69,4 +64,15 @@ class PlayedEpisodesViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun getPlayedEpisodes(): Flow<PagingData<Episode>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                prefetchDistance = 5
+            ),
+            initialKey = null,
+            pagingSourceFactory = episodesRepository.getEpisodesHistoryDataSource().asPagingSourceFactory()
+        ).flow
 }

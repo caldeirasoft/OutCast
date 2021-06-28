@@ -46,7 +46,7 @@ interface EpisodeDao : EntityDao<Episode> {
     fun getSavedEpisodesDataSource(): DataSource.Factory<Int, Episode>
 
     @Query("SELECT * FROM episode e WHERE playback_position != NULL")
-    fun getEpisodesHistory(): Flow<List<Episode>>
+    fun getEpisodesHistoryDataSource(): DataSource.Factory<Int, Episode>
 
     // get latest episodes (unplayed) / last 3 months
     @Query("""

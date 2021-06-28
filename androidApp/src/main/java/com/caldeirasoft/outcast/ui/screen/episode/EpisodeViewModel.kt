@@ -6,30 +6,22 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
+import com.caldeirasoft.outcast.data.repository.PodcastsRepository
 import com.caldeirasoft.outcast.domain.models.episode
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
-import com.caldeirasoft.outcast.domain.usecase.FetchPodcastDataUseCase
-import com.caldeirasoft.outcast.domain.usecase.LoadEpisodeFromDbUseCase
-import com.caldeirasoft.outcast.domain.usecase.RemoveSaveEpisodeUseCase
-import com.caldeirasoft.outcast.domain.usecase.SaveEpisodeUseCase
 import com.caldeirasoft.outcast.ui.screen.base.BaseViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.EpisodeRouteArgs
 import com.caldeirasoft.outcast.ui.util.urlDecode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EpisodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val loadEpisodeFromDbUseCase: LoadEpisodeFromDbUseCase,
-    private val fetchPodcastDataUseCase: FetchPodcastDataUseCase,
-    private val saveEpisodeUseCase: SaveEpisodeUseCase,
-    private val removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
+    private val podcastsRepository: PodcastsRepository,
     private val downloadRepository: DownloadRepository,
     private val episodesRepository: EpisodesRepository,
 ) : BaseViewModel<EpisodeViewModel.State, EpisodeViewModel.Event, EpisodeViewModel.Action>(
@@ -47,8 +39,8 @@ class EpisodeViewModel @Inject constructor(
 
     override fun activate() {
         val initialState = state.value
-        loadEpisodeFromDbUseCase
-            .execute(
+        episodesRepository
+            .getEpisodeWithGuid(
                 feedUrl = initialState.feedUrl,
                 guid = initialState.guid
             )
@@ -76,19 +68,18 @@ class EpisodeViewModel @Inject constructor(
 
     private fun setEpisode(storeEpisode: StoreEpisode) {
         if (!isEpisodeSet) {
-            fetchPodcastDataUseCase
-                .execute(storeEpisode.storePodcast.podcast)
-                .onStart {
-                    isEpisodeSet = true
-                    setState {
-                        copy(
-                            isLoading = true,
-                            episode = storeEpisode.episode,
-                            podcast = storeEpisode.storePodcast.podcast
-                        )
-                    }
+            viewModelScope.launch {
+                isEpisodeSet = true
+                setState {
+                    copy(
+                        isLoading = true,
+                        episode = storeEpisode.episode,
+                        podcast = storeEpisode.storePodcast.podcast
+                    )
                 }
-                .launchIn(viewModelScope)
+                podcastsRepository
+                    .updatePodcastItunesMetadata(storeEpisode.storePodcast.podcast)
+            }
         }
     }
 
@@ -109,29 +100,17 @@ class EpisodeViewModel @Inject constructor(
     private fun playLast() {
     }
 
-    private fun saveEpisode() {
-        viewModelScope.withState {
-            it.episode?.let { episode ->
-                episodesRepository.saveEpisodeToLibrary(episode)
-                downloadRepository.startDownload(episode)
-            }
-        }
-    }
-
-    private fun removeSavedEpisode() {
-        viewModelScope.withState {
-            it.episode?.let { episode ->
-                episodesRepository.deleteFromLibrary(episode)
-                downloadRepository.removeDownload(episode)
-            }
-        }
-    }
-
     private fun toggleSaveEpisode() {
         viewModelScope.withState {
             it.episode?.let { episode ->
-                if (episode.isSaved.not()) saveEpisodeUseCase.execute(episode)
-                else removeSaveEpisodeUseCase.execute(episode)
+                if (episode.isSaved.not()) {
+                    episodesRepository.saveEpisodeToLibrary(episode)
+                    downloadRepository.startDownload(episode)
+                }
+                else {
+                    episodesRepository.deleteFromLibrary(episode)
+                    downloadRepository.removeDownload(episode)
+                }
             }
         }
     }

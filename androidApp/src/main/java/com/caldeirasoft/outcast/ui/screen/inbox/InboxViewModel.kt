@@ -7,7 +7,6 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.usecase.*
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.episodelist.base.*
@@ -20,9 +19,6 @@ import javax.inject.Inject
 @HiltViewModel
 class InboxViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val loadLatestEpisodeCategoriesUseCase: LoadLatestEpisodeCategoriesUseCase,
-    saveEpisodeUseCase: SaveEpisodeUseCase,
-    removeSaveEpisodeUseCase: RemoveSaveEpisodeUseCase,
     private val episodesRepository: EpisodesRepository,
     private val downloadRepository: DownloadRepository,
 ) : EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>(

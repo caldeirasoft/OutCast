@@ -2,9 +2,8 @@ package com.caldeirasoft.outcast.presentation.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.usecase.FetchFollowedPodcastsUseCase
+import com.caldeirasoft.outcast.data.repository.PodcastsRepository
 import com.caldeirasoft.outcast.ui.screen.base.BaseViewModel
 import com.caldeirasoft.outcast.ui.screen.library.LibrarySort
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,12 +13,12 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val fetchFollowedPodcastsUseCase: FetchFollowedPodcastsUseCase,
+    private val podcastsRepository: PodcastsRepository,
 ) : BaseViewModel<LibraryViewModel.State, LibraryViewModel.Event, LibraryViewModel.Action>(
     initialState = State()
 ) {
     override fun activate() {
-        fetchFollowedPodcastsUseCase
+        podcastsRepository
             .getFollowedPodcasts()
             .setOnEach {
                 copy(podcasts = it)
