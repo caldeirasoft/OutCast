@@ -189,7 +189,7 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
                         ) {
                             Text(
                                 text = title,
-                                style = typography . h4
+                                style = typography.h4
                             )
                         }
 
@@ -207,6 +207,44 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ScaffoldWithLargeHeaderAndLazyColumn(
+    modifier: Modifier = Modifier,
+    headerRatioOrientation: Orientation = Orientation.Vertical,
+    headerRatio: Float = 1/3f,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
+    listState: LazyListState = rememberLazyListState(),
+    topBar: @Composable () -> Unit = {},
+    headerContent: @Composable () -> Unit = {},
+    itemsContent: LazyListScope.() -> Unit = {}
+) {
+    ScaffoldWithLargeHeader(
+        modifier = modifier,
+        scaffoldState = scaffoldState,
+        listState = listState,
+        snackbarHost = snackbarHost,
+        headerRatioOrientation = headerRatioOrientation,
+        headerRatio = headerRatio,
+        topBar = topBar
+    ) { headerHeight ->
+        LazyColumn(state = listState) {
+            // header
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = headerHeight.toDp())
+                ) {
+                    headerContent()
+                }
+            }
+
+            itemsContent()
+        }
+    }
+}
 
 @Composable
 fun ReachableAppBar(

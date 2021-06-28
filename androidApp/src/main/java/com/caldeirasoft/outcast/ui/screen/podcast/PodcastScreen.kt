@@ -48,11 +48,11 @@ import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
-import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
+import com.caldeirasoft.outcast.ui.screen.store.storedata.*
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.Podcast_settingsRouteArgs
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
+import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -130,19 +130,10 @@ private fun PodcastScreen(
 
     val podcastData = state.podcast
 
-    ScaffoldWithLargeHeader(
+    ScaffoldWithLargeHeaderAndLazyColumn(
         listState = listState,
+        headerRatio = 1 / 2f,
         scaffoldState = scaffoldState,
-        topBar = {
-            PodcastScreenTopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                state = state,
-                lazyListState = listState,
-                navigateUp = { performAction(PodcastViewModel.Action.Exit) }
-            )
-        },
-        headerRatio = 1/2f,
         snackbarHost = {
             // reuse default SnackbarHost to have default animation and timing handling
             SnackbarHost(it) { data ->
@@ -153,157 +144,193 @@ private fun PodcastScreen(
                 )
             }
         },
-    ) { headerHeight ->
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .navigationBarsPadding()
-        ) {
-            // header
-            item {
-                Box(
+        topBar = {
+            PodcastScreenTopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                state = state,
+                lazyListState = listState,
+                navigateUp = { performAction(PodcastViewModel.Action.Exit) }
+            )
+        },
+        headerContent = {
+            /*val artwork = state.storeData.artwork
+            if (artwork != null) {
+                HeaderEditorialArtwork(
                     modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    PodcastHeader(
-                        modifier = Modifier
-                            .height(headerHeight.toDp()),
-                        state = state,
-                        lazyListState = listState,
-                        openStoreDataDetail = { performAction(PodcastViewModel.Action.OpenStoreData(it)) }
-                    )
-                }
-            }
-
-            // action buttons
-            item {
-                podcastData?.let {
-                    PodcastActionAppBar(
-                        state = state,
-                        performAction = performAction,
-                    )
-                }
-            }
-            // description
-            item {
-                PodcastDescriptionContent(description = podcastData?.description)
-            }
-
-            // genre
-            item {
-                podcastData?.genre?.let { genre ->
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 8.dp)
-                    ) {
-                        ChipButton(selected = false,
-                            onClick = {
-                                performAction(PodcastViewModel.Action.OpenStoreData(genre.toStoreData()))
-                            })
-                        {
-                            Text(text = genre.name)
-                        }
-                    }
-                }
-            }
-            // episode title + actions
-            item {
-                TopAppBar(
-                    title = {
-                        Text(
-                            stringResource(id = R.string.podcast_episodes),
-                        )
-                    },
-                    actions = {
-                        // sort button
-                        IconButton(onClick = { performAction(PodcastViewModel.Action.ToggleSortOrder) }) {
-                            Icon(
-                                painter = painterResource(
-                                    id = if (state.sortOrder == SortOrder.DESC)
-                                        R.drawable.ic_sort_asc else R.drawable.ic_sort_desc
-                                ),
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    backgroundColor = Color.Transparent,
-                    elevation = 0.dp
+                        .fillMaxSize()
+                        .alpha(listState.expandedHeaderAlpha),
+                    artwork = artwork
+                )
+            } else {*/
+            PodcastHeader(
+                modifier = Modifier
+                    .fillMaxSize(),
+                state = state,
+                lazyListState = listState,
+                openStoreDataDetail = { performAction(PodcastViewModel.Action.OpenStoreData(it)) }
+            )
+            //}
+        }
+    ) {
+        // action buttons
+        item {
+            podcastData?.let {
+                PodcastActionAppBar(
+                    state = state,
+                    performAction = performAction,
                 )
             }
+        }
+        // description
+        item {
+            PodcastDescriptionContent(description = podcastData?.description)
+        }
 
-            // episodes
-            items(lazyPagingItems = lazyPagingItems) { uiModel ->
-                uiModel?.let {
-                    if (uiModel is EpisodeUiModel.EpisodeItem) {
-                        PodcastEpisodeItem(
-                            episode = uiModel.episode,
-                            onEpisodeClick = {
-                                performAction(PodcastViewModel.Action.OpenEpisodeDetail(uiModel.episode))
-                            },
-                            onContextMenuClick = {
-                                coroutineScope.OpenBottomSheetMenu(
-                                    header = { // header : episode
-                                        EpisodeItem(
-                                            episode = uiModel.episode,
-                                            showActions = false,
-                                        )
-                                    },
-                                    items = listOf(
-                                        BottomSheetMenuItem(
-                                            titleId = R.string.action_play_next,
-                                            icon = Icons.Default.QueuePlayNext,
-                                            onClick = { performAction(PodcastViewModel.Action.PlayNextEpisode(uiModel.episode)) },
-                                        ),
-                                        BottomSheetMenuItem(
-                                            titleId = R.string.action_play_last,
-                                            icon = Icons.Default.AddToQueue,
-                                            onClick = { performAction(PodcastViewModel.Action.PlayLastEpisode(uiModel.episode)) },
-                                        ),
-                                        if (uiModel.episode.isSaved.not())
-                                            BottomSheetMenuItem(
-                                                titleId = R.string.action_save_episode,
-                                                icon = Icons.Outlined.BookmarkAdd,
-                                                onClick = { performAction(PodcastViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
-                                            )
-                                        else
-                                            BottomSheetMenuItem(
-                                                titleId = R.string.action_remove_saved_episode,
-                                                icon = Icons.Outlined.BookmarkRemove,
-                                                onClick = { performAction(PodcastViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
-                                            ),
-                                        BottomSheetSeparator,
-                                        BottomSheetMenuItem(
-                                            titleId = R.string.action_share_episode,
-                                            icon = Icons.Default.Share,
-                                            onClick = { performAction(PodcastViewModel.Action.ShareEpisode(uiModel.episode)) },
-                                        )
-                                    ),
-                                    drawerState = drawerState,
-                                    drawerContent = drawerContent
-                                )
-                            }
+        // genre
+        item {
+            podcastData?.genre?.let { genre ->
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp)
+                ) {
+                    ChipButton(selected = false,
+                        onClick = {
+                            performAction(PodcastViewModel.Action.OpenStoreData(genre.toStoreData()))
+                        })
+                    {
+                        Text(text = genre.name)
+                    }
+                }
+            }
+        }
+        // episode title + actions
+        item {
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(id = R.string.podcast_episodes),
+                    )
+                },
+                actions = {
+                    // sort button
+                    IconButton(onClick = { performAction(PodcastViewModel.Action.ToggleSortOrder) }) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (state.sortOrder == SortOrder.DESC)
+                                    R.drawable.ic_sort_asc else R.drawable.ic_sort_desc
+                            ),
+                            contentDescription = null
                         )
-                        Divider()
                     }
+                },
+                backgroundColor = Color.Transparent,
+                elevation = 0.dp
+            )
+        }
+
+        // episodes
+        items(lazyPagingItems = lazyPagingItems) { uiModel ->
+            uiModel?.let {
+                if (uiModel is EpisodeUiModel.EpisodeItem) {
+                    PodcastEpisodeItem(
+                        episode = uiModel.episode,
+                        onEpisodeClick = {
+                            performAction(PodcastViewModel.Action.OpenEpisodeDetail(uiModel.episode))
+                        },
+                        onContextMenuClick = {
+                            coroutineScope.OpenBottomSheetMenu(
+                                header = { // header : episode
+                                    EpisodeItem(
+                                        episode = uiModel.episode,
+                                        showActions = false,
+                                    )
+                                },
+                                items = listOf(
+                                    BottomSheetMenuItem(
+                                        titleId = R.string.action_play_next,
+                                        icon = Icons.Default.QueuePlayNext,
+                                        onClick = {
+                                            performAction(
+                                                PodcastViewModel.Action.PlayNextEpisode(
+                                                    uiModel.episode
+                                                )
+                                            )
+                                        },
+                                    ),
+                                    BottomSheetMenuItem(
+                                        titleId = R.string.action_play_last,
+                                        icon = Icons.Default.AddToQueue,
+                                        onClick = {
+                                            performAction(
+                                                PodcastViewModel.Action.PlayLastEpisode(
+                                                    uiModel.episode
+                                                )
+                                            )
+                                        },
+                                    ),
+                                    if (uiModel.episode.isSaved.not())
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_save_episode,
+                                            icon = Icons.Outlined.BookmarkAdd,
+                                            onClick = {
+                                                performAction(
+                                                    PodcastViewModel.Action.ToggleSaveEpisode(
+                                                        uiModel.episode
+                                                    )
+                                                )
+                                            },
+                                        )
+                                    else
+                                        BottomSheetMenuItem(
+                                            titleId = R.string.action_remove_saved_episode,
+                                            icon = Icons.Outlined.BookmarkRemove,
+                                            onClick = {
+                                                performAction(
+                                                    PodcastViewModel.Action.ToggleSaveEpisode(
+                                                        uiModel.episode
+                                                    )
+                                                )
+                                            },
+                                        ),
+                                    BottomSheetSeparator,
+                                    BottomSheetMenuItem(
+                                        titleId = R.string.action_share_episode,
+                                        icon = Icons.Default.Share,
+                                        onClick = {
+                                            performAction(
+                                                PodcastViewModel.Action.ShareEpisode(
+                                                    uiModel.episode
+                                                )
+                                            )
+                                        },
+                                    )
+                                ),
+                                drawerState = drawerState,
+                                drawerContent = drawerContent
+                            )
+                        }
+                    )
+                    Divider()
+                }
+            }
+        }
+
+        lazyPagingItems
+            .ifLoading {
+                item {
+                    LoadingScreen()
                 }
             }
 
-            lazyPagingItems
-                .ifLoading {
-                    item {
-                        LoadingScreen()
-                    }
-                }
-
-            item {
-                // bottom app bar spacer
-                Spacer(modifier = Modifier.height(56.dp))
-            }
+        item {
+            // bottom app bar spacer
+            Spacer(modifier = Modifier.height(56.dp))
         }
     }
 }
+
 
 @Composable
 private fun PodcastHeader(

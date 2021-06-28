@@ -139,7 +139,7 @@ private fun StoreDataScreen(
     RestoreStatusBarColorOnDispose()
     val listState = lazyPagingItems.rememberLazyListStateWithPagingItems()
 
-    ScaffoldWithLargeHeader(
+    ScaffoldWithLargeHeaderAndLazyColumn(
         listState = listState,
         topBar = {
             if (!hideTopBar) {
@@ -151,8 +151,7 @@ private fun StoreDataScreen(
                         performAction(StoreDataViewModel.Action.Exit)
                     }
                 )
-            }
-            else {
+            } else {
                 Spacer(
                     Modifier
                         .statusBarsHeight()
@@ -160,218 +159,285 @@ private fun StoreDataScreen(
                         .background(MaterialTheme.colors.surface)
                 )
             }
+        },
+        headerContent = {
+            val artwork = state.storeData.artwork
+            if (artwork != null) {
+                HeaderEditorialArtwork(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(listState.expandedHeaderAlpha),
+                    artwork = artwork
+                )
+            } else {
+                Box(
+                    Modifier.fillMaxSize()
+                        .padding(top = 16.dp, bottom = 16.dp)
+                        .padding(start = 16.dp, end = 16.dp)
+                )
+                {
+                    Text(
+                        text = title,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart),
+                        style = typography.h4
+                    )
+                }
+            }
         }
-    ) { headerHeight ->
-        val artwork = state.storeData.artwork
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .navigationBarsPadding()
-        )
-        {
-            // header
+    ) {
+        // filter by category
+        if (state.categories.isNotEmpty()) {
+            // filter
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(height = headerHeight.toDp())
+                        .padding(top = 8.dp, start = 16.dp, end = 16.dp)
                 ) {
-                    if (artwork != null) {
-                        HeaderEditorialArtwork(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(height = headerHeight.toDp())
-                                .alpha(listState.expandedHeaderAlpha),
-                            artwork = artwork
-                        )
-                    } else {
-                        Text(
-                            text = title,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(top = 16.dp, bottom = 16.dp)
-                                .padding(start = 16.dp, end = 16.dp),
-                            fontSize = 36.sp
-                        )
-                    }
-                }
-            }
-
-            // filter by category
-            if (state.categories.isNotEmpty()) {
-                // filter
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, start = 16.dp, end = 16.dp)
-                    ) {
-                        val coroutineScope = rememberCoroutineScope()
-                        val drawerState = LocalBottomSheetState.current
-                        val drawerContent = LocalBottomSheetContent.current
-                        ChipButton(
-                            selected = (state.currentCategoryId != DEFAULT_GENRE),
-                            onClick = {
-                                coroutineScope.OpenBottomSheetCategoriesFilter(
-                                    categories = state.categories,
-                                    selectedCategory = state.currentCategory,
-                                    drawerState = drawerState,
-                                    drawerContent = drawerContent,
-                                    onCategorySelected = {
-                                        performAction(
-                                            StoreDataViewModel.Action.SelectCategory(
-                                                it
-                                            )
+                    val coroutineScope = rememberCoroutineScope()
+                    val drawerState = LocalBottomSheetState.current
+                    val drawerContent = LocalBottomSheetContent.current
+                    ChipButton(
+                        selected = (state.currentCategoryId != DEFAULT_GENRE),
+                        onClick = {
+                            coroutineScope.OpenBottomSheetCategoriesFilter(
+                                categories = state.categories,
+                                selectedCategory = state.currentCategory,
+                                drawerState = drawerState,
+                                drawerContent = drawerContent,
+                                onCategorySelected = {
+                                    performAction(
+                                        StoreDataViewModel.Action.SelectCategory(
+                                            it
                                         )
-                                    }
-                                )
-                            }
-                        )
-                        {
-                            Text(
-                                text = state.currentCategory.name
+                                    )
+                                }
                             )
                         }
-                    }
-                }
-            }
-
-            // label
-            item {
-
-            }
-
-            // description
-            item {
-                state.storeData.description?.let { description ->
-                    Box(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .animateContentSize()
-                    ) {
-                        OverflowText(
-                            text = description,
-                            overflow = TextOverflow.Clip,
-                            textAlign = TextAlign.Left,
-                            maxLines = 3
+                    )
+                    {
+                        Text(
+                            text = state.currentCategory.name
                         )
                     }
                 }
             }
+        }
 
-            lazyPagingItems
-                .ifLoading {
-                    item {
-                        LoadingScreen()
-                    }
+        // label
+        item {
+
+        }
+
+        // description
+        item {
+            state.storeData.description?.let { description ->
+                Box(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .animateContentSize()
+                ) {
+                    OverflowText(
+                        text = description,
+                        overflow = TextOverflow.Clip,
+                        textAlign = TextAlign.Left,
+                        maxLines = 3
+                    )
                 }
-                .ifError {
-                    item {
-                        ErrorScreen(t = it)
-                    }
+            }
+        }
+
+        lazyPagingItems
+            .ifLoading {
+                item {
+                    LoadingScreen()
                 }
-                .ifNotLoading {
-                    // content
-                    when {
-                        state.storeData.isMultiRoom -> {
-                            items(lazyPagingItems = lazyPagingItems) { storeUiModel ->
-                                when (storeUiModel) {
-                                    is StoreUiModel.TitleItem -> {
-                                        // header
-                                        when (val collection = storeUiModel.item) {
-                                            is StoreCollectionData -> {
-                                                StoreHeadingSection(title = collection.label)
-                                            }
-                                            is StoreCollectionItems -> {
-                                                StoreHeadingSectionWithLink(
-                                                    title = collection.label,
-                                                    onClick = {
-                                                        performAction(StoreDataViewModel.Action.OpenStoreData(collection.room))
-                                                    })
-                                            }
-                                            is StoreCollectionEpisodes -> {
-                                                StoreHeadingSectionWithLink(
-                                                    title = collection.label,
-                                                    onClick = {
-                                                        performAction(StoreDataViewModel.Action.OpenStoreData(collection.room))
-                                                    })
-                                            }
+            }
+            .ifError {
+                item {
+                    ErrorScreen(t = it)
+                }
+            }
+            .ifNotLoading {
+                // content
+                when {
+                    state.storeData.isMultiRoom -> {
+                        items(lazyPagingItems = lazyPagingItems) { storeUiModel ->
+                            when (storeUiModel) {
+                                is StoreUiModel.TitleItem -> {
+                                    // header
+                                    when (val collection = storeUiModel.item) {
+                                        is StoreCollectionData -> {
+                                            StoreHeadingSection(title = collection.label)
+                                        }
+                                        is StoreCollectionItems -> {
+                                            StoreHeadingSectionWithLink(
+                                                title = collection.label,
+                                                onClick = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenStoreData(
+                                                            collection.room
+                                                        )
+                                                    )
+                                                })
+                                        }
+                                        is StoreCollectionEpisodes -> {
+                                            StoreHeadingSectionWithLink(
+                                                title = collection.label,
+                                                onClick = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenStoreData(
+                                                            collection.room
+                                                        )
+                                                    )
+                                                })
                                         }
                                     }
-                                    is StoreUiModel.StoreUiItem -> {
-                                        // content
-                                        when (val storeItem = storeUiModel.item) {
-                                            is StoreCollectionFeatured -> {
-                                                StoreCollectionFeaturedContent(
-                                                    storeCollection = storeItem,
-                                                    openStoreDataDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenStoreData(
-                                                                it
-                                                            )
+                                }
+                                is StoreUiModel.StoreUiItem -> {
+                                    // content
+                                    when (val storeItem = storeUiModel.item) {
+                                        is StoreCollectionFeatured -> {
+                                            StoreCollectionFeaturedContent(
+                                                storeCollection = storeItem,
+                                                openStoreDataDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenStoreData(
+                                                            it
                                                         )
-                                                    },
-                                                    openPodcastDetail = {
+                                                    )
+                                                },
+                                                openPodcastDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenPodcastDetail(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                                openEpisodeDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
+                                        is StoreCollectionData -> {
+                                            StoreCollectionDataContent(
+                                                storeCollection = storeItem,
+                                                openStoreDataDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenStoreData(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                                openPodcastDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenPodcastDetail(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                                openEpisodeDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
+                                        is StoreCollectionItems -> {
+                                            StoreCollectionItemsContent(
+                                                storeCollection = storeItem,
+                                                openPodcastDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenPodcastDetail(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                                openEpisodeDetail = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                                followingStatus = state.followingStatus,
+                                                followLoadingStatus = state.followLoadingStatus,
+                                                onFollowPodcast = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.FollowPodcast(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
+                                        is StoreEpisode -> {
+                                            StoreEpisodeItem(
+                                                episode = storeItem.episode,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                onThumbnailClick = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenPodcastDetail(
+                                                            storeItem.storePodcast
+                                                        )
+                                                    )
+                                                },
+                                                onEpisodeClick = {
+                                                    performAction(
+                                                        StoreDataViewModel.Action.OpenEpisodeDetail(
+                                                            storeItem
+                                                        )
+                                                    )
+                                                },
+                                                index = storeUiModel.index
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else -> {
+                        val sortByPopularity = state.storeData.sortByPopularity
+                        val firstUiModel = lazyPagingItems.peek(0) as StoreUiModel
+                        when {
+                            firstUiModel is StoreUiModel.StoreUiItem &&
+                                    firstUiModel.item is StorePodcast ->
+                                gridItemsIndexed(
+                                    lazyPagingItems = lazyPagingItems,
+                                    contentPadding = PaddingValues(16.dp),
+                                    horizontalInnerPadding = 16.dp,
+                                    verticalInnerPadding = 16.dp,
+                                    columns = 2
+                                ) { index, uiModel ->
+                                    if (uiModel is StoreUiModel.StoreUiItem) {
+                                        when (val item = uiModel.item) {
+                                            is StorePodcast -> {
+                                                PodcastGridItem(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(),
+                                                    onClick = {
                                                         performAction(
                                                             StoreDataViewModel.Action.OpenPodcastDetail(
-                                                                it
+                                                                item
                                                             )
                                                         )
                                                     },
-                                                    openEpisodeDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                )
-                                            }
-                                            is StoreCollectionData -> {
-                                                StoreCollectionDataContent(
-                                                    storeCollection = storeItem,
-                                                    openStoreDataDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenStoreData(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                    openPodcastDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenPodcastDetail(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                    openEpisodeDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                )
-                                            }
-                                            is StoreCollectionItems -> {
-                                                StoreCollectionItemsContent(
-                                                    storeCollection = storeItem,
-                                                    openPodcastDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenPodcastDetail(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                    openEpisodeDetail = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenEpisodeDetail(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                    followingStatus = state.followingStatus,
-                                                    followLoadingStatus = state.followLoadingStatus,
+                                                    podcast = item,
+                                                    index = (index + 1).takeIf { sortByPopularity },
+                                                    isFollowing = state.followingStatus.contains(
+                                                        item.id
+                                                    ),
+                                                    isFollowingLoading = state.followLoadingStatus.contains(
+                                                        item.id
+                                                    ),
                                                     onFollowPodcast = {
                                                         performAction(
                                                             StoreDataViewModel.Action.FollowPodcast(
@@ -381,128 +447,59 @@ private fun StoreDataScreen(
                                                     },
                                                 )
                                             }
+                                        }
+                                    }
+                                }
+                            firstUiModel is StoreUiModel.StoreUiItem &&
+                                    firstUiModel.item is StoreEpisode ->
+                                itemsIndexed(lazyPagingItems = lazyPagingItems) { index, uiModel ->
+                                    if (uiModel is StoreUiModel.StoreUiItem) {
+                                        when (val item = uiModel.item) {
                                             is StoreEpisode -> {
                                                 StoreEpisodeItem(
-                                                    episode = storeItem.episode,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    onThumbnailClick = {
-                                                        performAction(
-                                                            StoreDataViewModel.Action.OpenPodcastDetail(
-                                                                storeItem.storePodcast
-                                                            )
-                                                        )
-                                                    },
+                                                    modifier = Modifier,
                                                     onEpisodeClick = {
                                                         performAction(
                                                             StoreDataViewModel.Action.OpenEpisodeDetail(
-                                                                storeItem
+                                                                item
                                                             )
                                                         )
                                                     },
-                                                    index = storeUiModel.index
+                                                    onThumbnailClick = {
+                                                        performAction(
+                                                            StoreDataViewModel.Action.OpenPodcastDetail(
+                                                                item.storePodcast
+                                                            )
+                                                        )
+                                                    },
+                                                    episode = item.episode,
+                                                    index = (index + 1).takeIf { sortByPopularity },
                                                 )
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Divider()
                                             }
                                         }
                                     }
                                 }
-                            }
-                        }
-                        else -> {
-                            val sortByPopularity = state.storeData.sortByPopularity
-                            val firstUiModel = lazyPagingItems.peek(0) as StoreUiModel
-                            when {
-                                firstUiModel is StoreUiModel.StoreUiItem &&
-                                        firstUiModel.item is StorePodcast ->
-                                    gridItemsIndexed(
-                                        lazyPagingItems = lazyPagingItems,
-                                        contentPadding = PaddingValues(16.dp),
-                                        horizontalInnerPadding = 16.dp,
-                                        verticalInnerPadding = 16.dp,
-                                        columns = 2
-                                    ) { index, uiModel ->
-                                        if (uiModel is StoreUiModel.StoreUiItem) {
-                                            when (val item = uiModel.item) {
-                                                is StorePodcast -> {
-                                                    PodcastGridItem(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(),
-                                                        onClick = {
-                                                            performAction(
-                                                                StoreDataViewModel.Action.OpenPodcastDetail(
-                                                                    item
-                                                                )
-                                                            )
-                                                        },
-                                                        podcast = item,
-                                                        index = (index + 1).takeIf { sortByPopularity },
-                                                        isFollowing = state.followingStatus.contains(
-                                                            item.id
-                                                        ),
-                                                        isFollowingLoading = state.followLoadingStatus.contains(
-                                                            item.id
-                                                        ),
-                                                        onFollowPodcast = {
-                                                            performAction(
-                                                                StoreDataViewModel.Action.FollowPodcast(
-                                                                    it
-                                                                )
-                                                            )
-                                                        },
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                firstUiModel is StoreUiModel.StoreUiItem &&
-                                        firstUiModel.item is StoreEpisode ->
-                                    itemsIndexed(lazyPagingItems = lazyPagingItems) { index, uiModel ->
-                                        if (uiModel is StoreUiModel.StoreUiItem) {
-                                            when (val item = uiModel.item) {
-                                                is StoreEpisode -> {
-                                                    StoreEpisodeItem(
-                                                        modifier = Modifier,
-                                                        onEpisodeClick = {
-                                                            performAction(
-                                                                StoreDataViewModel.Action.OpenEpisodeDetail(
-                                                                    item
-                                                                )
-                                                            )
-                                                        },
-                                                        onThumbnailClick = {
-                                                            performAction(
-                                                                StoreDataViewModel.Action.OpenPodcastDetail(
-                                                                    item.storePodcast
-                                                                )
-                                                            )
-                                                        },
-                                                        episode = item.episode,
-                                                        index = (index + 1).takeIf { sortByPopularity },
-                                                    )
-                                                    Spacer(modifier = Modifier.height(8.dp))
-                                                    Divider()
-                                                }
-                                            }
-                                        }
-                                    }
-                            }
                         }
                     }
                 }
-                .ifLoadingMore {
-                    // loading more
-                    item {
-                        Text(
-                            modifier = Modifier.padding(
-                                vertical = 16.dp,
-                                horizontal = 4.dp
-                            ),
-                            text = "Loading next"
-                        )
-                    }
+            }
+            .ifLoadingMore {
+                // loading more
+                item {
+                    Text(
+                        modifier = Modifier.padding(
+                            vertical = 16.dp,
+                            horizontal = 4.dp
+                        ),
+                        text = "Loading next"
+                    )
                 }
-        }
+            }
     }
 }
+
 
 @Composable
 fun HeaderEditorialArtwork(
@@ -558,7 +555,7 @@ private fun StoreDataScreenTopAppBar(
         appBarAlpha)
 
     // top app bar
-    val artwork = state.storeData?.artwork
+    val artwork = state.storeData.artwork
     val contentEndColor = contentColorFor(MaterialTheme.colors.surface)
     val contentColor: Color =
         artwork?.textColor1
