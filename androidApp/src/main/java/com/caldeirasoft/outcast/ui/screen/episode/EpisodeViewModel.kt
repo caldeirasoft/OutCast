@@ -34,7 +34,6 @@ class EpisodeViewModel @Inject constructor(
     }
 ) {
 
-    private var isInitialized: Boolean = false
     private var isEpisodeSet: Boolean = false
 
     override fun activate() {

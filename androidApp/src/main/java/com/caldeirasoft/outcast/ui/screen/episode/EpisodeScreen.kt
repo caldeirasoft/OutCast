@@ -1,11 +1,11 @@
 package com.caldeirasoft.outcast.ui.screen.episode
 
-import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,21 +23,24 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.ui.components.*
-import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
+import com.caldeirasoft.outcast.ui.theme.getColor
+import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDateTime
+import com.caldeirasoft.outcast.ui.util.DurationFormatter.formatDuration
 import com.caldeirasoft.outcast.ui.util.navigateToPodcast
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -49,7 +52,6 @@ import com.google.accompanist.placeholder.material.shimmer
 import cz.levinzonr.router.core.Route
 import cz.levinzonr.router.core.RouteArg
 import cz.levinzonr.router.core.RouteArgType
-import kotlinx.coroutines.flow.collect
 
 @Route(
     name = "episode",
@@ -87,38 +89,6 @@ fun EpisodeScreen(
             scaffoldState = scaffoldState,
             episode = state.episode,
             performAction = performAction,
-            contextMenuItems = listOf(
-                ContextMenuItem(
-                    titleId = R.string.action_play_next,
-                    icon = Icons.Default.QueuePlayNext,
-                    onClickAction = { performAction(EpisodeViewModel.Action.PlayNextEpisode) },
-                ),
-                ContextMenuItem(
-                    titleId = R.string.action_play_last,
-                    icon = Icons.Default.AddToQueue,
-                    onClickAction = { performAction(EpisodeViewModel.Action.PlayLastEpisode) },
-                ),
-                ContextMenuSeparator,
-                if (state.episode?.isSaved == false)
-                    ContextMenuItem(
-                        titleId = R.string.action_save_episode,
-                        icon = Icons.Outlined.BookmarkAdd,
-                        onClickAction = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
-                    )
-                else
-                    ContextMenuItem(
-                        titleId = R.string.action_remove_saved_episode,
-                        icon = Icons.Outlined.BookmarkRemove,
-                        onClickAction = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
-                    )
-                ,
-                ContextMenuSeparator,
-                ContextMenuItem(
-                    titleId = R.string.action_share_episode,
-                    icon = Icons.Default.Share,
-                    onClickAction = { performAction(EpisodeViewModel.Action.ShareEpisode) },
-                )
-            )
         )
     }
 
@@ -134,11 +104,13 @@ fun EpisodeScreen(
     state: EpisodeViewModel.State,
     scaffoldState: ScaffoldState,
     episode: Episode?,
-    contextMenuItems: List<BaseContextMenuItem>,
     performAction: (EpisodeViewModel.Action) -> Unit
 ) {
-    Scaffold(
+    val listState = rememberLazyListState()
+    ScaffoldWithLargeHeaderAndLazyColumn(
+        headerRatio = 1 / 2f,
         scaffoldState = scaffoldState,
+        listState = listState,
         snackbarHost = {
             // reuse default SnackbarHost to have default animation and timing handling
             SnackbarHost(it) { data ->
@@ -149,25 +121,25 @@ fun EpisodeScreen(
                 )
             }
         },
-    ) {
-        //
-        val listState = rememberLazyListState(0)
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ) {
-            // header
-            EpisodeExpandedHeader(
+        topBar = {
+            EpisodeTopAppBar(
+                state = state,
+                listState = listState,
+                navigateUp = { performAction(EpisodeViewModel.Action.Exit) }
+            )
+        },
+        headerContent = {
+            EpisodeHeader(
                 episode = episode,
+                podcastData = state.podcast,
                 listState = listState,
                 onPodcastClick = { performAction(EpisodeViewModel.Action.OpenPodcastDetail) },
             )
-
-
-            // action bar
-            episode?.let {
+        }
+    ) {
+        // action bar
+        episode?.let {
+            item {
                 EpisodeActionAppBar(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -175,139 +147,174 @@ fun EpisodeScreen(
                         .padding(bottom = 16.dp),
                     episode = it,
                     onSaveButtonClick = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
-                    contextMenuItems = contextMenuItems
+                    contextMenuItems = listOf(
+                        ContextMenuItem(
+                            titleId = R.string.action_play_next,
+                            icon = Icons.Default.QueuePlayNext,
+                            onClickAction = { performAction(EpisodeViewModel.Action.PlayNextEpisode) },
+                        ),
+                        ContextMenuItem(
+                            titleId = R.string.action_play_last,
+                            icon = Icons.Default.AddToQueue,
+                            onClickAction = { performAction(EpisodeViewModel.Action.PlayLastEpisode) },
+                        ),
+                        ContextMenuSeparator,
+                        if (state.episode?.isSaved == false)
+                            ContextMenuItem(
+                                titleId = R.string.action_save_episode,
+                                icon = Icons.Outlined.BookmarkAdd,
+                                onClickAction = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
+                            )
+                        else
+                            ContextMenuItem(
+                                titleId = R.string.action_remove_saved_episode,
+                                icon = Icons.Outlined.BookmarkRemove,
+                                onClickAction = { performAction(EpisodeViewModel.Action.ToggleSaveEpisode) },
+                            ),
+                        ContextMenuSeparator,
+                        ContextMenuItem(
+                            titleId = R.string.action_share_episode,
+                            icon = Icons.Default.Share,
+                            onClickAction = { performAction(EpisodeViewModel.Action.ShareEpisode) },
+                        )
+                    )
                 )
             }
-
-            /* description if present */
-            EpisodeDescriptionContent(description = episode?.description)
-
-            // custom artwork
-            // bottom app bar spacer
-            Spacer(modifier = Modifier.height(56.dp))
         }
 
-        EpisodeTopAppBar(
-            state = state,
-            listState = listState,
-            navigateUp = { performAction(EpisodeViewModel.Action.Exit) },
-        )
+        /* description if present */
+        item {
+            EpisodeDescriptionContent(description = episode?.description)
+        }
+
+        // bottom app bar spacer
+        item {
+            Spacer(modifier = Modifier.height(56.dp))
+        }
     }
 }
 
 @Composable
-private fun EpisodeExpandedHeader(
+private fun EpisodeHeader(
     episode: Episode?,
+    podcastData: Podcast?,
     listState: LazyListState,
     onPodcastClick: () -> Unit
 ) {
-    val dominantColor = MaterialTheme.colors.primary
-
     val alphaLargeHeader = listState.expandedHeaderAlpha
-    Box(modifier = Modifier
-        .fillMaxWidth()
-    )
-    {
-        Box(
+    val bgDominantColor = podcastData?.artworkDominantColor
+        ?.let { Color.getColor(it) }
+        ?: MaterialTheme.colors.onSurface
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    0.0f to bgDominantColor.copy(alpha = 0.5f),
+                    0.2f to bgDominantColor.copy(alpha = 0.5f),
+                    0.6f to Color.Transparent,
+                    startY = 0.0f,
+                    endY = Float.POSITIVE_INFINITY
+                )
+            )
+            .padding(horizontal = 16.dp)
+    ) {
+        // Draw a scrim over the status bar which matches the app bar
+        Spacer(
+            Modifier
+                //.background(appBarColor)
+                .fillMaxWidth()
+                .statusBarsHeight()
+        )
+
+        // spacer behind top app bar
+        Spacer(Modifier.height(56.dp))
+
+        // thumbnail
+        Card(
+            backgroundColor = Color.Transparent,
+            shape = RoundedCornerShape(8.dp),
+            elevation = 2.dp,
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .align(Alignment.Start)
         ) {
-            val bgDominantColor = dominantColor
-            val bgDominantColorAnimated = animateColorAsState(targetValue = bgDominantColor).value
-            Box(
+            Image(
+                painter = rememberCoilPainter(request = episode?.artworkUrl.orEmpty()),
+                contentDescription = episode?.podcastName,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .fillMaxSize()
-                    //.background(Color.Magenta.copy(alpha = 0.9f))
-                    .background(
-                        brush = Brush.verticalGradient(
-                            0.0f to bgDominantColorAnimated.copy(alpha = 0.5f),
-                            0.2f to bgDominantColorAnimated.copy(alpha = 0.5f),
-                            0.6f to Color.Transparent,
-                            startY = 0.0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .placeholder(
+                        visible = (episode == null),
+                        shape = RoundedCornerShape(8.dp),
+                        highlight = PlaceholderHighlight.shimmer(),
                     )
             )
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(top = 56.dp, bottom = 8.dp)
-                .alpha(alphaLargeHeader),
-        ) {
-            // status bar spacer
-            Spacer(modifier = Modifier.statusBarsHeight())
+        Spacer(modifier = Modifier.height(8.dp))
 
-            // thumbnail
-            Card(
-                backgroundColor = Color.Transparent,
-                shape = RoundedCornerShape(8.dp),
-                elevation = 2.dp,
-                modifier = Modifier
-                    .align(Alignment.Start)
-            ) {
-                Image(
-                    painter = rememberCoilPainter(request = episode?.artworkUrl.orEmpty()),
-                    contentDescription = episode?.podcastName,
-                    contentScale = ContentScale.Crop,
+        // episode name
+        Box(modifier = Modifier.heightIn(min = 50.dp)) {
+            if (episode != null) {
+                Text(
+                    text = episode.name,
+                    style = MaterialTheme.typography.h5,
                     modifier = Modifier
-                        .width(120.dp)
-                        .aspectRatio(1f)
+                        .align(Alignment.BottomStart)
+                )
+            } else {
+                Text(
+                    text = LoremIpsum(8).values.joinToString(" "),
+                    style = MaterialTheme.typography.h5,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
                         .placeholder(
-                            visible = (episode == null),
-                            shape = RoundedCornerShape(8.dp),
+                            visible = true,
                             highlight = PlaceholderHighlight.shimmer(),
                         )
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-            // episode name
-            Box(modifier = Modifier.heightIn(min = 50.dp)) {
-                if (episode != null) {
-                    Text(
-                        text = episode.name,
-                        style = MaterialTheme.typography.h5,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                    )
-                }
-                else {
-                    Text(
-                        text = LoremIpsum(8).values.joinToString(" "),
-                        style = MaterialTheme.typography.h5,
-                        maxLines = 1,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .placeholder(
-                                visible = true,
-                                highlight = PlaceholderHighlight.shimmer(),
-                            )
-                    )
-                }
-            }
+        // podcast name
+        Text(
+            text = with(AnnotatedString.Builder()) {
+                append(episode?.podcastName.orEmpty())
+                append(" ›")
+                toAnnotatedString()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
+                .clickable(onClick = onPodcastClick),
+            style = MaterialTheme.typography.body1,
+            maxLines = 2,
+            color = MaterialTheme.colors.primary
+        )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // podcast name
+        // date
+        val context = LocalContext.current
+        if (episode != null) {
             Text(
-                text = with(AnnotatedString.Builder()) {
-                    append(episode?.podcastName.orEmpty())
-                    append(" ›")
-                    toAnnotatedString()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp)
-                    .clickable(onClick = onPodcastClick),
-                style = MaterialTheme.typography.body1,
-                maxLines = 2,
-                color = dominantColor
+                text = episode.releaseDateTime.formatRelativeDateTime(context)
             )
-            //TODO: date
+        } else {
+            Text(
+                text = LoremIpsum(2).values.joinToString(" "),
+                maxLines = 1,
+                modifier = Modifier
+                    .placeholder(
+                        visible = true,
+                        highlight = PlaceholderHighlight.shimmer(),
+                    )
+            )
         }
     }
 }
@@ -338,7 +345,10 @@ fun EpisodeTopAppBar(
             modifier = Modifier,
             title = {
                 CompositionLocalProvider(LocalContentAlpha provides appBarAlpha) {
-                    Text(text = state.episode?.name.orEmpty())
+                    Text(
+                        text = state.episode?.name.orEmpty(),
+                        maxLines = 2
+                    )
                 }
             },
             navigationIcon = {

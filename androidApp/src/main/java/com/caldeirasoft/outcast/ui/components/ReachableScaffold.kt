@@ -123,7 +123,7 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
     topBarActions: @Composable RowScope.() -> Unit = {},
     itemsContent: LazyListScope.() -> Unit = {}
 ) {
-    ScaffoldWithLargeHeader(
+    ScaffoldWithLargeHeaderAndLazyColumn(
         modifier = modifier,
         scaffoldState = scaffoldState,
         listState = listState,
@@ -167,44 +167,38 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
                         Divider()
                 }
             }
-        }
-    ) { headerHeight ->
-        LazyColumn(state = listState) {
-            // header
-            item {
-                Box(
+        },
+        headerContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 16.dp, bottom = 16.dp)
+                    .padding(start = 16.dp, end = 16.dp)
+            ) {
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = headerHeight.toDp())
-                        .padding(top = 16.dp, bottom = 16.dp)
-                        .padding(start = 16.dp, end = 16.dp)
+                        .fillMaxHeight()
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxHeight()
+                    Box(Modifier
+                        .align(Bottom)
+                        .weight(1f),
                     ) {
-                        Box(Modifier
-                            .align(Bottom)
-                            .weight(1f),
-                        ) {
-                            Text(
-                                text = title,
-                                style = typography.h4
-                            )
-                        }
+                        Text(
+                            text = title,
+                            style = typography.h4
+                        )
+                    }
 
-                        Box(Modifier.align(CenterVertically)) {
-                            largeTitleAction?.let {
-                                largeTitleAction()
-                            }
+                    Box(Modifier.align(CenterVertically)) {
+                        largeTitleAction?.let {
+                            largeTitleAction()
                         }
                     }
                 }
             }
-
-            itemsContent()
-        }
-    }
+        },
+        itemsContent = itemsContent
+    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
