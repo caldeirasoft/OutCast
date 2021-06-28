@@ -132,14 +132,14 @@ class PodcastViewModel @Inject constructor(
     }
 
 
-    fun follow() {
+    private fun follow() {
         viewModelScope.launch {
             setState { copy(followingStatus = FollowStatus.FOLLOWING) }
             podcastsRepository.followPodcast(feedUrl = initialState.feedUrl)
         }
     }
 
-    fun unfollow() {
+    private fun unfollow() {
         viewModelScope.launch {
             podcastsRepository.unfollowPodcast(feedUrl = initialState.feedUrl)
         }
@@ -153,7 +153,7 @@ class PodcastViewModel @Inject constructor(
         }
     }
 
-    fun sharePodcast() {
+    private fun sharePodcast() {
         viewModelScope.withState {
             it.podcast?.let { podcast ->
                 emitEvent(Event.SharePodcast(podcast))

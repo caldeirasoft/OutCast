@@ -34,7 +34,6 @@ class EmptyPreferenceItem(
 ) : PreferenceItem()
 
 sealed class KeyPreferenceItem<T> : PreferenceItem() {
-    abstract val prefKey: String
 }
 
 sealed class ListPreferenceItem<T> : KeyPreferenceItem<T>() {
@@ -44,80 +43,96 @@ sealed class ListPreferenceItem<T> : KeyPreferenceItem<T>() {
 data class SwitchPreferenceItem(
     override val title: String,
     override val summary: String,
-    override val prefKey: String,
     override val icon: ImageVector? = null,
     override val singleLineTitle: Boolean = false,
     override val enabled: Boolean = true,
     override val dependencyValue: Boolean? = null,
-    val defaultValue: Boolean = false,
+    val value: Boolean = false,
     val onValueChanged: (Boolean) -> Unit,
 ) : KeyPreferenceItem<Boolean>()
 
 data class SeekbarFloatPreferenceItem(
     override val title: String,
     override val summary: String,
-    override val prefKey: String,
     override val icon: ImageVector? = null,
     override val singleLineTitle: Boolean = false,
     override val enabled: Boolean = true,
     override val dependencyValue: Boolean? = null,
-    val defaultValue: Float = 0F,
+    val value: Float = 0F,
     val valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     val steps: Int = 0,
     val valueRepresentation: (Float) -> String,
     val onValueChanged: (Float) -> Unit,
 ) : KeyPreferenceItem<Float>()
 
+sealed class NumberRangePreferenceItem<T : Comparable<T>> : KeyPreferenceItem<T>() {
+    abstract val value: T
+    abstract val valueRange: ClosedFloatingPointRange<T>
+    abstract val steps: T
+    abstract val valueRepresentation: (T) -> String
+    abstract val onValueChanged: (T) -> Unit
+}
+
 data class NumberRangeFloatPreferenceItem(
     override val title: String,
     override val summary: String,
-    override val prefKey: String,
     override val singleLineTitle: Boolean = false,
     override val icon: ImageVector? = null,
     override val enabled: Boolean = true,
     override val dependencyValue: Boolean? = null,
-    val defaultValue: Float = 0F,
-    val valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
-    val steps: Float = 0f,
-    val valueRepresentation: (Float) -> String = { it.roundToInt().toString() },
-    val onValueChanged: (Float) -> Unit,
-) : KeyPreferenceItem<Float>()
+    override val value: Float,
+    override val valueRange: ClosedFloatingPointRange<Float>,
+    override val steps: Float,
+    override val valueRepresentation: (Float) -> String = { it.toString() },
+    override val onValueChanged: (Float) -> Unit,
+) : NumberRangePreferenceItem<Float>()
+
+data class NumberRangeIntPreferenceItem(
+    override val title: String,
+    override val summary: String,
+    override val singleLineTitle: Boolean = false,
+    override val icon: ImageVector? = null,
+    override val enabled: Boolean = true,
+    override val dependencyValue: Boolean? = null,
+    override val value: Int,
+    override val valueRange: ClosedFloatingPointRange<Int>,
+    override val steps: Int,
+    override val valueRepresentation: (Int) -> String = { it.toString() },
+    override val onValueChanged: (Int) -> Unit,
+) : NumberRangePreferenceItem<Int>()
 
 data class SingleListPreferenceItem<T>(
     override val title: String,
     override val summary: String,
-    override val prefKey: String,
     override val singleLineTitle: Boolean = false,
     override val icon: ImageVector? = null,
     override val enabled: Boolean = true,
     override val entries: Map<T, String>,
     override val dependencyValue: Boolean? = null,
-    val defaultValue: T,
+    val value: T,
     val onValueChanged: (T) -> Unit,
 ) : ListPreferenceItem<T>()
 
 data class MultiListPreferenceItem<T>(
     override val title: String,
     override val summary: String,
-    override val prefKey: String,
     override val singleLineTitle: Boolean = false,
     override val icon: ImageVector? = null,
     override val enabled: Boolean = true,
     override val entries: Map<T, String>,
     override val dependencyValue: Boolean? = null,
-    val defaultValue: Set<T> = emptySet(),
+    val value: Set<T> = emptySet(),
     val onValueChanged: (Set<T>) -> Unit,
 ) : ListPreferenceItem<T>()
 
 data class NumberPreferenceItem(
     override val title: String,
     override val summary: String,
-    override val prefKey: String,
     override val singleLineTitle: Boolean = false,
     override val icon: ImageVector? = null,
     override val enabled: Boolean = true,
     override val dependencyValue: Boolean? = null,
-    val defaultValue: Int = 0,
+    val value: Int = 0,
     val valueRepresentation: @Composable (Int) -> String,
     val onValueChanged: (Int) -> Unit,
 ) : KeyPreferenceItem<Int>()

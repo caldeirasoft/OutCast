@@ -3,8 +3,6 @@ package com.caldeirasoft.outcast.ui.screen.search
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -21,14 +19,12 @@ import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
-import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeader
+import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeaderAndLazyColumn
 import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
 import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
-import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.navigateToStore
-import com.caldeirasoft.outcast.ui.util.toDp
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import cz.levinzonr.router.core.Route
@@ -39,74 +35,49 @@ import cz.levinzonr.router.core.Route
 fun SearchScreen(
     navController: NavController
 ) {
-    val listState = rememberLazyListState(0)
-    ScaffoldWithLargeHeader(
-        listState = listState,
+    ScaffoldWithLargeHeaderAndLazyColumn(
+        title = stringResource(id = R.string.screen_search),
         modifier = Modifier
             .statusBarsPadding()
-            .navigationBarsPadding()
-    ) { headerHeight ->
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-        )
-        {
+            .navigationBarsPadding(),
+        showTopBar = false,
+    ) {
+        // search bar
+        stickyHeader {
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = { navController.navigate(RoutesActions.toSearch_results()) }
+            )
+        }
+
+        val categoriesIds = listOf(-1) + Category.values()
+            .filter { !it.nested }
+            .map { it.id }
+
+        item {
             // header
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = headerHeight.toDp())
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.screen_search),
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(top = 16.dp, bottom = 16.dp)
-                            .padding(start = 16.dp, end = 16.dp),
-                        style = typography.h4
-                    )
-                }
-            }
-
-            // search bar
-            stickyHeader {
-                SearchBar(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    onClick = { navController.navigate(RoutesActions.toSearch_results()) }
+            StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
+        }
+        gridItems(
+            items = categoriesIds,
+            contentPadding = PaddingValues(16.dp),
+            horizontalInnerPadding = 8.dp,
+            verticalInnerPadding = 8.dp,
+            columns = 2
+        ) { categoryId ->
+            when (categoryId) {
+                -1 -> TopChartCardItem(
+                    navigateToTopChart = { navController.navigateToStore(StoreData.TopCharts) }
                 )
-            }
-
-            val categoriesIds = listOf(-1) + Category.values()
-                .filter { !it.nested }
-                .map { it.id }
-
-            item {
-                // header
-                StoreHeadingSection(title = stringResource(id = R.string.store_tab_categories))
-            }
-            gridItems(
-                items = categoriesIds,
-                contentPadding = PaddingValues(16.dp),
-                horizontalInnerPadding = 8.dp,
-                verticalInnerPadding = 8.dp,
-                columns = 2
-            ) { categoryId ->
-                when (categoryId) {
-                    -1 -> TopChartCardItem(
-                        navigateToTopChart = { navController.navigateToStore(StoreData.TopCharts) }
-                    )
-                    else -> {
-                        Category.fromId(categoryId)?.let { category ->
-                            CategoryCardItem(
-                                category = category,
-                                navigateToCategory = {
-                                    navController.navigateToStore(category)
-                                }
-                            )
-                        }
+                else -> {
+                    Category.fromId(categoryId)?.let { category ->
+                        CategoryCardItem(
+                            category = category,
+                            navigateToCategory = {
+                                navController.navigateToStore(category)
+                            }
+                        )
                     }
                 }
             }

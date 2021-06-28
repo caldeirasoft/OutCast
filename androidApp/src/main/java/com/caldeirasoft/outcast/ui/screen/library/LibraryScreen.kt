@@ -25,15 +25,12 @@ import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.presentation.viewmodel.LibraryViewModel
-import com.caldeirasoft.outcast.ui.components.PodcastDefaults
-import com.caldeirasoft.outcast.ui.components.PodcastThumbnail
-import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeader
+import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.BottomSheetMenuItem
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetContent
 import com.caldeirasoft.outcast.ui.components.bottomsheet.LocalBottomSheetState
 import com.caldeirasoft.outcast.ui.components.bottomsheet.OpenBottomSheetMenu
 import com.caldeirasoft.outcast.ui.components.collapsingtoolbar.CollapsingToolbarState
-import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsViewModel
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
@@ -79,6 +76,8 @@ fun LibraryScreen(
                     navController.navigate(RoutesActions.toSaved_episodes())
                 is LibraryViewModel.Event.OpenPlayedEpisodes ->
                     navController.navigate(RoutesActions.toPlayed_episodes())
+                is LibraryViewModel.Event.OpenSettings ->
+                    navController.navigate(RoutesActions.toSettings())
             }
         }
     ) { state, performAction ->
@@ -95,150 +94,107 @@ private fun LibraryScreen(
     state: LibraryViewModel.State,
     performAction: (LibraryViewModel.Action) -> Unit
 ) {
-    ScaffoldWithLargeHeader(
+    ScaffoldWithLargeHeaderAndLazyColumn(
+        title = stringResource(id = R.string.screen_library),
         modifier = Modifier
             .statusBarsPadding()
-            .navigationBarsPadding()
-    ) { headerHeight ->
-        LazyColumn {
-            // header
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = headerHeight.toDp())
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.screen_library),
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(top = 16.dp, bottom = 16.dp)
-                            .padding(start = 16.dp, end = 16.dp),
-                        fontSize = 36.sp
-                    )
-                }
-            }
-
-            val libraryIds = listOf(
-                LibraryItemType.SAVED_EPISODES.name
-            ) + state.sortedPodcasts.map { it.feedUrl }
-
-            val libraryItemsMap = LibraryItemType.values().map { it.name to it }.toMap()
-            val podcastsMap = state.sortedPodcasts.map { it.feedUrl to it }.toMap()
-
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // sort button
-                    LibrarySortButton(
-                        state = state,
-                        performAction = performAction,
-                    )
-                    // spacer
-                    Spacer(Modifier.weight(1f))
-                    // grid/list button
-                    LibraryDisplayButton(
-                        state = state,
-                        onClick = { performAction(LibraryViewModel.Action.ToggleDisplay) }
-                    )
-                }
-            }
-
-            if (state.displayAsGrid) {
-                gridItems(
-                    items = libraryIds,
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalInnerPadding = 16.dp,
-                    verticalInnerPadding = 16.dp,
-                    columns = 2
-                ) { itemId ->
-                    when (itemId) {
-                        LibraryItemType.SIDELOADS.name,
-                        LibraryItemType.SAVED_EPISODES.name ->
-                            libraryItemsMap[itemId]?.let { item ->
-                                LibraryGridItem(
-                                    item = item,
-                                    state = state,
-                                    performAction = performAction
-                                )
-                            }
-                        else -> {
-                            podcastsMap[itemId]?.let { item ->
-                                PodcastGridItem(
-                                    podcast = item,
-                                    sort = state.sortBy,
-                                    onClick = {
-                                        performAction(LibraryViewModel.Action.OpenPodcastDetail(item))
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                items(items = libraryIds) { itemId ->
-                    when (itemId) {
-                        LibraryItemType.SIDELOADS.name,
-                        LibraryItemType.SAVED_EPISODES.name ->
-                            libraryItemsMap[itemId]?.let { item ->
-                                LibraryListItem(
-                                    item = item,
-                                    state = state,
-                                    performAction = performAction
-                                )
-                            }
-                        else -> {
-                            podcastsMap[itemId]?.let { item ->
-                                PodcastListItem(
-                                    podcast = item,
-                                    sort = state.sortBy,
-                                    onClick = {
-                                        performAction(LibraryViewModel.Action.OpenPodcastDetail(item))
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                // bottom app bar spacer
-                Spacer(modifier = Modifier.height(56.dp))
+            .navigationBarsPadding(),
+        showTopBar = false,
+        largeTitleAction = {
+            IconButton(
+                onClick = { performAction(LibraryViewModel.Action.OpenSettings) }) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = null)
             }
         }
-    }
-}
-
-@Composable
-private fun LibraryTopAppBar(
-    modifier: Modifier,
-    state: LibraryState,
-    collapsingToolbarState: CollapsingToolbarState,
-    onPlayedEpisodesButtonClick: () -> Unit,
-) {
-    Timber.d("progress: ${collapsingToolbarState.progress}, alpha:${collapsingToolbarState.collapsedAlpha}")
-    Column(
-        modifier = modifier
     ) {
-        TopAppBar(
-            modifier = Modifier,
-            title = {
-            },
-            actions = {
-                IconButton(onClick = onPlayedEpisodesButtonClick) {
-                    Icon(
-                        imageVector = Icons.Default.History,
-                        contentDescription = null,
-                    )
-                }
-            },
-            backgroundColor = Color.Transparent,
-            contentColor = MaterialTheme.colors.onSurface,
-            elevation = 0.dp
-        )
+        val libraryIds = listOf(
+            LibraryItemType.SAVED_EPISODES.name
+        ) + state.sortedPodcasts.map { it.feedUrl }
 
-        if (collapsingToolbarState.progress == 0f)
-            Divider()
+        val libraryItemsMap = LibraryItemType.values().map { it.name to it }.toMap()
+        val podcastsMap = state.sortedPodcasts.map { it.feedUrl to it }.toMap()
+
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // sort button
+                LibrarySortButton(
+                    state = state,
+                    performAction = performAction,
+                )
+                // spacer
+                Spacer(Modifier.weight(1f))
+                // grid/list button
+                LibraryDisplayButton(
+                    state = state,
+                    onClick = { performAction(LibraryViewModel.Action.ToggleDisplay) }
+                )
+            }
+        }
+
+        if (state.displayAsGrid) {
+            gridItems(
+                items = libraryIds,
+                contentPadding = PaddingValues(16.dp),
+                horizontalInnerPadding = 16.dp,
+                verticalInnerPadding = 16.dp,
+                columns = 2
+            ) { itemId ->
+                when (itemId) {
+                    LibraryItemType.SIDELOADS.name,
+                    LibraryItemType.SAVED_EPISODES.name ->
+                        libraryItemsMap[itemId]?.let { item ->
+                            LibraryGridItem(
+                                item = item,
+                                state = state,
+                                performAction = performAction
+                            )
+                        }
+                    else -> {
+                        podcastsMap[itemId]?.let { item ->
+                            PodcastGridItem(
+                                podcast = item,
+                                sort = state.sortBy,
+                                onClick = {
+                                    performAction(LibraryViewModel.Action.OpenPodcastDetail(item))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            items(items = libraryIds) { itemId ->
+                when (itemId) {
+                    LibraryItemType.SIDELOADS.name,
+                    LibraryItemType.SAVED_EPISODES.name ->
+                        libraryItemsMap[itemId]?.let { item ->
+                            LibraryListItem(
+                                item = item,
+                                state = state,
+                                performAction = performAction
+                            )
+                        }
+                    else -> {
+                        podcastsMap[itemId]?.let { item ->
+                            PodcastListItem(
+                                podcast = item,
+                                sort = state.sortBy,
+                                onClick = {
+                                    performAction(LibraryViewModel.Action.OpenPodcastDetail(item))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            // bottom app bar spacer
+            Spacer(modifier = Modifier.height(56.dp))
+        }
     }
 }
 

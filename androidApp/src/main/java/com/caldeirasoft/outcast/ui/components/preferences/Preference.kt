@@ -17,51 +17,48 @@ import com.caldeirasoft.outcast.domain.model.PreferenceItem
 @ExperimentalMaterialApi
 @Composable
 fun Preference(
-    title: String,
+    item: PreferenceItem,
     summary: String? = null,
-    singleLineTitle: Boolean = false,
-    icon: ImageVector? = null,
-    enabled: Boolean = true,
     onClick: () -> Unit = { },
     trailing: @Composable (() -> Unit)? = null,
 ) {
-    Preference(
-        title = title,
-        summary = {
-            summary
-                ?.takeIf { it.isNotEmpty() }
-                ?.let {
-                    Text(text = it)
-                }
-        },
-        singleLineTitle = singleLineTitle,
-        icon = icon,
-        enabled = enabled,
-        onClick = onClick,
-        trailing = trailing
-    )
+    StatusWrapper(enabled = item.enabled) {
+        ListItem(
+            text = {
+                Text(text = item.title,
+                    maxLines = if (item.singleLineTitle) 1 else Int.MAX_VALUE)
+            },
+            secondaryText = {
+                (summary ?: item.summary)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        Text(text = it)
+                    }
+            },
+            icon = { PreferenceIcon(imageVector = item.icon) },
+            modifier = Modifier.clickable(onClick = { if (item.enabled) onClick() }),
+            trailing = trailing,
+        )
+    }
 }
 
 @ExperimentalMaterialApi
 @Composable
 fun Preference(
-    title: String,
+    item: KeyPreferenceItem<*>,
     summary: @Composable () -> Unit,
-    singleLineTitle: Boolean = false,
-    icon: ImageVector? = null,
-    enabled: Boolean = true,
     onClick: () -> Unit = { },
     trailing: @Composable (() -> Unit)? = null,
 ) {
-    StatusWrapper(enabled = enabled) {
+    StatusWrapper(enabled = item.enabled) {
         ListItem(
             text = {
-                Text(text = title,
-                    maxLines = if (singleLineTitle) 1 else Int.MAX_VALUE)
+                Text(text = item.title,
+                    maxLines = if (item.singleLineTitle) 1 else Int.MAX_VALUE)
             },
             secondaryText = summary,
-            icon = { PreferenceIcon(imageVector = icon) },
-            modifier = Modifier.clickable(onClick = { if (enabled) onClick() }),
+            icon = { PreferenceIcon(imageVector = item.icon) },
+            modifier = Modifier.clickable(onClick = { if (item.enabled) onClick() }),
             trailing = trailing,
         )
     }

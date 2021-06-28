@@ -1,14 +1,16 @@
 package com.caldeirasoft.outcast.ui.navigation
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.*
-import androidx.navigation.navigation
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetHost
@@ -17,13 +19,11 @@ import com.caldeirasoft.outcast.ui.screen.episodelist.base.InboxScreen
 import com.caldeirasoft.outcast.ui.screen.library.LibraryScreen
 import com.caldeirasoft.outcast.ui.screen.played_episodes.PlayedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.podcast.PodcastScreen
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsEpisodeLimitScreen
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsNewEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsScreen
-import com.caldeirasoft.outcast.ui.screen.podcastsettings.PodcastSettingsViewModel
 import com.caldeirasoft.outcast.ui.screen.saved_episodes.SavedEpisodesScreen
 import com.caldeirasoft.outcast.ui.screen.search.SearchScreen
 import com.caldeirasoft.outcast.ui.screen.search_results.SearchResultsScreen
+import com.caldeirasoft.outcast.ui.screen.settings.SettingsScreen
 import com.caldeirasoft.outcast.ui.screen.store.storedata.DiscoverScreen
 import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreScreen
@@ -58,12 +58,11 @@ fun NavigationHost() {
                 addEpisode(navController)
                 addPodcast(navController)
                 addPodcastSettings(navController)
-                addPodcastSettingsNewEpisodes(navController)
-                addPodcastSettingsEpisodeLimit(navController)
                 addSavedEpisodes(navController)
                 addPlayedEpisodes(navController)
                 addStore(navController)
                 addSearchResults(navController)
+                addSettings(navController)
             }
         }
     }
@@ -146,38 +145,6 @@ private fun NavGraphBuilder.addPodcastSettings(navController: NavController) {
 }
 
 @FlowPreview
-private fun NavGraphBuilder.addPodcastSettingsNewEpisodes(navController: NavController) {
-    composable(
-        route = Routes.podcast_settings_new_episodes.path,
-        arguments = Routes.podcast_settings_new_episodes.navArgs
-    ) {
-        val parentViewModel = hiltViewModel<PodcastSettingsViewModel>(
-            navController.getBackStackEntry(Routes.podcast_settings.path)
-        )
-        PodcastSettingsNewEpisodesScreen(
-            viewModel = parentViewModel,
-            navController = navController
-        )
-    }
-}
-
-@FlowPreview
-private fun NavGraphBuilder.addPodcastSettingsEpisodeLimit(navController: NavController) {
-    composable(
-        route = Routes.podcast_settings_episode_limit.path,
-        arguments = Routes.podcast_settings_episode_limit.navArgs
-    ) {
-        val parentViewModel = hiltViewModel<PodcastSettingsViewModel>(
-            navController.getBackStackEntry(Routes.podcast_settings.path)
-        )
-        PodcastSettingsEpisodeLimitScreen(
-            viewModel = parentViewModel,
-            navController = navController
-        )
-    }
-}
-
-@FlowPreview
 private fun NavGraphBuilder.addPlayedEpisodes(navController: NavController) {
     composable(Routes.played_episodes.path) {
         PlayedEpisodesScreen(
@@ -236,5 +203,17 @@ private fun NavGraphBuilder.addSearchResults(navController: NavController) {
         SearchResultsScreen(
             viewModel = hiltViewModel(),
             navController = navController)
+    }
+}
+
+@FlowPreview
+private fun NavGraphBuilder.addSettings(navController: NavController) {
+    composable(
+        route = Routes.settings.path
+    ) {
+        SettingsScreen(
+            viewModel = hiltViewModel(),
+            navController = navController
+        )
     }
 }

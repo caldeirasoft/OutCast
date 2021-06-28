@@ -10,34 +10,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.caldeirasoft.outcast.domain.model.MultiListPreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
 fun <T> MultiSelectListPreference(
-    title: String,
-    icon: ImageVector? = null,
-    singleLineTitle: Boolean = false,
-    enabled: Boolean = true,
-    entries: Map<T, String>,
-    values: Set<T> = emptySet(),
-    onValueChanged: (Set<T>) -> Unit,
+    item: MultiListPreferenceItem<T>,
 ) {
+    val selectedValues = item.value
     val showDialog = remember { mutableStateOf(false) }
     val closeDialog = { showDialog.value = false }
-    val description = entries
-        .filter { values.contains(it.key) }
+    val description = item.entries
+        .filter { selectedValues.contains(it.key) }
         .map { it.value }
         .joinToString(separator = ", ", limit = 3)
 
     Preference(
-        title = title,
-        singleLineTitle = singleLineTitle,
-        enabled = enabled,
-        icon = icon,
+        item = item,
         summary = if (description.isNotBlank()) description else null,
         onClick = { showDialog.value = true }
     )
@@ -45,17 +37,17 @@ fun <T> MultiSelectListPreference(
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { closeDialog() },
-            title = { Text(text = title) },
+            title = { Text(text = item.title) },
             text = {
                 Column {
-                    entries.forEach { current ->
-                        val isSelected = values.contains(current.key)
+                    item.entries.forEach { current ->
+                        val isSelected = selectedValues.contains(current.key)
                         val onSelectionChanged = {
                             val result = when (!isSelected) {
-                                true -> values + current.key
-                                false -> values - current.key
+                                true -> selectedValues + current.key
+                                false -> selectedValues - current.key
                             }
-                            onValueChanged(result)
+                            item.onValueChanged(result)
                         }
                         Row(Modifier
                             .fillMaxWidth()

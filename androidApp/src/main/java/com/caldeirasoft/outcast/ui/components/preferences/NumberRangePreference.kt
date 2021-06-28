@@ -15,43 +15,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.domain.model.NumberRangeFloatPreferenceItem
+import com.caldeirasoft.outcast.domain.model.NumberRangeIntPreferenceItem
+import com.caldeirasoft.outcast.domain.model.NumberRangePreferenceItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalMaterialApi
-@ExperimentalCoroutinesApi
 @Composable
 fun NumberRangePreference(
-    title: String,
-    summary: String? = null,
-    icon: ImageVector? = null,
-    singleLineTitle: Boolean = false,
-    enabled: Boolean = true,
-    value: Float,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
-    steps: Int = 0,
-    valueRepresentation: @Composable (Float) -> String,
-    onValueChanged: (Float) -> Unit,
+    item: NumberRangeFloatPreferenceItem
 ) {
-    val currentValue = remember(value) { mutableStateOf(value) }
+    val currentValue = remember { mutableStateOf(item.value) }
     Preference(
-        title = title,
-        singleLineTitle = singleLineTitle,
-        enabled = enabled,
-        icon = icon,
-        summary = {
-        },
+        item = item,
+        summary = item.summary,
         trailing = {
             PreferenceTrailing(
+                item = item,
                 value = currentValue.value,
-                valueRange = valueRange,
-                steps = steps,
-                valueRepresentation = valueRepresentation,
+                onValueMinusStep = { value, step -> value - step },
+                onValuePlusStep = { value, step -> value + step },
                 onValueChanged = {
                     currentValue.value = it
-                    onValueChanged(currentValue.value)
+                    item.onValueChanged(currentValue.value)
                 },
             )
         }
@@ -59,21 +45,44 @@ fun NumberRangePreference(
 }
 
 @Composable
-private fun PreferenceTrailing(
-    value: Float = 0F,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
-    steps: Int = 0,
-    valueRepresentation: @Composable (Float) -> String,
-    onValueChanged: (Float) -> Unit,
+fun NumberRangePreference(
+    item: NumberRangeIntPreferenceItem
+) {
+    val currentValue = remember { mutableStateOf(item.value) }
+    Preference(
+        item = item,
+        summary = item.summary,
+        trailing = {
+            PreferenceTrailing(
+                item = item,
+                value = currentValue.value,
+                onValueMinusStep = { value, step -> value - step },
+                onValuePlusStep = { value, step -> value + step },
+                onValueChanged = {
+                    currentValue.value = it
+                    item.onValueChanged(currentValue.value)
+                },
+            )
+        }
+    )
+}
+
+@Composable
+private fun <T : Comparable<T>> PreferenceTrailing(
+    item: NumberRangePreferenceItem<T>,
+    value: T,
+    onValueMinusStep: (T, T) -> T,
+    onValuePlusStep: (T, T) -> T,
+    onValueChanged: (T) -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { onValueChanged((value - steps).coerceIn(valueRange)) }) {
+        IconButton(onClick = { onValueChanged(onValueMinusStep(value, item.steps).coerceIn(item.valueRange)) }) {
             Icon(imageVector = Icons.Default.RemoveCircleOutline, contentDescription = "remove")
         }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = valueRepresentation(value))
+        Text(text = item.valueRepresentation(value))
         Spacer(modifier = Modifier.width(8.dp))
-        IconButton(onClick = { onValueChanged((value + steps).coerceIn(valueRange)) }) {
+        IconButton(onClick = { onValueChanged(onValuePlusStep(value, item.steps).coerceIn(item.valueRange)) }) {
             Icon(imageVector = Icons.Default.AddCircleOutline, contentDescription = "add")
         }
     }

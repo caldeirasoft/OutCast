@@ -31,6 +31,7 @@ class LibraryViewModel @Inject constructor(
         is Action.OpenPlayedEpisodes -> emitEvent(Event.OpenPlayedEpisodes)
         is Action.OpenSavedEpisodes -> emitEvent(Event.OpenSavedEpisodes)
         is Action.OpenSideLoads -> Unit
+        is Action.OpenSettings -> emitEvent(Event.OpenSettings)
         is Action.ToggleDisplay -> toggleDisplay()
         is Action.ChangeSort -> changePodcastSort(action.sort)
         is Action.ChangeSortOrder -> changePodcastSort(action.sortByDesc)
@@ -90,6 +91,7 @@ class LibraryViewModel @Inject constructor(
         object OpenSavedEpisodes : Event()
         object OpenPlayedEpisodes : Event()
         object OpenSideLoads : Event()
+        object OpenSettings : Event()
         data class OpenPodcastContextMenu(val podcast: Podcast) : Event()
         data class OpenSortByBottomSheet(val sort: LibrarySort, val sortByDesc: Boolean) : Event()
         object Exit: Event()
@@ -100,6 +102,7 @@ class LibraryViewModel @Inject constructor(
         object OpenSavedEpisodes : Action()
         object OpenPlayedEpisodes : Action()
         object OpenSideLoads : Action()
+        object OpenSettings : Action()
         data class ChangeSort(val sort: LibrarySort) : Action()
         data class ChangeSortOrder(val sortByDesc: Boolean) : Action()
         object ToggleDisplay : Action()

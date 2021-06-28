@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
 import com.caldeirasoft.outcast.data.db.entities.Settings
+import com.caldeirasoft.outcast.data.repository.PodcastsRepository
 import com.caldeirasoft.outcast.data.repository.SettingsRepository
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.domain.models.store.StoreData
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class PodcastSettingsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
+    private val podcastsRepository: PodcastsRepository,
 ) : BaseViewModel<PodcastSettingsViewModel.State, PodcastSettingsViewModel.Event, PodcastSettingsViewModel.Action>(
     initialState = State(
         feedUrl = Podcast_settingsRouteArgs.fromSavedStatedHandle(savedStateHandle).feedUrl
@@ -42,12 +44,19 @@ class PodcastSettingsViewModel @Inject constructor(
         is Action.UpdateSettings -> updateSettings(action.settings)
         is Action.NavigateToNewEpisodes -> emitEvent(Event.NavigateToNewEpisodes(feedUrl = initialState.feedUrl))
         is Action.NavigateToEpisodeLimit -> emitEvent(Event.NavigateToEpisodeLimit(feedUrl = initialState.feedUrl))
+        is Action.UnfollowPodcast -> unfollow()
         is Action.Exit -> emitEvent(Event.Exit)
     }
 
     private fun updateSettings(podcastSettings: PodcastSettings) {
         viewModelScope.launch {
             settingsRepository.updatePodcastSettings(podcastSettings)
+        }
+    }
+
+    private fun unfollow() {
+        viewModelScope.launch {
+            podcastsRepository.unfollowPodcast(feedUrl = initialState.feedUrl)
         }
     }
 
@@ -67,6 +76,7 @@ class PodcastSettingsViewModel @Inject constructor(
         data class UpdateSettings(val settings: PodcastSettings) : Action()
         object NavigateToNewEpisodes : Action()
         object NavigateToEpisodeLimit : Action()
+        object UnfollowPodcast : Action()
         object Exit : Action()
     }
 }

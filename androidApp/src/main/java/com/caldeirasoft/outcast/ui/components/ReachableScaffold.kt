@@ -14,9 +14,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Bottom
+import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -115,6 +119,7 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
     listState: LazyListState = rememberLazyListState(),
     showTopBar: Boolean = true,
     navigateUp: () -> Unit = {},
+    largeTitleAction: @Composable (() -> Unit)? = null,
     topBarActions: @Composable RowScope.() -> Unit = {},
     itemsContent: LazyListScope.() -> Unit = {}
 ) {
@@ -171,15 +176,29 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(height = headerHeight.toDp())
+                        .padding(top = 16.dp, bottom = 16.dp)
+                        .padding(start = 16.dp, end = 16.dp)
                 ) {
-                    Text(
-                        text = title,
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(top = 16.dp, bottom = 16.dp)
-                            .padding(start = 16.dp, end = 16.dp),
-                        style = typography.h4
-                    )
+                            .fillMaxHeight()
+                    ) {
+                        Box(Modifier
+                            .align(Bottom)
+                            .weight(1f),
+                        ) {
+                            Text(
+                                text = title,
+                                style = typography . h4
+                            )
+                        }
+
+                        Box(Modifier.align(CenterVertically)) {
+                            largeTitleAction?.let {
+                                largeTitleAction()
+                            }
+                        }
+                    }
                 }
             }
 

@@ -25,7 +25,7 @@ import kotlinx.datetime.Clock
         PodcastSettings::class,
         SearchEntity::class,
     ],
-    version = 4
+    version = 5
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDatabase : RoomDatabase() {
@@ -50,16 +50,25 @@ abstract class OutcastDatabase : RoomDatabase() {
                 settingsValues.put("sync_podcasts", true)
                 settingsValues.put("background_sync", BackgroundRefreshOptions.EVERY_1_HOUR.ordinal)
                 settingsValues.put("sync_with_cloud", true)
+                settingsValues.put("sync_on_mobile_data", true)
                 settingsValues.put("episode_limit", EpisodeLimitOptions.ONE_MONTH.ordinal)
+                settingsValues.put("allow_notifications", true)
+                settingsValues.put("notifications_type",
+                    NotificationsTypeOptions.NEW_EPISODES_INBOX.id +
+                    NotificationsTypeOptions.NEW_EPISODES_QUEUE.id
+                )
+                settingsValues.put("notifications_badge",
+                    NotificationsBadgeOptions.INBOX_COUNT.id
+                )
                 settingsValues.put("download_queue_episodes", true)
-                settingsValues.put("download_saved_episodes", true)
+                settingsValues.put("download_queue_length", 80)
+                settingsValues.put("download_starred_episodes", true)
                 settingsValues.put(
                     "delete_played_episodes",
-                    DeleteEpisodesDelay.AFTER_1_DAY.ordinal
+                    DeleteEpisodesDelayOptions.AFTER_1_DAY.ordinal
                 )
                 settingsValues.put("stream_on_mobile_data", StreamOptions.PLAY.ordinal)
-                settingsValues.put("sync_on_mobile_data", true)
-                settingsValues.put("download_on_mobile_data", true)
+                settingsValues.put("download_on_mobile_data", false)
                 settingsValues.put("skip_back_button", SkipOptions.SKIP_15_SECONDS.ordinal)
                 settingsValues.put("skip_forward_button", SkipOptions.SKIP_30_SECONDS.ordinal)
                 settingsValues.put(
