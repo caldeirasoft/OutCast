@@ -4,8 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddToQueue
@@ -16,7 +19,9 @@ import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -30,8 +35,12 @@ import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.util.*
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
+import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import timber.log.Timber
@@ -118,14 +127,45 @@ private fun EpisodeListScreen(
         // filter : podcasts
         item {
             ChipGroup(
-                selectedValue = state.podcastsWithCount.firstOrNull { it.feedUrl == state.podcastFilter },
+                selectedValue = state
+                    .podcastsWithCount
+                    .firstOrNull { it.feedUrl == state.podcastFilter },
                 values = state.podcastsWithCount.sortedBy { it.name },
                 onClick = { pwc ->
                     performAction(BaseEpisodeListViewModel.Action.FilterByPodcast(pwc?.feedUrl))
+                },
+                itemContent = { value, isSelected ->
+                    Chip(
+                        selected = isSelected,
+                        onClick = {
+                            if (!isSelected)
+                                performAction(BaseEpisodeListViewModel.Action.FilterByPodcast(value.feedUrl))
+                            else performAction(BaseEpisodeListViewModel.Action.FilterByPodcast(null))
+                        },
+                        isThumbnailVisible = true,
+                        text = {
+                            val styledText =
+                                applyTextStyleCustom(MaterialTheme.typography.body2, ContentAlpha.high) {
+                                    Text(
+                                        text = value.count.toString(),
+                                    )
+                                }
+                            styledText()
+                        },
+                        thumbnail = {
+                            Image(
+                                painter = rememberCoilPainter(request = value.artworkUrl),
+                                contentDescription = value.name,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .clip(CircleShape)
+                                    .size(48.dp)
+                            )
+                        }
+                    )
                 }
-            ) {
-                Text(text = it.name)
-            }
+            )
         }
         // episodes
         items(lazyPagingItems = lazyPagingItems) { uiModel ->

@@ -39,7 +39,7 @@ abstract class EpisodeListViewModel(
 
     protected abstract fun getPodcastCount(): Flow<List<PodcastWithCount>>
 
-    fun filterByPodcast(feedUrl: String?) {
+    private fun filterByPodcast(feedUrl: String?) {
         viewModelScope.setState {
             copy(podcastFilter = feedUrl)
         }
@@ -65,7 +65,8 @@ abstract class EpisodeListViewModel(
             .insertDateSeparators()
 
 
-    protected open fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
+    protected open fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators()
+            : Flow<PagingData<EpisodeUiModel>> =
         this.map { pagingData ->
             pagingData.map {
                 it as EpisodeUiModel

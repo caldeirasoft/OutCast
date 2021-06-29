@@ -14,7 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CircleNotifications
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.Composable
@@ -54,6 +56,78 @@ fun ChipButton(
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 4.dp),
         onClick = onClick
     ) {
+        val styledText = applyTextStyleCustom(typography.body2, ContentAlpha.high, text)
+        styledText()
+    }
+}
+
+@Composable
+fun Chip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    isThumbnailVisible: Boolean = false,
+    thumbnail: @Composable () -> Unit = {},
+    text: @Composable () -> Unit
+) {
+    val backgroundColor: Color = when {
+        selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
+        else -> Color.Transparent
+    }
+    val contentColor: Color = when {
+        selected -> MaterialTheme.colors.primary
+        else -> MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    }
+    val startPadding = if (isThumbnailVisible) 4.dp else 24.dp
+    OutlinedButton(
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColor).value,
+            disabledContentColor = MaterialTheme.colors.onSurface
+                .copy(alpha = ContentAlpha.disabled)
+        ),
+        shape = RoundedCornerShape(50),
+        modifier = Modifier.padding(0.dp),
+        contentPadding = PaddingValues(start = startPadding, end = 24.dp, top = 4.dp, bottom = 4.dp),
+        onClick = onClick
+    ) {
+        if (isThumbnailVisible) {
+            thumbnail()
+            Spacer(modifier = Modifier.padding(8.dp))
+        }
+        val styledText = applyTextStyleCustom(typography.body2, ContentAlpha.high, text)
+        styledText()
+    }
+}
+
+@Composable
+fun ChipImageButton(
+    selected: Boolean,
+    onClick: () -> Unit,
+    image: @Composable () -> Unit,
+    text: @Composable () -> Unit
+) {
+    val backgroundColor: Color = when {
+        selected -> MaterialTheme.colors.primary.copy(alpha = 0.3f)
+        else -> Color.Transparent
+    }
+    val contentColor: Color = when {
+        selected -> MaterialTheme.colors.primary
+        else -> MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    }
+    OutlinedButton(
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = animateColorAsState(backgroundColor).value,
+            contentColor = animateColorAsState(contentColor).value,
+            disabledContentColor = MaterialTheme.colors.onSurface
+                .copy(alpha = ContentAlpha.disabled)
+        ),
+        shape = RoundedCornerShape(50),
+        modifier = Modifier.padding(0.dp),
+        contentPadding = PaddingValues(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+        onClick = onClick
+    ) {
+        image()
+        Spacer(modifier = Modifier.padding(8.dp))
         val styledText = applyTextStyleCustom(typography.body2, ContentAlpha.high, text)
         styledText()
     }
@@ -123,6 +197,87 @@ fun <T : Any> ChipGroup(
     selectedValue: T?,
     values: List<T>,
     onClick: (T?) -> Unit,
+    isThumbnailVisible: Boolean = false,
+    thumbnail: @Composable (T) -> Unit = {},
+    text: @Composable (T) -> Unit,
+) {
+    ChipGroup(
+        selectedValue = selectedValue,
+        values = values, onClick = onClick
+    ) { value, isSelected ->
+        Chip(
+            selected = isSelected,
+            onClick = {
+                if (!isSelected) onClick(value)
+                else onClick(null)
+            },
+            isThumbnailVisible = isThumbnailVisible,
+            text = {
+                val styledText =
+                    applyTextStyleCustom(typography.body2, ContentAlpha.high) {
+                        text(value)
+                    }
+                styledText()
+            },
+            thumbnail = { thumbnail(value) }
+        )
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun <T : Any> ChipGroup(
+    modifier: Modifier = Modifier,
+    selectedValue: T?,
+    values: List<T>,
+    onClick: (T?) -> Unit,
+    itemContent: @Composable (T, Boolean) -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    LazyRow(
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        selectedValue?.let {
+            item {
+                OutlinedButton(
+                    colors = ButtonDefaults.textButtonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+                        disabledContentColor = MaterialTheme.colors.onSurface
+                            .copy(alpha = ContentAlpha.disabled)
+                    ),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .widthIn(36.dp),
+                    contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                    onClick = { onClick(null) }
+                ) {
+                    Icon(imageVector = Icons.Outlined.Clear, contentDescription = null)
+                }
+            }
+        }
+        items(items = values
+            .filter { value -> selectedValue?.let { value == selectedValue } ?: true },
+            key = { value -> value }
+        ) { value ->
+            itemContent(value, selectedValue?.let { value == selectedValue } ?: false)
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun <T : Any> ChipImageGroup(
+    modifier: Modifier = Modifier,
+    selectedValue: T?,
+    values: List<T>,
+    onClick: (T?) -> Unit,
+    image: @Composable (T) -> Unit,
     text: @Composable (T) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -143,7 +298,9 @@ fun <T : Any> ChipGroup(
                             .copy(alpha = ContentAlpha.disabled)
                     ),
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier.padding(0.dp).widthIn(36.dp),
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .widthIn(36.dp),
                     contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
                     onClick = { onClick(null) }
                 ) {
@@ -155,7 +312,7 @@ fun <T : Any> ChipGroup(
             .filter { value -> selectedValue?.let { value == selectedValue } ?: true },
             key = { value -> value }
         ) { value ->
-            ChipButton(
+            ChipImageButton(
                 selected = selectedValue == value,
                 onClick = {
                     if (selectedValue != value)
@@ -165,6 +322,9 @@ fun <T : Any> ChipGroup(
                     coroutineScope.launch {
                         listState.scrollToItem(0)
                     }
+                },
+                image = {
+                    image(value)
                 }
             ) {
                 val styledText =
@@ -227,6 +387,24 @@ fun PreviewChipButton() {
         ChipButton(
             selected = true,
             onClick = {},
+        ) {
+            Text(text = "Podcasts")
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewChipImageButton() {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 16.dp)
+            .fillMaxWidth()
+    ) {
+        ChipImageButton(
+            selected = true,
+            onClick = {},
+            image = { Icon(imageVector = Icons.Default.CircleNotifications, contentDescription = null) }
         ) {
             Text(text = "Podcasts")
         }

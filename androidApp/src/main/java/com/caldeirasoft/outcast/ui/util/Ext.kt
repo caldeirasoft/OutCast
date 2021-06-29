@@ -11,16 +11,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.caldeirasoft.outcast.ui.components.bottomsheet.ModalBottomSheetContent
-import com.caldeirasoft.outcast.ui.navigation.Screen
 import kotlin.math.roundToInt
 
 typealias ComposableFn = @Composable () -> Unit
 typealias ComposableRowFn = @Composable RowScope.() -> Unit
 typealias ComposableColumnFn = @Composable ColumnScope.() -> Unit
 typealias TypedComposableFn<T> = @Composable (T) -> Unit
-typealias ScreenFn = (Screen) -> Unit
-typealias DialogFn = (ModalBottomSheetState, ModalBottomSheetContent, Screen) -> Unit
 
 val Int.px: Float @Composable get() = with(LocalDensity.current) { this@px.dp.toPx()}
 
