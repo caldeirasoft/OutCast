@@ -121,6 +121,8 @@ class SettingsRepository @Inject constructor(
             .toMap()
 
         val contextLocale = context.resources.configuration.locales.get(0)
+        val defaultCountry = contextLocale.country
+
         val selectedCountry =
             countriesMap[country] ?: throw IllegalArgumentException("country not found")
         var defaultLanguage:String? = null

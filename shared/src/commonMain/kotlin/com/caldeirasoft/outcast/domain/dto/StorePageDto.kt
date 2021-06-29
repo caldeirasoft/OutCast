@@ -2,6 +2,7 @@
 package com.caldeirasoft.outcast.domain.dto
 
 import com.caldeirasoft.outcast.domain.models.store.Artwork
+import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import com.caldeirasoft.outcast.domain.serializers.InstantStringSerializer
 import com.caldeirasoft.outcast.domain.serializers.LocalDateStringSerializer
 import kotlinx.datetime.Instant
@@ -367,8 +368,7 @@ class GenreResult (
     val url: String = "",
     val chartUrls: GenreChartUrlsResult? = null,
     val subgenres: Map<Int, GenreResult> = hashMapOf()
-) {
-}
+)
 
 @Serializable
 class GenreChartUrlsResult (

@@ -28,7 +28,7 @@ data class StorePodcast(
     val copyright: String? = null,
     val isExplicit: Boolean = false,
     val userRating: Float,
-    val category: Category?,
+    var genre: StoreCategory?,
     override val storeFront: String,
 ) : StoreItemArtwork {
 

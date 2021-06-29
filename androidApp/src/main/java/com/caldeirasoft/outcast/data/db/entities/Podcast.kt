@@ -48,7 +48,7 @@ data class Podcast(
   @ColumnInfo(name = "podcastWebsiteURL") val podcastWebsiteURL: String? = null,
   @ColumnInfo(name = "copyright") val copyright: String? = null,
   @ColumnInfo(name = "userRating") val userRating: Double? = null,
-  @ColumnInfo(name = "category") val category: Int? = null,
+  @ColumnInfo(name = "genre") val genre: String? = null,
   @ColumnInfo(name = "newFeedUrl") val newFeedUrl: String? = null,
   @ColumnInfo(name = "isComplete") val isComplete: Boolean = false,
   @ColumnInfo(name = "isExplicit") val isExplicit: Boolean = false,
@@ -58,9 +58,6 @@ data class Podcast(
   @ColumnInfo(name = "podcast_filter") val podcastFilter: Int = PodcastFilter.ALL.ordinal,
   @ColumnInfo(name = "podcast_sort") val podcastSortOrder: Int = SortOrder.DESC.ordinal,
   ) {
-
-  val genre: Category?
-    get() = category?.let { Category.values()[it] }
 
   companion object {
     val Podcast.podcastSortOrderOption: SortOrder
@@ -96,7 +93,7 @@ data class Podcast(
         trackCount = trackCount.toLong(),
         copyright = copyright,
         isExplicit = isExplicit,
-        category = category?.ordinal,
+        genre = genre?.name,
         newFeedUrl = null,
         isComplete = false,
         isFollowed = false,

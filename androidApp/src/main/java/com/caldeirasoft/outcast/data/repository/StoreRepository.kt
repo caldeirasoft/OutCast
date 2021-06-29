@@ -2,6 +2,7 @@ package com.caldeirasoft.outcast.data.repository
 
 import android.content.Context
 import com.caldeirasoft.outcast.data.api.ItunesAPI
+import com.caldeirasoft.outcast.domain.dto.GenreResult
 import com.caldeirasoft.outcast.domain.dto.LockupResult
 import com.caldeirasoft.outcast.domain.dto.LookupResultItem
 import com.caldeirasoft.outcast.domain.dto.StorePageDto
@@ -9,6 +10,7 @@ import com.caldeirasoft.outcast.domain.enums.StoreItemType
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
 import com.caldeirasoft.outcast.domain.models.store.*
+import com.caldeirasoft.outcast.domain.models.store.StoreGenre.Companion.toStoreGenre
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -652,7 +654,7 @@ class StoreRepository @Inject constructor(
                     copyright = item.copyright,
                     isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
                     userRating = item.userRating?.value?.toFloat() ?: 0f,
-                    category = item.genres.first().category,
+                    genre = item.genres.first().toStoreCategory(),
                     storeFront = storeFront
                 )
             }
@@ -699,7 +701,7 @@ class StoreRepository @Inject constructor(
                             copyright = item.copyright,
                             isExplicit = item.contentRatingsBySystem?.riaa?.rank == 2,
                             userRating = item.userRating?.value?.toFloat() ?: 0f,
-                            category = item.genres.first().category,
+                            genre = item.genres.first().toStoreCategory(),
                             storeFront = storeFront
                         )
                     } else {
@@ -768,5 +770,21 @@ class StoreRepository @Inject constructor(
         return lookupIds
             .filter { id -> newLookup.containsKey(id) }
             .mapNotNull { id -> newLookup[id] }
+    }
+
+    /**
+     * getGenresDataAsync
+     */
+    suspend fun getStoreGenreDataAsync(storeFront: String): StoreGenreData {
+        val storeResponse = itunesAPI.genres(storeFront)
+        if (storeResponse.isSuccessful.not())
+            throw HttpException(storeResponse)
+        val map: Map<Int, GenreResult> = storeResponse.body() ?: throw HttpException(storeResponse)
+
+        val rootEntry = map.values.first()
+        return StoreGenreData(
+            root = rootEntry.toStoreGenre(),
+            genres = rootEntry.subgenres.values.map { it.toStoreGenre() }
+        )
     }
 }

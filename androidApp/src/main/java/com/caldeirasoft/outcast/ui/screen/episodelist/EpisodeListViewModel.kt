@@ -1,104 +1,84 @@
 package com.caldeirasoft.outcast.ui.screen.episodelist
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import com.caldeirasoft.outcast.data.db.entities.Download
+import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.PodcastWithCount
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.ui.screen.base.BaseViewModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.BaseEpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.base.*
+import com.caldeirasoft.outcast.ui.util.isDateTheSame
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-abstract class EpisodeListViewModel<State: Any, Event: EpisodeListViewModel.Event, Action: EpisodeListViewModel.Action>(
-    initialState: State,
-    private val episodesRepository: EpisodesRepository,
-    private val downloadRepository: DownloadRepository,
-) : BaseViewModel<State, EpisodeListViewModel.Event, Action>(initialState)
-{
-    @OptIn(FlowPreview::class)
-    abstract val episodes: Flow<PagingData<EpisodeUiModel>>
-    protected val downloadsFlow: MutableStateFlow<List<Download>> =
-        MutableStateFlow(emptyList())
+abstract class EpisodeListViewModel(
+    episodesRepository: EpisodesRepository,
+    downloadRepository: DownloadRepository,
+) : BaseEpisodeListViewModel<BaseEpisodeListViewModel.State, BaseEpisodeListViewModel.Event, BaseEpisodeListViewModel.Action>(
+    initialState = State(),
+    episodesRepository = episodesRepository,
+    downloadRepository = downloadRepository
+) {
 
-    init {
-        downloadRepository.getAllDownloads()
+    override fun activate() {
+        super.activate()
+
+        getPodcastCount()
             .distinctUntilChanged()
-            .onEach { downloads ->
-                downloadsFlow.emit(downloads)
+            .setOnEach { podcastsWithCount ->
+                copy(podcastsWithCount = podcastsWithCount)
             }
-            .launchIn(viewModelScope)
+
+        downloadsFlow
+            .setOnEach { downloads ->
+                copy(downloads = downloads)
+            }
     }
 
     override suspend fun performAction(action: Action) = when (action) {
-        is EpisodeListViewModel.Action.OpenPodcastDetail ->
-            emitEvent(EpisodeListViewModel.Event.OpenPodcastDetail(action.episode))
-        is EpisodeListViewModel.Action.OpenEpisodeDetail ->
-            emitEvent(EpisodeListViewModel.Event.OpenEpisodeDetail(action.episode))
-        is EpisodeListViewModel.Action.OpenEpisodeContextMenu ->
-            emitEvent(EpisodeListViewModel.Event.OpenEpisodeContextMenu(action.episode))
-        is EpisodeListViewModel.Action.PlayEpisode -> playEpisode(action.episode)
-        is EpisodeListViewModel.Action.PauseEpisode -> playEpisode(action.episode)
-        is EpisodeListViewModel.Action.PlayNextEpisode -> playNext(action.episode)
-        is EpisodeListViewModel.Action.PlayLastEpisode -> playLast(action.episode)
-        is EpisodeListViewModel.Action.ToggleSaveEpisode -> toggleSaveEpisode(action.episode)
-        is EpisodeListViewModel.Action.ShareEpisode -> shareEpisode()
-        is EpisodeListViewModel.Action.Exit -> emitEvent(EpisodeListViewModel.Event.Exit)
-        else -> Unit
+        is Action.FilterByPodcast ->
+            filterByPodcast(action.feedUrl)
+        else -> super.performAction(action)
     }
 
-    protected fun playEpisode(episode: Episode) {
-    }
+    protected abstract fun getPodcastCount(): Flow<List<PodcastWithCount>>
 
-    protected fun playNext(episode: Episode) {
-    }
-
-    protected fun playLast(episode: Episode) {
-    }
-
-    protected fun toggleSaveEpisode(episode: Episode) {
-        viewModelScope.withState {
-            if (episode.isSaved.not()) episodesRepository.saveEpisodeToLibrary(episode)
-            else episodesRepository.deleteFromLibrary(episode)
+    fun filterByPodcast(feedUrl: String?) {
+        viewModelScope.setState {
+            copy(podcastFilter = feedUrl)
         }
+        emitEvent(Event.RefreshList)
     }
 
-    protected fun shareEpisode() {
-        viewModelScope.launch {
-            emitEvent(EpisodeListViewModel.Event.ShareEpisode)
+    override fun getEpisodes(): Flow<PagingData<EpisodeUiModel>> =
+        getEpisodesPagingData()
+            .map { pagingData ->
+                state.value.podcastFilter
+                    ?.let {
+                        pagingData.filter { episode ->
+                            episode.feedUrl == it
+                        }
+                    }
+                    ?: pagingData
+            }
+            .map { pagingData ->
+                pagingData.map {
+                    EpisodeUiModel.EpisodeItem(it)
+                }
+            }
+            .insertDateSeparators()
+
+
+    protected open fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
+        this.map { pagingData ->
+            pagingData.map {
+                it as EpisodeUiModel
+            }
         }
-    }
-
-    data class State(
-        val error: Throwable? = null,
-        val episodes: List<Episode> = emptyList(),
-        val category: Category? = null,
-        val categories: List<Category> = emptyList(),
-        val downloads: List<Download> = emptyList(),
-    )
-
-    open class Event {
-        data class OpenPodcastDetail(val episode: Episode) : Event()
-        data class OpenEpisodeDetail(val episode: Episode) : Event()
-        data class OpenEpisodeContextMenu(val episode: Episode) : Event()
-        object RefreshList : Event()
-        object ShareEpisode : Event()
-        object Exit : Event()
-    }
-
-    open class Action {
-        data class OpenPodcastDetail(val episode: Episode) : Action()
-        data class OpenEpisodeDetail(val episode: Episode) : Action()
-        data class OpenEpisodeContextMenu(val episode: Episode) : Action()
-        data class PlayEpisode(val episode: Episode) : Action()
-        data class PauseEpisode(val episode: Episode) : Action()
-        data class PlayNextEpisode(val episode: Episode) : Action()
-        data class PlayLastEpisode(val episode: Episode) : Action()
-        data class ToggleSaveEpisode(val episode: Episode) : Action()
-        data class ShareEpisode(val episode: Episode) : Action()
-        data class FilterCategory(val category: Category?): Action()
-        object Exit : Action()
-    }
 }

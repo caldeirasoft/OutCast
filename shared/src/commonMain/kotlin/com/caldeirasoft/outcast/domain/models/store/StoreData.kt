@@ -66,6 +66,14 @@ data class StoreData(
             storeFront = "",
         )
 
+        fun StoreGenre.toStoreData() = StoreData(
+            id = id.toLong(),
+            label = name,
+            url = GENRE_URL.replace("{genre}", id.toString()),
+            genreId = id,
+            storeFront = "",
+        )
+
         fun Category.toStoreData() = StoreData(
             id = id.toLong(),
             label = text,

@@ -11,7 +11,7 @@ data class PodcastItunesMetadata(
   @ColumnInfo(name = "podcastId") val podcastId: Long? = null,
   @ColumnInfo(name = "artistId") val artistId: Long? = null,
   @ColumnInfo(name = "artistUrl") val artistUrl: String? = null,
-  @ColumnInfo(name = "category") val category: Int? = null,
+  @ColumnInfo(name = "genre") val genre: String? = null,
   @ColumnInfo(name = "userRating") val userRating: Double? = null,
 ) {
   companion object {
@@ -21,7 +21,7 @@ data class PodcastItunesMetadata(
         podcastId = podcastId,
         artistId = artistId,
         artistUrl = artistUrl,
-        category = category,
+        genre = genre,
         userRating = userRating,
       )
   }

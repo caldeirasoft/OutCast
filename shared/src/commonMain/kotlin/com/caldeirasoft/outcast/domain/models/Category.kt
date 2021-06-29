@@ -127,7 +127,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class Category(
-    val text: String, val id: Int, val nested: Boolean = false, val parent: Category? = null,
+    val text: String,
+    val id: Int,
+    val nested: Boolean = false,
+    val parent: Category? = null,
 ) {
     ARTS("Arts", 1301),
     FOOD("Food", 1306, true, ARTS),

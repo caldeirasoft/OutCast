@@ -48,6 +48,7 @@ import com.caldeirasoft.outcast.domain.models.rss.item.RssStandardItem
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
+import java.util.*
 
 class ITunesParser : ParserBase<ITunesChannelData>() {
 
@@ -81,7 +82,7 @@ class ITunesParser : ParserBase<ITunesChannelData>() {
 
             when (name) {
                 ITUNES_IMAGE -> image = readImage()
-                ITUNES_EXPLICIT -> explicit = readString(ITUNES_EXPLICIT)?.toBoolean()
+                ITUNES_EXPLICIT -> explicit = readString(ITUNES_EXPLICIT)?.toBool()
                 ITUNES_CATEGORY -> categories = readCategory()
                 ITUNES_AUTHOR -> author = readString(ITUNES_AUTHOR)
                 ITUNES_OWNER -> owner = readOwner()
@@ -213,7 +214,7 @@ class ITunesParser : ParserBase<ITunesChannelData>() {
             when (name) {
                 ITUNES_DURATION -> duration = readString(ITUNES_DURATION)
                 ITUNES_IMAGE -> image = readImage().url
-                ITUNES_EXPLICIT -> explicit = readString(ITUNES_EXPLICIT)?.toBoolean()
+                ITUNES_EXPLICIT -> explicit = readString(ITUNES_EXPLICIT)?.toBool()
                 ITUNES_TITLE -> simpleTitle = readString(ITUNES_TITLE)
                 ITUNES_EPISODE -> episode = readString(ITUNES_EPISODE)?.toIntOrNull()
                 ITUNES_SEASON -> season = readString(ITUNES_SEASON)?.toIntOrNull()

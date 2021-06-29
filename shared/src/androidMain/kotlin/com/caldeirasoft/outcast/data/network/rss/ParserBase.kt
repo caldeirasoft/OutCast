@@ -49,6 +49,7 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.ByteArrayInputStream
 import java.io.IOException
+import java.util.*
 
 abstract class ParserBase<out T : RssStandardChannel> : Parser<T> {
 
@@ -134,8 +135,16 @@ abstract class ParserBase<out T : RssStandardChannel> : Parser<T> {
         //logW(logTag, "[skip] tag name = $name, depth is $depth.")
     }
 
+    protected fun String.toBool(): Boolean {
+        return when (lowercase(Locale.getDefault())) {
+            "yes", "true" -> true
+            "no", "false" -> false
+            else -> false
+        }
+    }
+
     protected fun String.toBoolOrNull(): Boolean? {
-        return when (toLowerCase()) {
+        return when (lowercase(Locale.getDefault())) {
             "yes", "true" -> true
             "no", "false" -> false
             else -> null

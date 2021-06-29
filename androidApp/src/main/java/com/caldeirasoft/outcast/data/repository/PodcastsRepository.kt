@@ -72,7 +72,7 @@ class PodcastsRepository @Inject constructor(
                     podcastId = id,
                     artistId = artistId,
                     artistUrl = artistUrl,
-                    category = category?.ordinal,
+                    genre = genre?.name,
                     userRating = userRating.toDouble()
                 )
                 podcastDao.update(metaData)
@@ -160,7 +160,7 @@ class PodcastsRepository @Inject constructor(
                             podcastId = podcastId,
                             artistId = artistId,
                             artistUrl = artistUrl,
-                            category = category,
+                            genre = genre,
                             userRating = userRating
                         )
                         podcastDao.update(metaData)

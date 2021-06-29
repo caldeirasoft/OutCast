@@ -1,6 +1,5 @@
 package com.caldeirasoft.outcast.ui.screen.search_results
 
-import android.accessibilityservice.AccessibilityService
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +27,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,8 +47,6 @@ import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.base.SearchUiModel
 import com.caldeirasoft.outcast.ui.screen.base.StoreUiModel
-import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreCollectionItemsContent
 import com.caldeirasoft.outcast.ui.screen.store.storedata.StoreCollectionPodcastContent
 import com.caldeirasoft.outcast.ui.theme.colors
 import com.caldeirasoft.outcast.ui.theme.typography

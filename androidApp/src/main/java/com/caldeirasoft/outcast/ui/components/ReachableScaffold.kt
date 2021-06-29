@@ -60,53 +60,6 @@ fun ReachableScaffold(
     }
 }
 
-@Composable
-fun ScaffoldWithLargeHeader(
-    modifier: Modifier = Modifier,
-    headerRatioOrientation: Orientation = Orientation.Vertical,
-    headerRatio: Float = 1/3f,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
-    snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
-    listState: LazyListState = rememberLazyListState(),
-    topBar: @Composable () -> Unit = {},
-    itemContent: @Composable BoxWithConstraintsScope.(Int) -> Unit = {}
-) {
-    val appBarAlpha = listState.topAppBarAlpha
-    val backgroundColor: Color = Color.blendARGB(
-        MaterialTheme.colors.surface.copy(alpha = 0f),
-        MaterialTheme.colors.surface,
-        appBarAlpha)
-
-    Scaffold(
-        modifier = modifier,
-        scaffoldState = scaffoldState,
-        snackbarHost = snackbarHost,
-    ) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .semantics { testTag = "Store Directory screen" })
-        {
-            BoxWithConstraints {
-                val screenHeight = constraints.maxHeight
-                val screenWidth = constraints.maxWidth
-                val headerHeight =
-                    if (headerRatioOrientation == Orientation.Vertical)
-                        (screenHeight * headerRatio).toInt()
-                    else (screenWidth * headerRatio).toInt()
-
-                itemContent(headerHeight)
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                topBar()
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ScaffoldWithLargeHeaderAndLazyColumn(
@@ -236,6 +189,53 @@ fun ScaffoldWithLargeHeaderAndLazyColumn(
             }
 
             itemsContent()
+        }
+    }
+}
+
+@Composable
+private fun ScaffoldWithLargeHeader(
+    modifier: Modifier = Modifier,
+    headerRatioOrientation: Orientation = Orientation.Vertical,
+    headerRatio: Float = 1/3f,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
+    listState: LazyListState = rememberLazyListState(),
+    topBar: @Composable () -> Unit = {},
+    itemContent: @Composable BoxWithConstraintsScope.(Int) -> Unit = {}
+) {
+    val appBarAlpha = listState.topAppBarAlpha
+    val backgroundColor: Color = Color.blendARGB(
+        MaterialTheme.colors.surface.copy(alpha = 0f),
+        MaterialTheme.colors.surface,
+        appBarAlpha)
+
+    Scaffold(
+        modifier = modifier,
+        scaffoldState = scaffoldState,
+        snackbarHost = snackbarHost,
+    ) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTag = "Store Directory screen" })
+        {
+            BoxWithConstraints {
+                val screenHeight = constraints.maxHeight
+                val screenWidth = constraints.maxWidth
+                val headerHeight =
+                    if (headerRatioOrientation == Orientation.Vertical)
+                        (screenHeight * headerRatio).toInt()
+                    else (screenWidth * headerRatio).toInt()
+
+                itemContent(headerHeight)
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                topBar()
+            }
         }
     }
 }

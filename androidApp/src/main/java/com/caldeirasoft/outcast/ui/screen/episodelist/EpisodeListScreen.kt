@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,11 +15,9 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
@@ -30,14 +27,11 @@ import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.screen.base.Screen
-import com.caldeirasoft.outcast.ui.screen.saved_episodes.SavedEpisodesViewModel
 import com.caldeirasoft.outcast.ui.theme.blendARGB
-import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import com.caldeirasoft.outcast.ui.util.DateFormatter.formatRelativeDate
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
-import cz.levinzonr.router.core.Route
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import timber.log.Timber
@@ -47,25 +41,25 @@ import timber.log.Timber
 @Composable
 fun EpisodeListScreen(
     navController: NavController,
-    viewModel: EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>,
+    viewModel: EpisodeListViewModel,
     title: String,
     hideTopBar: Boolean = false
 ) {
     val scaffoldState = rememberScaffoldState()
-    val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel.getEpisodes().collectAsLazyPagingItems()
     Screen(
         viewModel = viewModel,
         onEvent = { event ->
             when (event) {
-                is EpisodeListViewModel.Event.OpenPodcastDetail ->
+                is BaseEpisodeListViewModel.Event.OpenPodcastDetail ->
                     navController.navigateToPodcast(event.episode.feedUrl)
-                is EpisodeListViewModel.Event.OpenEpisodeDetail ->
+                is BaseEpisodeListViewModel.Event.OpenEpisodeDetail ->
                     navController.navigateToEpisode(event.episode)
-                is EpisodeListViewModel.Event.Exit ->
+                is BaseEpisodeListViewModel.Event.Exit ->
                     navController.navigateUp()
-                is EpisodeListViewModel.Event.RefreshList ->
+                is BaseEpisodeListViewModel.Event.RefreshList ->
                     lazyPagingItems.refresh()
-                is EpisodeListViewModel.Event.ShareEpisode ->
+                is BaseEpisodeListViewModel.Event.ShareEpisode ->
                     //Toast.makeText()
                     scaffoldState.snackbarHostState.showSnackbar("Share episode")
             }
@@ -86,11 +80,11 @@ fun EpisodeListScreen(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun EpisodeListScreen(
-    state: EpisodeListViewModel.State,
+    state: BaseEpisodeListViewModel.State,
     scaffoldState: ScaffoldState,
     title: String,
     lazyPagingItems: LazyPagingItems<EpisodeUiModel>,
-    performAction: (EpisodeListViewModel.Action) -> Unit,
+    performAction: (BaseEpisodeListViewModel.Action) -> Unit,
     hideTopBar: Boolean = false
 ) {
     val context = LocalContext.current
@@ -117,19 +111,20 @@ private fun EpisodeListScreen(
             }
         },
         navigateUp = {
-            performAction(EpisodeListViewModel.Action.Exit)
+            performAction(BaseEpisodeListViewModel.Action.Exit)
         },
         showTopBar = !hideTopBar,
     ) {
-        // filter : categories (if exist)
+        // filter : podcasts
         item {
             ChipGroup(
-                selectedValue = state.category,
-                values = state.categories.sortedBy { it.text },
-                onClick = { category ->
-                    performAction(EpisodeListViewModel.Action.FilterCategory(category))
-                }) {
-                Text(text = it.text)
+                selectedValue = state.podcastsWithCount.firstOrNull { it.feedUrl == state.podcastFilter },
+                values = state.podcastsWithCount.sortedBy { it.name },
+                onClick = { pwc ->
+                    performAction(BaseEpisodeListViewModel.Action.FilterByPodcast(pwc?.feedUrl))
+                }
+            ) {
+                Text(text = it.name)
             }
         }
         // episodes
@@ -141,10 +136,10 @@ private fun EpisodeListScreen(
                             episode = uiModel.episode,
                             download = state.downloads.firstOrNull { it.url == uiModel.episode.mediaUrl },
                             onPodcastClick = {
-                                performAction(EpisodeListViewModel.Action.OpenPodcastDetail(uiModel.episode))
+                                performAction(BaseEpisodeListViewModel.Action.OpenPodcastDetail(uiModel.episode))
                             },
                             onEpisodeClick = {
-                                performAction(EpisodeListViewModel.Action.OpenEpisodeDetail(uiModel.episode))
+                                performAction(BaseEpisodeListViewModel.Action.OpenEpisodeDetail(uiModel.episode))
                             },
                             onContextMenuClick = {
                                 coroutineScope.OpenBottomSheetMenu(
@@ -158,30 +153,30 @@ private fun EpisodeListScreen(
                                         BottomSheetMenuItem(
                                             titleId = R.string.action_play_next,
                                             icon = Icons.Default.QueuePlayNext,
-                                            onClick = { performAction(EpisodeListViewModel.Action.PlayNextEpisode(uiModel.episode)) },
+                                            onClick = { performAction(BaseEpisodeListViewModel.Action.PlayNextEpisode(uiModel.episode)) },
                                         ),
                                         BottomSheetMenuItem(
                                             titleId = R.string.action_play_last,
                                             icon = Icons.Default.AddToQueue,
-                                            onClick = { performAction(EpisodeListViewModel.Action.PlayLastEpisode(uiModel.episode)) },
+                                            onClick = { performAction(BaseEpisodeListViewModel.Action.PlayLastEpisode(uiModel.episode)) },
                                         ),
                                         if (uiModel.episode.isSaved.not())
                                             BottomSheetMenuItem(
                                                 titleId = R.string.action_save_episode,
                                                 icon = Icons.Outlined.BookmarkAdd,
-                                                onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                                onClick = { performAction(BaseEpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
                                             )
                                         else
                                             BottomSheetMenuItem(
                                                 titleId = R.string.action_remove_saved_episode,
                                                 icon = Icons.Outlined.BookmarkRemove,
-                                                onClick = { performAction(EpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
+                                                onClick = { performAction(BaseEpisodeListViewModel.Action.ToggleSaveEpisode(uiModel.episode)) },
                                             ),
                                         BottomSheetSeparator,
                                         BottomSheetMenuItem(
                                             titleId = R.string.action_share_episode,
                                             icon = Icons.Default.Share,
-                                            onClick = { performAction(EpisodeListViewModel.Action.ShareEpisode(uiModel.episode)) },
+                                            onClick = { performAction(BaseEpisodeListViewModel.Action.ShareEpisode(uiModel.episode)) },
                                         )
                                     ),
                                     drawerState = drawerState,

@@ -10,13 +10,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class GenreDto (
-    val genreId: Int,
+    private val genreId: Int,
     val name: String = "",
     val url: String = "",
 ) {
-    val category: Category?
-        get() = Category.fromId(id = genreId)
-
     fun toStoreCategory(): StoreCategory =
         StoreCategory(
             id = genreId,

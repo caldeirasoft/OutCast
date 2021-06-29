@@ -25,7 +25,7 @@ import kotlinx.datetime.Clock
         PodcastSettings::class,
         SearchEntity::class,
     ],
-    version = 5
+    version = 6
 )
 @TypeConverters(InstantConverter::class)
 abstract class OutcastDatabase : RoomDatabase() {

@@ -4,44 +4,35 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.caldeirasoft.outcast.data.db.entities.Episode
+import com.caldeirasoft.outcast.data.db.entities.PodcastWithCount
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.BaseEpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.util.isDateTheSame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Instant
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class PlayedEpisodesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val episodesRepository: EpisodesRepository,
+    episodesRepository: EpisodesRepository,
     downloadRepository: DownloadRepository,
-) : EpisodeListViewModel<EpisodeListViewModel.State, EpisodeListViewModel.Event, EpisodeListViewModel.Action>(
-    initialState = State(),
+) : EpisodeListViewModel(
     episodesRepository = episodesRepository,
     downloadRepository = downloadRepository
 ) {
+    override fun getPodcastCount(): Flow<List<PodcastWithCount>> =
+        episodesRepository.getInboxEpisodesPodcastCount()
 
-    @OptIn(FlowPreview::class)
-    override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        getPlayedEpisodes()
-            .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) }}
-            .insertDateSeparators()
-            .cachedIn(viewModelScope)
+    override fun getEpisodesDataSource(): DataSource.Factory<Int, Episode> =
+        episodesRepository.getEpisodesHistoryDataSource()
 
-    override fun activate() {
-        downloadsFlow
-            .setOnEach { downloads ->
-                copy(downloads = downloads)
-            }
-    }
-
-    private fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
+    override fun Flow<PagingData<EpisodeUiModel.EpisodeItem>>.insertDateSeparators(): Flow<PagingData<EpisodeUiModel>> =
         map {
             it.insertSeparators { before, after ->
                 if (after == null) {
@@ -64,15 +55,4 @@ class PlayedEpisodesViewModel @Inject constructor(
                 }
             }
         }
-
-    private fun getPlayedEpisodes(): Flow<PagingData<Episode>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false,
-                prefetchDistance = 5
-            ),
-            initialKey = null,
-            pagingSourceFactory = episodesRepository.getEpisodesHistoryDataSource().asPagingSourceFactory()
-        ).flow
 }

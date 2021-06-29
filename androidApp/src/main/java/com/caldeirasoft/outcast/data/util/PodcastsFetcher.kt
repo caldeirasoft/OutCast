@@ -182,11 +182,6 @@ private fun ITunesChannelData.toPodcastResponse(
 ): PodcastRssResponse {
     val releaseDateTime = getReleaseDateTime(this.items?.first())
 
-    val category = categories
-        ?.mapNotNull { it.name }
-        ?.mapNotNull { Category.fromName(it) }
-        ?.firstOrNull()
-
     val podcast = Podcast(
         feedUrl = feedUrl,
         podcastId = currentPodcast?.podcastId,
@@ -195,7 +190,7 @@ private fun ITunesChannelData.toPodcastResponse(
         artistId = currentPodcast?.artistId,
         artistUrl = currentPodcast?.artistUrl,
         url = "",
-        category = currentPodcast?.category,
+        genre = currentPodcast?.genre,
         artworkUrl = currentPodcast?.artworkUrl ?: image?.url.orEmpty(),
         artworkDominantColor = currentPodcast?.artworkDominantColor,
         copyright = copyright,
@@ -236,7 +231,6 @@ private fun ITunesItemData.toEpisode(podcast: Podcast): Episode {
         mediaUrl = enclosure?.url.orEmpty(),
         mediaType = enclosure?.type.orEmpty(),
         duration = duration?.let { parseDurationString(it) } ?: 0,
-        category = podcast.category,
         podcastEpisodeNumber = episode,
         podcastEpisodeSeason = season,
         podcastEpisodeType = episodeType,

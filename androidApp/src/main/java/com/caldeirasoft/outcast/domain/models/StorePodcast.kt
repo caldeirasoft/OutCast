@@ -16,7 +16,7 @@ val StorePodcast.podcast: Podcast
             name = name,
             artistName = artistName,
             url = url,
-            category = category?.ordinal,
+            genre = genre?.name,
             artworkUrl = getArtworkUrl(),
             artworkDominantColor = artwork?.bgColor,
             artistId = artistId,

@@ -6,6 +6,7 @@ import com.caldeirasoft.outcast.data.db.dao.EpisodeDao
 import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
+import com.caldeirasoft.outcast.data.db.entities.PodcastWithCount
 import com.caldeirasoft.outcast.domain.models.Category
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -28,23 +29,29 @@ class EpisodesRepository @Inject constructor(
     fun getInboxEpisodesDataSource(): DataSource.Factory<Int, Episode> =
         episodeDao.getInboxEpisodesDataSource()
 
-    // get inbox categories
-    fun getInboxEpisodesCategories(): Flow<List<Category?>> =
-        episodeDao.getInboxEpisodesCategories()
-            .map { categories -> categories.map { index -> index?.let { Category.values()[index] } } }
-
+    // get inbox podcasts & count
+    fun getInboxEpisodesPodcastCount(): Flow<List<PodcastWithCount>> =
+        episodeDao.getInboxEpisodesPodcastCount()
 
     // get episodes from podcasts
     fun getEpisodesDataSourceWithUrl(feedUrl: String): DataSource.Factory<Int, Episode> =
         episodeDao.getEpisodesDataSourceWithUrl(feedUrl)
 
-    // get saved episdoes
+    // get saved episodes
     fun getSavedEpisodesDataSource(): DataSource.Factory<Int, Episode> =
         episodeDao.getSavedEpisodesDataSource()
 
-    // get episodes
+    // get saved episodes podcasts & count
+    fun getSavedEpisodesPodcastCount(): Flow<List<PodcastWithCount>> =
+        episodeDao.getSavedEpisodesPodcastCount()
+
+    // get episodes history
     fun getEpisodesHistoryDataSource(): DataSource.Factory<Int, Episode> =
         episodeDao.getEpisodesHistoryDataSource()
+
+    // get episodes history podcasts & count
+    fun getEpisodesHistoryPodcastCount(): Flow<List<PodcastWithCount>> =
+        episodeDao.getEpisodesHistoryPodcastCount()
 
     // save episode to library
     suspend fun saveEpisodeToLibrary(episode: Episode) {

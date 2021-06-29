@@ -42,13 +42,35 @@ interface EpisodeDao : EntityDao<Episode> {
     @Query("SELECT * FROM episode e WHERE feedUrl = :feedUrl ORDER BY e.releaseDateTime ASC")
     fun getEpisodesDataSourceWithUrlOrderByDateAsc(feedUrl: String): DataSource.Factory<Int, Episode>
 
+    // get saved episodes podcast count
     @Query("SELECT * FROM episode e WHERE isSaved = 1")
     fun getSavedEpisodesDataSource(): DataSource.Factory<Int, Episode>
 
+    // get saved episodes podcast count
+    @Query("""
+        SELECT DISTINCT p.feedUrl, p.artworkUrl, p.name, COUNT(e.guid) AS count
+        FROM episode e
+        INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
+        WHERE isSaved = 1
+        GROUP BY p.feedUrl, p.artworkUrl, p.name
+    """)
+    fun getSavedEpisodesPodcastCount(): Flow<List<PodcastWithCount>>
+
+    // get history episodes
     @Query("SELECT * FROM episode e WHERE playback_position != NULL")
     fun getEpisodesHistoryDataSource(): DataSource.Factory<Int, Episode>
 
-    // get latest episodes (unplayed) / last 3 months
+    // get history episodes podcast count
+    @Query("""
+        SELECT DISTINCT p.feedUrl, p.artworkUrl, p.name, COUNT(e.guid) AS count
+        FROM episode e
+        INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
+        WHERE playback_position != NULL
+        GROUP BY p.feedUrl, p.artworkUrl, p.name
+    """)
+    fun getEpisodesHistoryPodcastCount(): Flow<List<PodcastWithCount>>
+
+    // get inbox episodes
     @Query("""
         SELECT e.* FROM episode e
         INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
@@ -57,14 +79,15 @@ interface EpisodeDao : EntityDao<Episode> {
     """)
     fun getInboxEpisodesDataSource(): DataSource.Factory<Int, Episode>
 
-    // get latest episodes (unplayed) categories / last 3 months
+    // get inbox podcast count
     @Query("""
-        SELECT DISTINCT e.category
+        SELECT DISTINCT p.feedUrl, p.artworkUrl, p.name, COUNT(e.guid) AS count
         FROM episode e
         INNER JOIN podcast p ON (e.feedUrl = p.feedUrl)
         INNER JOIN inbox i ON (e.feedUrl = i.feedUrl AND e.guid = i.guid)
+        GROUP BY p.feedUrl, p.artworkUrl, p.name
     """)
-    fun getInboxEpisodesCategories(): Flow<List<Int?>>
+    fun getInboxEpisodesPodcastCount(): Flow<List<PodcastWithCount>>
 
     @Query("""
         SELECT e.*

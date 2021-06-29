@@ -17,7 +17,7 @@ import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.preferences.PreferenceViewModel
-import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
+import com.caldeirasoft.outcast.ui.screen.episodelist.BaseEpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storedata.args.PodcastRouteArgs
@@ -34,7 +34,7 @@ class PodcastViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     downloadRepository: DownloadRepository,
     episodesRepository: EpisodesRepository,
-) : EpisodeListViewModel<PodcastViewModel.State, PodcastViewModel.Event, PodcastViewModel.Action>(
+) : BaseEpisodeListViewModel<PodcastViewModel.State, PodcastViewModel.Event, PodcastViewModel.Action>(
     initialState = State(
         feedUrl = PodcastRouteArgs.fromSavedStatedHandle(savedStateHandle).feedUrl,
         isLoading = true,
@@ -45,23 +45,6 @@ class PodcastViewModel @Inject constructor(
 
     private var isInitialized: Boolean = false
     private var isPodcastSet: Boolean = false
-
-    @OptIn(FlowPreview::class)
-    override val episodes: Flow<PagingData<EpisodeUiModel>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false,
-                maxSize = 4000,
-                prefetchDistance = 5
-            ),
-            initialKey = null,
-            pagingSourceFactory = episodesRepository.getEpisodesDataSourceWithUrl(initialState.feedUrl).asPagingSourceFactory()
-        )
-            .flow
-            .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
-            .cachedIn(viewModelScope)
-
 
     override fun activate() {
         podcastsRepository
@@ -115,6 +98,15 @@ class PodcastViewModel @Inject constructor(
         is Action.Exit -> emitEvent(Event.Exit)
     }
 
+    @OptIn(FlowPreview::class)
+    override fun getEpisodes(): Flow<PagingData<EpisodeUiModel>> =
+        getEpisodesPagingData()
+            .map { pagingData -> pagingData.map { EpisodeUiModel.EpisodeItem(it) as EpisodeUiModel }}
+            .cachedIn(viewModelScope)
+
+    override fun getEpisodesDataSource(): DataSource.Factory<Int, Episode> =
+        episodesRepository.getEpisodesDataSourceWithUrl(initialState.feedUrl)
+
     fun setPodcast(storePodcast: StorePodcast) {
         if (!isPodcastSet) {
             viewModelScope.launch {
@@ -130,7 +122,6 @@ class PodcastViewModel @Inject constructor(
             }
         }
     }
-
 
     private fun follow() {
         viewModelScope.launch {
@@ -219,7 +210,7 @@ class PodcastViewModel @Inject constructor(
             }
     }
 
-    sealed class Event : EpisodeListViewModel.Event() {
+    sealed class Event : BaseEpisodeListViewModel.Event() {
         data class OpenPodcastDetail(val episode: Episode) : Event()
         data class OpenEpisodeDetail(val episode: Episode) : Event()
         data class OpenEpisodeContextMenu(val episode: Episode) : Event()
@@ -231,7 +222,7 @@ class PodcastViewModel @Inject constructor(
         object Exit : Event()
     }
 
-    sealed class Action : EpisodeListViewModel.Action() {
+    sealed class Action : BaseEpisodeListViewModel.Action() {
         data class SetPodcast(val podcast: StorePodcast) : Action()
         data class OpenStoreData(val storeData: StoreData) : Action()
         data class OpenPodcastDetail(val episode: Episode) : Action()

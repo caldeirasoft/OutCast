@@ -8,7 +8,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.BookmarkRemove
+import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,19 +40,15 @@ import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.enums.SortOrder
 import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
-import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
 import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.base.Screen
-import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeListViewModel
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
 import com.caldeirasoft.outcast.ui.screen.store.storedata.*
-import com.caldeirasoft.outcast.ui.screen.store.storedata.args.Podcast_settingsRouteArgs
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
-import com.caldeirasoft.outcast.ui.theme.typography
 import com.caldeirasoft.outcast.ui.util.*
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.insets.navigationBarsPadding
@@ -82,7 +78,7 @@ fun PodcastScreen(
     navController: NavController,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val lazyPagingItems = viewModel.episodes.collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel.getEpisodes().collectAsLazyPagingItems()
 
     storePodcast?.let {
         LaunchedEffect(storePodcast) {
@@ -187,24 +183,6 @@ private fun PodcastScreen(
             PodcastDescriptionContent(description = podcastData?.description)
         }
 
-        // genre
-        item {
-            podcastData?.genre?.let { genre ->
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 8.dp)
-                ) {
-                    ChipButton(selected = false,
-                        onClick = {
-                            performAction(PodcastViewModel.Action.OpenStoreData(genre.toStoreData()))
-                        })
-                    {
-                        Text(text = genre.name)
-                    }
-                }
-            }
-        }
         // episode title + actions
         item {
             TopAppBar(
@@ -439,6 +417,13 @@ private fun PodcastHeader(
             color = artistData?.let { MaterialTheme.colors.primary } ?: Color.Unspecified,
             textAlign = TextAlign.Start
         )
+
+        // category + rating
+        podcastData?.let {
+            PodcastMetaData(
+                podcastData = podcastData
+            )
+        }
     }
 }
 
@@ -630,51 +615,32 @@ fun PodcastActionAppBar(
 }
 
 @Composable
-fun PodcastMetaData(podcastData: Podcast,
-                    onCategoryClick: (Category) -> Unit) {
+fun PodcastMetaData(podcastData: Podcast) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         val tintColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
-        // rating
-        podcastData.userRating?.let { rating ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    modifier = Modifier.size(16.dp),
-                    contentDescription = null,
-                    tint = tintColor
-                )
-                Text(
-                    text = rating.toString(),
-                    color = tintColor
-                )
-            }
-        }
         // category
-        podcastData.genre?.let { category ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.clickable(onClick = {
-                    onCategoryClick(category)
-                })
-            ) {
+        podcastData.genre?.let { genre ->
+            // Category
+            Text(
+                text = genre,
+                color = tintColor
+            )
+            // explicit
+            if (podcastData.isExplicit) {
+                // Separator
+                VerticalDivider(modifier = Modifier.height(16.dp).align(Alignment.CenterVertically))
+                // explicit
                 Icon(
-                    imageVector = Icons.Default.Category,
-                    modifier = Modifier.size(16.dp),
+                    imageVector = Icons.Outlined.Explicit,
+                    modifier = Modifier.size(20.dp)
+                        .align(Alignment.CenterVertically),
                     contentDescription = null,
                     tint = tintColor
-                )
-                Text(
-                    text = category.name,
-                    color = tintColor
                 )
             }
         }
