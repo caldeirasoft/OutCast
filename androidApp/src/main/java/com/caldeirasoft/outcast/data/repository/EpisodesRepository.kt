@@ -7,7 +7,6 @@ import com.caldeirasoft.outcast.data.db.dao.QueueDao
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.EpisodeWithPodcast
 import com.caldeirasoft.outcast.data.db.entities.PodcastWithCount
-import com.caldeirasoft.outcast.domain.models.Category
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject

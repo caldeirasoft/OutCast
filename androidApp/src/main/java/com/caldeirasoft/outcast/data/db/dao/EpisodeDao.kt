@@ -4,11 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.*
 import com.caldeirasoft.outcast.data.db.entities.*
 import com.caldeirasoft.outcast.data.db.entities.EpisodeMetadata.Companion.metadata
-import com.caldeirasoft.outcast.domain.models.Category
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlin.time.days
 
 @Dao
 interface EpisodeDao : EntityDao<Episode> {

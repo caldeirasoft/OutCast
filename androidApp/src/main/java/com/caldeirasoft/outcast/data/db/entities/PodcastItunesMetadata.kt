@@ -2,9 +2,6 @@ package com.caldeirasoft.outcast.data.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
-import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.domain.models.store.Artwork
-import kotlinx.datetime.Instant
 
 data class PodcastItunesMetadata(
   @PrimaryKey @ColumnInfo(name = "feedUrl") val feedUrl: String,

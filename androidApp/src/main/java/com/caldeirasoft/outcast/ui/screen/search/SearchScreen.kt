@@ -1,38 +1,29 @@
 package com.caldeirasoft.outcast.ui.screen.search
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.caldeirasoft.outcast.R
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreGenre
 import com.caldeirasoft.outcast.ui.components.ScaffoldWithLargeHeaderAndLazyColumn
 import com.caldeirasoft.outcast.ui.components.StoreHeadingSection
 import com.caldeirasoft.outcast.ui.components.gridItems
 import com.caldeirasoft.outcast.ui.screen.base.Screen
-import com.caldeirasoft.outcast.ui.screen.store.categories.drawableId
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
-import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.theme.typography
-import com.caldeirasoft.outcast.ui.util.ColorHash
 import com.caldeirasoft.outcast.ui.util.navigateToStore
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
@@ -190,30 +181,6 @@ fun TopChartCardItem(
             text = {
                 Text(text = title, style = typography.h6.copy(fontSize = 16.sp))
             },
-        )
-    }
-}
-
-@Composable
-fun CategoryCardItem(
-    category: Category,
-    navigateToCategory: (Category) -> Unit,
-) {
-    Card(
-        border = ButtonDefaults.outlinedBorder,
-        shape = RoundedCornerShape(8.dp),
-        elevation = 0.dp,
-        onClick = {
-            navigateToCategory(category)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(24 / 9f)
-    )
-    {
-        ListItem(
-            modifier = Modifier,
-            text = { Text(text = category.text) },
         )
     }
 }

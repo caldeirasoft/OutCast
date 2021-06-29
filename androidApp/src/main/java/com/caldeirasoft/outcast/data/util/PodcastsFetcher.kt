@@ -20,7 +20,6 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.data.network.rss.ITunesParser
 import com.caldeirasoft.outcast.data.util.PodcastsFetcher.Companion.RFC_1123_DATE_TIME
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.rss.channel.ITunesChannelData
 import com.caldeirasoft.outcast.domain.models.rss.item.ITunesItemData
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,7 +35,6 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import retrofit2.HttpException
 import timber.log.Timber
 import java.time.chrono.IsoChronology
 import java.time.format.*

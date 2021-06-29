@@ -1,21 +1,11 @@
 package com.caldeirasoft.outcast.ui.screen.episodelist
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.PodcastWithCount
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
-import com.caldeirasoft.outcast.domain.models.Category
-import com.caldeirasoft.outcast.ui.screen.episodelist.BaseEpisodeListViewModel
-import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
-import com.caldeirasoft.outcast.ui.screen.episodelist.base.*
-import com.caldeirasoft.outcast.ui.util.isDateTheSame
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import javax.inject.Inject
 
 abstract class EpisodeListViewModel(
     episodesRepository: EpisodesRepository,

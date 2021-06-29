@@ -5,7 +5,6 @@ import android.os.Parcelable
 import androidx.room.*
 import com.caldeirasoft.outcast.data.db.customparcelers.InstantParceler
 import com.caldeirasoft.outcast.data.db.customparcelers.NullableInstantParceler
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize

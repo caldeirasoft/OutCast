@@ -7,9 +7,7 @@ import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.PodcastWithCount
 import com.caldeirasoft.outcast.data.repository.DownloadRepository
 import com.caldeirasoft.outcast.data.repository.EpisodesRepository
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.ui.screen.base.BaseViewModel
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 

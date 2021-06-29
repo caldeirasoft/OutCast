@@ -1,26 +1,12 @@
 package com.caldeirasoft.outcast.ui.navigation
 
-import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material.icons.twotone.Search
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.Genre
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
-import com.caldeirasoft.outcast.ui.screen.store.storedata.Routes
-import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.net.URLDecoder
-import java.net.URLEncoder
 
 enum class ScreenName {
     INBOX,
@@ -80,7 +66,6 @@ sealed class Screen (val id: ScreenName) {
     object Statistics : Screen(ScreenName.STATISTICS)
     data class StoreDataScreen(val storeData: StoreData? = null) : Screen(ScreenName.STORE_DATA) {
         constructor(genre: Genre) : this(storeData = genre.toStoreData())
-        constructor(category: Category) : this(storeData = category.toStoreData())
     }
 
 

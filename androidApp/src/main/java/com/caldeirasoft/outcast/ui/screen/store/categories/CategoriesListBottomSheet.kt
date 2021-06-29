@@ -1,7 +1,6 @@
 package com.caldeirasoft.outcast.ui.screen.store.categories
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.common.Constants.Companion.DEFAULT_GENRE
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreCategory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -122,32 +120,6 @@ fun CategoryListItem(
 }
 
 // genre icon
-
-val Category.drawableId: Int
-    @DrawableRes
-    get() = when(this.id) {
-        1301 -> R.drawable.ic_color_palette
-        1321 -> R.drawable.ic_analytics
-        1303 -> R.drawable.ic_theater
-        1304 -> R.drawable.ic_mortarboard
-        1483 -> R.drawable.ic_fiction
-        1511 -> R.drawable.ic_city_hall
-        1512 -> R.drawable.ic_first_aid_kit
-        1487 -> R.drawable.ic_history
-        1305 -> R.drawable.ic_family
-        1502 -> R.drawable.ic_game_controller
-        1310 -> R.drawable.ic_guitar
-        1489 -> R.drawable.ic_news
-        1314 -> R.drawable.ic_religion
-        1533 -> R.drawable.ic_flasks
-        1324 -> R.drawable.ic_social_care
-        1545 -> R.drawable.ic_sport
-        1309 -> R.drawable.ic_video_camera
-        1318 -> R.drawable.ic_artificial_intelligence
-        1488 -> R.drawable.ic_handcuffs
-        else -> R.drawable.ic_analytics
-    }
-
 @DrawableRes
 fun StoreCategory.getDrawableId() : Int? = when(this.id) {
         1301 -> R.drawable.ic_color_palette

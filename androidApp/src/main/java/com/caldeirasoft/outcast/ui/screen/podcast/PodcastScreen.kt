@@ -38,7 +38,6 @@ import androidx.paging.compose.items
 import com.caldeirasoft.outcast.R
 import com.caldeirasoft.outcast.data.db.entities.Podcast
 import com.caldeirasoft.outcast.domain.enums.SortOrder
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.components.*
@@ -46,7 +45,6 @@ import com.caldeirasoft.outcast.ui.components.bottomsheet.*
 import com.caldeirasoft.outcast.ui.screen.episodelist.EpisodeUiModel
 import com.caldeirasoft.outcast.ui.screen.base.Screen
 import com.caldeirasoft.outcast.ui.screen.store.base.FollowStatus
-import com.caldeirasoft.outcast.ui.screen.store.storedata.*
 import com.caldeirasoft.outcast.ui.theme.blendARGB
 import com.caldeirasoft.outcast.ui.theme.getColor
 import com.caldeirasoft.outcast.ui.util.*

@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.navigation.NavController
 import com.caldeirasoft.outcast.data.db.entities.Episode
 import com.caldeirasoft.outcast.data.db.entities.Podcast
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.store.StoreData
-import com.caldeirasoft.outcast.domain.models.store.StoreData.Companion.toStoreData
 import com.caldeirasoft.outcast.domain.models.store.StoreEpisode
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
 import com.caldeirasoft.outcast.ui.screen.store.storedata.RoutesActions
@@ -51,12 +49,6 @@ fun NavController.navigateToPodcastSettings(feedUrl: String) {
 }
 
 fun NavController.navigateToStore(storeData: StoreData) {
-    val storeDataEncoded = jsonUrlEncodeObject(storeData)
-    this.navigate(RoutesActions.toStore(storeDataEncoded))
-}
-
-fun NavController.navigateToStore(category: Category) {
-    val storeData = category.toStoreData()
     val storeDataEncoded = jsonUrlEncodeObject(storeData)
     this.navigate(RoutesActions.toStore(storeDataEncoded))
 }

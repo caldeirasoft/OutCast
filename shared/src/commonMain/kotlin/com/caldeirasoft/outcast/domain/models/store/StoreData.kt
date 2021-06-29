@@ -1,13 +1,11 @@
 @file:UseSerializers(InstantSerializer::class)
 package com.caldeirasoft.outcast.domain.models.store
 
-import com.caldeirasoft.outcast.domain.common.Constants
 import com.caldeirasoft.outcast.domain.common.Constants.Companion.GENRE_URL
 import com.caldeirasoft.outcast.domain.common.Constants.Companion.PODCASTS_URL
 import com.caldeirasoft.outcast.domain.common.Constants.Companion.TOP_CHARTS_URL
 import com.caldeirasoft.outcast.domain.interfaces.StoreCollection
 import com.caldeirasoft.outcast.domain.interfaces.StoreItemArtwork
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.serializers.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -69,14 +67,6 @@ data class StoreData(
         fun StoreGenre.toStoreData() = StoreData(
             id = id.toLong(),
             label = name,
-            url = GENRE_URL.replace("{genre}", id.toString()),
-            genreId = id,
-            storeFront = "",
-        )
-
-        fun Category.toStoreData() = StoreData(
-            id = id.toLong(),
-            label = text,
             url = GENRE_URL.replace("{genre}", id.toString()),
             genreId = id,
             storeFront = "",

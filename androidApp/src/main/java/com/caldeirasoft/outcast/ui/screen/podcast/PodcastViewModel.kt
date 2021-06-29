@@ -12,7 +12,6 @@ import com.caldeirasoft.outcast.data.db.entities.PodcastSettings
 import com.caldeirasoft.outcast.data.repository.*
 import com.caldeirasoft.outcast.domain.enums.PodcastFilter
 import com.caldeirasoft.outcast.domain.enums.SortOrder
-import com.caldeirasoft.outcast.domain.models.Category
 import com.caldeirasoft.outcast.domain.models.podcast
 import com.caldeirasoft.outcast.domain.models.store.StoreData
 import com.caldeirasoft.outcast.domain.models.store.StorePodcast
@@ -234,7 +233,7 @@ class PodcastViewModel @Inject constructor(
         data class PlayLastEpisode(val episode: Episode) : Action()
         data class ToggleSaveEpisode(val episode: Episode) : Action()
         data class ShareEpisode(val episode: Episode) : Action()
-        data class FilterCategory(val category: Category?): Action()
+        object FilterCategory: Action()
         object OpenSettings : Action()
         object SharePodcast : Action()
         object OpenWebsite : Action()
